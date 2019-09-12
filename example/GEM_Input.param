@@ -19,10 +19,10 @@ LOGISTIC_CONVERG_TOL  // Convergence tolerance for logistic regression
 DELIMINATOR
 ,
 GENO_FILE_PATH  // Path of geno file
-example.bgen
+/GEMexample/example.bgen
 PHENO_FILE_PATH  // Path of pheno data file
-example.pheno
+/GEMexample/example.pheno
 SAMPLE_FILE_PATH // Path of sample file. Executed only when bgen file does not provide sample order. Format follows UK BioBank.
 
 OUTPUT_PATH // Path of output file
-my_example.out
+/GEMexample/my_example.out

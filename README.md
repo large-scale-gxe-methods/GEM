@@ -1,9 +1,9 @@
 # GEM
 
-Building DockerFile 
+#Building and testing DockerFile 
 ## Execution
 ### Steps to be followed - 
-#### Building and running docker images
+#### Step 1: Building and running docker images
 Execute in your terminal - 
  - Clone this git repository to your local machine <br> 
  ```
@@ -16,6 +16,10 @@ Execute in your terminal -
  - Build the base docker image <br> 
  ```
    docker build -t large-scale-gxe-methods/gem:v0.7 . 
+ ```
+ - Run the base docker image <br>
+ ```
+   docker run -ti --rm large-scale-gxe-methods/gem:v0.7 bash 
  ```
  
 #### Testing installation

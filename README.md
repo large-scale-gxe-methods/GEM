@@ -19,7 +19,7 @@ Execute in your terminal -
  ```
  
 #### Testing installation
- - Run GEM within a contrainter with the example files <br> 
+ - Run GEM within a docker container with the example files <br> 
  ```
 $ cat example/GEM_Input.param
 SAMPLE_ID_HEADER  // Column header name of sample ID in pheno data file

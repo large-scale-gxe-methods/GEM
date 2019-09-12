@@ -1,0 +1,28 @@
+SAMPLE_ID_HEADER  // Column header name of sample ID in pheno data file
+sampleid
+PHENOTYPE  // 0 for continous data using linear regression, 1 for binary data using logistic regression
+1
+PHENO_HEADER  // column header name of phenotype data in pheno data file
+pheno2
+COVARIATES_HEADERS  // column header names of the slected covariates in the pheno data file
+cov1 cov2 cov3
+MISSING // missing value key of phenotype file
+NaN
+ROBUST  // 0 for non-robust analysis, 1 for robust analysis
+1
+STREAM_SNPS  // SNP numbers for each GWAS analysis
+20
+NUM_OF_INTER_COVARIATE  // Number of interactive covariate data columns with Geno (1 means the first column of covariate data, 2 means the first two selected columns, ...)
+1
+LOGISTIC_CONVERG_TOL  // Convergence tolerance for logistic regression
+0.000001
+DELIMINATOR
+,
+GENO_FILE_PATH  // Path of geno file
+example.bgen
+PHENO_FILE_PATH  // Path of pheno data file
+example.pheno
+SAMPLE_FILE_PATH // Path of sample file. Executed only when bgen file does not provide sample order. Format follows UK BioBank.
+
+OUTPUT_PATH // Path of output file
+my_example.out

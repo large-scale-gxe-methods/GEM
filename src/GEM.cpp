@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018  Liang Hong, Han Chen
+ *  Copyright (C) 2018,2019  Liang Hong, Han Chen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
   8/30/18: initial sample Size is not necessary equal
   8/30/18: hash table of genoUnMatchID for significant unmatching numbers;
   12/10/18: aritrary stream_snps implemented, omp parallel with > 20 covariates (HC)
+  2/7/19: speed up reading genotype data without looking up in genoUnMatchID
 
   To-Do List:
   1. OOP
@@ -317,7 +318,7 @@ int main(int argc, char *argv[]) {
       cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
       cout << "****************************************************************************\n";
 //      } // end of if IDMatching == 1
-  }
+  } // end SampleIdentifiers == 1
   else {
     std::ifstream fIDMat;
     fIDMat.open(samplefile);
@@ -489,7 +490,7 @@ int main(int argc, char *argv[]) {
   delete [] Xbeta;
 
   cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
-  cout << "SNP numbers for each GWAS analysis are : " << stream_snps << '\n';
+  cout << "Number of SNPs in each batch is: " << stream_snps << '\n';
   cout << "*********************************************************\n";
   vector <double> ZGSvec(samSize * (1+Sq)*stream_snps);
   vector <double> ZGSR2vec(samSize * (1+Sq)*stream_snps);
@@ -502,6 +503,16 @@ int main(int argc, char *argv[]) {
 
   fseek(fin, offset + 4, SEEK_SET);
   int stream_snps1 = stream_snps;
+
+  uint* include_idx = new uint[samSize];
+  int ii = 0;
+  for (uint i = 0; i < Nbgen; i++) {
+    if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+      include_idx[ii] = i;
+      ii++;
+    }
+  }
+  genoUnMatchID.clear();
 
   for (int snploop = 0; snploop*stream_snps1 < Mbgen; snploop++) {
     /*    if ((Mbgen % stream_snps) != 0) {
@@ -582,19 +593,23 @@ int main(int argc, char *argv[]) {
 //        if (IDMatching == 1) {
           int k = 0;
           for (uint i = 0; i < Nbgen; i++) {
-            double p11 = shortBuf[3*i] * scale;
-            double p10 = shortBuf[3*i+1] * scale;
-            double p00 = shortBuf[3*i+2] * scale;
-
-            double pTot = p11 + p10 + p00;
-            double dosage = (2*p00 + p10) / pTot;
 
 //	    if (find(genoUnMatchID.begin(), genoUnMatchID.end(), i) == genoUnMatchID.end()) {
-          if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+//          if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+	    if (include_idx[k] == i) {
+	      double p11 = shortBuf[3*i] * scale;
+	      double p10 = shortBuf[3*i+1] * scale;
+	      double p00 = shortBuf[3*i+2] * scale;
+
+	      double pTot = p11 + p10 + p00;
+	      double dosage = (2*p00 + p10) / pTot;
+
               int tmp2 = k+tmp1;
 	      AF[stream_i] += dosage;
-              ZGSvec[tmp2] = dosage;
-              if (phenoTyp == 1) ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
+              if (phenoTyp == 1) 
+		ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
+	      else
+		ZGSvec[tmp2] = dosage;
               k++;
             }
           }
@@ -698,7 +713,6 @@ int main(int argc, char *argv[]) {
               chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
             else if (B == 32U)
               chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
-            double p11 = chartem/double(1.0*(Bbits-1));
 	    bufAt += B/8;
 	    uint chartem1;
             if (B == 8U)
@@ -709,16 +723,21 @@ int main(int argc, char *argv[]) {
               chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
             else if (B == 32U)
               chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
-            double p10 = chartem1/double(1.0*(Bbits-1));
             bufAt += B/8;
-            double dosage = 2*(1-p11-p10) + p10;
 
 //            if (find(genoUnMatchID.begin(), genoUnMatchID.end(), i) == genoUnMatchID.end()) {
-            if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+//          if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+	    if (include_idx[k] == i) {
+	      double p11 = chartem/double(1.0*(Bbits-1));
+	      double p10 = chartem1/double(1.0*(Bbits-1));
+	      double dosage = 2*(1-p11-p10) + p10;
+
               int tmp2 = k+tmp1;
               AF[stream_i] += dosage;
-              ZGSvec[tmp2] = dosage; // replace your new data from other genotype files here.
-              if (phenoTyp == 1) ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
+              if (phenoTyp == 1) 
+		ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
+	      else
+		ZGSvec[tmp2] = dosage; // replace your new data from other genotype files here.
 	      k++;
 	    }
           }
@@ -876,10 +895,10 @@ int main(int argc, char *argv[]) {
     double** VarbetaInt = new double*[stream_snps];
     double* PvalM = new double[stream_snps];
     double* PvalInt = new double[stream_snps];
-    double* PvalJoin = new double[stream_snps];
+    double* PvalJoint = new double[stream_snps];
     boost::math::chi_squared chisq_dist_M(1);
     boost::math::chi_squared chisq_dist_Int(Sq);
-    boost::math::chi_squared chisq_dist_Join(1+Sq);
+    boost::math::chi_squared chisq_dist_Joint(1+Sq);
 
     if (robust == 0) {
       for (int i = 0; i < stream_snps; i++) {
@@ -933,9 +952,9 @@ int main(int argc, char *argv[]) {
         for (int j = 0; j < Sq; j++) statInt += betaInt[i][j]*Stemp3[j];
         if (isnan(statInt) || statInt <= 0.0) PvalInt[i] = NAN;
         else PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-        double statJoin = statM + statInt;
-        if (isnan(statJoin) || statJoin <= 0.0) PvalJoin[i] = NAN;
-        else PvalJoin[i] = boost::math::cdf(complement(chisq_dist_Join, statJoin));
+        double statJoint = statM + statInt;
+        if (isnan(statJoint) || statJoint <= 0.0) PvalJoint[i] = NAN;
+        else PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 
         delete [] S2TransS2;
         delete [] S2TransR;
@@ -1003,10 +1022,10 @@ int main(int argc, char *argv[]) {
         if (isnan(statInt) || statInt <= 0.0)  PvalInt[i] = NAN;
         else
           PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-        double statJoin = statM + statInt;
-        if (isnan(statJoin) || statJoin <= 0.0)  PvalJoin[i] = NAN;
+        double statJoint = statM + statInt;
+        if (isnan(statJoint) || statJoint <= 0.0)  PvalJoint[i] = NAN;
         else
-          PvalJoin[i] = boost::math::cdf(complement(chisq_dist_Join, statJoin));
+          PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 
         delete [] S2TransS2;
         delete [] S2TransR;
@@ -1032,7 +1051,7 @@ int main(int argc, char *argv[]) {
       for (int ii = 0; ii < Sq; ii++)
 	for (int jj = 0; jj < Sq; jj++)
 	  results << VarbetaInt[i][ii*Sq+jj] << "\t";
-      results << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoin[i] << '\n';
+      results << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
     }
 
     delete [] betaM;
@@ -1045,20 +1064,23 @@ int main(int argc, char *argv[]) {
     delete [] VarbetaInt;
     delete [] PvalM;
     delete [] PvalInt;
-    delete [] PvalJoin;
+    delete [] PvalJoint;
     AF.clear();
   } // end of snploop 
   phenodata.clear();
   covdata.clear();
-  genoUnMatchID.clear();
   delete [] XTransX;
   delete [] XinvXTX;
 
   fclose(fin);
 
+  delete [] snpID;
+  delete [] rsID;
+  delete [] chrStr;
   delete [] allele1;
   delete [] allele0;
   delete [] samID;
+  delete [] include_idx;
   
   results.close();
   std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);

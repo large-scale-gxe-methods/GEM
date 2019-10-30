@@ -1,0 +1,13 @@
+{
+  "run_GEM.genofiles": ["example/example.bgen"],
+  "run_GEM.phenofile": "example/example.pheno",
+  "run_GEM.sample_id_header": "sampleid",
+  "run_GEM.outcome": "pheno2",
+  "run_GEM.binary_outcome": "true",
+  "run_GEM.covar_headers": "cov1 cov2 cov3",
+  "run_GEM.int_covar_num": "1",
+  "run_GEM.robust": "true",
+  "run_GEM.out_names": ["testset"],
+  "run_GEM.memory": "1",
+  "run_GEM.disk": "1"
+}

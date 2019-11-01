@@ -40,7 +40,7 @@ task run_tests {
 	}
 
 	runtime {
-		docker: "large-scale-gxe-methods/gem:v0.7"
+		docker: "quay.io/kwesterman/gem-workflow"
 		memory: "${memory} GB"
 		disks: "local-disk ${disk} HDD"
 	}

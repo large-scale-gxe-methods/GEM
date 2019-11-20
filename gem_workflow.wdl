@@ -100,13 +100,12 @@ workflow run_GEM {
 		int_covar_num: "Indexes of the covariates for which interactions with genotype should be included ('1' means use the first covariate, '2 3' means use the second and third covariates, etc.)."
 		delimiter: "Delimiter used in the phenotype file."
 		missing: "Missing value key of phenotype file."
-                robust: "Boolean: should robust/sandwich/Huber-White standard errors be used?"
+                robust: "Boolean: should robust (a.k.a. sandwich/Huber-White) standard errors be used?"
 		stream_snps: "SNP numbers for each GWAS analysis."
 		tol: "Convergence tolerance for logistic regression."
 		out_names: "Array of names to distinguish output files (e.g. chromosome numbers)."
 		memory: "Requested memory (in GB)."
 		disk: "Requested disk space (in GB)."
-                out_names: "Names to be included for distinguishing output files."
 	}
 
         meta {

@@ -1,7 +1,7 @@
 task run_tests {
 
 	File genofile
-	#File? sample_file_path = ""
+	File? samplefile
 	File phenofile
 	String sample_id_header
 	String outcome
@@ -33,6 +33,7 @@ task run_tests {
 			"DELIMINATOR\n${delimiter}\n"\
 			"GENO_FILE_PATH\n${genofile}\n"\
 			"PHENO_FILE_PATH\n${phenofile}\n"\
+			"SAMPLE_FILE_PATH\n${samplefile}\n"\
 			"OUTPUT_PATH\n${out_name}_res"\
 			> GEM_Input.param
 
@@ -40,20 +41,21 @@ task run_tests {
 	}
 
 	runtime {
-		docker: "quay.io/kwesterman/gem-workflow"
+		docker: "quay.io/large-scale-gxe-methods/gem-workflow"
 		memory: "${memory} GB"
 		disks: "local-disk ${disk} HDD"
 	}
 
 	output {
 		File out = "${out_name}_res"
+		File param_file = "GEM_Input.param"
 	}
 }
 
 workflow run_GEM {
 
 	Array[File] genofiles
-	#Array[File] sample_file_paths
+	File? samplefile
 	File phenofile
 	String? sample_id_header
 	String outcome
@@ -73,6 +75,7 @@ workflow run_GEM {
 		call run_tests {
 			input:
 				genofile = genofiles[i],
+				samplefile = samplefile,
 				phenofile = phenofile,
 				sample_id_header = sample_id_header,
 				outcome = outcome,
@@ -92,6 +95,7 @@ workflow run_GEM {
 
 	parameter_meta {
 		genofiles: "Array of genotype filepaths in .bgen format."
+		samplefile: "Optional .sample file accompanying the .bgen file. Required for proper function if .bgen does not store sample identifiers."
 		phenofile: "Phenotype filepath."	
 		sample_id_header: "Column header name of sample ID in phenotype file."
 		outcome: "Column header name of phenotype data in phenotype file."

@@ -39,3 +39,4 @@ RUN apt-get -y install make && \
   make && \
   mv /GEM/src/GEM /GEM/GEM
 
+COPY rearrange_covars.sh /

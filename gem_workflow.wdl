@@ -1,3 +1,24 @@
+task rearrange_covars {
+
+	String covar_headers
+	String exposures
+
+	command {
+		/rearrange_covars.sh "${covar_headers}" "${exposures}"
+	}
+
+	runtime {
+		docker: "quay.io/large-scale-gxe-methods/gem-workflow"
+	}	
+
+	output {
+		Array[String] rcout = read_lines(stdout())
+		String new_covars = rcout[0]
+		String int_covar_num = rcout[1]
+	}
+}
+
+
 task run_tests {
 
 	File genofile
@@ -7,7 +28,7 @@ task run_tests {
 	String outcome
 	Boolean binary_outcome
 	String covar_headers
-	String? int_covar_num = 1
+	String int_covar_num
 	String? delimiter = ","
 	String? missing = "NaN"
 	Boolean robust
@@ -21,6 +42,8 @@ task run_tests {
 	String robust01 = if robust then "1" else "0"
 
 	command {
+		
+
 		echo -e "SAMPLE_ID_HEADER\n${sample_id_header}\n"\
 			"PHENOTYPE\n${pheno}\n"\
 			"PHENO_HEADER\n${outcome}\n"\
@@ -61,7 +84,7 @@ workflow run_GEM {
 	String outcome
 	Boolean binary_outcome
 	String covar_headers
-	String int_covar_num
+	String exposures
 	String? delimiter
 	String? missing
 	Boolean robust
@@ -70,6 +93,12 @@ workflow run_GEM {
 	Array[String] out_names
 	String? memory
 	String? disk
+
+	call rearrange_covars {
+		input:
+			covar_headers = covar_headers,
+			exposures = exposures
+	}
 
 	scatter (i in range(length(genofiles))) {
 		call run_tests {
@@ -80,8 +109,8 @@ workflow run_GEM {
 				sample_id_header = sample_id_header,
 				outcome = outcome,
 				binary_outcome = binary_outcome,
-				covar_headers = covar_headers,
-				int_covar_num = int_covar_num,
+				covar_headers = rearrange_covars.new_covars,
+				int_covar_num = rearrange_covars.int_covar_num,
 				delimiter = delimiter,
 				missing = missing,
 				robust = robust,
@@ -100,8 +129,8 @@ workflow run_GEM {
 		sample_id_header: "Column header name of sample ID in phenotype file."
 		outcome: "Column header name of phenotype data in phenotype file."
                 binary_outcome: "Boolean: is the outcome binary? Otherwise, quantitative is assumed."
-		covar_headers: "Column header names of the selected covariates in the pheno data file."
-		int_covar_num: "Indexes of the covariates for which interactions with genotype should be included ('1' means use the first covariate, '2 3' means use the second and third covariates, etc.)."
+		covar_headers: "Column header names of the selected covariates in the pheno data file (space-delimited)."
+		exposures: "Column header name(s) of the covariates to use as exposures for genotype interaction testing (space-delimited). All exposures must also be provided as covariates."
 		delimiter: "Delimiter used in the phenotype file."
 		missing: "Missing value key of phenotype file."
                 robust: "Boolean: should robust (a.k.a. sandwich/Huber-White) standard errors be used?"

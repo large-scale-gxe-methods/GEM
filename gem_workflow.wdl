@@ -36,6 +36,7 @@ task run_tests {
 	String? tol = "0.000001"
 	String out_name
 	String? memory = 10
+	String? cpu = 4
 	String? disk = 20
 
 	String pheno = if binary_outcome then "1" else "0"
@@ -66,6 +67,7 @@ task run_tests {
 	runtime {
 		docker: "quay.io/large-scale-gxe-methods/gem-workflow"
 		memory: "${memory} GB"
+		cpu: "${cpu}"
 		disks: "local-disk ${disk} HDD"
 	}
 
@@ -92,6 +94,7 @@ workflow run_GEM {
 	String? tol
 	Array[String] out_names
 	String? memory
+	String? cpu
 	String? disk
 
 	call rearrange_covars {
@@ -118,6 +121,7 @@ workflow run_GEM {
 				tol = tol,
 				out_name = out_names[i],
 				memory = memory,
+				cpu = cpu,
 				disk = disk
 		}
 	}
@@ -138,6 +142,7 @@ workflow run_GEM {
 		tol: "Convergence tolerance for logistic regression."
 		out_names: "Array of names to distinguish output files (e.g. chromosome numbers)."
 		memory: "Requested memory (in GB)."
+		cpu: "Minimum number of requested cores."
 		disk: "Requested disk space (in GB)."
 	}
 

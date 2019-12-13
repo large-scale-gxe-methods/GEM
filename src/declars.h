@@ -16,12 +16,15 @@
 #include <cmath>
 #include <unordered_map>
 #include <unordered_set>
+#include <exception>
 
+
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
-
+#include <boost/program_options.hpp>
 #include "zlib.h"
 
 using std::string;
@@ -34,10 +37,14 @@ using std::getline;
 using std::find;
 using std::unordered_map;
 using std::unordered_set;
+namespace po = boost::program_options;
+
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef unsigned long long uint64;
+typedef unsigned short ushort;
+
 
 typedef struct {
   /*** Pheno type data information ***/

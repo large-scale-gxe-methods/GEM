@@ -68,13 +68,11 @@ int main(int argc, char *argv[]) {
                  .run(), 
                  vm);
 
-
    }
    catch(po::error const& e){
     std::cerr << e.what() << endl;
     exit(EXIT_FAILURE);
    }
-
    po::notify(vm);
 
    if(vm.count("help")){
@@ -85,16 +83,21 @@ int main(int argc, char *argv[]) {
       cout << "\nGEM version: " << VERSION << "\n" << endl;
       return 0;
    }
-   if(vm.count("param"))
+
+   if(vm.count("param")){
       pFile = vm["param"].as<string>();
       strcpy(paramfile, pFile.c_str());
+   }else{
+      cerr << "\nERROR: parameter file (-param) is needed. See -help for more details.\n" << endl;
+      exit(1);
+   }
+
 
    if(vm.count("maf")){
       MAF = vm["maf"].as<double>();
    }
 
-
-  cout << "Parameter input file is: " << paramfile << '\n';
+   cout << "Parameter input file is: " << paramfile << '\n';
 
 
   /****************************************************

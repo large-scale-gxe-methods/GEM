@@ -21,13 +21,13 @@
   version 1: GWAS of snp one by one
   version 2: streaming multi-snps and GWAS analysis of multi-snps simultaneously
   version bgen: multi-snps and bgen
-  version Log: logistic regression for binary phenodata
-  7/27/18: input column header name in pheno file not index number
-  8/01/18: sample ID matching
-  8/30/18: initial sample Size is not necessary equal
-  8/30/18: hash table of genoUnMatchID for significant unmatching numbers;
+  version Log:  logistic regression for binary phenodata
+  7/27/18:  input column header name in pheno file not index number
+  8/01/18:  sample ID matching
+  8/30/18:  initial sample Size is not necessary equal
+  8/30/18:  hash table of genoUnMatchID for significant unmatching numbers;
   12/10/18: aritrary stream_snps implemented, omp parallel with > 20 covariates (HC)
-  2/7/19: speed up reading genotype data without looking up in genoUnMatchID
+  2/7/19:   speed up reading genotype data without looking up in genoUnMatchID
 
   To-Do List:
   1. OOP
@@ -35,27 +35,67 @@
 
 #include "declars.h"
 
-int main(int argc, char *argv[]) {
-  char paramfile[300], genofile[300], phenofile[300], samplefile[300];
-  PARAMETERS prm;
 
-  /********************************
-    Parse command line
-  ********************************/
-  {
-    cout << "*********************************************************\n";
-    cout << "Number of command-line arguments: " << argc << '\n';
-    if (argc != 2) {
-      cout << "Only one argument for the parameter input file name is a must. \n";
-      exit(1);
-    }
-    if (argv[1][0] == '-') {
-      cout << "Usage options are not provided. All settings can be found in the parameter input file. \n";
-      exit(1);
-    }
-    sscanf(argv[1], "%s", paramfile);
-    cout << "Parameter input file is: " << paramfile << '\n';
-  }
+
+#define VERSION "8.1"
+void print_help(int argc, char *argv[]);
+
+
+int main(int argc, char *argv[]) {
+
+
+
+   char paramfile[300], genofile[300], phenofile[300], samplefile[300];
+   PARAMETERS prm;
+   string pFile;
+   double MAF = 0.001;
+
+
+   po::options_description desc("Allowed options");
+   desc.add_options()
+       ("help", "")
+       ("version", "")
+       ("param", po::value<string>(), "")
+       ("maf",   po::value<double>()->default_value(0.001), "");
+   po::variables_map vm;
+
+
+   try{
+   po::store(po::command_line_parser(argc, argv)
+                 .options(desc)
+                 .style(po::command_line_style::unix_style 
+                       | po::command_line_style::allow_long_disguise)
+                 .run(), 
+                 vm);
+
+
+   }
+   catch(po::error const& e){
+    std::cerr << e.what() << endl;
+    exit(EXIT_FAILURE);
+   }
+
+   po::notify(vm);
+
+   if(vm.count("help")){
+      print_help(argc, argv);
+      return 0;
+   }
+   if(vm.count("version")){
+      cout << "\nGEM version: " << VERSION << "\n" << endl;
+      return 0;
+   }
+   if(vm.count("param"))
+      pFile = vm["param"].as<string>();
+      strcpy(paramfile, pFile.c_str());
+
+   if(vm.count("maf")){
+      MAF = vm["maf"].as<double>();
+   }
+
+
+  cout << "Parameter input file is: " << paramfile << '\n';
+
 
   /****************************************************
     Call subroutine to read parameters from a file
@@ -67,6 +107,10 @@ int main(int argc, char *argv[]) {
     cout << genopath << " is not a bgen format. Only support bgen format. \n";
     exit(1);
   }
+
+
+
+
 
   /****************************************************
     Parameters
@@ -92,6 +136,13 @@ int main(int argc, char *argv[]) {
   double epsilon = prm.epsilon;
 
   double exetime = 0;
+
+
+
+
+
+
+
 
   /***************************************************
     Processing pheno file
@@ -159,6 +210,7 @@ int main(int argc, char *argv[]) {
     cout << covSelHeadersName[i] << "   ";
   }
   cout << '\n';
+  cout << "MAF filtering threshold: " << MAF << endl;
 //  cout << "Check Missing Values in Pheno Data File And Match of Order Sequence of Sample IDs?\n";
 //  IDMatching == 0 ? cout << "No Chekcing! \n" : cout << "Yes, Checking Please! \n"; 
 
@@ -173,6 +225,21 @@ int main(int argc, char *argv[]) {
   cout << "Before ID Matching and checking missing values: \n";
   cout << "Size of the pheno vector is: " << samSize << " X 1\n";
   cout << "Size of the selected covariate matrix (including first column for interception values) is: " << samSize << " X " << numSelCol+1 << '\n';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // initialize data matrix
   vector <double> phenodata(samSize);
@@ -224,6 +291,16 @@ int main(int argc, char *argv[]) {
   }
   cout << "End of reading pheno and covariate data. \n";
   cout << "*********************************************************\n";
+
+
+
+
+
+
+
+
+
+
 
   /***************************************************************
     Read General information of bgen data.
@@ -373,6 +450,15 @@ int main(int argc, char *argv[]) {
   phenomap.clear(); // clear phenomap
   // end of sample identifier block
 
+
+
+
+
+
+
+
+
+
   /******************************************************************
     Genome-Wide Associate Study using Linear or Logistic regression
     and Processing Geno Files (.bgen)
@@ -440,7 +526,7 @@ int main(int argc, char *argv[]) {
       if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
       beta[i] = betaT[i];
     }
-
+ 
     delete [] Yip1;
     delete [] WYip1;
     delete [] WX;
@@ -514,105 +600,179 @@ int main(int argc, char *argv[]) {
   }
   genoUnMatchID.clear();
 
-  for (int snploop = 0; snploop*stream_snps1 < Mbgen; snploop++) {
+
+
+
+
+  int snploop = 0;
+  int k_warning = 0;
+  while(snploop < Mbgen){
     /*    if ((Mbgen % stream_snps) != 0) {
       cerr << "ERROR: total snps is not divisible by streaming snp numbers ( " << stream_snps << " ). \n";
       exit(1);
       } */
-    if((snploop + 1) * stream_snps1 >= Mbgen) {
-      stream_snps = Mbgen - snploop * stream_snps1;
-    }
 
-    int Sq1 = Sq+1;
-    int ZGS_col = Sq1*stream_snps;
-    vector <double> AF(stream_snps);
+        int Sq1 = Sq+1;
+        int ZGS_col = Sq1*stream_snps;
+        vector <double> AF(stream_snps);
 
-    for (int stream_i = 0; stream_i < stream_snps; stream_i++) {
-    /**** variant data block ********/
-      if (Layout == 1) {
-        uint Nrow; fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;
-        if (Nrow != Nbgen) {
-          cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << '\n';
-          exit(1);
-        }
-      }
-      ushort LS; fread(&LS, 2, 1, fin);  // cout << "LS: " << LS << " " << std::flush;
-      if (LS > maxLA) {
-        maxLA = 2*LS;
-        delete [] snpID;
-        char* snpID = new char[maxLA+1];
-      }
-      fread(snpID, 1, LS, fin); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
-      ushort LR; fread(&LR, 2, 1, fin); // cout << "LR: " << LR << " " << std::flush;
-      if (LR > maxLA) {
-        maxLA = 2*LR;
-        delete [] rsID;
-        char* rsID = new char[maxLA+1];
-      }
-      fread(rsID, 1, LR, fin); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
-      ushort LC; fread(&LC, 2, 1, fin); // cout << "LC: " << LC << " " << std::flush;
-      fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
-      uint physpos; fread(&physpos, 4, 1, fin); // cout << "physpos: " << physpos << " " << std::flush;
 
-      if (Layout == 2) {
-        ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
-        if (LKnum != 2) {
-          cerr << "ERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n";
-          exit(1);
-        }
-      }
-      uint LA; fread(&LA, 4, 1, fin); // cout << "LA: " << LA << " " << std::flush;
-      if (LA > maxLA) {
-        maxLA = 2*LA;
-        delete [] allele1;
-        char* allele1 = new char[maxLA+1];
-      }
-      fread(allele1, 1, LA, fin); allele1[LA] = '\0';
-      uint LB; fread(&LB, 4, 1, fin); // cout << "LB: " << LB << " " << std::flush;
-      if (LB > maxLB) {
-        maxLB = 2*LB;
-        delete [] allele0;
-        char* allele0 = new char[maxLB+1];
-      }
-      fread(allele0, 1, LB, fin); allele0[LB] = '\0';
 
-      geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + std::to_string(physpos) + "\t" + string(allele1) + "\t" + string(allele0);
+        int stream_i = 0;
+        while(stream_i < stream_snps){
 
-      if (Layout == 1) {
-        uint zLen; fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
-	fread(&zBuf[0], 1, zLen, fin);
-	uLongf destLen = 6*Nbgen;
-        if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen) != Z_OK || destLen != 6*Nbgen) {
-          cerr << "ERROR: uncompress() failed\n";
-          exit(1);
-        }
-        // read genotype probabilities
-        double sum_eij = 0, sum_fij_minus_eij2 = 0;
-        const double scale = 1.0/32768;
-        int tmp1 = stream_i*Sq1*samSize;
-//        if (IDMatching == 1) {
-          int k = 0;
-          for (uint i = 0; i < Nbgen; i++) {
+              if(snploop == Mbgen && stream_i == 0){
+                 break;
+              }
 
-//	    if (find(genoUnMatchID.begin(), genoUnMatchID.end(), i) == genoUnMatchID.end()) {
-//          if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
-	    if (include_idx[k] == i) {
-	      double p11 = shortBuf[3*i] * scale;
-	      double p10 = shortBuf[3*i+1] * scale;
-	      double p00 = shortBuf[3*i+2] * scale;
+              if(snploop == Mbgen && stream_i != 0){
+                 stream_snps = stream_i;
+                 int Sq1 = stream_snps + 1;
+                 int ZGS_col = Sq1 * stream_snps;
+                 vector <double> AF (stream_snps);
+                 break;
+              }
+              snploop++;
 
-	      double pTot = p11 + p10 + p00;
-	      double dosage = (2*p00 + p10) / pTot;
 
-              int tmp2 = k+tmp1;
-	      AF[stream_i] += dosage;
-              if (phenoTyp == 1) 
-		ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
-	      else
-		ZGSvec[tmp2] = dosage;
-              k++;
-            }
-          }
+              
+
+
+
+             /**** Variant Data Block ********/
+
+             // Number of individuals. Only present when Layout == 1
+             if(Layout == 1) {
+                uint Nrow; fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;  
+                if(Nrow != Nbgen) {
+                   cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << '\n';
+                   exit(1);
+                }
+             }
+
+             // The length of the variant identifier
+     	     ushort LS; fread(&LS, 2, 1, fin);  // cout << "LS: " << LS << " " << std::flush;
+             if(LS > maxLA){
+                maxLA = 2*LS;
+                delete [] snpID;
+                char* snpID = new char[maxLA+1];
+             }
+
+             // The variant identifier
+             fread(snpID, 1, LS, fin); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
+
+
+             // The length of the rsid
+             ushort LR; fread(&LR, 2, 1, fin); // cout << "LR: " << LR << " " << std::flush;
+             if(LR > maxLA){
+                maxLA = 2*LR;
+                delete [] rsID;
+                char* rsID = new char[maxLA+1];
+             }
+
+             // The rsid
+             fread(rsID, 1, LR, fin); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
+             
+            
+             // The length of the chromosome
+             ushort LC; fread(&LC, 2, 1, fin); // cout << "LC: " << LC << " " << std::flush;
+
+             // The chromosome
+             fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
+             // if(chrStr != userChr){
+             //    continue;
+             // }
+             // The variant position
+             uint physpos; fread(&physpos, 4, 1, fin); // cout << "physpos: " << physpos << " " << std::flush;
+             //if(physpos >= minPos || physpos <= maxPos){ 
+             //   continue;
+             //}
+
+
+             // The number of alleles if Layout == 2. If Layout == 1, this value is assumed to be 2
+             if(Layout == 2){
+                ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
+        
+                if(LKnum != 2){
+                   cerr << "ERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n";
+                   exit(1);
+                }
+             }
+
+
+             // Length of the first allele
+             uint LA; fread(&LA, 4, 1, fin); // cout << "LA: " << LA << " " << std::flush;
+             if(LA > maxLA){
+                maxLA = 2*LA;
+                delete [] allele1;
+                char* allele1 = new char[maxLA+1];
+             }
+             // The first allele
+             fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+      
+
+             // The length of the second allele
+             uint LB; fread(&LB, 4, 1, fin); // cout << "LB: " << LB << " " << std::flush;
+             if(LB > maxLB){
+                maxLB = 2*LB;
+                delete [] allele0;
+                char* allele0 = new char[maxLB+1];
+             }
+             // The second allele
+             fread(allele0, 1, LB, fin); allele0[LB] = '\0';
+
+
+
+             geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + std::to_string(physpos) + "\t" + string(allele1) + "\t" + string(allele0);
+
+
+
+             if(Layout == 1){
+     
+                uint zLen; fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
+	        fread(&zBuf[0], 1, zLen, fin);
+	        uLongf destLen = 6*Nbgen;
+                if(uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen) != Z_OK || destLen != 6*Nbgen) {
+                   cerr << "ERROR: uncompress() failed\n";
+                   exit(1);
+                }
+
+ 
+                // read genotype probabilities
+                double sum_eij = 0, sum_fij_minus_eij2 = 0;
+                const double scale = 1.0/32768;
+                int tmp1 = stream_i*Sq1*samSize;
+
+                //if (IDMatching == 1) {
+                int k = 0;
+                for (uint i = 0; i < Nbgen; i++) {
+
+                     //if (find(genoUnMatchID.begin(), genoUnMatchID.end(), i) == genoUnMatchID.end()) {
+                     //if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
+	             if (include_idx[k] == i) {
+	                 double p11 = shortBuf[3*i] * scale;
+	                 double p10 = shortBuf[3*i+1] * scale;
+	                 double p00 = shortBuf[3*i+2] * scale;
+
+	                 double pTot = p11 + p10 + p00;
+	                 double dosage = (2*p00 + p10) / pTot;
+
+                         int tmp2 = k + tmp1;
+	                 AF[stream_i] += dosage;
+               
+                         if(phenoTyp == 1){ 
+		            ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;}
+	                 else{
+		            ZGSvec[tmp2] = dosage;}
+                         
+                         k++;
+                     }
+                }
+         
+                if((AF[stream_i]/2/samSize) < MAF || (AF[stream_i]/2/samSize) > (1-MAF)){
+                    AF[stream_i] = 0;
+                    continue;
+                }
 //        }
 /*        else if (IDMatching == 0) {
           for (uint i = 0; i < Nbgen; i++) {
@@ -629,14 +789,15 @@ int main(int argc, char *argv[]) {
           }
         }
 */
-        for (int j = 0; j < Sq; j++) {
-          int tmp3 = samSize*(j+1)+tmp1;
-          for (uint i = 0; i < samSize; i++) {
-            int tmp4 = i*(numSelCol+1);
-            ZGSvec[tmp3+i] = covX[tmp4+j+1]*ZGSvec[tmp1+i]; // here we save ZGS in column wise
-          }
-        }
-      } // end of reading genotype data when Layout = 1
+              for (int j = 0; j < Sq; j++) {
+                   int tmp3 = samSize*(j+1)+tmp1;
+                   
+                   for (uint i = 0; i < samSize; i++) {
+                        int tmp4 = i*(numSelCol+1);
+                        ZGSvec[tmp3+i] = covX[tmp4+j+1]*ZGSvec[tmp1+i]; // here we save ZGS in column wise
+                   }
+              }
+            } // end of reading genotype data when Layout = 1
 
       if (Layout == 2) {
         uint zLen; fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
@@ -657,6 +818,8 @@ int main(int argc, char *argv[]) {
           cerr << "ERROR: uncompress() failed\n";
           exit(1);
         }
+
+
         // read genotype probabilities
         uchar *bufAt = &shortBuf[0];
         uint N = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24); bufAt += 4;
@@ -664,21 +827,32 @@ int main(int argc, char *argv[]) {
           cerr << "ERROR: " << "snpName " << " has N = " << N << " (mismatch with header block)\n";
           exit(1);
         }
+
+
         uint K = bufAt[0]|(bufAt[1]<<8); bufAt += 2;
-        if (K != 2U) {
-          cerr << "ERROR: " << "snpName " << " has K = " << K << " (non-bi-allelic)\n";
-          exit(1);
+        if(K != 2U){
+           if(k_warning == 0){
+              cout << "\n WARNING: There are SNP(s) with more than 2 alleles (non-bi-allelic). Skipping... \n\n";
+              k_warning++;
+           }
+           continue;
         }
+
+
         uint Pmin = *bufAt; bufAt++;
         if (Pmin != 2U) {
           cerr << "ERROR: " << "snpName " << " has minimum ploidy = " << Pmin << " (not 2)\n";
           exit(1);
         }
+
+
         uint Pmax = *bufAt; bufAt++;
         if (Pmax != 2U) {
           cerr << "ERROR: " << "snpName " << " has maximum ploidy = " << Pmax << " (not 2)\n";
           exit(1);
         }
+
+
         for (uint i = 0; i < N; i++) {
           uint ploidyMiss = *bufAt; bufAt++;
           if (ploidyMiss != 2U) {
@@ -687,11 +861,19 @@ int main(int argc, char *argv[]) {
           //  exit(1);
           }
         }
+
+        
+        // Phased information  indicating what is stored in the row. 
+        //    Phased = 1; row stores one probability per allele
+        //    Phased = 0; row stores one probability per possible genotype
+        //    Everything else is error.
         uint Phased = *bufAt; bufAt++;
         if (Phased != 0U) {
-          cerr << "ERROR: " << "snpName " << " has Phased = " << Phased << " (not 0)\n";
-          exit(1);
+            if(Phased == 1U){ cerr << "\nERROR: Phased data is not currently supported by GEM.\n"; exit(1);}
+            cerr << "\nERROR: " << snpID << " has Phased = " << Phased << ". (not 0). \n"; 
+            exit(1);
         }
+        
         uint B = *bufAt; bufAt++;
         uint Bbits = std::pow(2,B);
         if ((B != 8U) && (B != 16U) && (B != 24U) && (B != 32U)) {
@@ -699,49 +881,57 @@ int main(int argc, char *argv[]) {
           exit(1);
         }
 
+
+
         int tmp1 = stream_i*Sq1*samSize;
 
 //	if (IDMatching == 1) {
           int k = 0;
-          for (uint i = 0; i < N; i++) {
-    	    uint chartem;
-	    if (B == 8U)
-              chartem = bufAt[0];
-            else if (B == 16U)
-              chartem = bufAt[0]|(bufAt[1]<<8);
-            else if (B == 24U)
-              chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
-            else if (B == 32U)
-              chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
-	    bufAt += B/8;
-	    uint chartem1;
-            if (B == 8U)
-              chartem1 = bufAt[0];
-            else if (B == 16U)
-              chartem1 = bufAt[0]|(bufAt[1]<<8);
-            else if (B == 24U)
-              chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
-            else if (B == 32U)
-              chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
-            bufAt += B/8;
+          for(uint i = 0; i < N; i++){
+              uint chartem;
+              if (B == 8U)
+                  chartem = bufAt[0];
+              else if (B == 16U)
+                  chartem = bufAt[0]|(bufAt[1]<<8);
+              else if (B == 24U)
+                  chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
+              else if (B == 32U)
+                  chartem = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
+              bufAt += B/8;
+              
+	      uint chartem1;
+              if (B == 8U)
+                  chartem1 = bufAt[0];
+              else if (B == 16U)
+                  chartem1 = bufAt[0]|(bufAt[1]<<8);
+              else if (B == 24U)
+                  chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16);
+              else if (B == 32U)
+                  chartem1 = bufAt[0]|(bufAt[1]<<8)|(bufAt[2]<<16)|(bufAt[3]<<24);
+              bufAt += B/8;
 
 //            if (find(genoUnMatchID.begin(), genoUnMatchID.end(), i) == genoUnMatchID.end()) {
 //          if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
 	    if (include_idx[k] == i) {
-	      double p11 = chartem/double(1.0*(Bbits-1));
-	      double p10 = chartem1/double(1.0*(Bbits-1));
-	      double dosage = 2*(1-p11-p10) + p10;
+	        double p11 = chartem/double(1.0*(Bbits-1));
+	        double p10 = chartem1/double(1.0*(Bbits-1));
 
-              int tmp2 = k+tmp1;
-              AF[stream_i] += dosage;
-              if (phenoTyp == 1) 
-		ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
-	      else
-		ZGSvec[tmp2] = dosage; // replace your new data from other genotype files here.
-	      k++;
+	        double dosage = 2*(1-p11-p10) + p10;
+                int tmp2 = k+tmp1;
+                AF[stream_i] += dosage;
+                if (phenoTyp == 1) 
+		    ZGSvec[tmp2] = miu[k]*(1-miu[k])*dosage;
+	        else
+	            ZGSvec[tmp2] = dosage; // replace your new data from other genotype files here.
+	        k++;
 	    }
+            
           }
-//	}
+//	} 
+          if((AF[stream_i]/ 2/samSize) < MAF || (AF[stream_i]/2/samSize) > (1 - MAF)){ 
+             AF[stream_i] = 0;
+             continue;
+          }
 /*        else if (IDMatching == 0) {
           for (uint i = 0; i < N; i++) {
             uint chartem;
@@ -782,8 +972,14 @@ int main(int argc, char *argv[]) {
           }
         }
       }	// end of reading genotype data when Layout = 2
+
+     stream_i++;
     } // end of stream_i
 
+    if(snploop == Mbgen & stream_i == 0){
+       break;
+
+    }
     /***************************************************************/
     // genodata and envirment data
     auto wallexe0 = std::chrono::system_clock::now();
@@ -889,13 +1085,13 @@ int main(int argc, char *argv[]) {
     double* ZGSR2tZGS = new double[ZGS_col*ZGS_col];
     if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
 
-    double* betaM = new double[stream_snps];
-    double* VarbetaM = new double[stream_snps];
-    double** betaInt = new double*[stream_snps];
+    double*  betaM      = new double[stream_snps];
+    double*  VarbetaM   = new double[stream_snps];
+    double** betaInt    = new double*[stream_snps];
     double** VarbetaInt = new double*[stream_snps];
-    double* PvalM = new double[stream_snps];
-    double* PvalInt = new double[stream_snps];
-    double* PvalJoint = new double[stream_snps];
+    double*  PvalM      = new double[stream_snps];
+    double*  PvalInt    = new double[stream_snps];
+    double*  PvalJoint  = new double[stream_snps];
     boost::math::chi_squared chisq_dist_M(1);
     boost::math::chi_squared chisq_dist_Int(Sq);
     boost::math::chi_squared chisq_dist_Joint(1+Sq);
@@ -1093,3 +1289,71 @@ int main(int argc, char *argv[]) {
 }
 /* end of main*/
 
+
+
+
+
+
+
+
+
+// Function to help print command line options
+void print_help(int argc, char *argv[]){
+
+   // Welcome and version output
+   cout << "\nWelcome to GEM" << endl;
+   cout << "Version: " << VERSION << endl << endl << endl;
+   cout << "Usage: GEM <options>" << endl << endl;
+
+
+   // General help commans
+   po::options_description general("General options");
+   general.add_options()
+          ("help",    "Prints available options and exits.")
+          ("version", "Prints the version of GEM and exits.");
+
+
+   // Input file options
+   po::options_description files("Input file options");
+   files.add_options()
+          ("param", "GEM parameter file");
+ 
+
+   // Filtering options
+   po::options_description filter("Filter options");
+   filter.add_options()
+          ("maf", "Threshold to remove variants based on the allele frequency (AF). AF < thres || AF > 1 - thres.\nDefault: 0.001");
+
+
+
+
+   
+   // Combine and determine command line style
+   po::options_description all("Options");
+   all.add(general).add(files).add(filter);
+
+   po::variables_map out;
+   
+   po::store(po::command_line_parser(argc, argv)
+             .options(all)
+             .style(po::command_line_style::unix_style
+                    | po::command_line_style::allow_long_disguise)
+             .run(), 
+             out);
+
+
+
+
+
+   // Prints the help option`
+   if(out.count("help")){
+      std::stringstream stream;
+      stream << all;
+      string helpMsg = stream.str();
+      boost::algorithm::replace_all(helpMsg, "--", "-");
+      cout << helpMsg << endl;
+   }
+
+
+
+}

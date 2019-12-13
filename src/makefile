@@ -1,6 +1,6 @@
 CC=g++
 OBJECTS= MatrixUtils.o ReadParameters.o GEM.o
-LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -fopenmp -ldl -lpthread -lm
+LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -fopenmp -ldl -lpthread -lm -lboost_program_options
 
 #targets
 all: GEM

@@ -871,9 +871,10 @@ int main(int argc, char *argv[]) {
         //    Phased = 0; row stores one probability per possible genotype
         //    Everything else is error.
         uint Phased = *bufAt; bufAt++;
-        if (Phased != 0U) {
-            if(Phased == 1U){ cerr << "\nERROR: Phased data is not currently supported by GEM.\n"; exit(1);}
-            cerr << "\nERROR: " << snpID << " has Phased = " << Phased << ". (not 0). \n"; 
+        if (Phased != 0U && Phased != 1U) {
+            //if(Phased == 1U){ cerr << "\nERROR: Phased data is not currently supported by GEM.\n"; exit(1);}
+            cerr << "\nERROR: " << snpID << " has Phased = " << Phased << ". Must be 0 or 1. \n"
+                 << "       See https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html for more details." << endl; 
             exit(1);
         }
         
@@ -918,8 +919,14 @@ int main(int argc, char *argv[]) {
 	    if (include_idx[k] == i) {
 	        double p11 = chartem/double(1.0*(Bbits-1));
 	        double p10 = chartem1/double(1.0*(Bbits-1));
+                double dosage;                 
 
-	        double dosage = 2*(1-p11-p10) + p10;
+                if(Phased == 1U){
+                   dosage = 2-(p11 + p10);
+                }else{
+	           dosage = 2*(1-p11-p10) + p10;
+                }
+
                 int tmp2 = k+tmp1;
                 AF[stream_i] += dosage;
                 if (phenoTyp == 1) 

@@ -19,13 +19,23 @@
 #include <exception>
 
 
+#include <boost/thread.hpp>
+#include <boost/thread/tss.hpp>
+#include <boost/asio.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/program_options.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/tss.hpp>
+#include <boost/asio.hpp>
+#include <boost/filesystem.hpp> 
 #include "zlib.h"
+
 
 using std::string;
 using std::vector;
@@ -76,3 +86,4 @@ typedef struct {
 
 #include "MatrixUtils.h"
 #include "ReadParameters.h"
+#include "ReadBGEN.h"

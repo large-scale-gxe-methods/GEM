@@ -1,6 +1,6 @@
 CC=g++
-OBJECTS= MatrixUtils.o ReadParameters.o GEM.o
-LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -fopenmp -ldl -lpthread -lm -lboost_program_options
+OBJECTS= MatrixUtils.o ReadParameters.o ReadBGEN.o GEM.o
+LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -ldl -lpthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
 
 #targets
 all: GEM
@@ -13,8 +13,11 @@ MatrixUtils.o: MatrixUtils.cpp
 ReadParameters.o: ReadParameters.cpp
 	$(CC) -c -std=c++11 ReadParameters.cpp
 
+ReadBGEN.o: ReadBGEN.cpp
+	$(CC) -c -std=c++11 ReadBGEN.cpp
+
 GEM.o: GEM.cpp
-	$(CC) -std=c++11 -c -fopenmp GEM.cpp
+	$(CC) -std=c++11 -c GEM.cpp
 
 #clean
 clean:

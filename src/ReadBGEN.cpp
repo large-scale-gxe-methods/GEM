@@ -365,7 +365,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = "gem_bin_" + std::to_string(thread_num) + ".tmp";
 	std::ofstream results(output, std::ofstream::binary);
-
+	std::ostringstream oss;
 
 	vector <uchar> shortBuf;
 	uint maxLA = 65536;
@@ -417,6 +417,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	
 
 	int snploop = begin;
+	int variant_index = 0;
 	while (snploop <= end) {
 
 		int Sq1 = Sq + 1;
@@ -438,7 +439,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 				break;
 			}
-
 			snploop++;
 
 
@@ -564,7 +564,10 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				}
 
 				if ((AF[stream_i] / 2 / samSize) < MAF || (AF[stream_i] / 2 / samSize) > (1 - MAF)) {
+					AF[stream_i] = 0;
 					continue;
+				} else {
+					AF[stream_i] = AF[stream_i] / 2 / samSize;
 				}
 
 				for (int j = 0; j < Sq; j++) {
@@ -774,7 +777,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			} // end of layout 2
 	
-
+			variant_index++;
 			stream_i++;
 		} // end of stream_i
 
@@ -1051,17 +1054,17 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 
 		for (int i = 0; i < stream_snps; i++) {
-			results << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+			oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
 			for (int ii = 0; ii < Sq; ii++) {
-				results << betaInt[i][ii] << "\t";
+				 oss << betaInt[i][ii] << "\t";
 			}
 
 			for (int ii = 0; ii < Sq; ii++) {
 				for (int jj = 0; jj < Sq; jj++) {
-					results << VarbetaInt[i][ii * Sq + jj] << "\t";
+					oss << VarbetaInt[i][ii * Sq + jj] << "\t";
 				}
 			}
-			results << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
 		}
 
 
@@ -1082,6 +1085,14 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		delete[] PvalInt;
 		delete[] PvalJoint;
 		AF.clear();
+
+
+		if ((variant_index % 10000 == 0) || snploop == end + 1) {
+			results << oss.str();
+			oss.str(std::string());
+			oss.clear();
+			variant_index = 0;
+		}
 	} // end of snploop 
 
 

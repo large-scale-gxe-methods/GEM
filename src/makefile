@@ -1,5 +1,5 @@
 CC=g++
-OBJECTS= MatrixUtils.o ReadParameters.o ReadBGEN.o GEM.o
+OBJECTS= MatrixUtils.o ReadParameters.o ReadBGEN.o TimeUtils.o GEM.o
 LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -ldl -lpthread -fopenmp -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
 
 #targets

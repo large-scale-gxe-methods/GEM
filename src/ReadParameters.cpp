@@ -160,7 +160,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	// Read parameter file
 	if (out.count("param")) {
 		pFile = out["param"].as<string>();
-		cout << "Parameter input file is: " << pFile << '\n';
 	}
 	else {
 		cerr << "\nERROR: parameter file (-param) is needed." << endl;

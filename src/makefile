@@ -16,6 +16,9 @@ ReadParameters.o: ReadParameters.cpp
 ReadBGEN.o: ReadBGEN.cpp
 	$(CC) -c -std=c++11 ReadBGEN.cpp
 
+TimeUtils.o: TimeUtils.cpp
+	$(CC) -C -std=c++11 TimeUtils.cpp
+
 GEM.o: GEM.cpp
 	$(CC) -std=c++11 -c -fopenmp GEM.cpp
 

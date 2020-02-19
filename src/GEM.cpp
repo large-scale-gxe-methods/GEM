@@ -35,14 +35,13 @@
 
 #include "declars.h"
 
-
 int main(int argc, char* argv[]) {
 
 	char paramfile[300];
 	char phenofile[300];
 	char genofile[300];
 	char samplefile[300];
-
+	Time clock;
 
 
 	// Process command line
@@ -162,7 +161,8 @@ int main(int argc, char* argv[]) {
 	colNames.clear();
 
 	// print out header names and select pheno columns
-	cout << "*********************************************************\n";
+	cout << "\n\n*********************************************************\n";
+	cout << "Parameter input file is: " << cmd.pFile << '\n';
 	cout << "The Selected Phenotype Data Header Name is: " << phenoHeaderName << '\n';
 	cout << "Linear or Binary? ";
 	phenoTyp == 0 ? cout << "Linear \n" : cout << "Binary \n";
@@ -186,18 +186,16 @@ int main(int argc, char* argv[]) {
 	finph.seekg(0, finph.beg);
 	getline(finph, line);
 	cout << "*********************************************************\n";
-	cout << "Before ID Matching and checking missing values: \n";
+
+
+
+
+
+
+
+	cout << "Before ID Matching and checking missing values... \n";
 	cout << "Size of the pheno vector is: " << samSize << " X 1\n";
 	cout << "Size of the selected covariate matrix (including first column for interception values) is: " << samSize << " X " << numSelCol + 1 << '\n';
-
-
-
-
-
-
-
-
-
 	// initialize data matrix
 	vector <double> phenodata(samSize);
 	vector <string> sampleIds(samSize);
@@ -265,125 +263,12 @@ int main(int argc, char* argv[]) {
 	***************************************************************/
 	Bgen bgen;
 	bgen.processBgenHeaderBlock(genofile);
+	bgen.processBgenSampleBlock(bgen, samplefile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
 
-
-
-	uint maxLA  = 65536;
-	char* samID = new char[maxLA + 1];
-
-
-	/**** sample identifier block ********/
-	/* exists when SampleIdentifiers = 1 */
-	if (bgen.SampleIdentifiers == 1) {
-		uint LS1; fread(&LS1, 4, 1, bgen.fin); // std::cout << "LS1: " << LS1 << std::endl; // LS1 + L_H <= offset
-		uint Nrow; fread(&Nrow, 4, 1, bgen.fin); // cout << "Nrow: " << Nrow << " " << std::flush;
-		if (Nrow != bgen.Nbgen) {
-			cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << bgen.Nbgen << '\n';
-			exit(1);
-		}
-
-
-		int k = 0;
-		for (uint m = 0; m < bgen.Nbgen; m++) {
-			ushort LSID; fread(&LSID, 2, 1, bgen.fin); // std::cout << "LSID: " << LSID << " ";
-			fread(samID, 1, LSID, bgen.fin); // std::cout << "samID: " << samID << " " << std::endl;
-
-			// IDMatching
-			string strtmp(samID);
-			int itmp = k;
-			if (phenomap.find(strtmp) != phenomap.end()) {
-				auto tmp_valvec = phenomap[strtmp];
-				if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-					sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-					// covdata[k*(numSelCol+1) + 0] = 1.0;
-					for (int c = 0; c < numSelCol; c++)
-						sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
-					k++;
-				}
-				// erase the used element in phenomap
-				phenomap.erase(strtmp);
-			}
-			// save the index with unmatched ID into genoUnMatchID.
-	//        if (itmp == k) genoUnMatchID.push_back(m);
-			if (itmp == k) genoUnMatchID.insert(m);
-		}
-		// After IDMatching, resizing phenodata and covdata, and updating samSize;
-		phenodata.resize(k);
-		covdata.resize(k * (numSelCol + 1));
-		samSize = k;
-		cout << "****************************************************************************\n";
-		if (genoUnMatchID.empty())
-			cout << "After processes of sample IDMatching and checking missing values, the sample size does not change.\n";
-		else
-			cout << "After processes of sample IDMatching and checking missing values, the sample size changes from "
-			<< samSize + genoUnMatchID.size() << " to " << samSize << ".\n";
-
-		cout << "****************************************************************************\n";
-		cout << "Sample IDMatching and checking missing values processes have been completed.\n";
-		cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
-		cout << "****************************************************************************\n";
-		//      } // end of if IDMatching == 1
-	} // end SampleIdentifiers == 1
-	else {
-		std::ifstream fIDMat;
-		fIDMat.open(samplefile);
-		string IDline;
-		getline(fIDMat, IDline);
-		getline(fIDMat, IDline);
-
-		int k = 0;
-		for (uint m = 0; m < bgen.Nbgen; m++) {
-			// IDMatching
-			getline(fIDMat, IDline);
-			std::istringstream iss(IDline);
-			string strtmp;
-			iss >> strtmp;
-			//        string strtmp(samID);
-			int itmp = k;
-			if (phenomap.find(strtmp) != phenomap.end()) {
-				auto tmp_valvec = phenomap[strtmp];
-				if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-					sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-					// covdata[k*(numSelCol+1) + 0] = 1.0;
-					for (int c = 0; c < numSelCol; c++)
-						sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
-					k++;
-				}
-				// erase the used element in phenomap
-				phenomap.erase(strtmp);
-			}
-			// save the index with unmatched ID into genoUnMatchID.
-	  //        if (itmp == k) genoUnMatchID.push_back(m);
-			if (itmp == k) genoUnMatchID.insert(m);
-		}
-		// After IDMatching, resizing phenodata and covdata, and updating samSize;
-		fIDMat.close();
-
-		phenodata.resize(k);
-		covdata.resize(k * (numSelCol + 1));
-		samSize = k;
-		cout << "****************************************************************************\n";
-		if (genoUnMatchID.empty())
-			cout << "After processes of sample IDMatching and checking missing values, the sample size does not change.\n";
-		else
-			cout << "After processes of sample IDMatching and checking missing values, the sample size changes from "
-			<< samSize + genoUnMatchID.size() << " to " << samSize << ".\n";
-
-		cout << "****************************************************************************\n";
-		cout << "Sample IDMatching and checking missing values processes have been completed.\n";
-		cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
-		cout << "****************************************************************************\n";
-	}
 	sampleIds.clear(); // clear memory
 	phenomap.clear(); // clear phenomap
-	// end of sample identifier block
-
-
-
-
-
-
-
+	phenodata.clear();
+	covdata.clear();
 
 
 
@@ -391,9 +276,10 @@ int main(int argc, char* argv[]) {
 	  Genome-Wide Associate Study using Linear or Logistic regression
 	  and Processing Geno Files (.bgen)
 	******************************************************************/
-	cout << "Starting GWAS. \n";
-	double* phenoY = &phenodata[0];
-	double* covX   = &covdata[0];
+	cout << "Starting GWAS. \n\n";
+	samSize = bgen.new_samSize;
+	double* phenoY = &bgen.new_phenodata[0];
+	double* covX   = &bgen.new_covdata[0];
 	vector <double> residvec(samSize);
 
 	// for logistic regression
@@ -402,6 +288,8 @@ int main(int argc, char* argv[]) {
 	int iter = 1;
 
 
+	cout << "Precalculations and fitting null model..." << endl;
+	auto start_time = std::chrono::high_resolution_clock::now(); 
 	// transpose(X) * X
 	double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
 	matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
@@ -471,8 +359,7 @@ int main(int argc, char* argv[]) {
 		matInv(XTransX, numSelCol + 1);
 		delete[] WX;
 
-		cout << "Logistic regression reaches convergence after " << iter << " steps.\n";
-		cout << "*********************************************************\n";
+		cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
 	}
 
 	// X*[invert (XTransX)]
@@ -488,6 +375,12 @@ int main(int argc, char* argv[]) {
 	sigma2 = sigma2 / (samSize - (numSelCol + 1));
 	if (phenoTyp == 1) sigma2 = 1.0;
 
+	cout << "Execution time... ";
+	auto end_time = std::chrono::high_resolution_clock::now();
+	printExecutionTime(start_time, end_time);
+	cout << "Done.\n";
+	cout << "*********************************************************\n";
+
 	double* resid = &residvec[0];
 
 	delete[] XTransY;
@@ -495,8 +388,7 @@ int main(int argc, char* argv[]) {
 	delete[] Xbeta;
 
 	cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
-	cout << "Number of SNPs in each batch is: " << stream_snps << '\n';
-	cout << "*********************************************************\n";
+	cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
 	vector <double> ZGSvec(samSize * (1 + Sq) * stream_snps);
 	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
 
@@ -505,27 +397,13 @@ int main(int argc, char* argv[]) {
 	double* WZGS = &WZGSvec[0];
 
 
-	int stream_snps1 = stream_snps;
-
-	vector<long int> include_idx(samSize);
-	int ii = 0;
-	for (uint i = 0; i < bgen.Nbgen; i++) {
-		if (genoUnMatchID.find(i) == genoUnMatchID.end()) {
-			include_idx[ii] = i;
-			ii++;
-		}
-	}
-	genoUnMatchID.clear();
-
 
 
 
 	bgen.numSelCol = numSelCol;
 	bgen.Sq = Sq;
-	bgen.samSize = samSize;
 	bgen.robust = robust;
 	bgen.stream_snps = stream_snps;
-    bgen.include_idx = include_idx;
 	bgen.maf = cmd.MAF;
 	bgen.miu = miu;
 	bgen.phenoTyp = phenoTyp;
@@ -538,7 +416,7 @@ int main(int argc, char* argv[]) {
 
 
 	// Identifying the start position of each BGEN variant block for parallizing.
-	cout << "Detected " << boost::thread::hardware_concurrency() << " available core(s). Using " << cmd.threads << " for parallel processing..." << endl;
+	cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s). Using " << cmd.threads << " for multithreading..." << endl;
 	cout << "Dividing BGEN file into " << cmd.threads << " blocks..." << endl;
 
 	vector<int> Mbgen_begin(cmd.threads);
@@ -555,27 +433,14 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	cout << "Identifying start position of each block... Execution time: ";
-	auto start_time = std::chrono::high_resolution_clock::now();
+	cout << "Identifying start position of each block...\n";
+	start_time = std::chrono::high_resolution_clock::now();
 	bgenVariantPos = getPositionOfBgenVariant(bgen.fin, bgen.offset, bgen.Mbgen, bgen.Nbgen, bgen.CompressedSNPBlocks, bgen.Layout, Mbgen_begin);
-	auto end_time = std::chrono::high_resolution_clock::now();
-
-	auto execution_time_ms  = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-	auto execution_time_sec = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
-	auto execution_time_min = std::chrono::duration_cast<std::chrono::minutes>(end_time - start_time).count();
-
-	if (execution_time_min > 0)
-		cout << "" << execution_time_min % 60 << "m, ";
-	if (execution_time_sec > 0)
-		cout << "" << execution_time_sec % 60 << "s, ";
-	if (execution_time_ms > 0)
-		cout << "" << execution_time_ms % long(1E+3) << " ms";
-	cout << "\n";
-	fclose(bgen.fin);
-
-
-
-
+	end_time = std::chrono::high_resolution_clock::now();
+	cout << "Execution time... ";
+	printExecutionTime(start_time, end_time);
+	cout << "Done.\n";
+	cout << "*********************************************************\n";
 
 
 
@@ -584,33 +449,22 @@ int main(int argc, char* argv[]) {
 
 
 	// Preparing for parallelizing of BGEN file
-	boost::asio::io_service io_service;
+	cout << "Starting multithreading...\n"; 
 	boost::thread_group thread_grp;
-	boost::asio::io_service::work work(io_service);
-	std::vector<boost::shared_future<void> > pending_data; // vector of futures
 
+	start_time = std::chrono::high_resolution_clock::now();
 	// Create threads
 	for (int i = 0; i < cmd.threads; ++i) {
-		thread_grp.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
+		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], genofile, i, boost::ref(bgen)));
 	}
-
-	// Assigning each thread a chunk of the BGEN file.
-	for (int i = 0; i < cmd.threads; i++) {
-		typedef boost::packaged_task<void> task_t;
-		boost::shared_ptr<task_t> task = boost::make_shared<task_t>(
-			boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], genofile, i, boost::ref(bgen)));
-
-		boost::shared_future<void> fut = task->get_future();
-		pending_data.push_back(fut);
-
-		io_service.post(boost::bind(&task_t::operator(), task));
-	}
-
-	boost::wait_for_all(pending_data.begin(), pending_data.end());
+	thread_grp.join_all();
+	cout << "Joining threads... \n";
 	//pending_data.clear();
-
-
-
+	end_time = std::chrono::high_resolution_clock::now();
+	cout << "Execution time... ";
+	printExecutionTime(start_time, end_time);
+	cout << "Done. \n";
+	cout << "*********************************************************\n";
 
 
 
@@ -620,6 +474,8 @@ int main(int argc, char* argv[]) {
 
 
 	// Write all results from each thread to 1 file
+	cout << "Combining results... \n";
+	start_time = std::chrono::high_resolution_clock::now();
 	std::ofstream results(output, std::ofstream::binary);
 	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "AF" << "\t" << "Beta_Main" << "\t" << "Var_Beta_Main" << "\t";
 	for (int i = 1; i <= Sq; i++) {
@@ -642,22 +498,22 @@ int main(int argc, char* argv[]) {
 		boost::filesystem::remove(threadOutputFile.c_str());
 
 	}
-
 	results.close();
+	end_time = std::chrono::high_resolution_clock::now();
+	cout << "Execution time... ";
+	printExecutionTime(start_time, end_time);
+	cout << "Done. \n";
 
 
 
-	phenodata.clear();
-	covdata.clear();
 	delete[] XTransX;
 	delete[] XinvXTX;
-	delete[] samID;
-	include_idx.clear();
+	//delete[] samID;
 
 
 
-
-
+	
+	cout << "*********************************************************\n";
 	std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
 	double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
 	cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";

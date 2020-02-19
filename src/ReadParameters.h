@@ -69,8 +69,6 @@ public:
 	int stream_i;
 	int snploop;
 	int ZGS_col;
-	int Sq1;
-
 	FILE* fin3;
 
 	// For reading variant block
@@ -97,6 +95,8 @@ public:
 
 
 	// For uncompressing genotype block
+	int Sq1;
+	int end_loop;
 	uLongf destLen;
 	vector <uchar> shortBuf;
 	uchar* bufAt;

@@ -113,7 +113,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	//Performance options
 	po::options_description performance("Performance options");
 	performance.add_options()
-		("threads", po::value<int>()->default_value(ceil((boost::thread::hardware_concurrency() / 2))), "");
+		("threads", po::value<int>()->default_value(ceil((boost::thread::physical_concurrency() / 2))), "");
 
 
 

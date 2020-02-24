@@ -1,6 +1,6 @@
 CC=g++
 OBJECTS= MatrixUtils.o ReadParameters.o TimeUtils.o ReadBGEN.o GEM.o
-LIBS= -L /opt/intel/mkl/lib/intel64 -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -fopenmp -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
+LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -fopenmp -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
 
 OMP_NUM_THREADS=1
 export OMP_NUM_THREADS

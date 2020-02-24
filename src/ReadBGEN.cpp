@@ -226,7 +226,7 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 	vector <uchar> zBuf;
 	vector <long int> variant_pos(Mbgen_begin.size());
 
-
+	
 	fseek(fin, offset + 4, SEEK_SET);
 
 	for (int snploop = 0; snploop < Mbgen; snploop++) {
@@ -361,9 +361,6 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 
 void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int thread_num, Bgen test) {
 
-	omp_set_num_threads(1);
-	cout << omp_get_num_threads() << endl;
-	cout << omp_get_max_threads() << endl;
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = "gem_bin_" + std::to_string(thread_num) + ".tmp";
@@ -789,313 +786,313 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		}
 
 
-		///***************************************************************/
-		////	genodata and envirment data
-		//double* ZGS = &ZGSvec[0];
-
-		//// transpose(X) * ZGS
-		//// it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
-		//// important!!!!
-		//double* XtransZGS = new double[(numSelCol + 1) * ZGS_col];
-		//matNmatNprod(covX, ZGS, XtransZGS, numSelCol + 1, samSize, ZGS_col);
-
-
-
-		//if (phenoType == 0) {
-		//	for (int j = 0; j < ZGS_col; j++) {
-		//		for (int i = 0; i < samSize; i++) {
-		//			for (int k = 0; k <= numSelCol; k++) {
-		//				ZGS[j * samSize + i] -= XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
-		//			}
-		//			if (robust == 1) { ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i]; }
-		//		}
-		//	}
-		//}
-		//else if (phenoType == 1) {
-
-		//	for (int j = 0; j < ZGS_col; j++) {
-		//		for (int i = 0; i < samSize; i++) {
-		//			double ZGStemp = 0.0;
-		//			for (int k = 0; k <= numSelCol; k++) {
-		//				if (k == 0) {
-		//					ZGStemp += ZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]) - XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
-		//				}
-		//				else {
-		//					ZGStemp -= XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
-		//				}
-		//			}
-
-		//			ZGS[j * samSize + i] = ZGStemp;
-		//			if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
-		//			WZGS[j * samSize + i] = miu[i] * (1 - miu[i]) * ZGS[j * samSize + i];
-		//		}
-		//	}
-		//}
-
-
-
-		//double* ZGSR2 = &ZGSR2vec[0];
-		//delete[] XtransZGS;
-		//// transpose(ZGS) * resid
-		//double* ZGStR = new double[ZGS_col];
-		//matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
-		//// transpose(ZGS) * ZGS
-		//double* ZGStZGS = new double[ZGS_col * ZGS_col];
-		//if (phenoType == 0) {
-		//	matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
-		//}
-		//else if (phenoType == 1) {
-		//	matmatTprod(ZGS, WZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
-		//}
-		//else {
-		//	cout << "phenoTyp is not equal to 0 or 1. Kill the job!! \n";
-		//	exit(1);
-		//}
-
-
-		//// transpose(ZGSR2) * ZGS
-		//double* ZGSR2tZGS = new double[ZGS_col * ZGS_col];
-		//if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
-
-
-
-
-
-		//double*  betaM      = new double[stream_snps];
-		//double*  VarbetaM   = new double[stream_snps];
-		//double** betaInt    = new double* [stream_snps];
-		//double** VarbetaInt = new double* [stream_snps];
-		//double*  PvalM      = new double[stream_snps];
-		//double*  PvalInt    = new double[stream_snps];
-		//double*  PvalJoint  = new double[stream_snps];
-		//boost::math::chi_squared chisq_dist_M(1);
-		//boost::math::chi_squared chisq_dist_Int(Sq);
-		//boost::math::chi_squared chisq_dist_Joint(1 + Sq);
-
-
-
-
-		//if (robust == 0) {
-
-		//	for (int i = 0; i < stream_snps; i++) {
-		//		// initialize dynamic 2D array
-		//		betaInt[i] = new double[Sq];
-		//		VarbetaInt[i] = new double[Sq * Sq];
-
-		//		// betamain
-		//		int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
-		//		betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
-		//		VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
-
-		//		double* S2TransS2 = new double[Sq * Sq];
-		//		double* S2TransR = new double[Sq];
-		//		double* S2DS2 = new double[Sq * Sq];
-		//		double* InvVarbetaint = new double[Sq * Sq];
-		//		for (int ind1 = 0; ind1 < Sq; ind1++) {
-		//			for (int ind2 = 0; ind2 < Sq; ind2++) {
-		//				// transpose(Snew2) * Snew2
-		//				S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-		//			}
-		//			//transpose(Snew2) * resid
-		//			S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
-		//		}
-
-		//		// invert (S2TransS2)
-		//		matInv(S2TransS2, Sq);
-
-		//		// betaInt = invert(S2TransS2) * S2TransR
-		//		matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
-
-		//		// Inv(S2TransS2) * S2DS2
-		//		double* Stemp2 = new double[Sq * Sq];
-
-		//		for (int j = 0; j < Sq; j++) {
-		//			for (int k = 0; k < Sq; k++) {
-		//				VarbetaInt[i][j * Sq + k] = sigma2 * S2TransS2[j * Sq + k];
-		//				InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
-		//			}
-		//		}
-
-		//		// calculating P values
-		//		double statM = betaM[i] * betaM[i] / VarbetaM[i];
-		//		if (isnan(statM) || statM <= 0.0) {
-		//			PvalM[i] = NAN;
-		//		}
-		//		else {
-		//			PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
-		//		}
-
-		//		// invert VarbetaInt[i]
-		//		matInv(InvVarbetaint, Sq);
-		//		double* Stemp3 = new double[Sq];
-		//		matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
-
-		//		double statInt = 0.0;
-		//		for (int j = 0; j < Sq; j++) {
-		//			statInt += betaInt[i][j] * Stemp3[j];
-		//		}
-
-		//		if (isnan(statInt) || statInt <= 0.0) {
-		//			PvalInt[i] = NAN;
-		//		}
-		//		else {
-		//			PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-		//		}
-
-
-		//		double statJoint = statM + statInt;
-		//		if (isnan(statJoint) || statJoint <= 0.0) {
-		//			PvalJoint[i] = NAN;
-		//		}
-		//		else {
-		//			PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-		//		}
-
-		//		delete[] S2TransS2;
-		//		delete[] S2TransR;
-		//		delete[] S2DS2;
-		//		delete[]Stemp2;
-		//		delete[]Stemp3;
-		//		delete[]InvVarbetaint;
-		//	}
-		//}
-		//else if (robust == 1) {
-
-		//	for (int i = 0; i < stream_snps; i++) {
-		//		// initialize dynamic 2D array
-		//		betaInt[i] = new double[Sq];
-		//		VarbetaInt[i] = new double[Sq * Sq];
-
-		//		//betamain
-		//		int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
-		//		betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
-		//		VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
-
-		//		double* S2TransS2 = new double[Sq * Sq];
-		//		double* S2TransR = new double[Sq];
-		//		double* S2DS2 = new double[Sq * Sq];
-		//		double* InvVarbetaint = new double[Sq * Sq];
-
-		//		for (int ind1 = 0; ind1 < Sq; ind1++) {
-		//			for (int ind2 = 0; ind2 < Sq; ind2++) {
-		//				// transpose(Snew2) * Snew2
-		//				S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-		//				// transpose(Snew2) * D * Snew2
-		//				S2DS2[ind1 * Sq + ind2] = ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] - ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] + ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1];
-		//			}
-		//			//transpose(Snew2) * resid
-		//			S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
-		//		}
-
-		//		// invert (S2TransS2)
-		//		matInv(S2TransS2, Sq);
-
-		//		// betaInt = invert(S2TransS2) * S2TransR
-		//		matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
-
-		//		// Inv(S2TransS2) * S2DS2
-		//		double* Stemp2 = new double[Sq * Sq];
-		//		matmatprod(S2TransS2, S2DS2, Stemp2, Sq, Sq, Sq);
-
-		//		// Stemp2 * Inv(S2TransS2)
-		//		matNmatNprod(Stemp2, S2TransS2, VarbetaInt[i], Sq, Sq, Sq);
-
-
-
-		//		for (int j = 0; j < Sq; j++) {
-		//			for (int k = 0; k < Sq; k++) {
-		//				InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
-		//			}
-		//		}
-
-
-		//		//calculating P values
-		//		double statM = betaM[i] * betaM[i] / VarbetaM[i];
-		//		if (isnan(statM) || statM <= 0.0) {
-		//			PvalM[i] = NAN;
-		//		}
-		//		else {
-		//			PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
-		//		}
-
-
-		//		// invert VarbetaInt[i]
-		//		matInv(InvVarbetaint, Sq);
-		//		double* Stemp3 = new double[Sq];
-		//		matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
-
-		//		double statInt = 0.0;
-		//		for (int j = 0; j < Sq; j++) {
-		//			statInt += betaInt[i][j] * Stemp3[j];
-		//		}
-
-		//		if (isnan(statInt) || statInt <= 0.0) {
-		//			PvalInt[i] = NAN;
-		//		}
-		//		else {
-		//			PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-		//		}
-
-		//		double statJoint = statM + statInt;
-		//		if (isnan(statJoint) || statJoint <= 0.0) {
-		//			PvalJoint[i] = NAN;
-		//		}
-		//		else {
-		//			PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-		//		}
-
-
-		//		delete[] S2TransS2;
-		//		delete[] S2TransR;
-		//		delete[] S2DS2;
-		//		delete[] Stemp2;
-		//		delete[] Stemp3;
-		//		delete[] InvVarbetaint;
-		//	}
-		//} // end of if robust == 1
-
-
-
-		//for (int i = 0; i < stream_snps; i++) {
-		//	oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
-		//	for (int ii = 0; ii < Sq; ii++) {
-		//		 oss << betaInt[i][ii] << "\t";
-		//	}
-
-		//	for (int ii = 0; ii < Sq; ii++) {
-		//		for (int jj = 0; jj < Sq; jj++) {
-		//			oss << VarbetaInt[i][ii * Sq + jj] << "\t";
-		//		}
-		//	}
-		//	oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
-		//}
-
-
-
-		//delete[] ZGStR;
-		//delete[] ZGStZGS;
-		//delete[] ZGSR2tZGS;
-
-		//delete[] betaM;
-		//delete[] VarbetaM;
-		//for (int i = 0; i < stream_snps; i++) {
-		//	delete[] betaInt[i];
-		//	delete[] VarbetaInt[i];
-		//}
-		//delete[] betaInt;
-		//delete[] VarbetaInt;
-		//delete[] PvalM;
-		//delete[] PvalInt;
-		//delete[] PvalJoint;
-		//AF.clear();
-
-
-		//if ((variant_index % 10000 == 0) || snploop == end + 1) {
-		//	results << oss.str();
-		//	oss.str(std::string());
-		//	oss.clear();
-		//	variant_index = 0;
-		//}
+		/***************************************************************/
+		//	genodata and envirment data
+		double* ZGS = &ZGSvec[0];
+
+		// transpose(X) * ZGS
+		// it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
+		// important!!!!
+		double* XtransZGS = new double[(numSelCol + 1) * ZGS_col];
+		matNmatNprod(covX, ZGS, XtransZGS, numSelCol + 1, samSize, ZGS_col);
+
+
+
+		if (phenoType == 0) {
+			for (int j = 0; j < ZGS_col; j++) {
+				for (int i = 0; i < samSize; i++) {
+					for (int k = 0; k <= numSelCol; k++) {
+						ZGS[j * samSize + i] -= XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
+					}
+					if (robust == 1) { ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i]; }
+				}
+			}
+		}
+		else if (phenoType == 1) {
+
+			for (int j = 0; j < ZGS_col; j++) {
+				for (int i = 0; i < samSize; i++) {
+					double ZGStemp = 0.0;
+					for (int k = 0; k <= numSelCol; k++) {
+						if (k == 0) {
+							ZGStemp += ZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]) - XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
+						}
+						else {
+							ZGStemp -= XinvXTX[k * samSize + i] * XtransZGS[j * (numSelCol + 1) + k];
+						}
+					}
+
+					ZGS[j * samSize + i] = ZGStemp;
+					if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
+					WZGS[j * samSize + i] = miu[i] * (1 - miu[i]) * ZGS[j * samSize + i];
+				}
+			}
+		}
+
+
+
+		double* ZGSR2 = &ZGSR2vec[0];
+		delete[] XtransZGS;
+		// transpose(ZGS) * resid
+		double* ZGStR = new double[ZGS_col];
+		matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
+		// transpose(ZGS) * ZGS
+		double* ZGStZGS = new double[ZGS_col * ZGS_col];
+		if (phenoType == 0) {
+			matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
+		}
+		else if (phenoType == 1) {
+			matmatTprod(ZGS, WZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
+		}
+		else {
+			cout << "phenoTyp is not equal to 0 or 1. Kill the job!! \n";
+			exit(1);
+		}
+
+
+		// transpose(ZGSR2) * ZGS
+		double* ZGSR2tZGS = new double[ZGS_col * ZGS_col];
+		if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
+
+
+
+
+
+		double*  betaM      = new double[stream_snps];
+		double*  VarbetaM   = new double[stream_snps];
+		double** betaInt    = new double* [stream_snps];
+		double** VarbetaInt = new double* [stream_snps];
+		double*  PvalM      = new double[stream_snps];
+		double*  PvalInt    = new double[stream_snps];
+		double*  PvalJoint  = new double[stream_snps];
+		boost::math::chi_squared chisq_dist_M(1);
+		boost::math::chi_squared chisq_dist_Int(Sq);
+		boost::math::chi_squared chisq_dist_Joint(1 + Sq);
+
+
+
+
+		if (robust == 0) {
+
+			for (int i = 0; i < stream_snps; i++) {
+				// initialize dynamic 2D array
+				betaInt[i] = new double[Sq];
+				VarbetaInt[i] = new double[Sq * Sq];
+
+				// betamain
+				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
+				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
+
+				double* S2TransS2 = new double[Sq * Sq];
+				double* S2TransR = new double[Sq];
+				double* S2DS2 = new double[Sq * Sq];
+				double* InvVarbetaint = new double[Sq * Sq];
+				for (int ind1 = 0; ind1 < Sq; ind1++) {
+					for (int ind2 = 0; ind2 < Sq; ind2++) {
+						// transpose(Snew2) * Snew2
+						S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+					}
+					//transpose(Snew2) * resid
+					S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				}
+
+				// invert (S2TransS2)
+				matInv(S2TransS2, Sq);
+
+				// betaInt = invert(S2TransS2) * S2TransR
+				matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
+
+				// Inv(S2TransS2) * S2DS2
+				double* Stemp2 = new double[Sq * Sq];
+
+				for (int j = 0; j < Sq; j++) {
+					for (int k = 0; k < Sq; k++) {
+						VarbetaInt[i][j * Sq + k] = sigma2 * S2TransS2[j * Sq + k];
+						InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
+					}
+				}
+
+				// calculating P values
+				double statM = betaM[i] * betaM[i] / VarbetaM[i];
+				if (isnan(statM) || statM <= 0.0) {
+					PvalM[i] = NAN;
+				}
+				else {
+					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
+				}
+
+				// invert VarbetaInt[i]
+				matInv(InvVarbetaint, Sq);
+				double* Stemp3 = new double[Sq];
+				matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
+
+				double statInt = 0.0;
+				for (int j = 0; j < Sq; j++) {
+					statInt += betaInt[i][j] * Stemp3[j];
+				}
+
+				if (isnan(statInt) || statInt <= 0.0) {
+					PvalInt[i] = NAN;
+				}
+				else {
+					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
+				}
+
+
+				double statJoint = statM + statInt;
+				if (isnan(statJoint) || statJoint <= 0.0) {
+					PvalJoint[i] = NAN;
+				}
+				else {
+					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+				}
+
+				delete[] S2TransS2;
+				delete[] S2TransR;
+				delete[] S2DS2;
+				delete[]Stemp2;
+				delete[]Stemp3;
+				delete[]InvVarbetaint;
+			}
+		}
+		else if (robust == 1) {
+
+			for (int i = 0; i < stream_snps; i++) {
+				// initialize dynamic 2D array
+				betaInt[i] = new double[Sq];
+				VarbetaInt[i] = new double[Sq * Sq];
+
+				//betamain
+				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
+				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
+
+				double* S2TransS2 = new double[Sq * Sq];
+				double* S2TransR = new double[Sq];
+				double* S2DS2 = new double[Sq * Sq];
+				double* InvVarbetaint = new double[Sq * Sq];
+
+				for (int ind1 = 0; ind1 < Sq; ind1++) {
+					for (int ind2 = 0; ind2 < Sq; ind2++) {
+						// transpose(Snew2) * Snew2
+						S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+						// transpose(Snew2) * D * Snew2
+						S2DS2[ind1 * Sq + ind2] = ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] - ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] + ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1];
+					}
+					//transpose(Snew2) * resid
+					S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				}
+
+				// invert (S2TransS2)
+				matInv(S2TransS2, Sq);
+
+				// betaInt = invert(S2TransS2) * S2TransR
+				matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
+
+				// Inv(S2TransS2) * S2DS2
+				double* Stemp2 = new double[Sq * Sq];
+				matmatprod(S2TransS2, S2DS2, Stemp2, Sq, Sq, Sq);
+
+				// Stemp2 * Inv(S2TransS2)
+				matNmatNprod(Stemp2, S2TransS2, VarbetaInt[i], Sq, Sq, Sq);
+
+
+
+				for (int j = 0; j < Sq; j++) {
+					for (int k = 0; k < Sq; k++) {
+						InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
+					}
+				}
+
+
+				//calculating P values
+				double statM = betaM[i] * betaM[i] / VarbetaM[i];
+				if (isnan(statM) || statM <= 0.0) {
+					PvalM[i] = NAN;
+				}
+				else {
+					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
+				}
+
+
+				// invert VarbetaInt[i]
+				matInv(InvVarbetaint, Sq);
+				double* Stemp3 = new double[Sq];
+				matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
+
+				double statInt = 0.0;
+				for (int j = 0; j < Sq; j++) {
+					statInt += betaInt[i][j] * Stemp3[j];
+				}
+
+				if (isnan(statInt) || statInt <= 0.0) {
+					PvalInt[i] = NAN;
+				}
+				else {
+					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
+				}
+
+				double statJoint = statM + statInt;
+				if (isnan(statJoint) || statJoint <= 0.0) {
+					PvalJoint[i] = NAN;
+				}
+				else {
+					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+				}
+
+
+				delete[] S2TransS2;
+				delete[] S2TransR;
+				delete[] S2DS2;
+				delete[] Stemp2;
+				delete[] Stemp3;
+				delete[] InvVarbetaint;
+			}
+		} // end of if robust == 1
+
+
+
+		for (int i = 0; i < stream_snps; i++) {
+			oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+			for (int ii = 0; ii < Sq; ii++) {
+				 oss << betaInt[i][ii] << "\t";
+			}
+
+			for (int ii = 0; ii < Sq; ii++) {
+				for (int jj = 0; jj < Sq; jj++) {
+					oss << VarbetaInt[i][ii * Sq + jj] << "\t";
+				}
+			}
+			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+		}
+
+
+
+		delete[] ZGStR;
+		delete[] ZGStZGS;
+		delete[] ZGSR2tZGS;
+
+		delete[] betaM;
+		delete[] VarbetaM;
+		for (int i = 0; i < stream_snps; i++) {
+			delete[] betaInt[i];
+			delete[] VarbetaInt[i];
+		}
+		delete[] betaInt;
+		delete[] VarbetaInt;
+		delete[] PvalM;
+		delete[] PvalInt;
+		delete[] PvalJoint;
+		AF.clear();
+
+
+		if ((variant_index % 10000 == 0) || snploop == end + 1) {
+			results << oss.str();
+			oss.str(std::string());
+			oss.clear();
+			variant_index = 0;
+		}
 	} // end of snploop 
 
 

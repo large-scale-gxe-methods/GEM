@@ -361,6 +361,7 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 
 void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int thread_num, Bgen test) {
 
+	omp_set_num_threads(1);
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = "gem_bin_" + std::to_string(thread_num) + ".tmp";

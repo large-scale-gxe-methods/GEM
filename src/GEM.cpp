@@ -420,7 +420,7 @@ int main(int argc, char* argv[]) {
 
 
 	// Identifying the start position of each BGEN variant block for parallizing.
-	cout << "Detected " << boost::thread::physical_concurrency() << " available thread(s). Using " << cmd.threads << " for multithreading..." << endl;
+	cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s). Using " << cmd.threads << " for multithreading..." << endl;
 	cout << "Dividing BGEN file into " << cmd.threads << " blocks..." << endl;
 
 	vector<int> Mbgen_begin(cmd.threads);

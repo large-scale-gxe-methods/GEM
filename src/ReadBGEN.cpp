@@ -1098,7 +1098,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 
 	// Close files
-	//results.close();
+	results.close();
 	fclose(fin3);
 
 	auto end_time = std::chrono::high_resolution_clock::now();

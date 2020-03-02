@@ -1,4 +1,8 @@
-# GEM
+# GEM  
+
+Gene-Environment interaction analysis for Millions of samples  
+
+<br />
 
 ## Contents
 - [Installation](#installation)

@@ -7,6 +7,7 @@
 
 <br />
 <br />
+<br />
 
 ## Installation  
 Dependencies:  
@@ -26,13 +27,14 @@ To install GEM, run the following lines of code.
 
 <br />
 <br />
+<br />
 
 ## Usage
 
 ### Running GEM
 
 1. [Command Line Options](#command-line-options)  
-1. [Parameter File Format](#parameter-file-format)
+1. [Input Files](#input-files)
 1. [Output File Format](#output-file-format)
 1. [Examples](#examples)
 
@@ -70,11 +72,20 @@ For a list of options, use ```./GEM --help```.
 
 <br /> 
 
-#### Parameter File Format  
+#### Input Files
 
-At minimum, GEM requires a parameter file (.param) as input.  
-For an example of the parameter file format, see the [.param](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/GEM_Input.param) file example.  
+* ##### Parameter File Format (Required)
+    At minimum, GEM requires a parameter file (.param) as input.  
+    For an example of the parameter file format, see the [.param](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/GEM_Input.param) file example.  
 
+* ##### Genotype Files
+    Currently, GEM can only process v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+    Future updates will allow different genotype files as input.  
+
+* ##### .sample Files
+    A .sample file is required when the .bgen file does not contain sample identifiers.  
+    Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
+    
 <br /> 
 
 #### Output File Format  
@@ -87,7 +98,7 @@ Below are details of the column header in the output file.
 SNPID   - The SNP identifier.
 rsID    - The reference identifier of the SNP.
 CHR     - The chromosome of the SNP.
-POS     - The position of the SNP in its CHR.
+POS     - The position of the SNP of its CHR.
 Allele1 - The reference allele (REF) assuming that the REF allele is first.
 Allele2 - The alternative allele (ALT) assuming that the ALT allele is second.
 AF      - The allele frequency of the ALT allele.
@@ -121,18 +132,19 @@ The results should look like the following output file [example.out](https://git
 <br />
 <br />
 
-To exclude variants with minor allele frequency (MAF) < 0.1, use the --maf parameter.
+To exclude variants with minor allele frequency (MAF) < 0.2, use the --maf parameter.
 ```
-./GEM --param ../example/GEM_Input.param --maf 0.1
+./GEM --param ../example/GEM_Input.param --maf 0.2
 ```
 
 <br />
 
 To spawn 3 threads for multithreading, use the --threads parameter
 ```
-./GEM --param ../example/GEM_Input.param --maf 0.1 --threads 3
+./GEM --param ../example/GEM_Input.param --maf 0.2 --threads 3
 ```
 
+<br />
 <br />
 <br />
 

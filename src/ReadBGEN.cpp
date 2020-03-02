@@ -11,7 +11,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	// Ensure genotype file contains BGEN extension
 	string genopath(genofile);
 	if (genopath.substr(genopath.length() - 5, 5) != ".bgen") {
-		cout << genopath << " is not a .bgen file. Currently only supporting genotype files in BGEN format. \n\n";
+		cout << "\nError: " << genopath << " is not a .bgen file. Currently only supporting genotype files in BGEN format. \n\n";
 		exit(1);
 	}
 
@@ -22,7 +22,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	***************************************************************/
 	fin = fopen(genofile, "rb");
 	if (fin == 0) {
-		cerr << "BGEN file could not be opened." << endl << endl;
+		cerr << "\nError: BGEN file could not be opened.\n\n";
 		exit(1);
 	}
 
@@ -76,7 +76,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 		uint LS1;  fread(&LS1,  4, 1, bgen.fin); // std::cout << "LS1: " << LS1 << std::endl; // LS1 + L_H <= offset
 		uint Nrow; fread(&Nrow, 4, 1, bgen.fin); // cout << "Nrow: " << Nrow << " " << std::flush;
 		if (Nrow != bgen.Nbgen) {
-			cerr << "\n ERROR: Nrow = " << Nrow << " does not match Nbgen = " << bgen.Nbgen << "\n\n";
+			cerr << "\nERROR: Nrow = " << Nrow << " does not match Nbgen = " << bgen.Nbgen << "\n\n";
 			exit(1);
 		}
 
@@ -115,7 +115,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 	else {
 
 		if (bgen.SampleIdentifiers == 0 && samplefile[0] == '\0') {
-			cerr << "\n Error: BGEN file does not contain sample identifiers (SampleIdentifiers == 0). A .sample file is required. \n"
+			cerr << "\nError: BGEN file does not contain sample identifiers (SampleIdentifiers == 0). A .sample file is required. \n"
 				<< "          See https://www.well.ox.ac.uk/~gav/qctool/documentation/sample_file_formats.html for .sample file format. \n\n";
 			exit(1);
 		}
@@ -125,7 +125,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 		fIDMat.open(samplefile);
 
 		if (!fIDMat.is_open()) {
-			cerr << "\n Error: Sample file could not be opened." << endl << endl;
+			cerr << "\nError: Sample file could not be opened." << endl << endl;
 			exit(1);
 		}
 
@@ -175,7 +175,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 
 
 	if (samSize == 0) {
-		cerr << "\n Error: Sample size changed from" << samSize + genoUnMatchID.size() << " to " << samSize 
+		cerr << "\nError: Sample size changed from" << samSize + genoUnMatchID.size() << " to " << samSize 
 			 << "         Check if sample IDs are consistent across files. \n\n";
 		exit(1);
 	}
@@ -298,7 +298,7 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 			 ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 			 if (LKnum != 2) {
-				 cerr << "ERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n";
+				 cerr << "\nError: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
 				 exit(1);
 			 }
 		 }
@@ -446,7 +446,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			if (Layout == 1) {
 				uint Nrow;  fread(&Nrow, 4, 1, fin3); // cout << "Nrow: " << Nrow << " " << std::flush;  
 				if (Nrow != Nbgen) {
-					cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << "\n\n";
+					cerr << "\nError: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << "\n\n";
 					exit(1);
 				}
 			}
@@ -491,7 +491,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			if (Layout == 2) {
 				ushort LKnum;  fread(&LKnum, 2, 1, fin3); // this is for Layout = 2, Lnum = 2 is Layout = 1
 				if (LKnum != 2) {
-					cerr << "ERROR: Non-bi-allelic variant found: " << LKnum << " alleles \n\n";
+					cerr << "\nError: Non-bi-allelic variant found: " << LKnum << " alleles \n\n";
 					exit(1);
 				}
 			}
@@ -528,7 +528,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uLongf destLen = 6 * Nbgen;
 
 				if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen) != Z_OK || destLen != 6 * Nbgen) {
-					cerr << "ERROR: uncompress() failed\n\n";
+					cerr << "\nError: uncompress() failed\n\n";
 					exit(1);
 				}
 
@@ -607,7 +607,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 				if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen - 4) != Z_OK || destLen != DLen) {
 					cout << "destLen: " << destLen << " " << zLen - 4 << "\n\n";
-					cerr << "ERROR: uncompress() failed\n";
+					cerr << "\nError: uncompress() failed\n";
 					exit(1);
 				}
 
@@ -616,7 +616,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uchar* bufAt = &shortBuf[0];
 				uint N = bufAt[0] | (bufAt[1] << 8) | (bufAt[2] << 16) | (bufAt[3] << 24); bufAt += 4;
 				if (N != Nbgen) {
-					cerr << "ERROR: " << "snpName " << " has N = " << N << " (mismatch with header block)\n\n";
+					cerr << "\nError: " << "snpName " << " has N = " << N << " (mismatch with header block)\n\n";
 					exit(1);
 				}
 
@@ -624,21 +624,21 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 				uint K = bufAt[0] | (bufAt[1] << 8); bufAt += 2;
 				if (K != 2U) {
-					cout << "\n WARNING: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
+					cout << "\nError: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
 					exit(1);
 				}
 
 
 				uint Pmin = *bufAt; bufAt++;
 				if (Pmin > 2U) {
-					cerr << "ERROR: " << snpID << " has minimum ploidy = " << Pmin << ". Currently unsupported. \n\n";
+					cerr << "\nError: " << snpID << " has minimum ploidy = " << Pmin << ". Currently unsupported. \n\n";
 					exit(1);
 				}
 
 
 				uint Pmax = *bufAt; bufAt++;
 				if (Pmax > 2U) {
-					cerr << "ERROR: " << snpID << " has maximum ploidy = " << Pmax << ". Currently unsupported. \n\n";
+					cerr << "\nError: " << snpID << " has maximum ploidy = " << Pmax << ". Currently unsupported. \n\n";
 					exit(1);
 				}
 
@@ -653,7 +653,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 					 ploidy_and_missing_info[i] = ploidyMiss;
 
 					if (ploidyMiss > 2U) {
-						std::cerr << "ERROR: " << snpID << " has ploidy/missingness byte = " << ploidyMiss
+						std::cerr << "\nError: " << snpID << " has ploidy/missingness byte = " << ploidyMiss
 							<< " (not 2) \n\n";
 						exit(1);
 					}
@@ -674,7 +674,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uint Phased = *bufAt; bufAt++;
 				if (Phased != 0U && Phased != 1U) {
 					//if(Phased == 1U){ cerr << "\nERROR: Phased data is not currently supported by GEM.\n"; exit(1);}
-					cerr << "\nERROR: " << snpID << " has Phased = " << Phased << ". Must be 0 or 1. \n"
+					cerr << "\nError: " << snpID << " has Phased = " << Phased << ". Must be 0 or 1. \n"
 						<< "       See https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html for more details. \n\n";
 					exit(1);
 				}
@@ -682,7 +682,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uint B = *bufAt; bufAt++;
 				uint Bbits = std::pow(2, B);
 				if ((B != 8U) && (B != 16U) && (B != 24U) && (B != 32U)) {
-					std::cerr << "ERROR: " << "snpName " << " has B = " << B << " (not divisible by 8)\n\n";
+					std::cerr << "\nError: " << "snpName " << " has B = " << B << " (not divisible by 8)\n\n";
 					exit(1);
 				}
 

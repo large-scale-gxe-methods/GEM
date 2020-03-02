@@ -16,9 +16,9 @@ void ReadParameters(char *paramfile, char *genofile, char *phenofile, char *samp
   char tmp[300];
 
   fparams = fopen(paramfile, "rb");
-  if (fparams == NULL) {
-    cout << "Cannot open parameter file " << paramfile << endl;
-    return;
+  if (fparams == 0) {
+    cout << "\nError: Cannot open parameter file " << paramfile << "\n\n";
+    exit(1);
   }
 
   while (!feof(fparams)) {

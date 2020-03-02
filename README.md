@@ -3,10 +3,8 @@
 ## Contents
 - [Installation](#installation)
 - [Usage](#usage)
-- [Liscense](#liscense)
+- [License](#license)
 
-<br />
-<br />
 <br />
 
 ## Installation  
@@ -148,7 +146,7 @@ To spawn 3 threads for multithreading, use the --threads parameter
 <br />
 <br />
 
-## Liscense 
+## License 
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples

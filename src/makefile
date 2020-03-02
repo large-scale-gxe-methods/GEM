@@ -1,6 +1,6 @@
 CC=g++
 OBJECTS= MatrixUtils.o ReadParameters.o TimeUtils.o ReadBGEN.o GEM.o
-LIBS= -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -fopenmp -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
+LIBS= -L /opt/intel/mkl/lib/intel64 -lboost_iostreams -lz -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
 
 
 #targets
@@ -21,7 +21,7 @@ ReadBGEN.o: ReadBGEN.cpp
 	$(CC) -c -std=c++11 ReadBGEN.cpp
 
 GEM.o: GEM.cpp
-	$(CC) -std=c++11 -c -fopenmp GEM.cpp
+	$(CC) -std=c++11 -c GEM.cpp
 
 #clean
 clean:

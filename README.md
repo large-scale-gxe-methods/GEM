@@ -76,15 +76,15 @@ For a list of options, use ```./GEM --help```.
 
 #### Input Files
 
-* ##### Parameter File Format (Required)
+* ##### Parameter File (Required)
     At minimum, GEM requires a parameter file (.param) as input.  
     For an example of the parameter file format, see the [.param](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/GEM_Input.param) file example.  
 
-* ##### Genotype Files
-    Currently, GEM can only process v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+* ##### Genotype File
+    Currently, GEM can only support v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
     Future updates will allow different genotype files as input.  
 
-* ##### .sample Files
+* ##### Sample File
     A .sample file is required when the .bgen file does not contain sample identifiers.  
     Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
     

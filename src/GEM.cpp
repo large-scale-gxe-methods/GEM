@@ -484,14 +484,16 @@ int main(int argc, char* argv[]) {
 	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "AF" << "\t" << "Beta_Main" << "\t" << "Var_Beta_Main" << "\t";
 	for (int i = 1; i <= Sq; i++) {
 		results << "Beta_Interaction" << "_" << i << "\t";
-
-		for (int i = 1; i <= Sq; i++) {
-			for (int j = 1; j <= Sq; j++) {
-				results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
-			}
-		}
-		results << "P_Value_Main" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
 	}
+
+	for (int i = 1; i <= Sq; i++) {
+		 for (int j = 1; j <= Sq; j++) {
+			  results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+		 }
+	}
+		
+	results << "P_Value_Main" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+
 
 	for (int i = 0; i < cmd.threads; i++) {
 		std::string threadOutputFile = "gem_bin_" + std::to_string(i) + ".tmp";

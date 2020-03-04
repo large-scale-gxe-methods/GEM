@@ -13,7 +13,7 @@ ROBUST  // 0 for non-robust analysis, 1 for robust analysis
 STREAM_SNPS  // SNP numbers for each GWAS analysis
 20
 NUM_OF_INTER_COVARIATE  // Number of interactive covariate data columns with Geno (1 means the first column of covariate data, 2 means the first two selected columns, ...)
-1
+3
 LOGISTIC_CONVERG_TOL  // Convergence tolerance for logistic regression
 0.000001
 DELIMINATOR
@@ -25,4 +25,4 @@ PHENO_FILE_PATH  // Path of pheno data file
 SAMPLE_FILE_PATH // Path of sample file. Executed only when bgen file does not provide sample order. Format follows UK BioBank.
 
 OUTPUT_PATH // Path of output file
-../example/my_example.out
+my_example.out

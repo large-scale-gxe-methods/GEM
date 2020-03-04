@@ -107,14 +107,14 @@ AF      - The allele frequency of the ALT allele.
 
 
 ### Beta and Variance
-Beta_Main     - The beta value for the main effect
-Var_Beta_Main - The variance of the main effect
+Beta_Main     - The coefficient estimate for the marginal genetic effect
+Var_Beta_Main - The variance associated with the marginal genetic effect estimate
 
 To complete..
 
 
 ### P-values
-P_Value_Main        - Main effect p-value
+P_Value_Main        - Marginal genetic effect p-value
 P_Value_Interaction - Interaction effect p-value
 P_Value_Joint       - Joint p-value
 ```

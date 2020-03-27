@@ -32,24 +32,32 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
 
 	// First four bytes (offset)
-	fread(&offset, 4, 1, fin); cout << "offset: " << offset << '\n';
+	fread(&offset, 4, 1, fin);
 	
 
 	// The header block
-	uint L_H;      fread(&L_H, 4, 1, fin);   cout << "L_H: \n";
-	fread(&Mbgen, 4, 1, fin); cout << "BGEN snpBlocks (Mbgen): " << Mbgen << '\n'; assert(Mbgen != 0);
-	fread(&Nbgen, 4, 1, fin); cout << "BGEN samples (Nbgen): " << Nbgen << '\n';
+	uint L_H;      fread(&L_H, 4, 1, fin);
+	fread(&Mbgen, 4, 1, fin); cout << "Number of variants: " << Mbgen << '\n'; assert(Mbgen != 0);
+	fread(&Nbgen, 4, 1, fin); cout << "Number of samples: " << Nbgen << '\n';
 	char magic[5]; fread(magic, 1, 4, fin); magic[4] = '\0';  //cout << "magic bytes: " << string(magic) << endl;
 	fseek(fin, L_H - 20, SEEK_CUR);                           //cout << "skipping L_H-20 = " << L_H-20 << " bytes (free data area)" << endl;
 	uint flags;    fread(&flags, 4, 1, fin);                  //cout << "flags: " << flags << endl;
 
 
 	// The header block - flag definitions
-	CompressedSNPBlocks = flags & 3; cout << "CompressedSNPBlocks: " << CompressedSNPBlocks << '\n';
-	assert(CompressedSNPBlocks == 1); // REQUIRE CompressedSNPBlocks==1
+	CompressedSNPBlocks = flags & 3; cout << "Genotype Block Compression Type: ";
+	switch (CompressedSNPBlocks) {
+	case 1:
+		cout << "zlib";
+	case 2:
+		cout << "\nERROR: ZSTD compression is not supported.\n\n";
+		exit(1);
+	default:
+		cout << "\nERROR: SNP block must be compressed using zlib.\n\n";
+	}
 	Layout = (flags >> 2) & 0xf; cout << "Layout: " << Layout << '\n';
 	assert(Layout == 1 || Layout == 2); // REQUIRE Layout==1 or Layout==2
-	SampleIdentifiers = flags >> 31; cout << "SampleIdentifiers: " << SampleIdentifiers << '\n';
+	SampleIdentifiers = flags >> 31; cout << "Sample Identifiers Present: ";  SampleIdentifiers == 0 ? cout << "FALSE \n" : cout << "TRUE \n";
 
 
 }
@@ -88,7 +96,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 			 // IDMatching
 			 string strtmp(samID);
 			 int itmp = k;
-
 			 if (phenomap.find(strtmp) != phenomap.end()) {
 				auto tmp_valvec = phenomap[strtmp];
 				if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
@@ -367,6 +374,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	std::ofstream results(output, std::ofstream::binary);
 	std::ostringstream oss;
 
+
 	vector <uchar> shortBuf;
 	uint maxLA = 65536;
 	uint maxLB = 65536;
@@ -379,15 +387,18 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	string physpos_tmp;
 
 	int Sq = test.Sq;
-	int phenoType   = test.phenoTyp;
-	int robust      = test.robust;
-	int samSize     = test.new_samSize;
-	int numSelCol   = test.numSelCol;
-	int stream_snps = test.stream_snps;
-	double MAF      = test.maf;
-	double sigma2   = test.sigma2;
-	double* resid   = test.resid;
-	double* XinvXTX = test.XinvXTX;
+	int intSq = test.numIntSelCol;
+	int intSq1 = intSq + 1;
+	int expSq        = test.numExpSelCol;
+	int phenoType    = test.phenoTyp;
+	int robust       = test.robust;
+	int samSize      = test.new_samSize;
+	int numSelCol    = test.numSelCol;
+	int stream_snps  = test.stream_snps;
+	double MAF       = test.maf;
+	double sigma2    = test.sigma2;
+	double* resid    = test.resid;
+	double* XinvXTX  = test.XinvXTX;
 
 	uint Nbgen  = test.Nbgen;
 	uint Layout = test.Layout;
@@ -397,12 +408,14 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 	double* covX = test.covX;
 
-	vector <double> ZGSvec(samSize * (1 + Sq) * stream_snps);
+	vector <double> ZGSvec(samSize *   (1 + Sq) * stream_snps);
 	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
+
+
+
 	vector <double> WZGSvec(samSize * (1 + Sq) * stream_snps);
-
-
 	double* WZGS = &WZGSvec[0];
+
 	int Sq1 = Sq + 1;
 	
 	
@@ -738,9 +751,9 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 							dosage = 2 * (1 - p11 - p10) + p10;
 						}
 
+						
 						int tmp2 = idx_k + tmp1;
 						AF[stream_i] += dosage;
-
 						if (phenoType == 1) {
 							ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
 						}
@@ -849,13 +862,9 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			exit(1);
 		}
 
-
 		// transpose(ZGSR2) * ZGS
 		double* ZGSR2tZGS = new double[ZGS_col * ZGS_col];
 		if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
-
-
-
 
 
 		double*  betaM      = new double[stream_snps];
@@ -866,8 +875,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		double*  PvalInt    = new double[stream_snps];
 		double*  PvalJoint  = new double[stream_snps];
 		boost::math::chi_squared chisq_dist_M(1);
-		boost::math::chi_squared chisq_dist_Int(Sq);
-		boost::math::chi_squared chisq_dist_Joint(1 + Sq);
+		boost::math::chi_squared chisq_dist_Int(expSq);
+		boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 
 
 
@@ -876,42 +885,93 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			for (int i = 0; i < stream_snps; i++) {
 				// initialize dynamic 2D array
-				betaInt[i] = new double[Sq];
-				VarbetaInt[i] = new double[Sq * Sq];
+				betaInt[i] = new double[expSq];
+				VarbetaInt[i] = new double[expSq * expSq];
 
 				// betamain
 				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
 				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 				VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
 
-				double* S2TransS2 = new double[Sq * Sq];
-				double* S2TransR = new double[Sq];
-				double* S2DS2 = new double[Sq * Sq];
-				double* InvVarbetaint = new double[Sq * Sq];
-				for (int ind1 = 0; ind1 < Sq; ind1++) {
-					for (int ind2 = 0; ind2 < Sq; ind2++) {
-						// transpose(Snew2) * Snew2
-						S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-					}
-					//transpose(Snew2) * resid
-					S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
-				}
+
+				//double* S2TransS2     = new double[Sq * Sq];
+			    //double* S2TransR      = new double[Sq];
+				double* InvVarbetaint = new double[expSq * expSq];
+
+
+
+
+				// inv(ZGStZGS[tmp1])
+				double* invZGStZGStmp1 = new double[intSq1 * intSq1];
+				subMatrix(ZGStZGS, invZGStZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
+				matInv(invZGStZGStmp1, intSq1);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col]
+				double* ZGStZGSsGRow = new double[expSq * intSq1];
+				subMatrix(ZGStZGS, ZGStZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
+
+
+
+				/* For S2TransR*/
+				// ZGStR[i * Sq1 + ind1 + 1]
+				double* expZGStR = new double[expSq];
+				subMatrix(ZGStR, expZGStR, expSq, 1, expSq, expSq, (i * Sq1) + intSq1);
+				// ZGStR[i * Sq1]
+				double* int1ZGStR = new double[intSq1];
+				subMatrix(ZGStR, int1ZGStR, intSq1, 1, expSq + intSq, intSq1, (i * Sq1));
+				// ZGStR[i * Sq1] / ZGStZGS[tmp1]
+				double* invZGStmpInt1ZGStR = new double[intSq1];
+				matvecprod(invZGStZGStmp1, int1ZGStR, invZGStmpInt1ZGStR, intSq1, intSq1);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+				double* S2TransRright = new double[expSq];
+				matNmatNprod(ZGStZGSsGRow, invZGStmpInt1ZGStR, S2TransRright, expSq, intSq1, 1);
+				matAdd(expZGStR, S2TransRright, expSq, -1.0);
+
+
+				/* For S2TransS2S2*/
+				double* expS2TransS2 = new double[expSq * expSq];
+				subMatrix(ZGStZGS, expS2TransS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
+				// ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* invZGStmp1IntExpZGStZGS = new double[intSq1 * expSq];
+				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, intSq1, intSq1, expSq);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* S2TransS2right = new double[expSq * expSq];
+				matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, S2TransS2right, expSq, intSq1, expSq);
+				matAdd(expS2TransS2, S2TransS2right, expSq * expSq, -1.0);
+
+			
+				//Old code
+				//for (int ind1 = 0; ind1 < Sq; ind1++) {
+				//	 for (int ind2 = 0; ind2 < Sq; ind2++) {
+				//		  // transpose(Snew2) * Snew2
+				//		  S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+	
+ 			    //   }
+				//	 //transpose(Snew2) * resid
+				//	 S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				//}
+				
+
+
+
 
 				// invert (S2TransS2)
-				matInv(S2TransS2, Sq);
-
+				matInv(expS2TransS2, expSq);
 				// betaInt = invert(S2TransS2) * S2TransR
-				matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
+				matvecprod(expS2TransS2, expZGStR, betaInt[i], expSq, expSq);
 
 				// Inv(S2TransS2) * S2DS2
-				double* Stemp2 = new double[Sq * Sq];
+				double* Stemp2 = new double[expSq * expSq];
 
-				for (int j = 0; j < Sq; j++) {
-					for (int k = 0; k < Sq; k++) {
-						VarbetaInt[i][j * Sq + k] = sigma2 * S2TransS2[j * Sq + k];
-						InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
+				for (int j = 0; j < expSq; j++) {
+					for (int k = 0; k < expSq; k++) {
+						 VarbetaInt[i][j * expSq + k] = sigma2 * expS2TransS2[j * expSq + k];
+						 InvVarbetaint[j * expSq + k] = VarbetaInt[i][j * expSq + k];
 					}
 				}
+
+				
+
+
 
 				// calculating P values
 				double statM = betaM[i] * betaM[i] / VarbetaM[i];
@@ -923,12 +983,12 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				}
 
 				// invert VarbetaInt[i]
-				matInv(InvVarbetaint, Sq);
-				double* Stemp3 = new double[Sq];
-				matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
+				matInv(InvVarbetaint, expSq);
+				double* Stemp3 = new double[expSq];
+				matvecprod(InvVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 
 				double statInt = 0.0;
-				for (int j = 0; j < Sq; j++) {
+				for (int j = 0; j < expSq; j++) {
 					statInt += betaInt[i][j] * Stemp3[j];
 				}
 
@@ -948,12 +1008,26 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 				}
 
-				delete[] S2TransS2;
-				delete[] S2TransR;
-				delete[] S2DS2;
-				delete[]Stemp2;
+
+				//delete[] S2TransS2;
+				//delete[] S2TransR;
+				///delete[] ZGStZGSsGsInt;
+ 				delete[]Stemp2;
 				delete[]Stemp3;
 				delete[]InvVarbetaint;
+				delete[]invZGStZGStmp1;
+				delete[]ZGStZGSsGRow;
+
+				/* For S2TransR*/
+				delete[]expZGStR;
+				delete[]int1ZGStR;
+				delete[]invZGStmpInt1ZGStR;
+				delete[]S2TransRright;
+
+				/* For S2TransS2S2*/
+				delete[]expS2TransS2;
+				delete[]invZGStmp1IntExpZGStZGS;
+				delete[]S2TransS2right;
 			}
 		}
 		else if (robust == 1) {
@@ -968,40 +1042,123 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 				VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
 
-				double* S2TransS2 = new double[Sq * Sq];
-				double* S2TransR = new double[Sq];
-				double* S2DS2 = new double[Sq * Sq];
-				double* InvVarbetaint = new double[Sq * Sq];
+				//double* S2TransS2 = new double[Sq * Sq];
+				//double* S2TransR  = new double[Sq];
+				//double* S2DS2     = new double[Sq * Sq];
+				double* InvVarbetaint = new double[expSq * expSq];
 
-				for (int ind1 = 0; ind1 < Sq; ind1++) {
-					for (int ind2 = 0; ind2 < Sq; ind2++) {
-						// transpose(Snew2) * Snew2
-						S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-						// transpose(Snew2) * D * Snew2
-						S2DS2[ind1 * Sq + ind2] = ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] - ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] + ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1];
-					}
-					//transpose(Snew2) * resid
-					S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
-				}
+
+				// inv(ZGStZGS[tmp1])
+				double* invZGStZGStmp1 = new double[intSq1 * intSq1];
+				subMatrix(ZGStZGS, invZGStZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
+				matInv(invZGStZGStmp1, intSq1);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col]
+				double* ZGStZGSsGRow = new double[expSq * intSq1];
+				subMatrix(ZGStZGS, ZGStZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
+
+
+
+				/* For S2TransR*/
+				// ZGStR[i * Sq1 + ind1 + 1]
+				double* expZGStR = new double[expSq];
+				subMatrix(ZGStR, expZGStR, expSq, 1, expSq, expSq, (i* Sq1) + intSq1);
+				// ZGStR[i * Sq1]
+				double* int1ZGStR = new double[intSq1];
+				subMatrix(ZGStR, int1ZGStR, intSq1, 1, expSq + intSq, intSq1, (i* Sq1));
+				// ZGStR[i * Sq1] / ZGStZGS[tmp1]
+				double* invZGStmpInt1ZGStR = new double[intSq1];
+				matvecprod(invZGStZGStmp1, int1ZGStR, invZGStmpInt1ZGStR, intSq1, intSq1);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+				double* S2TransRright = new double[expSq];
+				matNmatNprod(ZGStZGSsGRow, invZGStmpInt1ZGStR, S2TransRright, expSq, intSq1, 1);
+				matAdd(expZGStR, S2TransRright, expSq, -1.0);
+
+
+				/* For S2TransS2S2*/
+				double* expS2TransS2 = new double[expSq * expSq];
+				subMatrix(ZGStZGS, expS2TransS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
+				// ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* invZGStmp1IntExpZGStZGS = new double[intSq1 * expSq];
+				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, intSq1, intSq1, expSq);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* S2TransS2right = new double[expSq * expSq];
+				matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, S2TransS2right, expSq, intSq1, expSq);
+				matAdd(expS2TransS2, S2TransS2right, expSq* expSq, -1.0);
+
+
+
+
+				/* For S2DS2*/
+				double* expS2DS2 = new double[expSq * expSq];
+				subMatrix(ZGSR2tZGS, expS2DS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
+				// ZGSR2tZGS[tmp1 + ind2 + 1]
+				double* intExpZGSR2tZGS = new double[expSq * intSq1];
+				subMatrix(ZGSR2tZGS, intExpZGSR2tZGS, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
+				// ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col]
+				double* ZGSR2tZGSsGRow = new double[expSq * intSq1];
+				subMatrix(ZGSR2tZGS, ZGSR2tZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
+				// ZGSR2tZGS[tmp1]
+				double* ZGSR2tZGStmp1 = new double[intSq1 * intSq1];
+				subMatrix(ZGSR2tZGS, ZGSR2tZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
+
+
+
+				// ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* invZGStmp1IntExpZGSR2tZGS = new double[intSq1 * expSq];
+				matTmatprod(invZGStZGStmp1, intExpZGSR2tZGS, invZGStmp1IntExpZGSR2tZGS, intSq1, intSq1, expSq);
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* S2DS2second = new double[expSq * expSq];
+				matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGSR2tZGS, S2DS2second, expSq, intSq1, expSq);
+				// ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
+				double* S2DS2third = new double[expSq * expSq];
+				matNmatNprod(ZGSR2tZGSsGRow, invZGStmp1IntExpZGStZGS, S2DS2third, expSq, intSq1, expSq);
+
+				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1]
+				double* invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
+				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
+				double* ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
+				matNmatNprod(ZGSR2tZGStmp1, invZGStZGStmp1_intExpZGStZGS, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
+				double* S2DS2Forthtemp = new double[intSq1 * intSq1];
+				matNmatNprod(invZGStZGStmp1, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, S2DS2Forthtemp, intSq1, intSq1, expSq);
+				double* S2DS2forth = new double[expSq * expSq];
+				matNmatNprod(ZGStZGSsGRow, S2DS2Forthtemp, S2DS2forth, expSq, intSq1, expSq);
+				matAdd(expS2DS2, S2DS2second, expSq * expSq, -1.0);
+				matAdd(expS2DS2, S2DS2third,  expSq * expSq, -1.0);
+				matAdd(expS2DS2, S2DS2forth,  expSq * expSq, 1.0);
+
+
+				// Old code
+				//for (int ind1 = 0; ind1 < Sq; ind1++) {
+				//	for (int ind2 = 0; ind2 < Sq; ind2++) {
+				//		// transpose(Snew2) * Snew2
+				//		S2TransS2[ind1 * Sq + ind2] = ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
+				//		// transpose(Snew2) * D * Snew2
+				//	S2DS2[ind1 * Sq + ind2] = ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col + ind2 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] - ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] + ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1];
+				//	}
+				//	//transpose(Snew2) * resid
+				//	S2TransR[ind1] = ZGStR[i * Sq1 + ind1 + 1] - ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStR[i * Sq1] / ZGStZGS[tmp1];
+				//}
+
+
 
 				// invert (S2TransS2)
-				matInv(S2TransS2, Sq);
+				matInv(expS2TransS2, expSq);
 
 				// betaInt = invert(S2TransS2) * S2TransR
-				matvecprod(S2TransS2, S2TransR, betaInt[i], Sq, Sq);
+				matvecprod(expS2TransS2, expZGStR, betaInt[i], expSq, expSq);
 
 				// Inv(S2TransS2) * S2DS2
-				double* Stemp2 = new double[Sq * Sq];
-				matmatprod(S2TransS2, S2DS2, Stemp2, Sq, Sq, Sq);
+				double* Stemp2 = new double[expSq * expSq];
+				matmatprod(expS2TransS2, expS2DS2, Stemp2, expSq, expSq, expSq);
 
 				// Stemp2 * Inv(S2TransS2)
-				matNmatNprod(Stemp2, S2TransS2, VarbetaInt[i], Sq, Sq, Sq);
+				matNmatNprod(Stemp2, expS2TransS2, VarbetaInt[i], expSq, expSq, expSq);
 
 
 
-				for (int j = 0; j < Sq; j++) {
-					for (int k = 0; k < Sq; k++) {
-						InvVarbetaint[j * Sq + k] = VarbetaInt[i][j * Sq + k];
+				for (int j = 0; j < expSq; j++) {
+					for (int k = 0; k < expSq; k++) {
+						InvVarbetaint[j * expSq + k] = VarbetaInt[i][j * expSq + k];
 					}
 				}
 
@@ -1017,12 +1174,12 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 
 				// invert VarbetaInt[i]
-				matInv(InvVarbetaint, Sq);
-				double* Stemp3 = new double[Sq];
-				matvecprod(InvVarbetaint, betaInt[i], Stemp3, Sq, Sq);
+				matInv(InvVarbetaint, expSq);
+				double* Stemp3 = new double[expSq];
+				matvecprod(InvVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 
 				double statInt = 0.0;
-				for (int j = 0; j < Sq; j++) {
+				for (int j = 0; j < expSq; j++) {
 					statInt += betaInt[i][j] * Stemp3[j];
 				}
 
@@ -1042,12 +1199,38 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				}
 
 
-				delete[] S2TransS2;
-				delete[] S2TransR;
-				delete[] S2DS2;
-				delete[] Stemp2;
-				delete[] Stemp3;
-				delete[] InvVarbetaint;
+				//delete[] S2TransS2;
+				//delete[] S2TransR;
+				///delete[] ZGStZGSsGsInt;
+				delete[]Stemp2;
+				delete[]Stemp3;
+				delete[]InvVarbetaint;
+				delete[]invZGStZGStmp1;
+				delete[]ZGStZGSsGRow;
+
+				/* For S2TransR*/
+				delete[]expZGStR;
+				delete[]int1ZGStR;
+				delete[]invZGStmpInt1ZGStR;
+				delete[]S2TransRright;
+
+				/* For S2TransS2S2*/
+				delete[]expS2TransS2;
+				delete[]invZGStmp1IntExpZGStZGS;
+				delete[]S2TransS2right;
+
+
+				/* For S2DS2*/
+				delete[]expS2DS2;
+				delete[]intExpZGSR2tZGS;
+				delete[]ZGSR2tZGSsGRow;
+				delete[]ZGSR2tZGStmp1;
+				delete[]invZGStmp1IntExpZGSR2tZGS;
+				delete[]S2DS2second;
+				delete[]S2DS2third;
+				delete[]invZGStZGStmp1_intExpZGStZGS;
+				delete[]ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS;
+				delete[]S2DS2forth;
 			}
 		} // end of if robust == 1
 
@@ -1055,13 +1238,13 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 		for (int i = 0; i < stream_snps; i++) {
 			oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
-			for (int ii = 0; ii < Sq; ii++) {
+			for (int ii = 0; ii < expSq; ii++) {
 				 oss << betaInt[i][ii] << "\t";
 			}
 
-			for (int ii = 0; ii < Sq; ii++) {
-				for (int jj = 0; jj < Sq; jj++) {
-					oss << VarbetaInt[i][ii * Sq + jj] << "\t";
+			for (int ii = 0; ii < expSq; ii++) {
+				for (int jj = 0; jj < expSq; jj++) {
+					oss << VarbetaInt[i][ii * expSq + jj] << "\t";
 				}
 			}
 			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';

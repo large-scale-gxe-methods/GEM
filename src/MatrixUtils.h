@@ -21,4 +21,11 @@ void matInv(double* A, int N);
 
 void matAdd(double* A, double* B, int N, double alpha);
 
+void subMatrix(double* A, double* u, int M, int N, int NrowA, int NrowB, int start);
+
+void SmatTmatprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int startB);
+
+void SmatNmatNprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int startA);
+
+void matSvecprod(double* A, double* v, double* u, int Nrow, int Ncol, int StartB);
 #endif

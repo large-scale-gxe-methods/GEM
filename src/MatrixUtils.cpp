@@ -24,6 +24,10 @@ extern "C"{
 
  void daxpy_(const int* N, double* DA, double* DX, const int* INCX, 
              double* DY, const int* INCY);
+
+ void dlacpy_(char* uplo, const int* m, const int* n, double* a,
+              const int* lda, double* b, const int* ldb);
+
 } 
 
 void initvec(double* v, int N){
@@ -138,4 +142,53 @@ void matAdd(double* A, double* B, int N, double alpha) {
   int length = N;
   int incOne = 1;
   daxpy_(&length, &alpha, B, &incOne, A, &incOne); 
+}
+
+
+
+void subMatrix(double* A, double* u, int M, int N, int NrowA, int NrowB, int start) {
+    char uplo = 'A';
+    dlacpy_(&uplo, &M, &N, &A[start], &NrowA, u, &NrowB);
+}
+
+
+
+
+void SmatTmatprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int startB) {
+    double alpha = 1.0, beta = 0.0;
+    char no = 'N', tr = 'T';
+    int k = Nrow, lda = Ncol, incx = NrowB, incy = Ncol;
+    double* tmp = new double[Ncol * NcolB];
+    initvec(tmp, Ncol * NcolB);
+    dgemm_(&no, &tr, &m, &n, &k, &alpha, A, &lda, v+startB, &incx, &beta, tmp, &incy);
+    for (int i = 0; i < Ncol * NcolB; ++i) {
+        u[i] = tmp[i];
+    }
+    delete[] tmp;
+}
+
+void SmatNmatNprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int StartA) {
+    double alpha = 1.0, beta = 0.0;
+    char no = 'N', tr = 'T';
+    int k = Ncol, lda = Nrow, incx = NrowB, incy = m;
+    double* tmp = new double[NcolB * NcolB];
+    initvec(tmp, NcolB * NcolB);
+    dgemm_(&no, &no, &m, &n, &k, &alpha, A+StartA, &lda, v, &incx, &beta, tmp, &incy);
+    for (int i = 0; i < NcolB * NcolB; ++i) {
+        u[i] = tmp[i];
+    }
+    delete[] tmp;
+}
+
+void matSvecprod(double* A, double* v, double* u, int Nrow, int Ncol, int StartV) {
+    double alpha = 1.0, beta = 0.0;
+    char no = 'N', tr = 'T';
+    int m = Nrow, n = 1, k = Ncol, lda = Ncol, incx = 1, incy = Nrow;
+    double* tmp = new double[Nrow];
+    initvec(tmp, Nrow);
+    dgemm_(&tr, &tr, &m, &n, &k, &alpha, A, &lda, v + StartV, &incx, &beta, tmp, &incy);
+    for (int i = 0; i < Nrow; ++i) {
+        u[i] = tmp[i];
+    }
+    delete[] tmp;
 }

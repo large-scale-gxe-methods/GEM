@@ -41,10 +41,7 @@
 
 int main(int argc, char* argv[]) {
 
-	char paramfile[300];
-	char phenofile[300];
-	char genofile[300];
-	char samplefile[300];
+
 	Time clock;
 
 
@@ -54,43 +51,103 @@ int main(int argc, char* argv[]) {
 
 
 
-
 	/****************************************************
-	  Call subroutine to read parameters from a file
+	 Parameters
 	****************************************************/
-	PARAMETERS prm;
-	strcpy(paramfile, cmd.pFile.c_str());
-	ReadParameters(paramfile, genofile, phenofile, samplefile, &prm);
-
-
-
-
-
-	/****************************************************
-	Parameters
-	****************************************************/
-	// int samSize = prm.samSize;
-	// int IDMatching = prm.IDMatching;
-
 	double exetime = 0;
-	double epsilon = prm.epsilon;
+	double epsilon = cmd.tol;
 
 	int samSize;
 	int phenoCol;
 	int samIDCol;
-	int Sq = prm.Sq;
-	int robust      = prm.robust;
-	int phenoTyp    = prm.phenoTyp;
-	int stream_snps = prm.stream_snps;
-	int numSelCol   = prm.covSelHeaders.size();
+	int robust       = cmd.robust;
+	int phenoTyp     = cmd.phenoType;
+	int stream_snps  = cmd.stream_snps;
+	char delim = cmd.pheno_delim[0];
+	if (delim == '\0') delim = ' ';
 
-	string phenoHeaderName(prm.phenoHeader);
-	string samIDHeaderName(prm.samIDHeader);
-	string output(prm.outputfile);
-
-	vector<int> colSelVec(numSelCol);
+	string phenoHeaderName = cmd.phenoName;
+	string samIDHeaderName = cmd.sampleID;
+	string phenoMissingKey = cmd.missing;
+	string output = cmd.outFile;
+	std::unordered_map<string, int> covHM;
+	std::unordered_map<string, int> intHM;
+	std::unordered_map<string, int> expHM;
 	vector<string> covSelHeadersName;
-	for (int i = 0; i < numSelCol; i++) covSelHeadersName.push_back(prm.covSelHeaders[i]);
+	vector<string> intCovSelHeadersName;
+	vector<string> expCovSelHeadersName;
+
+
+	string expErrorString;
+	int numExpSelCol = cmd.exp.size();
+	for (int i = 0; i < numExpSelCol; i++) {
+
+		expHM[cmd.exp[i]] += 1;
+		if (expHM[cmd.exp[i]] > 1) {
+			expErrorString += cmd.exp[i] + " ";
+			continue;
+		}
+		expCovSelHeadersName.push_back(cmd.exp[i]);
+	}
+	numExpSelCol = expCovSelHeadersName.size();
+
+	if (!expErrorString.empty()) {
+		cout << "WARNING: Exposure " + expErrorString + "is specified more than once.\n \t Removing the duplicate exposure names... \n\n";
+	}
+
+
+
+
+	string intCovErrorString;
+	int numIntSelCol = cmd.icov.size();
+	for (int i = 0; i < numIntSelCol; i++) {
+		if (expHM.find(cmd.icov[i]) != expHM.end()) {
+			cerr << "\nError: Interactive covariate " << cmd.icov[i] << " is specified as an interaction covariate (--int-covar-names) and exposure (--exposure-names)." << "\n\n";
+			exit(1);
+		}
+
+		intHM[cmd.icov[i]] += 1;
+		if (intHM[cmd.icov[i]] > 1) {
+			intCovErrorString += cmd.icov[i] + " ";
+			continue;
+		}
+		intCovSelHeadersName.push_back(cmd.icov[i]);
+	}
+
+	numIntSelCol = intCovSelHeadersName.size();
+	int Sq = numIntSelCol + numExpSelCol;
+
+	if (!intCovErrorString.empty()) {
+		cout << "\nWARNING: Interactive covariates " + intCovErrorString + "is specified more than once.\n \t Removing the duplicate interactive covariate names... \n\n";
+	}
+
+
+
+
+	string covErrorString;
+	int numSelCol = cmd.cov.size();
+	for (int i = 0; i < numSelCol; i++) {
+
+		if (expHM.find(cmd.cov[i]) != expHM.end()) {
+			cerr << "\nError: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and exposure (--exposure-namess)." << "\n\n";
+			exit(1);
+		}
+		if (intHM.find(cmd.cov[i]) != intHM.end()) {
+			cerr << "\nError: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
+			exit(1);
+		}
+		 covHM[cmd.cov[i]] += 1;
+		 if (covHM[cmd.cov[i]] > 1) {
+			 covErrorString += cmd.cov[i] + " ";
+			 continue;
+		 }
+		 covSelHeadersName.push_back(cmd.cov[i]);
+	}
+	numSelCol = covSelHeadersName.size();
+
+	if (!covErrorString.empty()) {
+		cout << "\nWARNING: Covariates " + covErrorString + "is specified more than once.\n \t Removing the duplicate covariates names... \n\n";
+	}
 
 
 
@@ -99,27 +156,88 @@ int main(int argc, char* argv[]) {
 
 
 
+	/****************************************************
+	 Print parameter info
+	****************************************************/
+	cout << "\n*********************************************************\n";
+	cout << "The Selected Phenotype is: " << phenoHeaderName << '\n';
+	cout << "Linear or Binary? "; phenoTyp == 0 ? cout << "Linear \n" : cout << "Binary \n";
+	cout << "Robust or Non-Robust Analysis? "; robust == 0 ? cout << "Non-Robust \n\n" : cout << "Robust \n\n";
+
+	if (numSelCol == 0) {
+		cout << "No Covariates Selected" << "\n";
+	}
+	else {
+		cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
+		cout << "The Selected Covariates are:  ";
+		for (int i = 0; i < numSelCol; i++) {
+			cout << covSelHeadersName[i] << "   ";
+		}
+		cout << "\n";
+	}
+
+	if (numIntSelCol == 0) {
+		cout << "No Interactive Covariates Selected" << "\n";
+	}
+	else {
+		cout << "The Total Number of Selected Interactive Covariates is: " << numIntSelCol << "\n";
+		cout << "The Selected Interactive Covariates are:  ";
+		for (int i = 0; i < numIntSelCol; i++) {
+			cout << intCovSelHeadersName[i] << "   ";
+		}
+		cout << "\n";
+	}
+
+	if (numExpSelCol == 0) {
+		cout << "No Exposures Selected" << "\n";
+	}
+	else {
+		cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
+		cout << "The Selected Exposures are:  ";
+		for (int i = 0; i < numExpSelCol; i++) {
+			cout << expCovSelHeadersName[i] << "   ";
+		}
+		cout << "\n\n";
+	}
+
+	cout << "Minor Allele Frequency Threshold: " << cmd.MAF << "\n";
+	cout << "Number of threads: " << cmd.threads << "\n";
+	cout << "*********************************************************\n";
 
 
 
-	/***************************************************
-	Processing pheno file
-	***************************************************/
+	
+
+	// Rearranging covSelHeaders
+	numSelCol = numSelCol + numIntSelCol + numExpSelCol;
+	vector<int> colSelVec(numSelCol);
+	for (int i = numExpSelCol-1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]);}
+	if (numIntSelCol != 0) {
+		for (int i = numIntSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), intCovSelHeadersName[i]); }
+	}
+	
+
+
+
+	// Start clock
 	auto wall0 = std::chrono::system_clock::now();
 	std::clock_t cpu0 = std::clock();
 
-	string phenoMissingKey(prm.MissingKey);
+	/***************************************************
+	 Reading phenotype file headers
+	***************************************************/
 	std::unordered_map<string, int> colNames;
-	int phenoncols;
-	//  char delim = ' '; // deliminator of pheno data file
-	char delim = prm.delim_pheno[0];
-	if (delim == '\0') delim = ' ';
 
-	// process header line: store column names
-	// and assign corresponding column numbers.
+	// Process header line: store column names and assign corresponding column numbers.
+	string phenopath(cmd.phenoFile);
+	int  phenoncols;
+
 	std::ifstream finph;
-	string phenopath(phenofile);
 	finph.open(phenopath);
+	if (!finph.is_open()) {
+		cerr << "\nError: Cannot open phenotype file. \n\n" << endl;
+	}
+
 	string line;
 	getline(finph, line);
 	std::istringstream issHead(line);
@@ -140,66 +258,66 @@ int main(int argc, char* argv[]) {
 
 	phenoncols = colNames.size();
 	if (colNames.find(phenoHeaderName) == colNames.end()) {
-		cerr << "Pheno header name is wrong.\n";
+		cerr << "\nError: Cannot find phenotype column " << phenoHeaderName << " in phenotype file. \n\n";
 		exit(1);
-	}
-	else
+	} else {
 		phenoCol = colNames[phenoHeaderName];
-	if (colNames.find(samIDHeaderName) == colNames.end()) {
-		cerr << "Sample ID header name is wrong.\n";
-		exit(1);
 	}
-	else
+
+	if (colNames.find(samIDHeaderName) == colNames.end()) {
+		cerr << "\nError: Cannot find sample ID column " << samIDHeaderName << " in phenotype file. \n\n";
+		exit(1);
+	} else {
 		samIDCol = colNames[samIDHeaderName];
+	}
 
 	for (int i = 0; i < numSelCol; i++) {
 		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
-			cerr << "Covariate header name is wrong.\n";
-			exit(i);
+			cerr << "\nError: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
+			exit(1);
 		}
-		else
+		else {
 			colSelVec[i] = colNames[covSelHeadersName[i]];
+		}
+	}
+
+	if (numIntSelCol != 0) {
+		for (int i = 0; i < numIntSelCol; i++) {
+			 if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
+				 cerr << "\nError: Cannot find interactive covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
+				 exit(1);
+			 }
+		}
+	}
+
+	for (int i = 0; i < numExpSelCol; i++) {
+		 if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
+			 cerr << "\nError: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
+			 exit(1);
+		 }
 	}
 
 	// Erase all elements and leaving it with a size of 0.
 	colNames.clear();
 
-	// print out header names and select pheno columns
-	cout << "\n\n*********************************************************\n";
-	cout << "Parameter input file is: " << cmd.pFile << '\n';
-	cout << "The Selected Phenotype Data Header Name is: " << phenoHeaderName << '\n';
-	cout << "Linear or Binary? ";
-	phenoTyp == 0 ? cout << "Linear \n" : cout << "Binary \n";
-	cout << "Robust or Non-Robust Analysis? ";
-	robust == 0 ? cout << "Non-Robust \n" : cout << "Robust \n";
-	cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
-	cout << "The Selected Covariate Column Header Names are:  ";
-	for (int i = 0; i < numSelCol; i++) {
-		cout << covSelHeadersName[i] << "   ";
-	}
-	cout << '\n';
-	cout << "MAF filtering threshold: " << cmd.MAF << endl;
-	//  cout << "Check Missing Values in Pheno Data File And Match of Order Sequence of Sample IDs?\n";
-	//  IDMatching == 0 ? cout << "No Chekcing! \n" : cout << "Yes, Checking Please! \n"; 
+	
+	
 
-	  // count sample size
+
+
+
+	// count sample size
 	int nrows = 0;
 	while (getline(finph, line)) nrows++;
 	samSize = nrows;
-	finph.clear();
+	finph.clear(); 
 	finph.seekg(0, finph.beg);
 	getline(finph, line);
-	cout << "*********************************************************\n";
-
-
-
-
-
-
-
 	cout << "Before ID Matching and checking missing values... \n";
-	cout << "Size of the pheno vector is: " << samSize << " X 1\n";
+	cout << "Size of the phenotype vector is: " << samSize << " X 1\n";
 	cout << "Size of the selected covariate matrix (including first column for interception values) is: " << samSize << " X " << numSelCol + 1 << '\n';
+
+
 	// initialize data matrix
 	vector <double> phenodata(samSize);
 	vector <string> sampleIds(samSize);
@@ -248,7 +366,7 @@ int main(int argc, char* argv[]) {
 		cerr << "Please also check the header line is at the top of the pheno data file! \n";
 		exit(1);
 	}
-	cout << "End of reading pheno and covariate data. \n";
+	cout << "End of reading phenotype and covariate data. \n";
 	cout << "*********************************************************\n";
 
 
@@ -266,8 +384,8 @@ int main(int argc, char* argv[]) {
 	  Conduct Sample IDMatching process if necessary.
 	***************************************************************/
 	Bgen bgen;
-	bgen.processBgenHeaderBlock(genofile);
-	bgen.processBgenSampleBlock(bgen, samplefile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+	bgen.processBgenHeaderBlock(cmd.genofile);
+	bgen.processBgenSampleBlock(bgen, cmd.samplefile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
 
 	sampleIds.clear(); // clear memory
 	phenomap.clear(); // clear phenomap
@@ -405,6 +523,8 @@ int main(int argc, char* argv[]) {
 
 
 	bgen.numSelCol = numSelCol;
+	bgen.numIntSelCol = numIntSelCol;
+	bgen.numExpSelCol = numExpSelCol;
 	bgen.Sq = Sq;
 	bgen.robust = robust;
 	bgen.stream_snps = stream_snps;
@@ -459,7 +579,7 @@ int main(int argc, char* argv[]) {
 	start_time = std::chrono::high_resolution_clock::now();
 	// Create threads
 	for (int i = 0; i < cmd.threads; ++i) {
-		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], genofile, i, boost::ref(bgen)));
+		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], cmd.genofile, i, boost::ref(bgen)));
 	}
 	thread_grp.join_all();
 	cout << "Joining threads... \n";
@@ -482,12 +602,12 @@ int main(int argc, char* argv[]) {
 	start_time = std::chrono::high_resolution_clock::now();
 	std::ofstream results(output, std::ofstream::binary);
 	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "AF" << "\t" << "Beta_Main" << "\t" << "Var_Beta_Main" << "\t";
-	for (int i = 1; i <= Sq; i++) {
+	for (int i = 1; i <= numExpSelCol; i++) {
 		results << "Beta_Interaction" << "_" << i << "\t";
 	}
 
-	for (int i = 1; i <= Sq; i++) {
-		 for (int j = 1; j <= Sq; j++) {
+	for (int i = 1; i <= numExpSelCol; i++) {
+		 for (int j = 1; j <= numExpSelCol; j++) {
 			  results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
 		 }
 	}

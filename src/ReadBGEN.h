@@ -46,6 +46,8 @@ public:
 	double* XinvXTX;
 	double* resid;
 	int numSelCol;
+	int numIntSelCol;
+	int numExpSelCol;
 	int Sq;
 	int samSize;
 	int robust;

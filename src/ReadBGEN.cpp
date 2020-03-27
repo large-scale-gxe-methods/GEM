@@ -49,6 +49,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	switch (CompressedSNPBlocks) {
 	case 1:
 		cout << "zlib";
+		break;
 	case 2:
 		cout << "\nERROR: ZSTD compression is not supported.\n\n";
 		exit(1);

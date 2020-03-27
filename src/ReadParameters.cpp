@@ -353,13 +353,13 @@ void print_help() {
 	cout << "Phenotype File Options: " << endl
 		<< "   --sampleid-name \t Column name in the phenotype file that contains sample identifiers." << endl
 		<< "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest." << endl
-		<< "   --exposure-names \t Column names in the phenotype file that contains the exposures." << endl
-		<< "   --int-covar-names \t Column names in the phenotype file that contains the interaction covariates." << endl
-		<< "   --covar-names \t Column names in the phenotype file that contains the covariates." << endl
+		<< "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
+		<< "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should be included for adjustment (mutually exclusive with --exposure-names)." << endl
+		<< "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
 		<< "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
-		<< "   --robust \t\t 0 indicates non-robust analysis and 1 indicates robust analysis. \n \t\t\t    Default: 0" << endl
+		<< "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
 		<< "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
-		<< "   --delim \t\t Charater specifying how the values in the phenotype file is separated. \n \t\t\t    Default: , (comma-separated)" << endl
+		<< "   --delim \t\t Delimiter separating values in the phenotype file. \n \t\t\t    Default: , (comma-separated)" << endl
 		<< "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl;
 		cout << endl << endl;
 

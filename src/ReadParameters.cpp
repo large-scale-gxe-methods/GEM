@@ -218,7 +218,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	if (out.count("pheno-file")){
 		phenoFile = out["pheno-file"].as<string>();
 	} else {
-		cerr << "\nERROR: Phenotype file (--pheno) is needed. \n\n";
+		cerr << "\nERROR: Phenotype file (--pheno-file) is needed. \n\n";
 		exit(1);
 	}
 	if (out.count("bgen")) {
@@ -345,7 +345,7 @@ void print_help() {
 	cout << "Input File Options: " << endl
 		<< "   --pheno-file \t Path to the phenotype file." << endl
 		<< "   --bgen \t\t Path to the BGEN file." << endl
-		<< "   --sample \t\t Path to the sample file. Required when BGEN file does not contain sample identifiers." << endl
+		<< "   --sample \t\t Path to the sample file. Required when the BGEN file does not contain sample identifiers." << endl
 		<< "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl;
 	cout << endl << endl;
 

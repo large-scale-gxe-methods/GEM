@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 	int numIntSelCol = cmd.icov.size();
 	for (int i = 0; i < numIntSelCol; i++) {
 		if (expHM.find(cmd.icov[i]) != expHM.end()) {
-			cerr << "\nError: Interactive covariate " << cmd.icov[i] << " is specified as an interaction covariate (--int-covar-names) and exposure (--exposure-names)." << "\n\n";
+			cerr << "\nERROR: Interactive covariate " << cmd.icov[i] << " is specified as an interaction covariate (--int-covar-names) and exposure (--exposure-names)." << "\n\n";
 			exit(1);
 		}
 
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 	int Sq = numIntSelCol + numExpSelCol;
 
 	if (!intCovErrorString.empty()) {
-		cout << "\nWARNING: Interactive covariates " + intCovErrorString + "is specified more than once.\n \t Removing the duplicate interactive covariate names... \n\n";
+		cout << "\nWARNING: Interactive covariates " + intCovErrorString + "is specified more than once.\n \t Removing the duplicate interaction covariate names... \n\n";
 	}
 
 
@@ -129,11 +129,11 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < numSelCol; i++) {
 
 		if (expHM.find(cmd.cov[i]) != expHM.end()) {
-			cerr << "\nError: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and exposure (--exposure-namess)." << "\n\n";
+			cerr << "\nERROR: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and exposure (--exposure-names)." << "\n\n";
 			exit(1);
 		}
 		if (intHM.find(cmd.cov[i]) != intHM.end()) {
-			cerr << "\nError: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
+			cerr << "\nERROR: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
 			exit(1);
 		}
 		 covHM[cmd.cov[i]] += 1;
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
 	numSelCol = covSelHeadersName.size();
 
 	if (!covErrorString.empty()) {
-		cout << "\nWARNING: Covariates " + covErrorString + "is specified more than once.\n \t Removing the duplicate covariates names... \n\n";
+		cout << "\nWARNING: Covariates " + covErrorString + "is specified more than once.\n \t Removing the duplicate covariate names... \n\n";
 	}
 
 
@@ -180,8 +180,8 @@ int main(int argc, char* argv[]) {
 		cout << "No Interactive Covariates Selected" << "\n";
 	}
 	else {
-		cout << "The Total Number of Selected Interactive Covariates is: " << numIntSelCol << "\n";
-		cout << "The Selected Interactive Covariates are:  ";
+		cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
+		cout << "The Selected Interaction Covariates are:  ";
 		for (int i = 0; i < numIntSelCol; i++) {
 			cout << intCovSelHeadersName[i] << "   ";
 		}
@@ -235,7 +235,7 @@ int main(int argc, char* argv[]) {
 	std::ifstream finph;
 	finph.open(phenopath);
 	if (!finph.is_open()) {
-		cerr << "\nError: Cannot open phenotype file. \n\n" << endl;
+		cerr << "\nERROR: Cannot open phenotype file. \n\n" << endl;
 	}
 
 	string line;
@@ -258,14 +258,14 @@ int main(int argc, char* argv[]) {
 
 	phenoncols = colNames.size();
 	if (colNames.find(phenoHeaderName) == colNames.end()) {
-		cerr << "\nError: Cannot find phenotype column " << phenoHeaderName << " in phenotype file. \n\n";
+		cerr << "\nERROR: Cannot find phenotype column " << phenoHeaderName << " in phenotype file. \n\n";
 		exit(1);
 	} else {
 		phenoCol = colNames[phenoHeaderName];
 	}
 
 	if (colNames.find(samIDHeaderName) == colNames.end()) {
-		cerr << "\nError: Cannot find sample ID column " << samIDHeaderName << " in phenotype file. \n\n";
+		cerr << "\nERROR: Cannot find sample ID column " << samIDHeaderName << " in phenotype file. \n\n";
 		exit(1);
 	} else {
 		samIDCol = colNames[samIDHeaderName];
@@ -273,7 +273,7 @@ int main(int argc, char* argv[]) {
 
 	for (int i = 0; i < numSelCol; i++) {
 		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
-			cerr << "\nError: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
+			cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
 			exit(1);
 		}
 		else {
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
 	if (numIntSelCol != 0) {
 		for (int i = 0; i < numIntSelCol; i++) {
 			 if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
-				 cerr << "\nError: Cannot find interactive covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
+				 cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
 				 exit(1);
 			 }
 		}
@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
 
 	for (int i = 0; i < numExpSelCol; i++) {
 		 if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
-			 cerr << "\nError: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
+			 cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
 			 exit(1);
 		 }
 	}
@@ -522,7 +522,7 @@ int main(int argc, char* argv[]) {
 
 
 
-	bgen.numSelCol = numSelCol;
+	bgen.numSelCol    = numSelCol;
 	bgen.numIntSelCol = numIntSelCol;
 	bgen.numExpSelCol = numExpSelCol;
 	bgen.Sq = Sq;
@@ -540,20 +540,31 @@ int main(int argc, char* argv[]) {
 
 
 	// Identifying the start position of each BGEN variant block for parallizing.
-	cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s). Using " << cmd.threads << " for multithreading..." << endl;
-	cout << "Dividing BGEN file into " << cmd.threads << " blocks..." << endl;
+	int threads;
+	cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
+	if (bgen.Mbgen < cmd.threads) {
+		threads = bgen.Mbgen;
+		cout << "Number of variants (" << bgen.Mbgen << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
+		cout << "Using " << threads << " for multithreading... \n\n";
+	}
+	else {
+		threads = cmd.threads;
+		cout << "Using " << threads << " for multithreading... \n\n";
+	}
 
-	vector<int> Mbgen_begin(cmd.threads);
-	vector<int> Mbgen_end(cmd.threads);
-	vector<long int> bgenVariantPos(cmd.threads);
+	cout << "Dividing BGEN file into " << threads << " blocks..." << endl;
 
-	for (int t = 0; t < cmd.threads; t++) {
-		Mbgen_begin[t] = floor((bgen.Mbgen / cmd.threads) * t);
+	vector<int> Mbgen_begin(threads);
+	vector<int> Mbgen_end(threads);
+	vector<long int> bgenVariantPos(threads);
 
-		if ((t + 1) == (cmd.threads)) {
+	for (int t = 0; t < threads; t++) {
+		Mbgen_begin[t] = floor((bgen.Mbgen / threads) * t);
+
+		if ((t + 1) == (threads)) {
 			Mbgen_end[t] = bgen.Mbgen - 1;
 		}else {
-			Mbgen_end[t] = floor(((bgen.Mbgen / cmd.threads) * (t + 1)) - 1);
+			Mbgen_end[t] = floor(((bgen.Mbgen / threads) * (t + 1)) - 1);
 		}
 	}
 
@@ -578,7 +589,7 @@ int main(int argc, char* argv[]) {
 
 	start_time = std::chrono::high_resolution_clock::now();
 	// Create threads
-	for (int i = 0; i < cmd.threads; ++i) {
+	for (int i = 0; i < threads; ++i) {
 		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], cmd.genofile, i, boost::ref(bgen)));
 	}
 	thread_grp.join_all();
@@ -615,7 +626,7 @@ int main(int argc, char* argv[]) {
 	results << "P_Value_Main" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
 
 
-	for (int i = 0; i < cmd.threads; i++) {
+	for (int i = 0; i < threads; i++) {
 		std::string threadOutputFile = "gem_bin_" + std::to_string(i) + ".tmp";
 		std::ifstream thread_output(threadOutputFile);
 		results << thread_output.rdbuf();

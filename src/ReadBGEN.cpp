@@ -48,7 +48,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	CompressedSNPBlocks = flags & 3; cout << "Genotype Block Compression Type: ";
 	switch (CompressedSNPBlocks) {
 	case 1:
-		cout << "zlib";
+		cout << "zlib\n";
 		break;
 	case 2:
 		cout << "\nERROR: ZSTD compression is not supported.\n\n";
@@ -1058,7 +1058,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				subMatrix(ZGStZGS, ZGStZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
 
 
-
 				/* For S2TransR*/
 				// ZGStR[i * Sq1 + ind1 + 1]
 				double* expZGStR = new double[expSq];
@@ -1101,9 +1100,9 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				// ZGSR2tZGS[tmp1]
 				double* ZGSR2tZGStmp1 = new double[intSq1 * intSq1];
 				subMatrix(ZGSR2tZGS, ZGSR2tZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
+				
 
-
-
+			
 				// ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
 				double* invZGStmp1IntExpZGSR2tZGS = new double[intSq1 * expSq];
 				matTmatprod(invZGStZGStmp1, intExpZGSR2tZGS, invZGStmp1IntExpZGSR2tZGS, intSq1, intSq1, expSq);
@@ -1113,14 +1112,13 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				// ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
 				double* S2DS2third = new double[expSq * expSq];
 				matNmatNprod(ZGSR2tZGSsGRow, invZGStmp1IntExpZGStZGS, S2DS2third, expSq, intSq1, expSq);
-
 				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1]
 				double* invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
 				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
 				double* ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
 				matNmatNprod(ZGSR2tZGStmp1, invZGStZGStmp1_intExpZGStZGS, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
-				double* S2DS2Forthtemp = new double[intSq1 * intSq1];
-				matNmatNprod(invZGStZGStmp1, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, S2DS2Forthtemp, intSq1, intSq1, expSq);
+				double* S2DS2Forthtemp = new double[intSq1 * expSq];
+			    matNmatNprod(invZGStZGStmp1, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, S2DS2Forthtemp, intSq1, intSq1, expSq);
 				double* S2DS2forth = new double[expSq * expSq];
 				matNmatNprod(ZGStZGSsGRow, S2DS2Forthtemp, S2DS2forth, expSq, intSq1, expSq);
 				matAdd(expS2DS2, S2DS2second, expSq * expSq, -1.0);
@@ -1141,7 +1139,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				//}
 
 
-
+				
 				// invert (S2TransS2)
 				matInv(expS2TransS2, expSq);
 
@@ -1200,6 +1198,12 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				}
 
 
+
+
+
+
+
+
 				//delete[] S2TransS2;
 				//delete[] S2TransR;
 				///delete[] ZGStZGSsGsInt;
@@ -1220,7 +1224,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				delete[]invZGStmp1IntExpZGStZGS;
 				delete[]S2TransS2right;
 
-
 				/* For S2DS2*/
 				delete[]expS2DS2;
 				delete[]intExpZGSR2tZGS;
@@ -1231,7 +1234,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				delete[]S2DS2third;
 				delete[]invZGStZGStmp1_intExpZGStZGS;
 				delete[]ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS;
-				delete[]S2DS2forth;
+				delete[]S2DS2Forthtemp;
+			    delete[]S2DS2forth;
 			}
 		} // end of if robust == 1
 

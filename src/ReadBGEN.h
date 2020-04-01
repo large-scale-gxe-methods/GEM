@@ -51,6 +51,7 @@ public:
 	int Sq;
 	int samSize;
 	int robust;
+	std::string outFile;
 	void processBgenHeaderBlock(char genofile[300]);
 	void processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
 };

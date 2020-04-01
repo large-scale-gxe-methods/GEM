@@ -536,7 +536,7 @@ int main(int argc, char* argv[]) {
 	bgen.XinvXTX = XinvXTX;
 	bgen.resid  = resid;
 	bgen.sigma2 = sigma2;
-
+	bgen.outFile = cmd.outFile;
 
 
 
@@ -628,7 +628,7 @@ int main(int argc, char* argv[]) {
 
 
 	for (int i = 0; i < threads; i++) {
-		std::string threadOutputFile = "gem_bin_" + std::to_string(i) + ".tmp";
+		std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
 		std::ifstream thread_output(threadOutputFile);
 		results << thread_output.rdbuf();
 

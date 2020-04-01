@@ -371,7 +371,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 
 	auto start_time = std::chrono::high_resolution_clock::now();
-	std::string output = "gem_bin_" + std::to_string(thread_num) + ".tmp";
+	std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
 	std::ofstream results(output, std::ofstream::binary);
 	std::ostringstream oss;
 

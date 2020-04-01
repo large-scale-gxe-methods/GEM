@@ -11,7 +11,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	// Ensure genotype file contains BGEN extension
 	string genopath(genofile);
 	if (genopath.substr(genopath.length() - 5, 5) != ".bgen") {
-		cout << "\nError: " << genopath << " is not a .bgen file. Currently only supporting genotype files in BGEN format. \n\n";
+		cout << "\nERROR: " << genopath << " is not a .bgen file. Currently only supporting genotype files in BGEN format. \n\n";
 		exit(1);
 	}
 
@@ -22,7 +22,7 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	***************************************************************/
 	fin = fopen(genofile, "rb");
 	if (fin == 0) {
-		cerr << "\nError: BGEN file could not be opened.\n\n";
+		cerr << "\nERROR: BGEN file could not be opened.\n\n";
 		exit(1);
 	}
 
@@ -123,7 +123,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 	else {
 
 		if (bgen.SampleIdentifiers == 0 && samplefile[0] == '\0') {
-			cerr << "\nError: BGEN file does not contain sample identifiers (SampleIdentifiers == 0). A .sample file is required. \n"
+			cerr << "\nERROR: BGEN file does not contain sample identifiers. A .sample file is required. \n"
 				<< "          See https://www.well.ox.ac.uk/~gav/qctool/documentation/sample_file_formats.html for .sample file format. \n\n";
 			exit(1);
 		}
@@ -133,7 +133,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 		fIDMat.open(samplefile);
 
 		if (!fIDMat.is_open()) {
-			cerr << "\nError: Sample file could not be opened." << endl << endl;
+			cerr << "\nERROR: Sample file could not be opened." << endl << endl;
 			exit(1);
 		}
 
@@ -183,8 +183,8 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 
 
 	if (samSize == 0) {
-		cerr << "\nError: Sample size changed from" << samSize + genoUnMatchID.size() << " to " << samSize 
-			 << "         Check if sample IDs are consistent across files. \n\n";
+		cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize 
+			 << "\n       Check if sample IDs are consistent across files. \n\n";
 		exit(1);
 	}
 
@@ -306,7 +306,7 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 			 ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 			 if (LKnum != 2) {
-				 cerr << "\nError: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+				 cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
 				 exit(1);
 			 }
 		 }
@@ -376,7 +376,11 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	std::ostringstream oss;
 
 
-	vector <uchar> shortBuf;
+
+	uint Nbgen  = test.Nbgen;
+	uint Layout = test.Layout;
+	uint CompressedSNPBlocks = test.CompressedSNPBlocks;
+
 	uint maxLA = 65536;
 	uint maxLB = 65536;
 	char* snpID   = new char[maxLA + 1];
@@ -384,11 +388,14 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	char* chrStr  = new char[maxLA + 1];
 	char* allele1 = new char[maxLA + 1];
 	char* allele0 = new char[maxLB + 1];
-	vector <uchar> zBuf;
 	string physpos_tmp;
+	vector <uchar> zBuf;
+	vector <uchar> shortBuf;
 
-	int Sq = test.Sq;
-	int intSq = test.numIntSelCol;
+
+	int Sq     = test.Sq;
+	int Sq1    = Sq + 1;
+	int intSq  = test.numIntSelCol;
 	int intSq1 = intSq + 1;
 	int expSq        = test.numExpSelCol;
 	int phenoType    = test.phenoTyp;
@@ -400,32 +407,31 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	double sigma2    = test.sigma2;
 	double* resid    = test.resid;
 	double* XinvXTX  = test.XinvXTX;
-
-	uint Nbgen  = test.Nbgen;
-	uint Layout = test.Layout;
-	uint CompressedSNPBlocks = test.CompressedSNPBlocks;
+	double* covX = test.covX;
 	vector <double> miu = test.miu;
 	vector<long int> include_idx = test.include_idx;
 
-	double* covX = test.covX;
+	uint16_t* shortBuf1; 
+	uchar* zBuf1;
+	uLongf destLen1;
+	if (Layout == 1) {
+		shortBuf1 = (uint16_t*)malloc(6 * Nbgen);
+		zBuf1 = (unsigned char*)malloc(6 * Nbgen);
+		destLen1 = 6 * Nbgen;
+	}
 
 	vector <double> ZGSvec(samSize *   (1 + Sq) * stream_snps);
 	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
-
-
-
 	vector <double> WZGSvec(samSize * (1 + Sq) * stream_snps);
 	double* WZGS = &WZGSvec[0];
+	
+	
 
-	int Sq1 = Sq + 1;
-	
-	
 	vector <string> geno_snpid(stream_snps);
+
 
 	FILE* fin3;
 	fin3 = fopen(genobgen, "rb");
-
-
 	fseek(fin3, byte, SEEK_SET);
 
 	
@@ -460,7 +466,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			if (Layout == 1) {
 				uint Nrow;  fread(&Nrow, 4, 1, fin3); // cout << "Nrow: " << Nrow << " " << std::flush;  
 				if (Nrow != Nbgen) {
-					cerr << "\nError: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << "\n\n";
+					cerr << "\nERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << "\n\n";
 					exit(1);
 				}
 			}
@@ -505,7 +511,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			if (Layout == 2) {
 				ushort LKnum;  fread(&LKnum, 2, 1, fin3); // this is for Layout = 2, Lnum = 2 is Layout = 1
 				if (LKnum != 2) {
-					cerr << "\nError: Non-bi-allelic variant found: " << LKnum << " alleles \n\n";
+					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles \n\n";
 					exit(1);
 				}
 			}
@@ -535,18 +541,14 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			//cout << string((*tss).snpID) + "\t" + string((*tss).rsID) + "\t" + string((*tss).chrStr) + "\t" + std::to_string((*tss).physpos) + "\t" + string((*tss).allele1) + "\t" + string((*tss).allele0);
 			if (Layout == 1) {
-
 				uint zLen; fread(&zLen, 4, 1, fin3); // cout << "zLen: " << zLen << endl;
-				fread(&zBuf[0], 1, zLen, fin3);
+				fread(zBuf1, 1, zLen, fin3);
 
-				uLongf destLen = 6 * Nbgen;
-
-				if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen) != Z_OK || destLen != 6 * Nbgen) {
+				if (uncompress((Bytef*) shortBuf1, &destLen1, zBuf1, zLen) != Z_OK || destLen1 != 6 * Nbgen) {
 					cerr << "\nError: uncompress() failed\n\n";
 					exit(1);
 				}
-
-
+				
 				// read genotype probabilities
 				const double scale = 1.0 / 32768;
 				int tmp1 = stream_i * Sq1 * samSize;
@@ -555,35 +557,40 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				int idx_k = 0;
 				for (uint i = 0; i < Nbgen; i++) {
 
-					 if (include_idx[idx_k] == i) {
-						 double p11 = shortBuf[3 * i] * scale;
-						 double p10 = shortBuf[3 * i + 1] * scale;
-						 double p00 = shortBuf[3 * i + 2] * scale;
 
-						 double pTot = p11 + p10 + p00;
-						 double dosage = (2 * p00 + p10) / pTot;
+					if (include_idx[idx_k] == i) {
+						double p11 = shortBuf1[3 * i] * scale;
+						double p10 = shortBuf1[3 * i + 1] * scale;
+						double p00 = shortBuf1[3 * i + 2] * scale;
 
-						 int tmp2 = idx_k + tmp1;
-						 AF[stream_i] += dosage;
+						double pTot = p11 + p10 + p00;
+						double dosage = (2 * p11 + p10) / pTot;
+						
+						int tmp2 = idx_k + tmp1;
+						AF[stream_i] += dosage;
 
-						 if (phenoType == 1) {
-							 ZGSvec[tmp1] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
-						 }
-						 else {
-							 ZGSvec[tmp1] = dosage;
-						 }
+						if (phenoType == 1) {
+							ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
+						}
+						else {
+							ZGSvec[tmp2] = dosage;
+						}
 
-						 idx_k++;
-					 }
+						idx_k++;
+					}
 				}
 
 				if ((AF[stream_i] / 2 / samSize) < MAF || (AF[stream_i] / 2 / samSize) > (1 - MAF)) {
 					AF[stream_i] = 0;
 					continue;
-				} else {
+				}
+				else {
 					AF[stream_i] = AF[stream_i] / 2 / samSize;
 				}
 
+				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0);
+				
+				
 				for (int j = 0; j < Sq; j++) {
 					 int tmp3 = samSize * (j + 1) + tmp1;
 
@@ -597,10 +604,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			} // end of reading genotype data when Layout = 1
 
 
-
-
-			if (Layout = 2) {
-
+			if (Layout == 2) {
 				uint zLen; fread(&zLen, 4, 1, fin3); // cout << "zLen: " << zLen << endl;
 				zBuf.resize(zLen - 4);
 				uint DLen;
@@ -620,8 +624,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 
 				if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen - 4) != Z_OK || destLen != DLen) {
-					cout << "destLen: " << destLen << " " << zLen - 4 << "\n\n";
-					cerr << "\nError: uncompress() failed\n";
+					cout << "destLen: " << destLen << " " << zLen - 4;
+					cerr << "\nERROR: uncompress() failed\n\n";
 					exit(1);
 				}
 
@@ -630,7 +634,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uchar* bufAt = &shortBuf[0];
 				uint N = bufAt[0] | (bufAt[1] << 8) | (bufAt[2] << 16) | (bufAt[3] << 24); bufAt += 4;
 				if (N != Nbgen) {
-					cerr << "\nError: " << "snpName " << " has N = " << N << " (mismatch with header block)\n\n";
+					cerr << "\nERROR: " << "snpName " << " has N = " << N << " (mismatch with header block)\n\n";
 					exit(1);
 				}
 
@@ -638,21 +642,21 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 				uint K = bufAt[0] | (bufAt[1] << 8); bufAt += 2;
 				if (K != 2U) {
-					cout << "\nError: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
+					cout << "\nERROR: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
 					exit(1);
 				}
 
 
 				uint Pmin = *bufAt; bufAt++;
 				if (Pmin > 2U) {
-					cerr << "\nError: " << snpID << " has minimum ploidy = " << Pmin << ". Currently unsupported. \n\n";
+					cerr << "\nERROR: " << snpID << " has minimum ploidy = " << Pmin << ". Currently unsupported. \n\n";
 					exit(1);
 				}
 
 
 				uint Pmax = *bufAt; bufAt++;
 				if (Pmax > 2U) {
-					cerr << "\nError: " << snpID << " has maximum ploidy = " << Pmax << ". Currently unsupported. \n\n";
+					cerr << "\nERROR: " << snpID << " has maximum ploidy = " << Pmax << ". Currently unsupported. \n\n";
 					exit(1);
 				}
 
@@ -667,7 +671,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 					 ploidy_and_missing_info[i] = ploidyMiss;
 
 					if (ploidyMiss > 2U) {
-						std::cerr << "\nError: " << snpID << " has ploidy/missingness byte = " << ploidyMiss
+						std::cerr << "\nERROR: " << snpID << " has ploidy/missingness byte = " << ploidyMiss
 							<< " (not 2) \n\n";
 						exit(1);
 					}
@@ -688,7 +692,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uint Phased = *bufAt; bufAt++;
 				if (Phased != 0U && Phased != 1U) {
 					//if(Phased == 1U){ cerr << "\nERROR: Phased data is not currently supported by GEM.\n"; exit(1);}
-					cerr << "\nError: " << snpID << " has Phased = " << Phased << ". Must be 0 or 1. \n"
+					cerr << "\nERROR: " << snpID << " has Phased = " << Phased << ". Must be 0 or 1. \n"
 						<< "       See https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html for more details. \n\n";
 					exit(1);
 				}
@@ -696,7 +700,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uint B = *bufAt; bufAt++;
 				uint Bbits = std::pow(2, B);
 				if ((B != 8U) && (B != 16U) && (B != 24U) && (B != 32U)) {
-					std::cerr << "\nError: " << "snpName " << " has B = " << B << " (not divisible by 8)\n\n";
+					std::cerr << "\nERROR: " << "snpName " << " has B = " << B << " (not divisible by 8)\n\n";
 					exit(1);
 				}
 
@@ -855,12 +859,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		if (phenoType == 0) {
 			matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
 		}
-		else if (phenoType == 1) {
+		if (phenoType == 1) {
 			matmatTprod(ZGS, WZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
-		}
-		else {
-			cout << "phenoTyp is not equal to 0 or 1. Kill the job!! \n";
-			exit(1);
 		}
 
 		// transpose(ZGSR2) * ZGS
@@ -1035,8 +1035,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			for (int i = 0; i < stream_snps; i++) {
 				// initialize dynamic 2D array
-				betaInt[i] = new double[Sq];
-				VarbetaInt[i] = new double[Sq * Sq];
+				betaInt[i] = new double[expSq];
+				VarbetaInt[i] = new double[expSq * expSq];
 
 				//betamain
 				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
@@ -1283,6 +1283,8 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		}
 	} // end of snploop 
 
+	free(shortBuf1);
+	free(zBuf1);
 
 	// Close files
 	results.close();

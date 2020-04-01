@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
 	****************************************************/
 	cout << "\n*********************************************************\n";
 	cout << "The Selected Phenotype is: " << phenoHeaderName << '\n';
-	cout << "Linear or Binary? "; phenoTyp == 0 ? cout << "Linear \n" : cout << "Binary \n";
+	cout << "Continuous or Binary? "; phenoTyp == 0 ? cout << "Continuous \n" : cout << "Binary \n";
 	cout << "Robust or Non-Robust Analysis? "; robust == 0 ? cout << "Non-Robust \n\n" : cout << "Robust \n\n";
 
 	if (numSelCol == 0) {
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (numIntSelCol == 0) {
-		cout << "No Interactive Covariates Selected" << "\n";
+		cout << "No Interaction Covariates Selected" << "\n";
 	}
 	else {
 		cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
@@ -201,7 +201,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	cout << "Minor Allele Frequency Threshold: " << cmd.MAF << "\n";
-	cout << "Number of threads: " << cmd.threads << "\n";
+	cout << "Number of Threads: " << cmd.threads << "\n";
+	cout << "Output File: " << cmd.outFile << "\n";
 	cout << "*********************************************************\n";
 
 

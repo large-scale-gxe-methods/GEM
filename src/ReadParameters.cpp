@@ -6,124 +6,8 @@
 #include "declars.h"
 
 
-#define VERSION "0.9.1"
+#define VERSION "1.0"
 void print_help();
-
-void ReadParameters(char *paramfile, char *genofile, char *phenofile, char *samplefile, PARAMETERS *prm) {
-
-  char lineinfo[500], keyword[200];
-  FILE *fparams;
-  char tmp[300];
-
-  fparams = fopen(paramfile, "rb");
-  if (fparams == 0) {
-    cout << "\nError: Cannot open parameter file " << paramfile << "\n\n";
-    exit(1);
-  }
-
-  while (!feof(fparams)) {
-    fgets(lineinfo, 500, fparams);
-    /*** read in the keyword about parameters in the next line ***/
-    sscanf(lineinfo, "%s", keyword);
-    /*** read in the next line of text ***/
-    fgets(lineinfo, 500, fparams);
-    /*** parse the line text based on the keyword ***/
-    if (keyword[0] >= 'A' && keyword[0] <= 'Z') {
-    /* the first letter of the keyword must be an upper case letter; otherwise skip the next data line */
-      if (!strcmp(keyword, "SAMPLE_SIZE"))  // Sample size
-        sscanf(lineinfo, "%d", &prm->samSize); 
-      else if (!strcmp(keyword, "SAMPLE_ID_HEADER")) // Header name of sample ID
-        sscanf(lineinfo, "%s", prm->samIDHeader);
-      else if (!strcmp(keyword, "PHENOTYPE"))  // Type of pheno data (continuous or binary)
-        sscanf(lineinfo, "%d", &prm->phenoTyp);
-      else if (!strcmp(keyword, "PHENO_HEADER")) // Header name of pheno data
-        sscanf(lineinfo, "%s", prm->phenoHeader);
-      else if (!strcmp(keyword, "COVARIATE_TOT_COLMUN_NUMS"))  // Total columns of covariate data
-        sscanf(lineinfo, "%d", &prm->numSelCol);
-      else if (!strcmp(keyword, "ROBUST"))  // Robust analysis or not
-        sscanf(lineinfo, "%d", &prm->robust);
-      else if (!strcmp(keyword, "SAMPLE_ID_MATCHING"))  // Check sample ID matching order in geno and pheno files or not
-        sscanf(lineinfo, "%d", &prm->IDMatching);
-      else if (!strcmp(keyword, "COVARIATES")) { // Column numbers of selected covariate data
-//        sscanf(lineinfo, "%d %d %d", &prm->colSelVec[0], &prm->colSelVec[1], &prm->colSelVec[2]);
-		std::istringstream iss(lineinfo);
-		string value;
-		vector <string> values;
-		while (getline(iss, value, ' ')) {
-			value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-			if (!value.empty()) {
-				values.push_back(value);
-			}
-		}
-		for (int i = 0; i < values.size(); i++) {
-			  sscanf(values[i].c_str(), "%s", tmp);
-			  prm->covSelHeaders.push_back(string(tmp));
-		}
-      }
-      else if (!strcmp(keyword, "STREAM_SNPS"))  // SNP numbers for each GWAS analysis
-        sscanf(lineinfo, "%d", &prm->stream_snps);
-	  else if (!strcmp(keyword, "INTERACTIVE_COVARIATES")) { // Number of interactive covariate data columns with Geno
-		char int_tmp[300];
-		std::istringstream iss(lineinfo);
-	    string value;
-	    vector <string> int_values;
-		while (getline(iss, value, ' ')) {
-			value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-			if (!value.empty()) {
-				int_values.push_back(value);
-			}
-		}
-		for (int i = 0; i < int_values.size(); i++) {
-			 sscanf(int_values[i].c_str(), "%s", int_tmp);
-			 prm->intCovSelHeaders.push_back(string(int_tmp));
-		}
-	  }
-
-	  else if (!strcmp(keyword, "EXPOSURES")) {
-		char exp_tmp[300];
-		std::istringstream iss(lineinfo);
-		string value;
-		vector <string> exp_values;
-		while (getline(iss, value, ' ')) {
-			value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-			if (!value.empty()) {
-				exp_values.push_back(value);
-			}
-		}
-		if (exp_values.size() != 0) {
-			for (int i = 0; i < exp_values.size(); i++) {
-				sscanf(exp_values[i].c_str(), "%s", exp_tmp);
-				prm->expCovSelHeaders.push_back(string(exp_tmp));
-			}
-		}
-	  }
-
-      else if (!strcmp(keyword, "LOGISTIC_CONVERG_TOL"))  // Convergence tolerance for logistic regression
-        sscanf(lineinfo, "%lf", &prm->epsilon);
-      else if (!strcmp(keyword, "GENO_FILE_PATH"))  // Path of geno file
-        sscanf(lineinfo, "%s", genofile);
-      else if (!strcmp(keyword, "PHENO_FILE_PATH"))  // Path of pheno data file
-        sscanf(lineinfo, "%s", phenofile);
-      else if (!strcmp(keyword, "SAMPLE_FILE_PATH"))  // Path of sample file
-        sscanf(lineinfo, "%s", samplefile);
-      else if (!strcmp(keyword, "DELIMINATOR")) // define deliminators
-	sscanf(lineinfo, "%s", prm->delim_pheno);
-      else if (!strcmp(keyword, "MISSING"))
-	sscanf(lineinfo, "%s", prm->MissingKey);
-      else if (!strcmp(keyword, "OUTPUT_PATH"))
-	sscanf(lineinfo, "%s", prm->outputfile);
-      else
-        cout << "Does not recognize keyword: " << keyword << endl;
-    }
-  }
-  fclose(fparams);
-}
-
-
-
 
 
 // Function to process command line arguments
@@ -174,7 +58,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	po::options_description performance("Performance options");
 	performance.add_options()
 		("threads",     po::value<int>()->default_value(ceil((boost::thread::hardware_concurrency() / 2))), "")
-		("stream-snps", po::value<int>()->default_value(20), "");
+		("stream-snps", po::value<int>()->default_value(1), "");
 
 
 
@@ -354,8 +238,8 @@ void print_help() {
 		<< "   --sampleid-name \t Column name in the phenotype file that contains sample identifiers." << endl
 		<< "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest." << endl
 		<< "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
-		<< "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should be included for adjustment (mutually exclusive with --exposure-names)." << endl
-		<< "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
+		<< "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
+		<< "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be includedfor adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
 		<< "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
 		<< "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
 		<< "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
@@ -372,8 +256,7 @@ void print_help() {
 
 	cout << "Performance Options:" << endl
 	     << "   --threads \t\t Set number of compute threads \n \t\t\t    Default: ceiling(detected threads / 2)" << endl
-	     << "   --stream-snps \t Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps. \n \t\t\t    Default: 20" << endl;
+	     << "   --stream-snps \t Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.\n \t\t\t    Default: 1" << endl;
     cout << endl << endl;
-
 	     
 }

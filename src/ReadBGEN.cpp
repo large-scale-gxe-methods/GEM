@@ -1,6 +1,6 @@
 #include "declars.h"
 #include "ReadBGEN.h"
-
+#include "zstd.h"
 
 
 
@@ -51,10 +51,10 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 		cout << "zlib\n";
 		break;
 	case 2:
-		cout << "\nERROR: ZSTD compression is not supported.\n\n";
-		exit(1);
+		cout << "ZSTD\n";
+		break;
 	default:
-		cout << "\nERROR: SNP block must be compressed using zlib.\n\n";
+		cout << "\nERROR: SNP block must be compressed using zlib or ZSTD.\n\n";
 	}
 	Layout = (flags >> 2) & 0xf; cout << "Layout: " << Layout << '\n';
 	assert(Layout == 1 || Layout == 2); // REQUIRE Layout==1 or Layout==2
@@ -184,7 +184,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 
 	if (samSize == 0) {
 		cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize 
-			 << "\n       Check if sample IDs are consistent across files. \n\n";
+			 << "\n       Check if sample IDs are consistent across files or if (--sampleid-name) is specified correctly. \n\n";
 		exit(1);
 	}
 
@@ -564,7 +564,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 						double p00 = shortBuf1[3 * i + 2] * scale;
 
 						double pTot = p11 + p10 + p00;
-						double dosage = (2 * p11 + p10) / pTot;
+						double dosage = (2 * p00 + p10) / pTot;
 						
 						int tmp2 = idx_k + tmp1;
 						AF[stream_i] += dosage;
@@ -612,7 +612,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 					DLen = zLen;
 					fread(&zBuf[0], 1, zLen, fin3);
 				}
-				else {
+				else if(CompressedSNPBlocks > 0) {
 					fread(&DLen, 4, 1, fin3);
 					fread(&zBuf[0], 1, zLen - 4, fin3);
 				}
@@ -622,13 +622,22 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				uLongf destLen = DLen; //6*Nbgen;
 				shortBuf.resize(DLen);
 
-
-				if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen - 4) != Z_OK || destLen != DLen) {
-					cout << "destLen: " << destLen << " " << zLen - 4;
-					cerr << "\nERROR: uncompress() failed\n\n";
-					exit(1);
+				if (CompressedSNPBlocks == 1) {
+					if (uncompress(&shortBuf[0], &destLen, &zBuf[0], zLen - 4) != Z_OK || destLen != DLen) {
+						cout << "destLen: " << destLen << " " << zLen - 4;
+						cerr << "\nERROR: uncompress() failed\n\n";
+						exit(1);
+					}
 				}
-
+				else if (CompressedSNPBlocks == 2) {
+					size_t ret = ZSTD_decompress(&shortBuf[0], destLen, &zBuf[0], zLen - 4);
+					if (ret > destLen) {
+						if (ZSTD_isError(ret)) {
+							cout << "ZSTD ERROR: " << ZSTD_getErrorName(ret);
+						}
+					}
+					
+				}
 
 				// read genotype probabilities
 				uchar* bufAt = &shortBuf[0];
@@ -1283,8 +1292,10 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 		}
 	} // end of snploop 
 
-	free(shortBuf1);
-	free(zBuf1);
+	if (Layout == 1) {
+		free(shortBuf1);
+		free(zBuf1);
+	}
 
 	// Close files
 	results.close();

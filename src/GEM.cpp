@@ -512,14 +512,6 @@ int main(int argc, char* argv[]) {
 
 	cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
 	cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
-	vector <double> ZGSvec(samSize * (1 + Sq) * stream_snps);
-	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
-
-	// for logistic regression
-	vector <double> WZGSvec(samSize * (1 + Sq) * stream_snps);
-	double* WZGS = &WZGSvec[0];
-
-
 
 
 

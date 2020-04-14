@@ -14,7 +14,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 ## Installation  
 Library Dependencies:  
 * BLAS/LAPACK. For top performance, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) on Intel processors. For AMD processors, ATLAS or OPENBLAS may be better alternatives.  
-* Boost C++ lirbaries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams`` that will need to be installed prior to executing the makefile.  
+* Boost C++ lirbaries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile.  
 * Zlib compression.  
 * ZSTD for BGEN v1.3 formats.
 

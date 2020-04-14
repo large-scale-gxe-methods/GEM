@@ -13,8 +13,10 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 ## Installation  
 Library Dependencies:  
-* BLAS/LAPACK. 
-* Boost C++ lirbaries. GEM links the Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams`` that will need to be installed prior to executing the makefile.
+* BLAS/LAPACK. For top performance, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) on Intel processors. For AMD processors, ATLAS or OPENBLAS may be better alternatives.  
+* Boost C++ lirbaries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams`` that will need to be installed prior to executing the makefile.  
+* Zlib compression.  
+* ZSTD for BGEN v1.3 formats.
 
 <br />
 
@@ -161,27 +163,27 @@ Below are details of the column header in the output file.
 
 ```diff
 # SNP Info
-SNPID   - The SNP identifier.
-rsID    - The rsid
+SNPID   - The SNP identifier as retrieved from the BGEN file.
+rsID    - The reference SNP ID number.
 CHR     - The chromosome of the SNP.
 POS     - The physical position of the SNP.
-Allele1 - The first allele in the BGEN file (usually the reference allele).
-Allele2 - The second allele in the BGEN file (usually the minor allele).
+Allele1 - The first allele in the BGEN file.
+Allele2 - The second allele in the BGEN file that is counted in association testing.
 AF      - The allele frequency of the second allele in the BGEN file.
 
 
 # Betas and Variances
-Beta_Main     - The coefficient estimate for the marginal genetic effect
-Var_Beta_Main - The variance associated with the marginal genetic effect estimate
+Beta_Marginal      - The coefficient estimate for the marginal genetic effect
+Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate
 Beta_Interaction_k - The coefficient estimate for the kth interction term, 
                      where k = {1..length(--exposure-names)}
 Var_Beta_Interaction_k_j - The variance associated with the kth and jth interaction term, 
                            where j = {1..length(--exposure-names)}  
 
 # P-values
-P_Value_Main        - Marginal genetic effect p-value
+P_Value_Marginal    - Marginal genetic effect p-value
 P_Value_Interaction - Interaction effect p-value
-P_Value_Joint       - Joint p-value
+P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect)
 ```
 
 <br />

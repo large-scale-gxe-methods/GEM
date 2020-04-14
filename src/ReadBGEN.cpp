@@ -1130,10 +1130,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			    matNmatNprod(invZGStZGStmp1, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, S2DS2Forthtemp, intSq1, intSq1, expSq);
 				double* S2DS2forth = new double[expSq * expSq];
 				matNmatNprod(ZGStZGSsGRow, S2DS2Forthtemp, S2DS2forth, expSq, intSq1, expSq);
-				for (int col = 0; col < expSq; col++) {
-					 for(int row = 0; row < expSq; row++)
-					     expS2DS2[col + row] -= S2DS2second[col + row]
-				}
 				matAdd(expS2DS2, S2DS2second, expSq * expSq, -1.0);
 				matAdd(expS2DS2, S2DS2third,  expSq * expSq, -1.0);
 				matAdd(expS2DS2, S2DS2forth,  expSq * expSq, 1.0);

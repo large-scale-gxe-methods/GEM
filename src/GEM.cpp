@@ -605,7 +605,7 @@ int main(int argc, char* argv[]) {
 	cout << "Combining results... \n";
 	start_time = std::chrono::high_resolution_clock::now();
 	std::ofstream results(output, std::ofstream::binary);
-	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "AF" << "\t" << "Beta_Main" << "\t" << "Var_Beta_Main" << "\t";
+	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 	for (int i = 1; i <= numExpSelCol; i++) {
 		results << "Beta_Interaction" << "_" << i << "\t";
 	}
@@ -616,7 +616,7 @@ int main(int argc, char* argv[]) {
 		 }
 	}
 		
-	results << "P_Value_Main" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+	results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
 
 
 	for (int i = 0; i < threads; i++) {

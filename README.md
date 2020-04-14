@@ -12,10 +12,9 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 <br />
 
 ## Installation  
-Dependencies:  
-* C++11 compiler
-* Intel Math Kernel Library (MKL)
-* Boost C++ libraries
+Library Dependencies:  
+* BLAS/LAPACK. 
+* Boost C++ lirbaries. GEM links the Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams`` that will need to be installed prior to executing the makefile.
 
 <br />
 
@@ -50,39 +49,104 @@ For a list of options, use ```./GEM --help```.
 
 ```
 
+General Options:
+
 --help
     Prints the available options of GEM and exits.  
    
    
 --verison
     Prints the version of GEM and exits.
-   
+  
+  
+  
+Input File Options:  
 
---param <param_file_path>
-    Path to the GEM paramater file. (REQUIRED)
+--pheno-file  
+     Path to the phenotype file.  
+
+--bgen  
+     Path to the BGEN file.  
+
+--sample  
+     Path to the sample file.  
+     Required when the BGEN file does not contain sample identifiers.
+
+--out  
+     Full path and extension to where GEM output results.  
+     Default: gem.out
+  
+  
+  
+Phenotype File Options:
+
+--sampleid-name  
+     Column name in the phenotype file that contains sample identifiers.  
+
+--pheno-name  
+     Column name in the phenotype file that contains the phenotype of interest.  
+
+--exposure-names  
+     One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests.  
+
+--int-covar-names  
+     Any column names in the phenotype file naming the covariate(s) for which interactions should be included 
+     for adjustment (mutually exclusive with --exposure-names).  
+
+--covar-names  
+     Any column names in the phenotype file naming the covariates for which only main effects should be included
+     for adjustment (mutually exclusive with both --exposure-names and --int-covar-names).  
+
+--pheno-type
+     0 indicates a continuous phenotype and 1 indicates a binary phenotype.  
+
+--robust  
+     0 for model-based standard errors and 1 for robust standard errors.
+        Default: 0  
+
+--tol 
+     Convergence tolerance for logistic regression.  
+        Default: 0.0000001  
+
+--delim  
+     Delimiter separating values in the phenotype file.  
+        Default: , (comma-separated)  
+
+--missing-value  
+     Indicates how missing values in the phenotype file are stored.  
+        Default: NA
+  
+  
    
-   
+Filtering Options:  
+
 --maf <value>
     Threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
        Default: 0.001
-
+  
+  
+  
+Performance Options:  
 
 --threads <value>
     Set number of compute threads.
-    	  Default: ceiling(detected threads / 2)
+    	  Default: ceiling(detected threads / 2)  
+
+--stream-snps  
+    Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
+          Default: 1
+
 ```
 
 <br /> 
 
 #### Input Files
 
-* ##### Parameter File (Required)
-    At minimum, GEM requires a parameter file (.param) as input.  
-    For an example of the parameter file format, see the [.param](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/GEM_Input.param) file example.  
+* ##### Phenotype File
+    A file which should contain a sample identifier column and columns for phenotypes and covariates.  
 
-* ##### Genotype File
-    Currently, GEM can only support v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
-    Future updates will allow different genotype files as input.  
+* ##### BGEN File
+    GEM can support v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).
 
 * ##### Sample File
     A .sample file is required when the .bgen file does not contain sample identifiers.  
@@ -92,28 +156,29 @@ For a list of options, use ```./GEM --help```.
 
 #### Output File Format  
 
-GEM will write results to the output file specified in the parameter file ([.param](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/GEM_Input.param)).  
+GEM will write results to the output file specified to the --out paramater (or 'gem.out' if no output file is specified).  
 Below are details of the column header in the output file.  
 
 ```diff
-### SNP Info
+# SNP Info
 SNPID   - The SNP identifier.
-rsID    - The reference identifier of the SNP.
+rsID    - The rsid
 CHR     - The chromosome of the SNP.
-POS     - The position of the SNP of its CHR.
-Allele1 - The reference allele (REF) assuming that the REF allele is first.
-Allele2 - The alternative allele (ALT) assuming that the ALT allele is second.
-AF      - The allele frequency of the ALT allele.
+POS     - The physical position of the SNP.
+Allele1 - The first allele in the BGEN file (usually the reference allele).
+Allele2 - The second allele in the BGEN file (usually the minor allele).
+AF      - The allele frequency of the second allele in the BGEN file.
 
 
-### Beta and Variance
+# Betas and Variances
 Beta_Main     - The coefficient estimate for the marginal genetic effect
 Var_Beta_Main - The variance associated with the marginal genetic effect estimate
+Beta_Interaction_k - The coefficient estimate for the kth interction term, 
+                     where k = {1..length(--exposure-names)}
+Var_Beta_Interaction_k_j - The variance associated with the kth and jth interaction term, 
+                           where j = {1..length(--exposure-names)}  
 
-To complete..
-
-
-### P-values
+# P-values
 P_Value_Main        - Marginal genetic effect p-value
 P_Value_Interaction - Interaction effect p-value
 P_Value_Joint       - Joint p-value
@@ -127,28 +192,21 @@ P_Value_Joint       - Joint p-value
 
 To run GEM using the example data, execute GEM with the following code.
 ```unix
-./GEM --param ../example/GEM_Input.param
+./GEM --bgen example.bgen --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --pheno-type 1 --robust 1 --missing-value NaN 
 ```
-The results should look like the following output file [example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/example.out).
-
-<br />
-<br />
-
-To exclude variants with minor allele frequency (MAF) < 0.2, use the --maf parameter.
-```
-./GEM --param ../example/GEM_Input.param --maf 0.2
-```
+The results should look like the following output file [example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/example.out).  
 
 <br />
 
-To spawn 3 threads for multithreading, use the --threads parameter
-```
-./GEM --param ../example/GEM_Input.param --maf 0.2 --threads 3
+GEM allows interaction covariate adjustments by specifying the ```--int-covar-names``` parameter.     
+```unix
+./GEM --bgen example.bgen --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 --exposure-names cov1 --int-covar-names cov3 --pheno-type 1 --robust 1 --missing-value NaN 
 ```
 
 <br />
 <br />
-<br />
+
+
 
 ## License 
 

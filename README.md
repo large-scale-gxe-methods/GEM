@@ -145,7 +145,7 @@ Performance Options:
 #### Input Files
 
 * ##### Phenotype File
-    A file which should contain a sample identifier column and columns for phenotypes and covariates.  
+    A file which should contain a sample identifier column and columns for the phenotypes and covariates.  
 
 * ##### BGEN File
     GEM can support v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).
@@ -175,7 +175,7 @@ AF      - The allele frequency of the second allele in the BGEN file.
 # Betas and Variances
 Beta_Marginal      - The coefficient estimate for the marginal genetic effect
 Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate
-Beta_Interaction_k - The coefficient estimate for the kth interction term, 
+Beta_Interaction_k - The coefficient estimate for the kth interaction term, 
                      where k = {1..length(--exposure-names)}
 Var_Beta_Interaction_k_j - The variance associated with the kth and jth interaction term, 
                            where j = {1..length(--exposure-names)}  
@@ -196,7 +196,7 @@ To run GEM using the example data, execute GEM with the following code.
 ```unix
 ./GEM --bgen example.bgen --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --pheno-type 1 --robust 1 --missing-value NaN 
 ```
-The results should look like the following output file [example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/example.out).  
+The results should look like the following output file [example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
 
 <br />
 

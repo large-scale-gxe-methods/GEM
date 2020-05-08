@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018,2019  Liang Hong, Han Chen
+ *  Copyright (C) 2018-2020  Liang Hong, Han Chen, Duy Pham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

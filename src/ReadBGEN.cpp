@@ -4,6 +4,9 @@
 
 
 
+/**************************************
+This function is revised based on the Parse function in BOLT-LMM v2.3 source code
+*************************************/
 // Read BGEN v1.1, v1.2, and v1.3 header block and flags.
 void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
@@ -69,6 +72,9 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
 
 
+/**************************************
+This function is revised based on the Parse function in BOLT-LMM v2.3 source code
+*************************************/
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
 void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize) {
 
@@ -219,6 +225,9 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 
 
 
+/**************************************
+This function is revised based on the Parse function in BOLT-LMM v2.3 source code
+*************************************/
 // This function reads just the variant block for BGEN files version v1.1, v1.2, and v1.3 and is used to grab the byte where the variant begins.
 std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbgen, uint Nbgen, uint CompressedSNPBlocks, uint Layout, vector<int> Mbgen_begin) {
 
@@ -367,6 +376,9 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 
 
 
+/**************************************
+This function contains code that has been revised based on the Parse function in BOLT-LMM v2.3 source code
+*************************************/
 void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int thread_num, Bgen test) {
 
 

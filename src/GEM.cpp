@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018,2019  Liang Hong, Han Chen
+ *  Copyright (C) 2018-2020  Liang Hong, Han Chen, Duy Pham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -608,19 +608,19 @@ int main(int argc, char* argv[]) {
 
 
 
-	//// Finished
-	//cout << "*********************************************************\n";
-	//std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
-	//double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-	//cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-	//cout << "Total CPU Time = "  << cpuduration << "  Seconds\n";
-	////cout << "Execution Wall Time = " << exetime << "  Seconds\n";
-	//cout << "*********************************************************\n";
+	// Finished
+	cout << "*********************************************************\n";
+	std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+	double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+	cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+	cout << "Total CPU Time = "  << cpuduration << "  Seconds\n";
+	//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
+	cout << "*********************************************************\n";
 
 
 
-	//delete[] XTransX;
-	//delete[] XinvXTX;
+	delete[] XTransX;
+	delete[] XinvXTX;
 
 
 	return 0;

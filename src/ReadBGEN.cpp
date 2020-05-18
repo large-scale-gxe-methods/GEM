@@ -4,9 +4,6 @@
 
 
 
-/**************************************
-This function is revised based on the Parse function in BOLT-LMM v2.3 source code
-*************************************/
 // Read BGEN v1.1, v1.2, and v1.3 header block and flags.
 void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
@@ -72,9 +69,6 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
 
 
-/**************************************
-This function is revised based on the Parse function in BOLT-LMM v2.3 source code
-*************************************/
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
 void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize) {
 
@@ -225,13 +219,21 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map
 
 
 
-/**************************************
-This function is revised based on the Parse function in BOLT-LMM v2.3 source code
-*************************************/
 // This function reads just the variant block for BGEN files version v1.1, v1.2, and v1.3 and is used to grab the byte where the variant begins.
-std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbgen, uint Nbgen, uint CompressedSNPBlocks, uint Layout, vector<int> Mbgen_begin) {
+//    Necesary when there's no bgen index file.
+void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
+
+
 
 	int t = 0;
+	int count = 0;
+	unsigned int index = 0;
+	uint CompressedSNPBlocks = bgen.CompressedSNPBlocks;
+	uint Layout = bgen.Layout;
+	uint offset = bgen.offset;
+	uint Mbgen = bgen.Mbgen;
+	uint nSNPS = Mbgen;
+	uint Nbgen = bgen.Nbgen;
 	uint maxLA = 65536;
 	uint maxLB = 65536;
 	char* snpID   = new char[maxLA + 1];
@@ -239,126 +241,413 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 	char* chrStr  = new char[maxLA + 1];
 	char* allele1 = new char[maxLA + 1];
 	char* allele0 = new char[maxLB + 1];
+	threads = cmd.threads;
+	string IDline;
 
-	vector <uchar> zBuf;
-	vector <long int> variant_pos(Mbgen_begin.size());
+	std::set<std::string> includeVariant;
+	std::vector<std::vector<uint>> includeVariantIndex;
+	bool checkSNPID   = false;
+	bool checkRSID    = false;
+	bool checkInclude = false;
+	bool checkExclude = false;
+
+
+	if (cmd.doFilters) {
+
+		filterVariants = true;
+
+		if (!cmd.includeVariantFile.empty()) {
+			checkInclude = true;
+			std::ifstream fInclude;
+			fInclude.open(cmd.includeVariantFile);
+			if (!fInclude.is_open()) {
+				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened." << endl << endl;
+				exit(1);
+			}
+
+
+			string vars;
+			getline(fInclude, IDline);
+			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
+			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
+
+
+			if (IDline == "snpid" ) {
+				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
+				checkSNPID = true;
+			}
+			else if (IDline == "rsid") {
+				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their rsid... \n";
+				checkRSID = true;
+			}
+			else {
+				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be snpid or rsid." << endl << endl;
+				exit(1);
+			}
+
+
+			while (fInclude >> vars) {
+				includeVariant.insert(vars);
+				count++;
+			}
+			nSNPS = count;
+			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
+			//count = ceil(count / Mbgen_begin.size());
+
+
+			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
+			if (nSNPS < threads) {
+				threads = nSNPS;
+				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+			else {
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+		}
+
+
+
+		cout << "Dividing BGEN file into " << threads << " blocks...\n";
+		cout << "Identifying start position of each block...\n";
+		vector<uint> endIndex(threads);
+		int nBlocks = ceil(nSNPS / threads);
+		int lastSNP = nSNPS - 1;
+		int index = 0;
+		int k = 0;
+		Mbgen_begin.resize(threads);
+		Mbgen_end.resize(threads);
+		bgenVariantPos.resize(threads);
+		keepVariants.resize(threads);
+
+
+		for (int t = 0; t < threads; t++) {
+		  	 endIndex[t] = ((t + 1) == threads) ? nSNPS - 1 : floor(((nSNPS / threads) * (t + 1)) - 1);
+		}
+
+
+
+		FILE* fin = bgen.fin;
+		fseek(fin, offset + 4, SEEK_SET);
+
+		// Identifying the start position of each BGEN variant block for multithreading when no bgen index file present.
+		for (int snploop = 0; snploop < Mbgen; snploop++) {
+
+			int prev = ftell(fin);
+
+			// Number of individuals. Only present when Layout == 1
+			if (Layout == 1) {
+				uint Nrow; fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;  
+				if (Nrow != Nbgen) {
+					cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << '\n';
+					exit(1);
+				}
+			}
+
+			// The length of the variant identifier
+			ushort LS; fread(&LS, 2, 1, fin);  // cout << "LS: " << LS << " " << std::flush;
+			if (LS > maxLA) {
+				maxLA = 2 * LS;
+				delete[] snpID;
+				char* snpID = new char[maxLA + 1];
+			}
+			// The variant identifier
+			fread(snpID, 1, LS, fin); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
+			if (checkSNPID) {
+				if ((checkInclude) && (includeVariant.find(snpID) != includeVariant.end())) {
+					keepVariants[k].push_back(snploop);
+					if (index == (nBlocks * k)) {
+						Mbgen_begin[k] = snploop;
+						long int curr = ftell(fin);
+						bgenVariantPos[k] = curr - (curr - (prev));
+					}
+					if (index == endIndex[k]) {
+						Mbgen_end[k] = snploop;
+						k++;
+						if (k == threads) {
+							break;
+						}
+					}
+					index++;
+				}
+			}
+
+
+			// The length of the rsid
+			ushort LR; fread(&LR, 2, 1, fin); // cout << "LR: " << LR << " " << std::flush;
+			if (LR > maxLA) {
+				maxLA = 2 * LR;
+				delete[] rsID;
+				char* rsID = new char[maxLA + 1];
+			}
 
 	
-	fseek(fin, offset + 4, SEEK_SET);
 
-	for (int snploop = 0; snploop < Mbgen; snploop++) {
-
-		 if (snploop == Mbgen_begin[t]) {
-
-			 variant_pos[t] = ftell(fin);
-			 t++;
-
-			 if (t == (Mbgen_begin.size())) {
-				 break;
-			 }
-
-		 }
-		 
-		
-		 /**** Variant Data Block ********/
-
-		 // Number of individuals. Only present when Layout == 1
-		 if (Layout == 1) {
-			 uint Nrow; fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;  
-			 if (Nrow != Nbgen) {
-				 cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << '\n';
-				 exit(1);
-			 }
-		 }
-
-		 // The length of the variant identifier
-		 ushort LS; fread(&LS, 2, 1, fin);  // cout << "LS: " << LS << " " << std::flush;
-		 if (LS > maxLA) {
-			 maxLA = 2 * LS;
-			 delete[] snpID;
-			 char* snpID = new char[maxLA + 1];
-		 }
-		 // The variant identifier
-		 fread(snpID, 1, LS, fin); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
-		
-
-
-		 // The length of the rsid
-		 ushort LR; fread(&LR, 2, 1, fin); // cout << "LR: " << LR << " " << std::flush;
-		 if (LR > maxLA) {
-			 maxLA = 2 * LR;
-			 delete[] rsID;
-			 char* rsID = new char[maxLA + 1];
-		 }
-		 // The rsid
-		 fread(rsID, 1, LR, fin); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
+			// The rsid
+			fread(rsID, 1, LR, fin); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
+			if (checkRSID) {
+				if (checkInclude && includeVariant.find(rsID) != includeVariant.end()) {
+					keepVariants[k].push_back(snploop);
+					if (index == (nBlocks * k)) {
+						Mbgen_begin[k] = snploop;
+						long int curr = ftell(fin);
+						bgenVariantPos[k] = curr - (curr - (prev));
+					}
+					if (index == endIndex[k]) {
+						Mbgen_end[k] = snploop;
+						k++;
+						if (k == threads) {
+							break;
+						}
+					}
+					index++;
+				}
+			}
 
 
 
-
-		 // The length of the chromosome
-		 ushort LC; fread(&LC, 2, 1, fin); // cout << "LC: " << LC << " " << std::flush;
-		 // The chromosome
-		 fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
-
+			// The length of the chromosome
+			ushort LC; fread(&LC, 2, 1, fin); // cout << "LC: " << LC << " " << std::flush;
+			// The chromosome
+			fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
 
 
-		 // The variant position
-		 uint physpos; fread(&physpos, 4, 1, fin); // cout << "physpos: " << physpos << " " << std::flush;
+
+			// The variant position
+			uint physpos; fread(&physpos, 4, 1, fin); // cout << "physpos: " << physpos << " " << std::flush;
 
 
 
 
 
-		 // The number of alleles if Layout == 2. If Layout == 1, this value is assumed to be 2
-		 if (Layout == 2) {
-			 ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
+			// The number of alleles if Layout == 2. If Layout == 1, this value is assumed to be 2
+			if (Layout == 2) {
+				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
-			 if (LKnum != 2) {
-				 cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
-				 exit(1);
-			 }
-		 }
-
-
-		 // Length of the first allele
-		 uint LA; fread(&LA, 4, 1, fin); // cout << "LA: " << LA << " " << std::flush;
-		 if (LA > maxLA) {
-			 maxLA = 2 * LA;
-			 delete[] allele1;
-			 char* allele1 = new char[maxLA + 1];
-		 }
-		 // The first allele
-		 fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+				if (LKnum != 2) {
+					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					exit(1);
+				}
+			}
 
 
-		 // The length of the second allele
-		 uint LB; fread(&LB, 4, 1, fin); // cout << "LB: " << LB << " " << std::flush;
-		 if (LB > maxLB) {
-			 maxLB = 2 * LB;
-			 delete[] allele0;
-			 char* allele0 = new char[maxLB + 1];
-		 }
-		 // The second allele
-		 fread(allele0, 1, LB, fin); allele0[LB] = '\0';
+			// Length of the first allele
+			uint LA; fread(&LA, 4, 1, fin); // cout << "LA: " << LA << " " << std::flush;
+			if (LA > maxLA) {
+				maxLA = 2 * LA;
+				delete[] allele1;
+				char* allele1 = new char[maxLA + 1];
+			}
+			// The first allele
+			fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+
+
+			// The length of the second allele
+			uint LB; fread(&LB, 4, 1, fin); // cout << "LB: " << LB << " " << std::flush;
+			if (LB > maxLB) {
+				maxLB = 2 * LB;
+				delete[] allele0;
+				char* allele0 = new char[maxLB + 1];
+			}
+			// The second allele
+			fread(allele0, 1, LB, fin); allele0[LB] = '\0';
 
 
 
 
-		 // Seeks past the uncompressed genotype.
-		 uint zLen;  fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
-		 uint DLen;
-		 if (CompressedSNPBlocks == 0) {
-			 fseek(fin, zLen, SEEK_CUR);
+			// Seeks past the uncompressed genotype.
+			uint zLen;  fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
+			if (Layout == 1) {
+				if (CompressedSNPBlocks == 0) {
+					fseek(fin, 6 * Nbgen, SEEK_CUR);
 
-		 } else {
-			 fseek(fin, 4 + zLen - 4, SEEK_CUR);
-		 }
+				}
+				else {
+					fseek(fin, zLen, SEEK_CUR);
+				}
+			}
+			if (Layout == 2) {
+				if (CompressedSNPBlocks == 0) {
+					fseek(fin, zLen, SEEK_CUR);
 
+				}
+				else {
+					fseek(fin, 4 + zLen - 4, SEEK_CUR);
+				}
+			}
+		}
+
+		if (index != (nSNPS - 1)) {
+			cerr << "\nError: There are one or more SNPs in BGEN file with " << IDline << " not in " << cmd.includeVariantFile << "\n\n";
+			exit(1);
+		}
 	}
+	else {
+	
+		filterVariants = false;
+
+		cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
+		if (Mbgen < threads) {
+			threads = Mbgen;
+			nSNPS = Mbgen;
+			cout << "Number of variants (" << Mbgen << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
+			cout << "Using " << threads << " for multithreading... \n\n";
+		}
+		else {
+			nSNPS = Mbgen;
+			cout << "Using " << threads << " for multithreading... \n\n";
+		}
+
+	
+		cout << "Dividing BGEN file into " << threads << " blocks..." << endl;
+		Mbgen_begin.resize(threads);
+		Mbgen_end.resize(threads);
+		bgenVariantPos.resize(threads);
+		keepVariants.resize(threads);
+
+		for (int t = 0; t < threads; t++) {
+			Mbgen_begin[t] = floor((nSNPS / threads) * t);
+			keepVariants[t].push_back(floor((nSNPS / threads)* t));
+
+			if ((t + 1) == (threads)) {
+				Mbgen_end[t] = nSNPS - 1;
+			}
+			else {
+				Mbgen_end[t] = floor(((nSNPS / threads) * (t + 1)) - 1);
+			}
+		}
 
 
-	return variant_pos;
+		FILE* fin = bgen.fin;
+		fseek(fin, offset + 4, SEEK_SET);
+
+
+
+		// Identifying the start position of each BGEN variant block for multithreading when no bgen index file present.
+		for (int snploop = 0; snploop < Mbgen; snploop++) {
+
+
+			if (snploop == Mbgen_begin[t]) {
+
+				bgenVariantPos[t] = ftell(fin);
+				t++;
+
+				if (!checkInclude && !checkExclude) {
+					if (t == (Mbgen_begin.size())) {
+						break;
+					}
+				}
+
+			}
+
+
+			/**** Variant Data Block ********/
+
+			// Number of individuals. Only present when Layout == 1
+			if (Layout == 1) {
+				uint Nrow; fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;  
+				if (Nrow != Nbgen) {
+					cerr << "ERROR: Nrow = " << Nrow << " does not match Nbgen = " << Nbgen << '\n';
+					exit(1);
+				}
+			}
+
+			// The length of the variant identifier
+			ushort LS; fread(&LS, 2, 1, fin);  // cout << "LS: " << LS << " " << std::flush;
+			if (LS > maxLA) {
+				maxLA = 2 * LS;
+				delete[] snpID;
+				char* snpID = new char[maxLA + 1];
+			}
+			// The variant identifier
+			fread(snpID, 1, LS, fin); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
+			
+
+
+			// The length of the rsid
+			ushort LR; fread(&LR, 2, 1, fin); // cout << "LR: " << LR << " " << std::flush;
+			if (LR > maxLA) {
+				maxLA = 2 * LR;
+				delete[] rsID;
+				char* rsID = new char[maxLA + 1];
+			}
+			// The rsid
+			fread(rsID, 1, LR, fin); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
+			
+
+
+
+			// The length of the chromosome
+			ushort LC; fread(&LC, 2, 1, fin); // cout << "LC: " << LC << " " << std::flush;
+			// The chromosome
+			fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
+
+
+
+			// The variant position
+			uint physpos; fread(&physpos, 4, 1, fin); // cout << "physpos: " << physpos << " " << std::flush;
+
+
+
+
+
+			// The number of alleles if Layout == 2. If Layout == 1, this value is assumed to be 2
+			if (Layout == 2) {
+				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
+
+				if (LKnum != 2) {
+					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					exit(1);
+				}
+			}
+
+
+			// Length of the first allele
+			uint LA; fread(&LA, 4, 1, fin); // cout << "LA: " << LA << " " << std::flush;
+			if (LA > maxLA) {
+				maxLA = 2 * LA;
+				delete[] allele1;
+				char* allele1 = new char[maxLA + 1];
+			}
+			// The first allele
+			fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+
+
+			// The length of the second allele
+			uint LB; fread(&LB, 4, 1, fin); // cout << "LB: " << LB << " " << std::flush;
+			if (LB > maxLB) {
+				maxLB = 2 * LB;
+				delete[] allele0;
+				char* allele0 = new char[maxLB + 1];
+			}
+			// The second allele
+			fread(allele0, 1, LB, fin); allele0[LB] = '\0';
+
+
+
+
+			// Seeks past the uncompressed genotype.
+			uint zLen;  fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
+			if (Layout == 1) {
+				if (CompressedSNPBlocks == 0) {
+					fseek(fin, 6 * Nbgen, SEEK_CUR);
+
+				}
+				else {
+					fseek(fin, zLen, SEEK_CUR);
+				}
+			}
+			if (Layout == 2) {
+				if (CompressedSNPBlocks == 0) {
+					fseek(fin, zLen, SEEK_CUR);
+
+				}
+				else {
+					fseek(fin, 4 + zLen - 4, SEEK_CUR);
+				}
+			}
+		}
+	}
 }
 
 
@@ -371,22 +660,12 @@ std::vector<long int> getPositionOfBgenVariant(FILE* fin, uint offset, uint Mbge
 
 
 
-
-
-
-
-
-/**************************************
-This function contains code that has been revised based on the Parse function in BOLT-LMM v2.3 source code
-*************************************/
-void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int thread_num, Bgen test) {
-
+void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test) {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
 	std::ofstream results(output, std::ofstream::binary);
 	std::ostringstream oss;
-
 
 
 	uint Nbgen  = test.Nbgen;
@@ -450,6 +729,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 	int snploop = begin;
 	int variant_index = 0;
+	int keepIndex = 0;
 	while (snploop <= end) {
 
 		int Sq1 = Sq + 1;
@@ -491,7 +771,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				delete[] snpID;
 				snpID = new char[maxLA + 1];
 			}
-
+			
 			// The variant identifier
 			fread(snpID, 1, LS, fin3); snpID[LS] = '\0'; // cout << "snpID: " << string(snpID) << " " << std::flush;
 
@@ -506,7 +786,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			// The rsid
 			fread(rsID, 1, LR, fin3); rsID[LR] = '\0'; // cout << "rsID: " << string(rsID) << " " << std::flush;
-
+		
 
 			// The length of the chromosome
 			ushort LC;  fread(&LC, 2, 1, fin3); // cout << "LC: " << LC << " " << std::flush;
@@ -548,7 +828,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 			}
 			// The second allele
 			fread(allele0, 1, LB, fin3); allele0[LB] = '\0';
-
 
 
 			//cout << string((*tss).snpID) + "\t" + string((*tss).rsID) + "\t" + string((*tss).chrStr) + "\t" + std::to_string((*tss).physpos) + "\t" + string((*tss).allele1) + "\t" + string((*tss).allele0);
@@ -615,9 +894,20 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 
 			} // end of reading genotype data when Layout = 1
 
-
 			if (Layout == 2) {
 				uint zLen; fread(&zLen, 4, 1, fin3); // cout << "zLen: " << zLen << endl;
+
+				if (filterVariants && keepVariants[keepIndex]+1 != snploop) {
+					if (CompressedSNPBlocks == 0) {
+						fseek(fin3, zLen, SEEK_CUR);
+
+					}
+					else {
+						fseek(fin3, 4 + zLen - 4, SEEK_CUR);
+					}
+					continue;
+				}
+
 				zBuf.resize(zLen - 4);
 				uint DLen;
 				if (CompressedSNPBlocks == 0) {
@@ -804,7 +1094,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0);
 
 
-
 				for (int j = 0; j < Sq; j++) {
 					 int tmp3 = samSize * (j + 1) + tmp1;
 					 for (uint i = 0; i < samSize; i++) {
@@ -818,6 +1107,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, char genobgen[300], int
 	
 			variant_index++;
 			stream_i++;
+			keepIndex++;
 		} // end of stream_i
 
 		if (snploop == end + 1 & stream_i == 0) {

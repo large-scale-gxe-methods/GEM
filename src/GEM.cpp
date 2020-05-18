@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2020  Liang Hong, Han Chen, Duy Pham
+ *  Copyright (C) 2018,2019  Liang Hong, Han Chen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -136,12 +136,13 @@ int main(int argc, char* argv[]) {
 			cerr << "\nERROR: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
 			exit(1);
 		}
-		 covHM[cmd.cov[i]] += 1;
-		 if (covHM[cmd.cov[i]] > 1) {
-			 covErrorString += cmd.cov[i] + " ";
-			 continue;
-		 }
-		 covSelHeadersName.push_back(cmd.cov[i]);
+
+		covHM[cmd.cov[i]] += 1;
+		if (covHM[cmd.cov[i]] > 1) {
+			covErrorString += cmd.cov[i] + " ";
+			continue;
+		}
+		covSelHeadersName.push_back(cmd.cov[i]);
 	}
 	numSelCol = covSelHeadersName.size();
 
@@ -399,7 +400,7 @@ int main(int argc, char* argv[]) {
 	  Genome-Wide Associate Study using Linear or Logistic regression
 	  and Processing Geno Files (.bgen)
 	******************************************************************/
-	cout << "Starting GWAS. \n\n";
+	cout << "Starting GWAS... \n\n";
 	samSize = bgen.new_samSize;
 	double* phenoY = &bgen.new_phenodata[0];
 	double* covX   = &bgen.new_covdata[0];
@@ -514,7 +515,6 @@ int main(int argc, char* argv[]) {
 	cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
 
 
-
 	bgen.numSelCol    = numSelCol;
 	bgen.numIntSelCol = numIntSelCol;
 	bgen.numExpSelCol = numExpSelCol;
@@ -530,40 +530,13 @@ int main(int argc, char* argv[]) {
 	bgen.sigma2 = sigma2;
 	bgen.outFile = cmd.outFile;
 
+	
 
 
-	// Identifying the start position of each BGEN variant block for parallizing.
-	int threads;
-	cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
-	if (bgen.Mbgen < cmd.threads) {
-		threads = bgen.Mbgen;
-		cout << "Number of variants (" << bgen.Mbgen << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
-		cout << "Using " << threads << " for multithreading... \n\n";
-	}
-	else {
-		threads = cmd.threads;
-		cout << "Using " << threads << " for multithreading... \n\n";
-	}
 
-	cout << "Dividing BGEN file into " << threads << " blocks..." << endl;
 
-	vector<int> Mbgen_begin(threads);
-	vector<int> Mbgen_end(threads);
-	vector<long int> bgenVariantPos(threads);
-
-	for (int t = 0; t < threads; t++) {
-		Mbgen_begin[t] = floor((bgen.Mbgen / threads) * t);
-
-		if ((t + 1) == (threads)) {
-			Mbgen_end[t] = bgen.Mbgen - 1;
-		}else {
-			Mbgen_end[t] = floor(((bgen.Mbgen / threads) * (t + 1)) - 1);
-		}
-	}
-
-	cout << "Identifying start position of each block...\n";
 	start_time = std::chrono::high_resolution_clock::now();
-	bgenVariantPos = getPositionOfBgenVariant(bgen.fin, bgen.offset, bgen.Mbgen, bgen.Nbgen, bgen.CompressedSNPBlocks, bgen.Layout, Mbgen_begin);
+	bgen.getPositionOfBgenVariant(bgen, cmd);
 	end_time = std::chrono::high_resolution_clock::now();
 	cout << "Execution time... ";
 	printExecutionTime(start_time, end_time);
@@ -574,25 +547,23 @@ int main(int argc, char* argv[]) {
 
 
 
-
-
-	// Preparing for parallelizing of BGEN file
+	//Preparing for parallelizing of BGEN file
 	cout << "Starting multithreading...\n"; 
 	boost::thread_group thread_grp;
+	
 
 	start_time = std::chrono::high_resolution_clock::now();
-	// Create threads
-	for (int i = 0; i < threads; ++i) {
-		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, Mbgen_begin[i], Mbgen_end[i], bgenVariantPos[i], cmd.genofile, i, boost::ref(bgen)));
+	for (int i = 0; i < bgen.threads; ++i) {
+		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
 	}
 	thread_grp.join_all();
 	cout << "Joining threads... \n";
-	//pending_data.clear();
 	end_time = std::chrono::high_resolution_clock::now();
 	cout << "Execution time... ";
 	printExecutionTime(start_time, end_time);
 	cout << "Done. \n";
 	cout << "*********************************************************\n";
+
 
 
 
@@ -609,17 +580,15 @@ int main(int argc, char* argv[]) {
 	for (int i = 1; i <= numExpSelCol; i++) {
 		results << "Beta_Interaction" << "_" << i << "\t";
 	}
-
 	for (int i = 1; i <= numExpSelCol; i++) {
 		 for (int j = 1; j <= numExpSelCol; j++) {
 			  results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
 		 }
 	}
-		
 	results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
 
 
-	for (int i = 0; i < threads; i++) {
+	for (int i = 0; i < bgen.threads; i++) {
 		std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
 		std::ifstream thread_output(threadOutputFile);
 		results << thread_output.rdbuf();
@@ -636,20 +605,23 @@ int main(int argc, char* argv[]) {
 
 
 
-	delete[] XTransX;
-	delete[] XinvXTX;
-	//delete[] samID;
 
 
 
-	
-	cout << "*********************************************************\n";
-	std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
-	double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-	cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-	cout << "Total CPU Time = "  << cpuduration << "  Seconds\n";
-	//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
-	cout << "*********************************************************\n";
+	//// Finished
+	//cout << "*********************************************************\n";
+	//std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+	//double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+	//cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+	//cout << "Total CPU Time = "  << cpuduration << "  Seconds\n";
+	////cout << "Execution Wall Time = " << exetime << "  Seconds\n";
+	//cout << "*********************************************************\n";
+
+
+
+	//delete[] XTransX;
+	//delete[] XinvXTX;
+
 
 	return 0;
 }

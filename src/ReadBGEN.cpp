@@ -343,7 +343,7 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 		// Identifying the start position of each BGEN variant block for multithreading when no bgen index file present.
 		for (int snploop = 0; snploop < Mbgen; snploop++) {
 
-			int prev = ftell(fin);
+			long unsigned int prev = ftell(fin);
 
 			// Number of individuals. Only present when Layout == 1
 			if (Layout == 1) {
@@ -400,7 +400,7 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 					keepVariants[k].push_back(snploop);
 					if (index == (nBlocks * k)) {
 						Mbgen_begin[k] = snploop;
-						long int curr = ftell(fin);
+						long unsigned int curr = ftell(fin);
 						bgenVariantPos[k] = curr - (curr - (prev));
 					}
 					if (index == endIndex[k]) {

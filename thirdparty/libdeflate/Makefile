@@ -206,78 +206,6 @@ endif
 
 ##############################################################################
 
-#### Programs
-
-PROG_CFLAGS += $(CFLAGS)		 \
-	       -D_POSIX_C_SOURCE=200809L \
-	       -D_FILE_OFFSET_BITS=64	 \
-	       -DHAVE_CONFIG_H
-
-ALL_PROG_COMMON_HEADERS := programs/config.h \
-			   programs/prog_util.h \
-			   programs/test_util.h
-PROG_COMMON_SRC      := programs/prog_util.c \
-			programs/tgetopt.c
-NONTEST_PROG_SRC     := programs/gzip.c
-TEST_PROG_COMMON_SRC := programs/test_util.c
-TEST_PROG_SRC        := programs/benchmark.c \
-			programs/checksum.c \
-			$(filter-out $(TEST_PROG_COMMON_SRC),$(wildcard programs/test_*.c))
-
-NONTEST_PROGRAMS := $(NONTEST_PROG_SRC:programs/%.c=%$(PROG_SUFFIX))
-DEFAULT_TARGETS  += $(NONTEST_PROGRAMS)
-TEST_PROGRAMS    := $(TEST_PROG_SRC:programs/%.c=%$(PROG_SUFFIX))
-
-PROG_COMMON_OBJ      := $(PROG_COMMON_SRC:%.c=%.o)
-NONTEST_PROG_OBJ     := $(NONTEST_PROG_SRC:%.c=%.o)
-TEST_PROG_COMMON_OBJ := $(TEST_PROG_COMMON_SRC:%.c=%.o)
-TEST_PROG_OBJ        := $(TEST_PROG_SRC:%.c=%.o)
-
-ALL_PROG_OBJ	     := $(PROG_COMMON_OBJ) $(NONTEST_PROG_OBJ) \
-			$(TEST_PROG_COMMON_OBJ) $(TEST_PROG_OBJ)
-
-# Generate autodetected configuration header
-programs/config.h:programs/detect.sh .prog-cflags
-	$(QUIET_GEN) CC="$(CC)" CFLAGS="$(PROG_CFLAGS)" $< > $@
-
-# Compile program object files
-$(ALL_PROG_OBJ): %.o: %.c $(ALL_PROG_COMMON_HEADERS) $(COMMON_HEADERS) \
-			.prog-cflags
-	$(QUIET_CC) $(CC) -o $@ -c $(CPPFLAGS) $(PROG_CFLAGS) $<
-
-# Link the programs.
-#
-# Note: the test programs are not compiled by default.  One reason is that the
-# test programs must be linked with zlib for doing comparisons.
-
-$(NONTEST_PROGRAMS): %$(PROG_SUFFIX): programs/%.o $(PROG_COMMON_OBJ) \
-			$(STATIC_LIB)
-	$(QUIET_CCLD) $(CC) -o $@ $(LDFLAGS) $(PROG_CFLAGS) $+
-
-$(TEST_PROGRAMS): %$(PROG_SUFFIX): programs/%.o $(PROG_COMMON_OBJ) \
-			$(TEST_PROG_COMMON_OBJ) $(STATIC_LIB)
-	$(QUIET_CCLD) $(CC) -o $@ $(LDFLAGS) $(PROG_CFLAGS) $+ -lz
-
-ifdef HARD_LINKS
-# Hard link gunzip to gzip
-gunzip$(PROG_SUFFIX):gzip$(PROG_SUFFIX)
-	$(QUIET_LN) ln -f $< $@
-else
-# No hard links; copy gzip to gunzip
-gunzip$(PROG_SUFFIX):gzip$(PROG_SUFFIX)
-	$(QUIET_CP) cp -f $< $@
-endif
-
-DEFAULT_TARGETS += gunzip$(PROG_SUFFIX)
-
-# Rebuild if CC, PROG_CFLAGS, or CPPFLAGS changed
-.prog-cflags: FORCE
-	@flags='$(CC):$(PROG_CFLAGS):$(CPPFLAGS)'; \
-	if [ "$$flags" != "`cat $@ 2>/dev/null`" ]; then \
-		[ -e $@ ] && echo "Rebuilding programs due to new compiler flags"; \
-		echo "$$flags" > $@; \
-	fi
-
 ##############################################################################
 
 all:$(DEFAULT_TARGETS)
@@ -314,7 +242,7 @@ check:test_programs
 help:
 	@echo "Available targets:"
 	@echo "------------------"
-	@for target in $(DEFAULT_TARGETS) $(TEST_PROGRAMS); do \
+	@for target in $(DEFAULT_TARGETS); do \
 		echo -e "$$target";		\
 	done
 
@@ -324,7 +252,7 @@ clean:
 		lib/*.obj lib/*/*.obj \
 		lib/*.dllobj lib/*/*.dllobj \
 		programs/*.o programs/*.obj \
-		$(DEFAULT_TARGETS) $(TEST_PROGRAMS) programs/config.h \
+		$(DEFAULT_TARGETS) programs/config.h \
 		libdeflate.lib libdeflate.def libdeflatestatic.lib \
 		.lib-cflags .prog-cflags
 

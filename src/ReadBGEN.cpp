@@ -89,7 +89,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 	if ((bgen.SampleIdentifiers == 0) || useSample) {
 
-		cout << "Sample Block is 0 and Sample identifiers used" << endl;
 		if (bgen.SampleIdentifiers == 0 && !useSample) {
 			cerr << "\nERROR: BGEN file does not contain sample identifiers. A .sample file is required. \n"
 				<< "       See https://www.well.ox.ac.uk/~gav/qctool/documentation/sample_file_formats.html for .sample file format. \n\n";
@@ -142,7 +141,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 	if ((bgen.SampleIdentifiers == 1) && !useSample) {
 
-		cout << "Sample Block is 1 and No sample identifiers used" << endl;
 		uint LS1;  fread(&LS1, 4, 1, bgen.fin); // std::cout << "LS1: " << LS1 << std::endl; // LS1 + L_H <= offset
 		uint Nrow; fread(&Nrow, 4, 1, bgen.fin); // cout << "Nrow: " << Nrow << " " << std::flush;
 		if (Nrow != bgen.Nbgen) {

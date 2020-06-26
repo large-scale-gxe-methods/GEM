@@ -19,6 +19,7 @@ class CommandLine {
 		std::string sampleFile;
 		std::string phenoFile;
 		std::string outFile;
+		bool useSampleFile = false;
 
 		// Inputs
 		std::vector<std::string> cov;

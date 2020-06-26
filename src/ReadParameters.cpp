@@ -51,7 +51,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	// Filtering options
 	po::options_description filter("Filtering options");
 	filter.add_options()
-		("maf", po::value<double>()->default_value(0.001), "")
+		("maf", po::value<double>()->default_value(0.0001), "")
 		("include-snp-file", po::value<std::string>(), "");
 
 	//Performance options
@@ -115,7 +115,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	if (out.count("sample")) {
 		sampleFile = out["sample"].as<string>();
 		strcpy(samplefile, sampleFile.c_str());
-	}
+		useSampleFile = true;
+	} 
 	if (out.count("out")) {
 		outFile = out["out"].as<string>();
 	}
@@ -258,7 +259,7 @@ void print_help() {
 
 
     cout << "Filtering Options: " << endl
-		 << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.001" << endl
+		 << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.0001" << endl
 		 << "   --include-snps-file \t Path to file containing a subset of variants in the specified BGEN file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the BGEN file is used for ID\n \t\t\t   matching. This must be either 'snpid' or 'rsid'. There should be one variant identifier per line after the header.\n \t\t\t   Variants not listed in this file will be excluded from analysis." << endl;
 	cout << endl << endl;
 

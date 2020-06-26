@@ -34,7 +34,7 @@
  */
 
 #include "declars.h"
-
+#define VERSION 1.1
 
 
 
@@ -82,6 +82,11 @@ int main(int argc, char* argv[]) {
 	int numExpSelCol = cmd.exp.size();
 	for (int i = 0; i < numExpSelCol; i++) {
 
+		if (phenoHeaderName.compare(cmd.exp[i]) == 0) {
+			cerr << "\nERROR: Exposure " << cmd.exp[i] << " is also specified as the phenotype (--pheno-name)." << "\n\n";
+			exit(1);
+		}
+
 		expHM[cmd.exp[i]] += 1;
 		if (expHM[cmd.exp[i]] > 1) {
 			expErrorString += cmd.exp[i] + " ";
@@ -105,7 +110,10 @@ int main(int argc, char* argv[]) {
 			cerr << "\nERROR: Interactive covariate " << cmd.icov[i] << " is specified as an interaction covariate (--int-covar-names) and exposure (--exposure-names)." << "\n\n";
 			exit(1);
 		}
-
+		if (phenoHeaderName.compare(cmd.icov[i]) == 0) {
+			cerr << "\nERROR: Interactive covariate " << cmd.icov[i] << " is also specified as the phenotype (--pheno-name)." << "\n\n";
+			exit(1);
+		}
 		intHM[cmd.icov[i]] += 1;
 		if (intHM[cmd.icov[i]] > 1) {
 			intCovErrorString += cmd.icov[i] + " ";
@@ -136,7 +144,10 @@ int main(int argc, char* argv[]) {
 			cerr << "\nERROR: Covariate " << cmd.cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
 			exit(1);
 		}
-
+		if (phenoHeaderName.compare(cmd.cov[i]) == 0) {
+			cerr << "\nERROR: Covariate " << cmd.cov[i] << " is also specified as the phenotype (--pheno-name)." << "\n\n";
+			exit(1);
+		}
 		covHM[cmd.cov[i]] += 1;
 		if (covHM[cmd.cov[i]] > 1) {
 			covErrorString += cmd.cov[i] + " ";
@@ -161,6 +172,9 @@ int main(int argc, char* argv[]) {
 	 Print parameter info
 	****************************************************/
 	cout << "\n*********************************************************\n";
+	cout << "Welcome to GEM v" << VERSION << "\n";
+	cout << "*********************************************************\n";
+	cout << "The Phenotype File is: " << cmd.phenoFile << "\n"; 
 	cout << "The Selected Phenotype is: " << phenoHeaderName << '\n';
 	cout << "Continuous or Binary? "; phenoTyp == 0 ? cout << "Continuous \n" : cout << "Binary \n";
 	cout << "Robust or Non-Robust Analysis? "; robust == 0 ? cout << "Non-Robust \n\n" : cout << "Robust \n\n";
@@ -201,6 +215,7 @@ int main(int argc, char* argv[]) {
 		cout << "\n\n";
 	}
 
+	cout << "Logistic Convergence Threshold: " << cmd.tol << "\n";
 	cout << "Minor Allele Frequency Threshold: " << cmd.MAF << "\n";
 	cout << "Number of Threads: " << cmd.threads << "\n";
 	cout << "Output File: " << cmd.outFile << "\n";
@@ -238,6 +253,7 @@ int main(int argc, char* argv[]) {
 	finph.open(phenopath);
 	if (!finph.is_open()) {
 		cerr << "\nERROR: Cannot open phenotype file. \n\n" << endl;
+		exit(1);
 	}
 
 	string line;
@@ -387,7 +403,7 @@ int main(int argc, char* argv[]) {
 	***************************************************************/
 	Bgen bgen;
 	bgen.processBgenHeaderBlock(cmd.genofile);
-	bgen.processBgenSampleBlock(bgen, cmd.samplefile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+	bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
 
 	sampleIds.clear(); // clear memory
 	phenomap.clear(); // clear phenomap
@@ -468,6 +484,10 @@ int main(int argc, char* argv[]) {
 	// X * beta
 	double* Xbeta = new double[samSize];
 	matvecprod(covX, beta, Xbeta, samSize, numSelCol + 1);
+
+	// X*[invert (XTransX)]
+	double* XinvXTX = new double[samSize * (numSelCol + 1)];
+
 	if (phenoTyp == 1) {
 		double* WX = new double[samSize * (numSelCol + 1)];
 		for (int i = 0; i < samSize; i++) {
@@ -481,14 +501,16 @@ int main(int argc, char* argv[]) {
 		matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
 		// invert (XTransX)
 		matInv(XTransX, numSelCol + 1);
+		matmatprod(WX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
 		delete[] WX;
 
 		cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
 	}
+	else {
+		matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+	}
 
-	// X*[invert (XTransX)]
-	double* XinvXTX = new double[samSize * (numSelCol + 1)];
-	matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+	
 	// residual = Y - X * beta
 	double sigma2 = 0;
 	for (int i = 0; i < samSize; i++) {

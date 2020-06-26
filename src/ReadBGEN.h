@@ -37,10 +37,10 @@ class Bgen {
 		// For multithreading BGEN file
 		int threads;
 		bool filterVariants;
-		vector<uint> Mbgen_begin;
-		vector<uint> Mbgen_end;
-		vector<uint> bgenVariantPos;
-		vector<vector<uint>> keepVariants;
+		std::vector<uint> Mbgen_begin;
+		std::vector<uint> Mbgen_end;
+		std::vector<long int> bgenVariantPos;
+		std::vector<vector<uint>> keepVariants;
 
 
 		// Temporary
@@ -60,7 +60,7 @@ class Bgen {
 		int robust;
 		std::string outFile;
 		void processBgenHeaderBlock(char genofile[300]);
-		void processBgenSampleBlock(Bgen bgen, char samplefile[300], unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
+		void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
 		void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 

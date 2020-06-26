@@ -1,3 +1,0 @@
-SNPID	rsID	CHR	POS	Allele1	Allele2	AF	Beta_Marginal	Var_Beta_Marginal	Beta_Interaction_1	Var_Beta_Interaction_1_1	P_Value_Marginal	P_Value_Interaction	P_Value_Joint
-SNP1	rs1		1	A	C	0.366	-0.163631	0.0361341	0.0471617	0.177676	0.389344	0.910914	0.686085
-SNP10	rs10		10	A	C	0.404	-0.0169926	0.0330517	0.0835218	0.159811	0.925532	0.834504	0.974146

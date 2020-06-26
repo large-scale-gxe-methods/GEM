@@ -22,7 +22,7 @@ TimeUtils.o: TimeUtils.cpp
 	$(CC) -c -std=c++11 TimeUtils.cpp
 
 ReadBGEN.o: ReadBGEN.cpp
-	$(CC) -c -std=c++11 -O2 ReadBGEN.cpp
+	$(CC) -c -std=c++11 -O2  -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 ReadBGEN.cpp
 
 GEM.o: GEM.cpp
 	$(CC) -std=c++11 -c -O2 GEM.cpp

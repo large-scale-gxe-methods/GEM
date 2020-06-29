@@ -192,6 +192,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	// Filtering options
 	if (out.count("maf")) {
 		MAF = out["maf"].as<double>();
+
+		if (MAF < 0.0 || MAF > 1) {
+			cerr << "\nERROR: Please specify --maf with a value greater than or equal to 0 and less than or equal to 1.\n\n";
+			exit(1);
+		}
 	}
 	if (out.count("include-snp-file")) {
 		includeVariantFile = out["include-snp-file"].as<std::string>();
@@ -208,9 +213,19 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	// Performance options
 	if (out.count("threads")) {
 		threads = out["threads"].as<int>();
+
+		if (threads <= 0) {
+			cerr << "\nERROR: Please specify --threads with a value greater than 0.\n\n";
+			exit(1);
+		}
 	}
 	if (out.count("stream-snps")) {
 		stream_snps = out["stream-snps"].as<int>();
+
+		if (stream_snps <= 0) {
+			cerr << "\nERROR: Please specify --stream_snps with a value greater than 0.\n\n";
+			exit(1);
+		}
 	}
 }
 

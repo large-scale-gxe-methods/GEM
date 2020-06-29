@@ -60,9 +60,9 @@ int main(int argc, char* argv[]) {
 	int samSize;
 	int phenoCol;
 	int samIDCol;
-	int robust       = cmd.robust;
-	int phenoTyp     = cmd.phenoType;
-	int stream_snps  = cmd.stream_snps;
+	int robust = cmd.robust;
+	int phenoTyp = cmd.phenoType;
+	int stream_snps = cmd.stream_snps;
 	char delim = cmd.pheno_delim[0];
 	if (delim == '\0') delim = ' ';
 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
 	cout << "\n*********************************************************\n";
 	cout << "Welcome to GEM v" << VERSION << "\n";
 	cout << "*********************************************************\n";
-	cout << "The Phenotype File is: " << cmd.phenoFile << "\n"; 
+	cout << "The Phenotype File is: " << cmd.phenoFile << "\n";
 	cout << "The Selected Phenotype is: " << phenoHeaderName << '\n';
 	cout << "Continuous or Binary? "; phenoTyp == 0 ? cout << "Continuous \n" : cout << "Binary \n";
 	cout << "Robust or Non-Robust Analysis? "; robust == 0 ? cout << "Non-Robust \n\n" : cout << "Robust \n\n";
@@ -223,16 +223,16 @@ int main(int argc, char* argv[]) {
 
 
 
-	
+
 
 	// Rearranging covSelHeaders
 	numSelCol = numSelCol + numIntSelCol + numExpSelCol;
 	vector<int> colSelVec(numSelCol);
-	for (int i = numExpSelCol-1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]);}
+	for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
 	if (numIntSelCol != 0) {
 		for (int i = numIntSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), intCovSelHeadersName[i]); }
 	}
-	
+
 
 
 
@@ -278,14 +278,16 @@ int main(int argc, char* argv[]) {
 	if (colNames.find(phenoHeaderName) == colNames.end()) {
 		cerr << "\nERROR: Cannot find phenotype column " << phenoHeaderName << " in phenotype file. \n\n";
 		exit(1);
-	} else {
+	}
+	else {
 		phenoCol = colNames[phenoHeaderName];
 	}
 
 	if (colNames.find(samIDHeaderName) == colNames.end()) {
 		cerr << "\nERROR: Cannot find sample ID column " << samIDHeaderName << " in phenotype file. \n\n";
 		exit(1);
-	} else {
+	}
+	else {
 		samIDCol = colNames[samIDHeaderName];
 	}
 
@@ -301,25 +303,25 @@ int main(int argc, char* argv[]) {
 
 	if (numIntSelCol != 0) {
 		for (int i = 0; i < numIntSelCol; i++) {
-			 if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
-				 cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
-				 exit(1);
-			 }
+			if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
+				cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
+				exit(1);
+			}
 		}
 	}
 
 	for (int i = 0; i < numExpSelCol; i++) {
-		 if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
-			 cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
-			 exit(1);
-		 }
+		if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
+			cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
+			exit(1);
+		}
 	}
 
 	// Erase all elements and leaving it with a size of 0.
 	colNames.clear();
 
-	
-	
+
+
 
 
 
@@ -328,7 +330,7 @@ int main(int argc, char* argv[]) {
 	int nrows = 0;
 	while (getline(finph, line)) nrows++;
 	samSize = nrows;
-	finph.clear(); 
+	finph.clear();
 	finph.seekg(0, finph.beg);
 	getline(finph, line);
 	cout << "Before ID Matching and checking missing values... \n";
@@ -419,7 +421,7 @@ int main(int argc, char* argv[]) {
 	cout << "Starting GWAS... \n\n";
 	samSize = bgen.new_samSize;
 	double* phenoY = &bgen.new_phenodata[0];
-	double* covX   = &bgen.new_covdata[0];
+	double* covX = &bgen.new_covdata[0];
 	vector <double> residvec(samSize);
 
 	// for logistic regression
@@ -429,7 +431,7 @@ int main(int argc, char* argv[]) {
 
 
 	cout << "Precalculations and fitting null model..." << endl;
-	auto start_time = std::chrono::high_resolution_clock::now(); 
+	auto start_time = std::chrono::high_resolution_clock::now();
 	// transpose(X) * X
 	double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
 	matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
@@ -510,7 +512,7 @@ int main(int argc, char* argv[]) {
 		matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
 	}
 
-	
+
 	// residual = Y - X * beta
 	double sigma2 = 0;
 	for (int i = 0; i < samSize; i++) {
@@ -537,7 +539,7 @@ int main(int argc, char* argv[]) {
 	cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
 
 
-	bgen.numSelCol    = numSelCol;
+	bgen.numSelCol = numSelCol;
 	bgen.numIntSelCol = numIntSelCol;
 	bgen.numExpSelCol = numExpSelCol;
 	bgen.Sq = Sq;
@@ -548,13 +550,9 @@ int main(int argc, char* argv[]) {
 	bgen.phenoTyp = phenoTyp;
 	bgen.covX = covX;
 	bgen.XinvXTX = XinvXTX;
-	bgen.resid  = resid;
+	bgen.resid = resid;
 	bgen.sigma2 = sigma2;
 	bgen.outFile = cmd.outFile;
-
-	
-
-
 
 
 	start_time = std::chrono::high_resolution_clock::now();
@@ -566,14 +564,16 @@ int main(int argc, char* argv[]) {
 	cout << "*********************************************************\n";
 
 
-
-
-
 	//Preparing for parallelizing of BGEN file
-	cout << "Starting multithreading...\n"; 
-	boost::thread_group thread_grp;
-	
+	if (cmd.threads > 1) {
+	    cout << "Running multithreading...\n";
+	}
+    else {
+	   cout << "Running with single thread...\n";
+	}
 
+
+	boost::thread_group thread_grp;
 	start_time = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < bgen.threads; ++i) {
 		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
@@ -585,7 +585,7 @@ int main(int argc, char* argv[]) {
 	printExecutionTime(start_time, end_time);
 	cout << "Done. \n";
 	cout << "*********************************************************\n";
-
+	
 
 
 

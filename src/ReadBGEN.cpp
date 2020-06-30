@@ -509,25 +509,26 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 
 
 
-
 			// Seeks past the uncompressed genotype.
-			uint zLen;  fread(&zLen, 4, 1, fin); // cout << "zLen: " << zLen << endl;
-			if (Layout == 1) {
-				if (CompressedSNPBlocks == 0) {
-					fseek(fin, 6 * Nbgen, SEEK_CUR);
+			if (Layout == 2) {
+				if (CompressedSNPBlocks > 0) {
+					uint zLen;  fread(&zLen, 4, 1, fin);
+					fseek(fin, 4 + zLen - 4, SEEK_CUR);
 
 				}
 				else {
+					uint zLen;  fread(&zLen, 4, 1, fin);
 					fseek(fin, zLen, SEEK_CUR);
 				}
 			}
-			if (Layout == 2) {
-				if (CompressedSNPBlocks == 0) {
+			else {
+				if (CompressedSNPBlocks == 1) {
+					uint zLen;  fread(&zLen, 4, 1, fin);
 					fseek(fin, zLen, SEEK_CUR);
 
 				}
 				else {
-					fseek(fin, 4 + zLen - 4, SEEK_CUR);
+					fseek(fin, 6 * Nbgen, SEEK_CUR);
 				}
 			}
 		}

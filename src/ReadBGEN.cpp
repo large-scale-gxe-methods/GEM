@@ -1601,9 +1601,6 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 			}
 			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
 		}
-		results << oss.str();
-		oss.str(std::string());
-		oss.clear();
 
 		delete[] ZGStR;
 		delete[] ZGStZGS;

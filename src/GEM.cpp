@@ -215,7 +215,9 @@ int main(int argc, char* argv[]) {
 		cout << "\n\n";
 	}
 
-	cout << "Logistic Convergence Threshold: " << cmd.tol << "\n";
+	if (cmd.phenoType == 1) {
+		cout << "Logistic Convergence Threshold: " << cmd.tol << "\n";
+	}
 	cout << "Minor Allele Frequency Threshold: " << cmd.MAF << "\n";
 	cout << "Number of Threads: " << cmd.threads << "\n";
 	cout << "Output File: " << cmd.outFile << "\n";
@@ -264,7 +266,7 @@ int main(int argc, char* argv[]) {
 
 	while (getline(issHead, headerName, delim)) {
 		if (colNames.find(headerName) != colNames.end()) {
-			cerr << "There has duplicate header names.\n";
+			cerr << "\nERROR: There are duplicate header names (" << headerName << ") in the phenotype file.\n\n";
 			exit(1);
 		}
 

@@ -74,18 +74,6 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 		cerr << "\nERROR: BGEN sample identifier flag must be 0 or 1\n\n";
 		exit(1);
 	}
-
-	if (Layout == 2) {
-		if (CompressedSNPBlocks < 2) {
-			cout << "BGEN file version: " << "v1.2\n";
-		}
-		else {
-			cout << "BGEN file version: " << "v1.3\n";
-		}
-	}
-	else {
-		cout << "BGEN file version: " << "v1.1\n";
-	}
 }
 
 
@@ -174,7 +162,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 		int tempIndex = 0;
 		for (uint m = 0; m < bgen.Nbgen; m++) {
 			ushort LSID; fread(&LSID, 2, 1, bgen.fin); // std::cout << "LSID: " << LSID << " ";
-			fread(samID, 1, LSID, bgen.fin); // std::cout << "samID: " << samID << " " << std::endl;
+			fread(samID, 1, LSID, bgen.fin); samID[LSID] = '\0'; // std::cout << "samID: " << samID << " " << std::endl;
 
 			// IDMatching
 			string strtmp(samID);
@@ -741,7 +729,7 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint64_t prob_offset, uin
 This function contains code that has been revised based on the Parse function in BOLT-LMM v2.3 source code and Plink 2.00
 **************************************************************************************************************************/
 
-void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test) {
+void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test) {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -1045,7 +1033,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 					exit(1);
 				}
 
-				const unsigned char* missing_and_ploidy_iter = &(bufAt[8]);
+				const unsigned char* missing_and_ploidy_info = &(bufAt[8]);
 				const unsigned char* probs_start = &(bufAt[10 + N]);
 				const uint32_t is_phased = probs_start[-2];
 				const uint32_t bit_precision = probs_start[-1];
@@ -1062,26 +1050,29 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 				int tmp1 = stream_i * Sq1 * samSize;
 				int idx_k = 0;
 				uintptr_t prob_offset = 0;
+				uint nMissing = 0;
 				if (!is_phased) {
 					for (int i = 0; i < N; i++) {
-						const uint32_t missing_and_ploidy = *missing_and_ploidy_iter++;
+						const uint32_t missing_and_ploidy = missing_and_ploidy_info[i];
 
 						uintptr_t numer_aa;
 						uintptr_t numer_ab;
 
-						switch (missing_and_ploidy) {
-						case 1:
-							Bgen13GetOneVal(probs_start, prob_offset, bit_precision, numer_mask);
-							prob_offset++;
-							break;
-						case 2:
+						if (missing_and_ploidy == 2) {
 							Bgen13GetTwoVals(probs_start, prob_offset, bit_precision, numer_mask, &numer_aa, &numer_ab);
 							prob_offset += 2;
-							break;
-						default:
-							cerr << "\nERROR: " << snpID << " contains ploidy value " << missing_and_ploidy << ". Currently unsupported.\n\n";
+
+						}
+						else if (missing_and_ploidy == 1) {
+							const uintptr_t numer_a = Bgen13GetOneVal(probs_start, prob_offset, bit_precision, numer_mask);
+							prob_offset++;
+
+						}
+						else {
+							cerr << "\nERROR: " << snpID << " contains ploidy " << missing_and_ploidy << ". Currently unsupported.\n\n";
 							exit(1);
 						}
+						
 
 						if (include_idx[idx_k] == i) {
 							ploidy_sum += missing_and_ploidy;
@@ -1096,7 +1087,6 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 							AF[stream_i] += dosage;
 
 							if (phenoType == 1) {
-
 								ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
 							}
 							else {
@@ -1109,7 +1099,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 				} else {
 					for (int i = 0; i < N; i++) {
 
-						const uint32_t missing_and_ploidy = *missing_and_ploidy_iter++;
+						const uint32_t missing_and_ploidy = missing_and_ploidy_info[i];
 
 					    uintptr_t numer_aa;
 						uintptr_t numer_ab;
@@ -1597,7 +1587,7 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 		} // end of if robust == 1
 
 
-
+		
 		for (int i = 0; i < stream_snps; i++) {
 			oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
 			for (int ii = 0; ii < expSq; ii++) {
@@ -1611,8 +1601,9 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 			}
 			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
 		}
-
-
+		results << oss.str();
+		oss.str(std::string());
+		oss.clear();
 
 		delete[] ZGStR;
 		delete[] ZGStZGS;
@@ -1632,13 +1623,19 @@ void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVarian
 		AF.clear();
 
 
-		if ((variant_index % 10000 == 0) || snploop == end + 1) {
+		if (variant_index % 1000 == 0) {
 			results << oss.str();
 			oss.str(std::string());
 			oss.clear();
-			variant_index = 0;
 		}
 	} // end of snploop 
+
+	if (variant_index % 1000 != 0) {
+	    results << oss.str();
+	    oss.str(std::string());
+	    oss.clear();
+	}
+
 
 	if (Layout == 1 && CompressedSNPBlocks == 1) {
 		free(shortBuf1);

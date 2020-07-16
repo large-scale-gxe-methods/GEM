@@ -39,7 +39,7 @@ class Bgen {
 		bool filterVariants;
 		std::vector<uint> Mbgen_begin;
 		std::vector<uint> Mbgen_end;
-		std::vector<long int> bgenVariantPos;
+		std::vector<long long unsigned int> bgenVariantPos;
 		std::vector<vector<uint>> keepVariants;
 
 
@@ -64,5 +64,5 @@ class Bgen {
 		void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void BgenParallelGWAS(int begin, int end, long int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
+void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
 #endif

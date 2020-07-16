@@ -213,8 +213,15 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 		cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
 		if (bgen.SampleIdentifiers == 1 && !useSample) {
-			cout << "ID matching was done using the BGEN sample identifier block. \nHere are the first 5 sample identifiers in the block: \n";
-			for (int i = 0; i < 5; i++) {
+			int print_i = 0;
+			if (bgen.Nbgen < 5) { 
+				print_i = bgen.Nbgen; 
+			}
+			else { 
+				print_i = 5;
+			}
+			cout << "ID matching was done using the BGEN sample identifier block. \nHere are the first " << print_i << " sample identifiers in the block: \n";
+			for (int i = 0; i < print_i; i++) {
 				cout << " " << tempID[i] << "\n";
 			}
 			cout << "\nRename the sample identifiers in the BGEN file or use a .sample file (--sample) instead. \n\n";
@@ -468,8 +475,8 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 				if (LKnum != 2) {
-					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
-					exit(1);
+					//cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					//exit(1);
 				}
 			}
 
@@ -636,8 +643,8 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 				if (LKnum != 2) {
-					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
-					exit(1);
+					//cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					//exit(1);
 				}
 			}
 
@@ -797,6 +804,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 	int snploop = begin;
 	int variant_index = 0;
 	int keepIndex = 0;
+	int testCount = 0;
 	while (snploop <= end) {
 
 		int Sq1 = Sq + 1;
@@ -849,7 +857,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				rsID = new char[maxLA + 1];
 			}
 			fread(rsID, 1, LR, fin3); rsID[LR] = '\0'; 
-		
+			//cout << string(rsID) << endl;
 			// The chromosome
 			ushort LC; fread(&LC, 2, 1, fin3);
 			fread(chrStr, 1, LC, fin3); chrStr[LC] = '\0';
@@ -859,14 +867,14 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 			physpos_tmp = std::to_string(physpos);
 
 			// The number of alleles if Layout == 2. If Layout == 1, this value is assumed to be 2 and not stored
+			ushort LKnum;
 			if (Layout == 2) {
-				ushort LKnum; fread(&LKnum, 2, 1, fin3); // this is for Layout = 2, Lnum = 2 is Layout = 1
-				if (LKnum != 2) {
-					cerr << "\nERROR: " << snpID << " is a non-bi-allelic variant with " << LKnum << " alleles \n\n";
+				fread(&LKnum, 2, 1, fin3); // this is for Layout = 2, Lnum = 2 is Layout = 1[
+				if (LKnum != 2) {\
+					cout << "\nERROR: " << snpID << " is a non-bi-allelic variant with " << LKnum << " alleles \n\n";
 					exit(1);
 				}
 			}
-
 			// The first allele
 			ushort LA;  fread(&LA, 4, 1, fin3);
 			if (LA > maxLA) {
@@ -884,9 +892,6 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				allele0 = new char[maxLB + 1];
 			}
 			fread(allele0, 1, LB, fin3); allele0[LB] = '\0';
-
-
-
 
 
 			if (Layout == 1) {
@@ -960,12 +965,12 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				uint zLen; fread(&zLen, 4, 1, fin3);
 
 
-				if (filterVariants && keepVariants[keepIndex]+1 != snploop) {
-					if (CompressedSNPBlocks == 0) {
-						fseek(fin3, zLen, SEEK_CUR);
+				if (filterVariants) {
+					if (CompressedSNPBlocks > 0) {
+						fseek(fin3, 4 + zLen - 4, SEEK_CUR);
 					}
 					else {
-						fseek(fin3, 4 + zLen - 4, SEEK_CUR);
+						fseek(fin3, zLen, SEEK_CUR);
 					}
 					continue;
 				}
@@ -1018,7 +1023,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				memcpy(&K, &(bufAt[4]), sizeof(int16_t));
 				if (K != 2U) {
 					cout << "\nERROR: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
-					exit(1);
+					//exit(1);
 				}
 			
 				const uint32_t min_ploidy = bufAt[6];
@@ -1067,6 +1072,8 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 							const uintptr_t numer_a = Bgen13GetOneVal(probs_start, prob_offset, bit_precision, numer_mask);
 							prob_offset++;
 
+							numer_aa = numer_a;
+							numer_ab = 0;
 						}
 						else {
 							cerr << "\nERROR: " << snpID << " contains ploidy " << missing_and_ploidy << ". Currently unsupported.\n\n";
@@ -1101,19 +1108,22 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 
 						const uint32_t missing_and_ploidy = missing_and_ploidy_info[i];
 
-					    uintptr_t numer_aa;
+						uintptr_t numer_aa;
 						uintptr_t numer_ab;
 
-						switch (missing_and_ploidy) {
-						case 1:
-							Bgen13GetOneVal(probs_start, prob_offset, bit_precision, numer_mask);
-							prob_offset++;
-							break;
-						case 2:
+						if (missing_and_ploidy == 2) {
 							Bgen13GetTwoVals(probs_start, prob_offset, bit_precision, numer_mask, &numer_aa, &numer_ab);
 							prob_offset += 2;
-							break;
-						default:
+
+						}
+						else if (missing_and_ploidy == 1) {
+							const uintptr_t numer_a = Bgen13GetOneVal(probs_start, prob_offset, bit_precision, numer_mask);
+							prob_offset++;
+
+							numer_aa = numer_a;
+							numer_ab = 0;
+						}
+						else {
 							cerr << "\nERROR: " << snpID << " contains ploidy " << missing_and_ploidy << ". Currently unsupported.\n\n";
 							exit(1);
 						}
@@ -1620,14 +1630,14 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 		AF.clear();
 
 
-		if (variant_index % 1000 == 0) {
+		if (variant_index % 10000 == 0) {
 			results << oss.str();
 			oss.str(std::string());
 			oss.clear();
 		}
 	} // end of snploop 
 
-	if (variant_index % 1000 != 0) {
+	if (variant_index % 10000 != 0) {
 	    results << oss.str();
 	    oss.str(std::string());
 	    oss.clear();
@@ -1636,9 +1646,6 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 
 	if (Layout == 1 && CompressedSNPBlocks == 1) {
 		free(shortBuf1);
-		free(zBuf1);
-	}
-	else {
 		free(zBuf1);
 	}
 

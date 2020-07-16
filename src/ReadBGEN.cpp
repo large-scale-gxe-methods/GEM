@@ -475,8 +475,8 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 				if (LKnum != 2) {
-					//cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
-					//exit(1);
+					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					exit(1);
 				}
 			}
 
@@ -643,8 +643,8 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				ushort LKnum; fread(&LKnum, 2, 1, fin); // this is for Layout = 2, Lnum = 2 is Layout = 1
 
 				if (LKnum != 2) {
-					//cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
-					//exit(1);
+					cerr << "\nERROR: Non-bi-allelic variant found: " << LKnum << " alleles\n\n";
+					exit(1);
 				}
 			}
 
@@ -870,7 +870,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 			ushort LKnum;
 			if (Layout == 2) {
 				fread(&LKnum, 2, 1, fin3); // this is for Layout = 2, Lnum = 2 is Layout = 1[
-				if (LKnum != 2) {\
+				if (LKnum != 2) {
 					cout << "\nERROR: " << snpID << " is a non-bi-allelic variant with " << LKnum << " alleles \n\n";
 					exit(1);
 				}
@@ -1023,7 +1023,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				memcpy(&K, &(bufAt[4]), sizeof(int16_t));
 				if (K != 2U) {
 					cout << "\nERROR: There are SNP(s) with more than 2 alleles (non-bi-allelic). . Currently unsupported. \n\n";
-					//exit(1);
+					exit(1);
 				}
 			
 				const uint32_t min_ploidy = bufAt[6];

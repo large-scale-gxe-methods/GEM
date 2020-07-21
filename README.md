@@ -16,8 +16,8 @@ Current version: 1.1
 
 ## Installation  
 Library Dependencies:  
-* BLAS/LAPACK. For top performance, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) on Intel processors. For AMD processors, ATLAS or OPENBLAS may be better alternatives.  
-* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile. Users on macOS may need to replace -lboost_thread with -lboost_thread-mt 
+* BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not install, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br /> For AMD processors, ATLAS or OPENBLAS may be better alternatives.  
+* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile. Users on macOS may need to replace ```-lboost_thread``` with ```-lboost_thread-mt``` in the makefile.
 
 <br />
 

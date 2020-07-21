@@ -51,7 +51,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	// Filtering options
 	po::options_description filter("Filtering options");
 	filter.add_options()
-		("maf", po::value<double>()->default_value(0.0001), "")
+		("maf", po::value<double>()->default_value(0.001), "")
 		("miss-geno-cutoff",  po::value<double>()->default_value(0.05), "")
 		("include-snp-file",  po::value<std::string>(), "");
 
@@ -285,7 +285,7 @@ void print_help() {
 
 
     cout << "Filtering Options: " << endl
-		 << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.0001" << endl
+		 << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.001" << endl
 		 << "   --miss-geno-cutoff \t Threshold to filter variants based on the missing genotype rate.\n \t\t\t    Default: 0.05" << endl
 		 << "   --include-snp-file \t Path to file containing a subset of variants in the specified BGEN file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the BGEN file is used for ID\n \t\t\t   matching. This must be either 'snpid' or 'rsid'. There should be one variant identifier per line after the header.\n \t\t\t   Variants not listed in this file will be excluded from analysis." << endl;
 	cout << endl << endl;

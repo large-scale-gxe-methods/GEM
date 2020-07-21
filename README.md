@@ -58,7 +58,7 @@ General Options:
     Prints the available options of GEM and exits.  
    
    
---verison
+--version
     Prints the version of GEM and exits.
   
   
@@ -103,7 +103,7 @@ Phenotype File Options:
 --pheno-type
      0 indicates a continuous phenotype and 1 indicates a binary phenotype.  
 
---robust  
+--robust  <value>
      0 for model-based standard errors and 1 for robust standard errors.
         Default: 0  
 
@@ -123,12 +123,12 @@ Phenotype File Options:
    
 Filtering Options:  
 
---maf <value>
-     Threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
-        Default: 0.0001
+--maf
+     Minimum threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
+        Default: 0.001
   
---miss-geno-cutoff <value>
-     Threshold to filter variants based on the missing genotype rate.  
+--miss-geno-cutoff
+     Maximum threshold value [0, 1.0] to filter variants based on the missing genotype rate.  
         Default: 0.05  
   
 --include-snp-file  
@@ -140,11 +140,11 @@ Filtering Options:
   
 Performance Options:  
 
---threads <value>
+--threads
      Set number of compute threads.
     	  Default: ceiling(detected threads / 2)  
 
---stream-snps  
+--stream-snps 
      Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
         Default: 1
 

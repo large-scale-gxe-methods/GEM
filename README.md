@@ -1,6 +1,9 @@
 # GEM  
 
-GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in samples from unrelated individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-covariate interactions, and robust inference.
+GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in samples from unrelated individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-covariate interactions, and robust inference. 
+
+<br />
+Current versions: 1.1
 
 <br />
 
@@ -14,9 +17,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 ## Installation  
 Library Dependencies:  
 * BLAS/LAPACK. For top performance, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) on Intel processors. For AMD processors, ATLAS or OPENBLAS may be better alternatives.  
-* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile.  
-* Zlib for BGEN files with zlib compression type.  
-* ZSTD for BGEN v1.3 formats.
+* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile. Users on macOS may need to replace -lboost_thread with -lboost_thread-mt 
 
 <br />
 
@@ -123,20 +124,29 @@ Phenotype File Options:
 Filtering Options:  
 
 --maf <value>
-    Threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
-       Default: 0.001
+     Threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
+        Default: 0.0001
   
+--miss-geno-cutoff <value>
+     Threshold to filter variants based on the missing genotype rate.  
+        Default: 0.05  
+  
+--include-snp-file  
+     Path to file containing a subset of variants in the specified BGEN file to be used for analysis. 
+     The firstline in this file is the header that specifies which variant identifier in the BGEN file  
+     is used for ID matching. This must be either 'snpid' or 'rsid'. There should be one variant 
+     identifier per line after the header. Variants not listed in this file will be excluded from analysis.
   
   
 Performance Options:  
 
 --threads <value>
-    Set number of compute threads.
+     Set number of compute threads.
     	  Default: ceiling(detected threads / 2)  
 
 --stream-snps  
-    Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
-          Default: 1
+     Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
+        Default: 1
 
 ```
 
@@ -158,18 +168,19 @@ Performance Options:
 
 #### Output File Format  
 
-GEM will write results to the output file specified to the --out paramater (or 'gem.out' if no output file is specified).  
+GEM will write results to the output file specified with the --out paramater (or 'gem.out' if no output file is specified).  
 Below are details of the column header in the output file.  
 
 ```diff
 # SNP Info
-SNPID   - The SNP identifier as retrieved from the BGEN file.
-rsID    - The reference SNP ID number.
-CHR     - The chromosome of the SNP.
-POS     - The physical position of the SNP.
-Allele1 - The first allele in the BGEN file.
-Allele2 - The second allele in the BGEN file that is counted in association testing.
-AF      - The allele frequency of the second allele in the BGEN file.
+SNPID     - The SNP identifier as retrieved from the BGEN file.
+rsID      - The reference SNP ID number.
+CHR       - The chromosome of the SNP.
+POS       - The physical position of the SNP.
+Allele1   - The first allele in the BGEN file.
+Allele2   - The second allele in the BGEN file that is counted in association testing.
+N_samples - The number of samples without missing genotypes.
+AF        - The allele frequency of the second allele in the BGEN file.
 
 
 # Betas and Variances

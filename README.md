@@ -103,7 +103,7 @@ Phenotype File Options:
 --pheno-type
      0 indicates a continuous phenotype and 1 indicates a binary phenotype.  
 
---robust  <value>
+--robust
      0 for model-based standard errors and 1 for robust standard errors.
         Default: 0  
 

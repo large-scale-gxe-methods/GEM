@@ -831,7 +831,6 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 				rsID = new char[maxLA + 1];
 			}
 			fread(rsID, 1, LR, fin3); rsID[LR] = '\0'; 
-			//cout << string(rsID) << endl;
 			// The chromosome
 			ushort LC; fread(&LC, 2, 1, fin3);
 			fread(chrStr, 1, LC, fin3); chrStr[LC] = '\0';
@@ -934,7 +933,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 					}
 					missingIndex.clear();
 				}
-				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing) + "\t" + std::to_string(nMissing);
+				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
 				
 
 				for (int j = 0; j < Sq; j++) {
@@ -1161,7 +1160,7 @@ void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<ui
 					}
 					missingIndex.clear();
 				}
-				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing) + "\t" + std::to_string(nMissing);
+				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
 
 				for (int j = 0; j < Sq; j++) {
 					 int tmp3 = samSize * (j + 1) + tmp1;

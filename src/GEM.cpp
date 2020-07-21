@@ -595,15 +595,11 @@ int main(int argc, char* argv[]) {
 
 
 
-
-
-
-
 	// Write all results from each thread to 1 file
 	cout << "Combining results... \n";
 	start_time = std::chrono::high_resolution_clock::now();
 	std::ofstream results(output, std::ofstream::binary);
-	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t" << "N_Missing" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t"  << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 	for (int i = 1; i <= numExpSelCol; i++) {
 		results << "Beta_Interaction" << "_" << i << "\t";
 	}

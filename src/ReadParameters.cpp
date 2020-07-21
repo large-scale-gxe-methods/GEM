@@ -52,7 +52,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	po::options_description filter("Filtering options");
 	filter.add_options()
 		("maf", po::value<double>()->default_value(0.0001), "")
-		("include-snp-file", po::value<std::string>(), "");
+		("miss-geno-cutoff",  po::value<double>()->default_value(0.05), "")
+		("include-snp-file",  po::value<std::string>(), "");
 
 	//Performance options
 	po::options_description performance("Performance options");
@@ -198,6 +199,16 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 			exit(1);
 		}
 	}
+	if (out.count("miss-geno-cutoff")) {
+		cout << "Here" << endl;
+		missGenoRate = out["miss-geno-cutoff"].as<double>();
+		if (missGenoRate < 0.0 || missGenoRate > 1.0) {
+			cerr << "\nERROR: Please specify --miss-geno-cutoff with a value greater than or equal to 0 and less than or equal to 1.\n\n";
+			exit(1);
+		}
+		cout << "Here" << endl;
+
+	}
 	if (out.count("include-snp-file")) {
 		includeVariantFile = out["include-snp-file"].as<std::string>();
 	}
@@ -239,9 +250,9 @@ void print_help() {
 
 	// Welcome and version output
 	cout << "\n\nWelcome to GEM" << endl;
-	cout << "Version: " << VERSION << endl << endl << endl;
-	cout << "Usage: GEM <options>" << endl << endl;
-
+	cout << "Version: " << VERSION << endl;
+	cout << "(C) 2018-2020 Liang Hong, Han Chen, Duy Pham \n";
+	cout << "GNU General Public License v3\n\n\n";
 
 
 	cout << "General Options: " << endl
@@ -275,6 +286,7 @@ void print_help() {
 
     cout << "Filtering Options: " << endl
 		 << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.0001" << endl
+		 << "   --miss-geno-cutoff \t Threshold to filter variants based on the missing genotype rate.\n \t\t\t    Default: 0.05" << endl
 		 << "   --include-snp-file \t Path to file containing a subset of variants in the specified BGEN file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the BGEN file is used for ID\n \t\t\t   matching. This must be either 'snpid' or 'rsid'. There should be one variant identifier per line after the header.\n \t\t\t   Variants not listed in this file will be excluded from analysis." << endl;
 	cout << endl << endl;
 

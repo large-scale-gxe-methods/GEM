@@ -46,6 +46,7 @@ class Bgen {
 		// Temporary
 		int stream_snps;
 		double  maf;
+		double missGeno;
 		vector < double > miu;
 		int     phenoTyp;
 		double  sigma2;

@@ -31,6 +31,7 @@ class CommandLine {
 	
 		// Filtering options
 		double MAF;
+		double missGenoRate;
 		std::string includeVariantFile;
 		bool doFilters;
 

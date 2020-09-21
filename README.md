@@ -10,6 +10,7 @@ Current version: 1.1
 ## Contents
 - [Installation](#installation)
 - [Usage](#usage)
+- [Contact](#contact)
 - [License](#license)
 
 <br />
@@ -17,7 +18,7 @@ Current version: 1.1
 ## Installation  
 Library Dependencies:  
 * BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not installed, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br /> <br />For AMD processors, ATLAS or OPENBLAS may be better alternatives. <br /><br />
-* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile. Users on macOS may need to replace ```-lboost_thread``` with ```-lboost_thread-mt``` in the makefile.
+* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile.  
 
 <br />
 
@@ -73,8 +74,32 @@ Input File Options:
 
 --sample  
      Path to the sample file.  
-     Required when the BGEN file does not contain sample identifiers.
-
+     Required when the BGEN file does not contain sample identifiers.  
+  
+--pfile  
+     Path and prefix to the .pgen, .pvar, and .psam files.  
+  
+--pgen  
+     Path to the pgen file.  
+  
+--pvar  
+     Path to the pvar file.  
+  
+--psam  
+     Path to the psam file.  
+  
+--bfile  
+     Path and prefix to the .bed, .bim and .fam files.  
+  
+--bed  
+     Path to the bed file.  
+  
+--bim  
+     Path to the bim file.  
+  
+--fam  
+     Path to the fam file.  
+  
 --out  
      Full path and extension to where GEM output results.  
      Default: gem.out
@@ -155,14 +180,16 @@ Performance Options:
 #### Input Files
 
 * ##### Phenotype File
-    A file which should contain a sample identifier column and columns for the phenotypes and covariates.  
+    1. A file which should contain a sample identifier column and columns for the phenotypes and covariates.  
 
-* ##### BGEN File
-    GEM can support v1.1, v1.2 or v1.3 .bgen genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).
-
+* ##### Genotype Files
+    1. BGEN v1.1, v1.2 or v1.3 genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+    2. Plink 2.0 PGEN file described here [PGEN Format](https://www.cog-genomics.org/plink/2.0/formats#pgen).  
+    3. Plink BED file described here [BED format](https://www.cog-genomics.org/plink/2.0/formats#bed).  
+     
 * ##### Sample File
-    A .sample file is required when the .bgen file does not contain sample identifiers.  
-    Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
+    1. A .sample file is required when the .bgen file does not contain sample identifiers.  
+       Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
     
 <br /> 
 
@@ -172,9 +199,10 @@ GEM will write results to the output file specified with the --out paramater (or
 Below are details of the column header in the output file.  
 
 ```diff
-# SNP Info
-SNPID     - The SNP identifier as retrieved from the BGEN file.
-rsID      - The reference SNP ID number.
+# SNP Info  
+ID        - The variant identifier. (PGEN/BED)
+SNPID     - The SNP identifier as retrieved from the BGEN file. (BGEN only)
+rsID      - The reference SNP ID number. (BGEN only)
 CHR       - The chromosome of the SNP.
 POS       - The physical position of the SNP.
 Allele1   - The first allele in the BGEN file.
@@ -220,6 +248,11 @@ GEM allows interaction covariate adjustments by specifying the ```--int-covar-na
 <br />
 
 
+## Contact 
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu), or Duy Pham (Duy.T.Pham@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+
+<br />
+<br />
 
 ## License 
 

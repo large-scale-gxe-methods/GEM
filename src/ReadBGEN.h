@@ -35,7 +35,7 @@ class Bgen {
 		std::vector<unsigned int> includeVariantIndex;
 
 		// For multithreading BGEN file
-		int threads;
+		uint threads;
 		bool filterVariants;
 		std::vector<uint> Mbgen_begin;
 		std::vector<uint> Mbgen_end;
@@ -65,5 +65,5 @@ class Bgen {
 		void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
+void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
 #endif

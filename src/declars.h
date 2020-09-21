@@ -60,3 +60,4 @@ typedef unsigned short ushort;
 #include "MatrixUtils.h"
 #include "ReadParameters.h"
 #include "ReadBGEN.h"
+#include "ReadPGEN.h"

@@ -1,5 +1,5 @@
 #include "declars.h"
-#include "ReadBgen.h"
+#include "ReadBGEN.h"
 #include "../thirdparty/zstd-1.4.5/lib/zstd.h"
 #include "../thirdparty/libdeflate-1.6/libdeflate.h"
 

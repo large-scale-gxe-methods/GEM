@@ -1,5 +1,5 @@
 #include "declars.h"
-#include "ReadPgen.h"
+#include "ReadPGEN.h"
 #include "../thirdparty/plink-2.0/plink2_bits.h"
 #include "../thirdparty/plink-2.0/plink2_base.h"
 #include "../thirdparty/plink-2.0/pgenlib_misc.h"

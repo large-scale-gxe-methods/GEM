@@ -1,5 +1,5 @@
 #include "declars.h"
-#include "ReadPGEN.h"
+#include "ReadPgen.h"
 #include "../thirdparty/plink-2.0/plink2_bits.h"
 #include "../thirdparty/plink-2.0/plink2_base.h"
 #include "../thirdparty/plink-2.0/pgenlib_misc.h"
@@ -46,6 +46,7 @@ void Pgen::processPgenHeader(string pgenFile) {
 	unsigned char* pgfi_alloc = nullptr;
 	if (plink2::cachealigned_malloc(pgfi_alloc_cacheline_ct * plink2::kCacheline, &pgfi_alloc)) {
 		cerr << "Out of memory" << endl;
+		exit(1);
 	}
 
 	uint32_t max_vrec_width;
@@ -70,6 +71,7 @@ void Pgen::processPgenHeader(string pgenFile) {
 	unsigned char* pgr_alloc;
 	if (plink2::cachealigned_malloc(pgr_alloc_main_byte_ct + (2 * plink2::kPglNypTransposeBatch + 5) * sample_subset_byte_ct + cumulative_popcounts_byte_ct + (1 + plink2::kPglNypTransposeBatch) * genovec_byte_ct + multiallelic_hc_byte_ct + dosage_main_byte_ct + plink2::kPglBitTransposeBufbytes + 4 * (plink2::kPglNypTransposeBatch * plink2::kPglNypTransposeBatch / 8), &pgr_alloc)) {
 		cerr << "Out of memory" << endl;
+		exit(1);
 	}
 
 	plink2::PglErr reterr = PgrInit(geno_filename, max_vrec_width, &_info_ptr, &_state_ptr, pgr_alloc);
@@ -77,6 +79,11 @@ void Pgen::processPgenHeader(string pgenFile) {
 		throw std::runtime_error("Out of memory.");
 	}
 
+	uint32_t max_allele_ct = _info_ptr.max_allele_ct;
+	if (max_allele_ct != 2) {
+		cerr << "\nERROR: There are non-biallelic variants in the .pgen file.\n\n";
+		exit(1);
+	}
 
 	cout << "Number of variants: " << raw_variant_ct << '\n'; 
 	cout << "Number of samples: " << raw_sample_ct << '\n';
@@ -105,7 +112,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 		nSamples++;
 	}
 	if (nSamples != pgen.raw_sample_ct) {
-		cout << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
+		cerr << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
 		exit(1);
 	}
 	else {
@@ -116,29 +123,24 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
 	int k = 0;
 	for (uint m = 0; m < pgen.raw_sample_ct; m++) {
-	      // IDMatching
-	      getline(fIDMat, IDline);
-	      std::istringstream iss(IDline);
-	      string strtmp;
-	      iss >> strtmp;
+	     getline(fIDMat, IDline);
+	     std::istringstream iss(IDline);
+	     string strtmp;
+	     iss >> strtmp;
 
 		 int itmp = k;
 		 if (phenomap.find(strtmp) != phenomap.end()) {
 			 auto tmp_valvec = phenomap[strtmp];
 			 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-				sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-				// covdata[k*(numSelCol+1) + 0] = 1.0;
-				for (int c = 0; c < numSelCol; c++) {
-			             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
-				}
+				 sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
+				 for (int c = 0; c < numSelCol; c++) {
+			          sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+				 }
 				k++;
 			 }
-
-			 // erase the used element in phenomap
 			 phenomap.erase(strtmp);
 		 }
 
-	     // save the index with unmatched ID into genoUnMatchID.
 		 if (itmp == k) genoUnMatchID.insert(m);
 	}
 	fIDMat.close();
@@ -185,7 +187,6 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 }
 
 
-// This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
 void Pgen::processPvar(Pgen pgen, string pvarFile) {
 
 

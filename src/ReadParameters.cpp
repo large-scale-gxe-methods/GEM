@@ -4,9 +4,8 @@
 
 
 #include "declars.h"
-
-
 #define VERSION "1.2"
+
 void print_help();
 
 
@@ -109,15 +108,27 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		cerr << "\nERROR: Phenotype file (--pheno-file) is needed. \n\n";
 		exit(1);
 	}
+
+
 	if (out.count("bgen")) {
 		bgenFile = out["bgen"].as<string>();
 		strcpy(genofile, bgenFile.c_str());
 		useBgenFile = true;
+
+		if (out.count("pgen") || out.count("pfile") || out.count("bed") || out.count("bfile")) {
+			cerr << "\nERROR: Only one genotype file format can be used.\n\n";
+			exit(1);
+		}
 	}
 	else if (out.count("pfile")) {
 
 		if (out.count("pgen")) {
-			cerr << "\nERROR: --pgen and --pfile cannot be used simultaneously.\n\n";
+			cerr << "\nERROR: --pfile and --pgen cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+
+		if (out.count("bed") || out.count("bfile")) {
+			cerr << "\nERROR: --pfile and --bed/--bfile cannot be used simultaneously.\n\n";
 			exit(1);
 		}
 
@@ -126,10 +137,15 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		pvarFile = out["pfile"].as<string>() + ".pvar";
 		strcpy(pgenfile, pgenFile.c_str());
 		usePgenFile = true;
+
 	}
 	else if (out.count("pgen")) {
 		if (out.count("pfile")) {
 			cerr << "\nERROR: --pgen and --pfile cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+		if (out.count("bed") || out.count("bfile")) {
+			cerr << "\nERROR: --pgen and --bed/--bfile cannot be used simultaneously.\n\n";
 			exit(1);
 		}
 		if (!out.count("psam")) {
@@ -146,16 +162,55 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		strcpy(pgenfile, pgenFile.c_str());
 		usePgenFile = true;
 	}
-	else {
-		cerr << "\nERROR: Genotype file (--bgen) / (--pfile) / (--pgen) is needed.\n\n";
-		exit(1);
+	else if (out.count("bfile")) {
+		if (out.count("bed")) {
+			cerr << "\nERROR: --bed and --bfile cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+		if (out.count("pgen") || out.count("pfile")) {
+			cerr << "\nERROR: --bfile and --pfile/--pgen cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+		bedFile = out["bfile"].as<string>() + ".bed";
+		famFile = out["bfile"].as<string>() + ".fam";
+		bimFile = out["bfile"].as<string>() + ".bim";
+		strcpy(pgenfile, pgenFile.c_str());
+		useBedFile = true;
 	}
-	if (useBgenFile && usePgenFile) {
-		cerr << "\nERROR: Both --bgen and --pfile/--pgen are specified.\n\n";
+	else if (out.count("bed")) {
+		if (out.count("bfile")) {
+			cerr << "\nERROR: --pgen and --pfile cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+		if (out.count("pgen") || out.count("pfile")) {
+			cerr << "\nERROR: --bed and --pfile/--pgen cannot be used simultaneously.\n\n";
+			exit(1);
+		}
+		if (!out.count("fam")) {
+			cerr << "\nERROR: .fam file (--fam) is needed.\n\n";
+			exit(1);
+		}
+		if (!out.count("bim")) {
+			cerr << "\nERROR: .bim file (--bim) is needed.\n\n";
+			exit(1);
+		}
+		bedFile = out["bed"].as<string>() + ".bed";
+		famFile = out["fam"].as<string>() + ".fam";
+		bimFile = out["bim"].as<string>() + ".bim";
+		strcpy(pgenfile, pgenFile.c_str());
+		useBedFile = true;
+	}
+	else {
+		cerr << "\nERROR: Genotype file (--bgen) / (--pfile/--pgen) / (--bfile/--bed) is needed.\n\n";
 		exit(1);
 	}
 
+
 	if (out.count("sample")) {
+		if (out.count("pgen") || out.count("pfile") || out.count("bed") || out.count("bfile")) {
+			cerr << "\nERROR: --sample flag should only be used with --bgen.\n\n";
+			exit(1);
+		}
 		sampleFile = out["sample"].as<string>();
 		strcpy(samplefile, sampleFile.c_str());
 		useSampleFile = true;
@@ -255,6 +310,10 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	}
 	if (out.count("include-snp-file")) {
 		includeVariantFile = out["include-snp-file"].as<std::string>();
+		if (out.count("pgen") || out.count("pfile") || out.count("bed") || out.count("bfile")) {
+			cerr << "\nERROR: --include-snp-file currently unsupported for plink genotype files.\n\n";
+			exit(1);
+		}
 	}
 
 	if (includeVariantFile.empty()) {

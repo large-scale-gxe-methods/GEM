@@ -19,9 +19,13 @@ public:
 	std::string pgenFile;
 	std::string pvarFile;
 	std::string psamFile;
+	std::string bedFile;
+	std::string bimFile;
+	std::string famFile;
 	bool useSampleFile = false;
 	bool useBgenFile = false;
 	bool usePgenFile = false;
+	bool useBedFile = false;
 
 	// Phenotype file
 	std::string phenoFile;

@@ -40,6 +40,10 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	}
 
 	if (fread(&Mbgen, 4, 1, fin)) { 
+		if (Mbgen <= 0) {
+			cerr << "\nERROR: The number of variants in the BGEN file is 0.\n\n";
+			exit(1);
+		}
 		cout << "Number of variants: " << Mbgen << '\n';
 	} 
 	else { 
@@ -48,12 +52,17 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 	}
 
 	if (fread(&Nbgen, 4, 1, fin)) {
+		if (Nbgen <= 0) {
+			cerr << "\nERROR: The number of samples in the BGEN file is 0.\n\n";
+			exit(1);
+		}
 		cout << "Number of samples: " << Nbgen << '\n';
 	}
 	else {
 		cerr << "\nERROR: Cannot read BGEN header (N). \n\n";
 		exit(1);
 	}
+
 
 	char magic[5]; 
 	if (!fread(magic, 1, 4, fin)) { 
@@ -76,30 +85,33 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
 
 	// The header block - flag definitions
-	CompressedSNPBlocks = flags & 3; cout << "Genotype Block Compression Type: ";
+	CompressedSNPBlocks = flags & 3;
 	
 	switch (CompressedSNPBlocks) {
 	case 0:
-		cout << "Uncompressed\n";
+		cout << "Genotype Block Compression Type: Uncompressed\n";
 		break;
 	case 1:
-		cout << "Zlib\n";
+		cout << "Genotype Block Compression Type: Zlib\n";
 		break;
 	case 2:
-		cout << "Zstd\n";
+		cout << "Genotype Block Compression Type: Zstd\n";
 		break;
 	default:
-		cout << "\nERROR: BGEN compression flag must be 0 (uncompressed), 1 (zlib compression), or 2 (zstd compression).\n\n";
+		cout << "\nERROR: BGEN compression flag must be 0 (uncompressed), 1 (zlib compression), or 2 (zstd compression). Value in file: " << CompressedSNPBlocks << ".\n\n";
 		exit(1);
 	}
 
-	Layout = (flags >> 2) & 0xf; cout << "Layout: " << Layout << '\n';
+	Layout = (flags >> 2) & 0xf; 
+	cout << "Layout: " << Layout << '\n';
 	if (Layout != 1U && Layout != 2U) {
 		cerr << "\nERROR: BGEN layout flag must be 1 or 2.\n\n";
 		exit(1);
 	}
 
-	SampleIdentifiers = flags >> 31; cout << "Sample Identifiers Present: ";  SampleIdentifiers == 0 ? cout << "False \n" : cout << "True \n";
+	SampleIdentifiers = flags >> 31; 
+	cout << "Sample Identifiers Present: ";  
+	SampleIdentifiers == 0 ? cout << "False \n" : cout << "True \n";
 	if (SampleIdentifiers != 0 && SampleIdentifiers != 1) {
 		cerr << "\nERROR: BGEN sample identifier flag must be 0 or 1.\n\n";
 		exit(1);
@@ -143,7 +155,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 			exit(1);
 		}
 
-
 		string IDline;
 		getline(fIDMat, IDline);
 		getline(fIDMat, IDline);
@@ -161,7 +172,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 			getline(fIDMat, IDline);
 			getline(fIDMat, IDline);
 		}
-
 
 		for (uint m = 0; m < bgen.Nbgen; m++) {
 			// IDMatching
@@ -727,11 +737,17 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 	vector <uchar> zBuf;
 	vector <uchar> shortBuf;
 
-	uchar* zBuf1;
-	uint16_t* shortBuf1;
+	vector <uchar> zBuf1;
+	vector <uint16_t> shortBuf1;
+	uLongf destLen1;
 	if (Layout == 1) {
-		shortBuf1 = (uint16_t*)malloc(6 * Nbgen);
-		zBuf1 = (unsigned char*)malloc(6 * Nbgen);
+		destLen1 = 6 * Nbgen;
+		if (CompressedSNPBlocks == 0) {
+			zBuf1.resize(destLen1);
+		}
+		else {
+			shortBuf1.resize(destLen1);
+		}
 	}
 
 
@@ -764,9 +780,6 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
 	vector <double> WZGSvec(samSize  * (1 + Sq) * stream_snps);
 	double* WZGS = &WZGSvec[0];
-	boost::math::chi_squared chisq_dist_M(1);
-	boost::math::chi_squared chisq_dist_Int(expSq);
-	boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 	
 	struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
@@ -834,28 +847,23 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 			ret = fread(allele0, 1, LB, fin3); allele0[LB] = '\0';
 
 
-
 			if (Layout == 1) {
-
-				uLongf destLen1 = 6 * Nbgen;
-
+				uint16_t* probs_start;
 				if (CompressedSNPBlocks == 1) {
 					uint zLen; ret = fread(&zLen, 4, 1, fin3);
-					ret = fread(zBuf1, 1, zLen, fin3);
+					zBuf1.resize(zLen);
+					ret = fread(&zBuf1[0], 1, zLen, fin3);
 					if (libdeflate_zlib_decompress(decompressor, &zBuf1[0], zLen, &shortBuf1[0], destLen1, NULL) != LIBDEFLATE_SUCCESS) {
 						cerr << "\nERROR: Decompressing " << snpID << " block failed with libdeflate.\n\n";
 						exit(1);
 					}
+					probs_start = &shortBuf1[0];
 				}
 				else {
-					ret = fread(zBuf1, 1, destLen1, fin3);
-					shortBuf1 = reinterpret_cast<uint16_t*>(zBuf1);
+					ret = fread(&zBuf1[0], 1, destLen1, fin3);
+					probs_start = reinterpret_cast<uint16_t*>(&zBuf1[0]);
 				}
 
-				if (ret != 0) {
-					cerr << "\nERROR: Cannot read BGEN variant block.\n\n";
-					exit(1);
-				}
 
 				// read genotype probabilities
 				const double scale = 1.0 / 32768;
@@ -865,9 +873,9 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				uint nMissing = 0;
 				for (uint i = 0; i < Nbgen; i++) {
 					if (include_idx[idx_k] == i) {
-						double p11 = shortBuf1[3 * i] * scale;
-						double p10 = shortBuf1[3 * i + 1] * scale;
-						double p00 = shortBuf1[3 * i + 2] * scale;
+						double p11 = probs_start[3 * i] * scale;
+						double p10 = probs_start[3 * i + 1] * scale;
+						double p00 = probs_start[3 * i + 2] * scale;
 
 						if (p11 == 0 && p10 == 0 && p00 == 0) {
 							missingIndex.push_back(idx_k);
@@ -890,7 +898,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 
 				double gmean = AF[stream_i] / double(samSize - nMissing);
-				double cur_AF = AF[stream_i] / 2 / double(samSize - nMissing);
+				double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
 				double percMissing = nMissing / (samSize * 1.0);
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
 					AF[stream_i] = 0.0;
@@ -901,9 +909,17 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 
 				if (nMissing > 0) {
-					for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-						int tmp5 = tmp1 + missingIndex[nm];
-						ZGSvec[tmp5] = gmean;
+					if (phenoType == 0) {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = gmean;
+						}
+					}
+					else {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+						}
 					}
 					missingIndex.clear();
 				}
@@ -1107,7 +1123,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 
 				double gmean = AF[stream_i] / double(samSize - nMissing);
-				double cur_AF = gmean / 2.0;
+				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
 				double percMissing = nMissing / (samSize * 1.0);
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
 					AF[stream_i] = 0.0;
@@ -1118,10 +1134,19 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 				
 				if (nMissing > 0) {
-					for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-						 int tmp5 = tmp1 + missingIndex[nm];
-						 ZGSvec[tmp5] = gmean;
+					if (phenoType == 0) {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = gmean;
+						}
 					}
+					else {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;;
+						}
+					}
+
 					missingIndex.clear();
 				}
 				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
@@ -1208,6 +1233,9 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 		double*  PvalM      = new double[stream_snps];
 		double*  PvalInt    = new double[stream_snps];
 		double*  PvalJoint  = new double[stream_snps];
+		boost::math::chi_squared chisq_dist_M(1);
+		boost::math::chi_squared chisq_dist_Int(expSq);
+		boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 
 
 		if (robust == 0) {
@@ -1551,14 +1579,6 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 	    oss.clear();
 	}
 
-
-	if (Layout == 1 && CompressedSNPBlocks == 1) {
-		free(shortBuf1);
-		free(zBuf1);
-	}
-	if (Layout == 1 && CompressedSNPBlocks == 0) {
-		free(zBuf1);
-	}
 
 	libdeflate_free_decompressor(decompressor);
 	delete[] snpID;

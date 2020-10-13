@@ -274,12 +274,12 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 //			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
 //			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
 //
-//			if (IDline == "snpid") {
-//				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
+//			if (IDline == "id") {
+//				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their id... \n";
 //				checkSNPID = true;
 //			}
 //			else {
-//				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be snpid for PGEN files." << endl << endl;
+//				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'id' for PGEN files." << endl << endl;
 //				exit(1);
 //			}
 //
@@ -311,29 +311,26 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 //		std::ifstream fIDMat;
 //		fIDMat.open(cmd.pvarFile);
 //
-//		if (!fIDMat.is_open()) {
-//			cerr << "\nERROR: .pvar file could not be opened.\n\n";
-//			exit(1);
-//		}
-//
-//
 //		string IDline;
 //		getline(fIDMat, IDline);
 //		std::istringstream iss(IDline);
 //		string value;
 //		vector <string> values;
 //
-//		while (getline(iss, value, '\t')) {
-//			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-//			values.push_back(value);
-//		}
+//		getline(iss, value, '\t');
 //
+//		int k = 0;
 //		for (uint32_t snploop = 0; snploop < raw_variant_ct; snploop++) {
 //			while (getline(iss, value, '\t')) {
 //				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 //				values.push_back(value);
 //			}
-//			values.clear();
+//
+//			if (includeVariant.find(rsID) != includeVariant.end()) {
+//				pgenVariantPos[k] = snploop;
+//				k++;
+//			}
+//			
 //		}
 //
 //	}
@@ -513,6 +510,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				int tmp1 = stream_i * Sq1 * samSize;
 				int idx_k = 0;
 				int nMissing = 0;
+				double gmean = 0.0;
 				for (uint32_t n = 0; n < file_sample_ct; n++) {
 					if (buf[n] == -9.0) {
 						if (include_idx[idx_k] == n) {
@@ -529,16 +527,18 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 
 					     if (phenoType == 1) {
 				     	     ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * buf[n];
+							 gmean += ZGSvec[tmp2];
 					     }
 					     else {
 					         ZGSvec[tmp2] = buf[n];
+							 gmean += ZGSvec[tmp2];
 					     }
 						 idx_k++;
 				     }
 
 				}
-				double gmean = AF[stream_i] / double(samSize - nMissing);
-				double cur_AF = gmean / 2.0;
+				gmean = gmean / double(samSize - nMissing);
+				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;;
 				double percMissing = nMissing / (samSize * 1.0);
 				
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
@@ -550,9 +550,17 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				}
 
 				if (nMissing > 0) {
-					for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-						int tmp5 = tmp1 + missingIndex[nm];
-						ZGSvec[tmp5] = gmean;
+					if (phenoType == 0) {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = gmean;
+						}
+					}
+					else {
+						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+							int tmp5 = tmp1 + missingIndex[nm];
+							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+						}
 					}
 					missingIndex.clear();
 				}

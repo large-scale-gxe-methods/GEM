@@ -18,8 +18,12 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 		cerr << "\nERROR: Cannot read bed file magic byte numbers.\n\n"; 
 		exit(1);
 	}
-	if (magic[0] != 0x6C || magic[1] != 0x1B || magic[2] != 0x01) { 
+	if (magic[0] != 0x6C || magic[1] != 0x1B) { 
 		cerr << "ERROR: " << bedFile << " is not a bed file (incorrect 'magic numbers').\n\n";
+		exit(1);
+	}
+	if (magic[2] != 0x01) {
+		cerr << "ERROR: " << bedFile << " is not in SNP major format.\n\n";
 		exit(1);
 	}
 
@@ -56,7 +60,6 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
 	cout << "Number of variants: " << nvars << endl;
 	cout << "Number of samples: " << nsamples << endl;
-
 
 	fclose(fin);
 }
@@ -182,8 +185,8 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 	std::vector<uint> missingIndex;
 	vector <double> AF(stream_snps);
 	int ZGS_col = Sq1 * stream_snps;
-	uint32_t n_samples = test.n_samples;
-	uint32_t n_variants = test.n_variants;
+	uint n_samples = test.n_samples;
+	uint n_variants = test.n_variants;
 
 	std::ifstream fIDMat;
 	fIDMat.open(bimFile);
@@ -196,9 +199,8 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 	}
 
 
-
 	std::ifstream readbedfile(bedFile.c_str(), std::ios::binary);
-	int nblocks = (n_samples + 3) / 4, pos;
+	uint nblocks = (n_samples + 3) / 4, pos;
 	unsigned char temp[2];
 	unsigned char* buffer = new unsigned char[nblocks];
 
@@ -229,14 +231,14 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 			while (getline(iss, value, '\t')) {
 				values.push_back(value);
 			}
-			values[4].erase(std::remove(values[4].begin(), values[4].end(), '\r'), values[4].end());
+			values[5].erase(std::remove(values[5].begin(), values[5].end(), '\r'), values[5].end());
 			snploop++;
 
 
 			int tmp1 = stream_i * Sq1 * samSize;
 			int idx_k = 0;
 			int nMissing = 0;
-			int ncount = 0;
+			uint ncount = 0;
 			readbedfile.read((char*)buffer, nblocks);
 			for (size_t n = 0; n < nblocks; n++) {
 				pos = 0;
@@ -289,7 +291,7 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 
 	
 			double gmean = AF[stream_i] / double(samSize - nMissing);
-			double cur_AF = gmean / 2.0;
+			double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
 			double percMissing = nMissing / (samSize * 1.0);
 
 			if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
@@ -301,9 +303,17 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 			}
 
 			if (nMissing > 0) {
-				for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-					int tmp5 = tmp1 + missingIndex[nm];
-					ZGSvec[tmp5] = gmean;
+				if (phenoType == 0) {
+					for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						int tmp5 = tmp1 + missingIndex[nm];
+						ZGSvec[tmp5] = gmean;
+					}
+				}
+				else {
+					for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						int tmp5 = tmp1 + missingIndex[nm];
+						ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+					}
 				}
 				missingIndex.clear();
 			}
@@ -388,8 +398,6 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 		boost::math::chi_squared chisq_dist_M(1);
 		boost::math::chi_squared chisq_dist_Int(expSq);
 		boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-
 
 
 		if (robust == 0) {

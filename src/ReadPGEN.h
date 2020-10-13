@@ -41,6 +41,7 @@ public:
 	int samSize;
 	int robust;
 	std::string outFile;
+	std::vector<long long unsigned int> pgenVariantPos;
 
 	void processPgenHeader(string pgenFile);
 	void processPvar(Pgen pgen, string pvarFile);

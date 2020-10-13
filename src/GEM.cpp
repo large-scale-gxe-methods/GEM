@@ -401,11 +401,16 @@ int main(int argc, char* argv[]) {
 		pgen.processPvar(pgen, cmd.pvarFile);
 		pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
 
+		sampleIds.clear();
+		phenomap.clear(); 
+		phenodata.clear();
+		covdata.clear();
+
 		samSize = pgen.new_samSize;
 		double* phenoY = &pgen.new_phenodata[0];
 		double* covX = &pgen.new_covdata[0];
-		vector <double> residvec(samSize);
 
+		vector <double> residvec(samSize);
 		// for logistic regression
 		vector <double> miu(samSize);
 		int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
@@ -549,9 +554,11 @@ int main(int argc, char* argv[]) {
 			pgen.begin.resize(threads);
 			pgen.end.resize(threads);
 			if (threads > 1) {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
 				cout << "Running multithreading...\n";
 			}
 			else {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
 				cout << "Running with single thread...\n";
 			}
 
@@ -590,7 +597,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}
@@ -638,9 +645,13 @@ int main(int argc, char* argv[]) {
 	if (cmd.useBedFile) {
 
 		Bed bed;
-
 		bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
 		bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+
+		sampleIds.clear();
+		phenomap.clear(); 
+		phenodata.clear();
+		covdata.clear();
 
 		samSize = bed.new_samSize;
 		double* phenoY = &bed.new_phenodata[0];
@@ -760,8 +771,6 @@ int main(int argc, char* argv[]) {
 		cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
 		cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
 
-
-
 		bed.numSelCol = numSelCol;
 		bed.numIntSelCol = numIntSelCol;
 		bed.numExpSelCol = numExpSelCol;
@@ -778,7 +787,6 @@ int main(int argc, char* argv[]) {
 		bed.sigma2 = sigma2;
 		bed.outFile = cmd.outFile;
 
-
 		if (!cmd.doFilters) {
 			//Preparing for parallelizing of BGEN file
 			uint32_t threads = cmd.threads;
@@ -792,9 +800,11 @@ int main(int argc, char* argv[]) {
 			bed.begin.resize(threads);
 			bed.end.resize(threads);
 			if (threads > 1) {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
 				cout << "Running multithreading...\n";
 			}
 			else {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
 				cout << "Running with single thread...\n";
 			}
 
@@ -817,7 +827,7 @@ int main(int argc, char* argv[]) {
 		boost::thread_group thread_grp;
 		start_time = std::chrono::high_resolution_clock::now();
 		for (uint32_t i = 0; i < bed.threads; ++i) {
-			thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, boost::ref(bed)));
+			 thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, boost::ref(bed)));
 		}
 		thread_grp.join_all();
 		cout << "Joining threads... \n";
@@ -828,12 +838,11 @@ int main(int argc, char* argv[]) {
 		cout << "*********************************************************\n";
 
 
-
 		// Write all results from each thread to 1 file
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}
@@ -888,12 +897,6 @@ int main(int argc, char* argv[]) {
 		bgen.processBgenHeaderBlock(cmd.genofile);
 		bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
 
-		sampleIds.clear(); // clear memory
-		phenomap.clear(); // clear phenomap
-		phenodata.clear();
-		covdata.clear();
-
-
 
 		/******************************************************************
 		  Genome-Wide Associate Study using Linear or Logistic regression
@@ -925,6 +928,7 @@ int main(int argc, char* argv[]) {
 		double* beta = new double[(numSelCol + 1)];
 		matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
 
+		
 		while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
 			iter++;
 			// X * beta
@@ -1048,9 +1052,11 @@ int main(int argc, char* argv[]) {
 
 		//Preparing for parallelizing of BGEN file
 		if (cmd.threads > 1) {
+			cout << "The second allele in the BGEN file will be used for association testing.\n";
 			cout << "Running multithreading...\n";
 		}
 		else {
+			cout << "The second allele in the BGEN file will be used for association testing.\n";
 			cout << "Running with single thread...\n";
 		}
 
@@ -1076,7 +1082,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}

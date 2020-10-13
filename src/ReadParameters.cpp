@@ -217,6 +217,24 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	}
 	if (out.count("out")) {
 		outFile = out["out"].as<string>();
+
+		std::ofstream results(outFile, std::ofstream::binary);
+		if (!results) {
+			cerr << "\nERROR: Output file could not be opened.\n\n";
+			exit(1);
+		}
+
+		if (results.fail()) {
+			cerr << "\nERROR: Output file could not be opened.\n\n";
+			exit(1);
+		}
+
+		results << "test" << endl;
+		if (results.fail()) {
+			cout << "\nERROR: Cannot write to output file.\n\n";
+		}
+		results.close();
+		boost::filesystem::remove(outFile.c_str());
 	}
 
 

@@ -1,6 +1,6 @@
 CC=gcc -std=gnu99 # Do not change this for libdeflate package.
 CXX=g++
-CXXFLAGS = -std=c++11 -O2 -g -Wall
+CXXFLAGS = -std=c++11 -O2 -g
 
 LIBS= -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
 

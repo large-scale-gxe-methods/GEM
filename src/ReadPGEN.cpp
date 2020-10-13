@@ -510,7 +510,6 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				int tmp1 = stream_i * Sq1 * samSize;
 				int idx_k = 0;
 				int nMissing = 0;
-				double gmean = 0.0;
 				for (uint32_t n = 0; n < file_sample_ct; n++) {
 					if (buf[n] == -9.0) {
 						if (include_idx[idx_k] == n) {
@@ -527,17 +526,15 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 
 					     if (phenoType == 1) {
 				     	     ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * buf[n];
-							 gmean += ZGSvec[tmp2];
 					     }
 					     else {
 					         ZGSvec[tmp2] = buf[n];
-							 gmean += ZGSvec[tmp2];
 					     }
 						 idx_k++;
 				     }
 
 				}
-				gmean = gmean / double(samSize - nMissing);
+				double gmean = AF[stream_i] / double(samSize - nMissing);
 				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;;
 				double percMissing = nMissing / (samSize * 1.0);
 				

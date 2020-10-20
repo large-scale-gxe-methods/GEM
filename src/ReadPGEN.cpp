@@ -535,7 +535,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 
 				}
 				double gmean = AF[stream_i] / double(samSize - nMissing);
-				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;;
+				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
 				double percMissing = nMissing / (samSize * 1.0);
 				
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {

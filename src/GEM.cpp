@@ -597,7 +597,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "ID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}
@@ -842,7 +842,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHROM" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "ID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}
@@ -1082,7 +1082,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}

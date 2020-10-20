@@ -156,9 +156,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 			cerr << "\nERROR: .pvar file (--pvar) is needed.\n\n";
 			exit(1);
 		}
-		pgenFile = out["pgen"].as<string>() + ".pgen";
-		psamFile = out["psam"].as<string>() + ".psam";
-		pvarFile = out["pvar"].as<string>() + ".pvar";
+		pgenFile = out["pgen"].as<string>();
+		psamFile = out["psam"].as<string>();
+		pvarFile = out["pvar"].as<string>();
 		strcpy(pgenfile, pgenFile.c_str());
 		usePgenFile = true;
 	}
@@ -194,9 +194,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 			cerr << "\nERROR: .bim file (--bim) is needed.\n\n";
 			exit(1);
 		}
-		bedFile = out["bed"].as<string>() + ".bed";
-		famFile = out["fam"].as<string>() + ".fam";
-		bimFile = out["bim"].as<string>() + ".bim";
+		bedFile = out["bed"].as<string>();
+		famFile = out["fam"].as<string>();
+		bimFile = out["bim"].as<string>();
 		strcpy(pgenfile, pgenFile.c_str());
 		useBedFile = true;
 	}
@@ -232,6 +232,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		results << "test" << endl;
 		if (results.fail()) {
 			cout << "\nERROR: Cannot write to output file.\n\n";
+			results.close();
+			exit(1);
 		}
 		results.close();
 		boost::filesystem::remove(outFile.c_str());

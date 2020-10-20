@@ -1143,7 +1143,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 					else {
 						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
 							int tmp5 = tmp1 + missingIndex[nm];
-							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;;
+							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
 						}
 					}
 

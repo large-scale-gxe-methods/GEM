@@ -553,14 +553,6 @@ int main(int argc, char* argv[]) {
 
 			pgen.begin.resize(threads);
 			pgen.end.resize(threads);
-			if (threads > 1) {
-				cout << "The second allele in the PGEN file will be used for association testing.\n";
-				cout << "Running multithreading...\n";
-			}
-			else {
-				cout << "The second allele in the PGEN file will be used for association testing.\n";
-				cout << "Running with single thread...\n";
-			}
 
 			for (uint32_t t = 0; t < threads; t++) {
 				pgen.begin[t] = floor((pgen.raw_variant_ct / threads) * t);
@@ -572,24 +564,37 @@ int main(int argc, char* argv[]) {
 					pgen.end[t] = floor(((pgen.raw_variant_ct / threads) * (t + 1)) - 1);
 				}
 			}
+
+			if (threads > 1) {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < pgen.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, boost::ref(pgen)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+			else {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running with single thread...\n";
+
+				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen);
+			}
+
 		}
 		else {
-			
+			cerr << "\nERROR: --include-snp-file currently unsupported for PGEN/BED files.\n\n";
+			exit(1);
 		}
-
-
-		boost::thread_group thread_grp;
-		start_time = std::chrono::high_resolution_clock::now();
-		for (uint32_t i = 0; i < pgen.threads; ++i) {
-			thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, boost::ref(pgen)));
-		}
-		thread_grp.join_all();
-		cout << "Joining threads... \n";
-		end_time = std::chrono::high_resolution_clock::now();
-		cout << "Execution time... ";
-		printExecutionTime(start_time, end_time);
-		cout << "Done. \n";
-		cout << "*********************************************************\n";
 
 
 
@@ -788,7 +793,7 @@ int main(int argc, char* argv[]) {
 		bed.outFile = cmd.outFile;
 
 		if (!cmd.doFilters) {
-			//Preparing for parallelizing of BGEN file
+
 			uint32_t threads = cmd.threads;
 			bed.threads = threads;
 			if (bed.n_variants < threads) {
@@ -799,18 +804,9 @@ int main(int argc, char* argv[]) {
 
 			bed.begin.resize(threads);
 			bed.end.resize(threads);
-			if (threads > 1) {
-				cout << "The SNP major allele in the BED file will be used for association testing.\n";
-				cout << "Running multithreading...\n";
-			}
-			else {
-				cout << "The SNP major allele in the BED file will be used for association testing.\n";
-				cout << "Running with single thread...\n";
-			}
 
 			for (uint32_t t = 0; t < threads; t++) {
 				bed.begin[t] = floor((bed.n_variants / threads) * t);
-
 				if ((t + 1) == (threads)) {
 					bed.end[t] = bed.n_variants - 1;
 				}
@@ -818,24 +814,40 @@ int main(int argc, char* argv[]) {
 					bed.end[t] = floor(((bed.n_variants / threads) * (t + 1)) - 1);
 				}
 			}
+
+			if (threads > 1) {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < bed.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, boost::ref(bed)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+			}
+			else {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running with single thread...\n";  
+
+				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+
+
 		}
 		else {
-
+			cerr << "\nERROR: --include-snp-file currently unsupported for PGEN/BED files.\n\n";
+			exit(1);
 		}
-
-
-		boost::thread_group thread_grp;
-		start_time = std::chrono::high_resolution_clock::now();
-		for (uint32_t i = 0; i < bed.threads; ++i) {
-			 thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, boost::ref(bed)));
-		}
-		thread_grp.join_all();
-		cout << "Joining threads... \n";
-		end_time = std::chrono::high_resolution_clock::now();
-		cout << "Execution time... ";
-		printExecutionTime(start_time, end_time);
-		cout << "Done. \n";
-		cout << "*********************************************************\n";
 
 
 		// Write all results from each thread to 1 file
@@ -1054,27 +1066,29 @@ int main(int argc, char* argv[]) {
 		if (cmd.threads > 1) {
 			cout << "The second allele in the BGEN file will be used for association testing.\n";
 			cout << "Running multithreading...\n";
+
+			boost::thread_group thread_grp;
+			start_time = std::chrono::high_resolution_clock::now();
+			for (uint i = 0; i < bgen.threads; ++i) {
+				thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
+			}
+			thread_grp.join_all();
+			cout << "Joining threads... \n";
+			end_time = std::chrono::high_resolution_clock::now();
+			cout << "Execution time... ";
+			printExecutionTime(start_time, end_time);
+			cout << "Done. \n";
+			cout << "*********************************************************\n";
 		}
 		else {
 			cout << "The second allele in the BGEN file will be used for association testing.\n";
 			cout << "Running with single thread...\n";
+
+
+			BgenParallelGWAS(bgen.Mbgen_begin[0], bgen.Mbgen_end[0], bgen.bgenVariantPos[0], bgen.keepVariants[0], cmd.genofile, bgen.filterVariants, 0, bgen);
+			cout << "Done. \n";
+			cout << "*********************************************************\n";
 		}
-
-
-		boost::thread_group thread_grp;
-		start_time = std::chrono::high_resolution_clock::now();
-		for (uint i = 0; i < bgen.threads; ++i) {
-			thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
-		}
-		thread_grp.join_all();
-		cout << "Joining threads... \n";
-		end_time = std::chrono::high_resolution_clock::now();
-		cout << "Execution time... ";
-		printExecutionTime(start_time, end_time);
-		cout << "Done. \n";
-		cout << "*********************************************************\n";
-
-
 
 
 

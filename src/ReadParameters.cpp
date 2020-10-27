@@ -246,7 +246,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		sampleID = out["sampleid-name"].as<string>();
 	}
 	else {
-		cerr << "\nERROR: Sample ID column name (--sample-col) is not specified. \n\n";
+		cerr << "\nERROR: Sample ID column name (--sampleid-name) is not specified. \n\n";
 		exit(1);
 	}
 	if (out.count("pheno-name")) {

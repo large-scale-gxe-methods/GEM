@@ -1,9 +1,14 @@
 # GEM  
 
-GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in samples from unrelated individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-covariate interactions, and robust inference. 
+GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in samples from unrelated individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-covariate interactions, and robust inference.  
+
 
 <br />
-Current version: 1.2
+Current version: 1.2  
+
+<br />
+Additional documentation:  
+https://large-scale-gxe-methods.github.io/GEM-website/index.html  
 
 <br />
 
@@ -180,16 +185,19 @@ Performance Options:
 #### Input Files
 
 * ##### Phenotype File
-    1. A file which should contain a sample identifier column and columns for the phenotypes and covariates.  
+    A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates.  
 
 * ##### Genotype Files
-    1. BGEN v1.1, v1.2 or v1.3 genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
-    2. Plink 2.0 PGEN file described here [PGEN Format](https://www.cog-genomics.org/plink/2.0/formats#pgen).  
-    3. Plink BED file described here [BED format](https://www.cog-genomics.org/plink/2.0/formats#bed).  
+    BGEN v1.1, v1.2 or v1.3 genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+    The BGEN file should only contain bi-allelic unphased/phased genotypes. The second allele in the BGEN file is counted in association testing.   
+
+    Plink BED/PGEN genotype files described here [BED/PGEN Format](https://www.cog-genomics.org/plink/2.0/formats).  
+    The BED files should be stored in variant-major form. The variant in the 6th column in the .bim file is counted in association testing.  
+    For PGEN files, there should only be bi-allelic genotypes. The second allele is counted in association testing; usually the "ALT" column in .pvar file.  
      
 * ##### Sample File
-    1. A .sample file is required when the .bgen file does not contain sample identifiers.  
-       Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
+    A .sample file is required when the .bgen file does not contain sample identifiers.  
+    Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.
     
 <br /> 
 

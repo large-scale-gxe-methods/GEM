@@ -209,7 +209,7 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 	int variant_index = 0;
 	int keepIndex = 0;
 	double geno;
-	while (snploop <= n_variants) {
+	while (snploop <= end) {
 
 		int stream_i = 0;
 		while (stream_i < stream_snps) {

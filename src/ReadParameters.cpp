@@ -330,7 +330,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	}
 	if (out.count("include-snp-file")) {
 		includeVariantFile = out["include-snp-file"].as<std::string>();
-		if (out.count("pgen") || out.count("pfile") || out.count("bed") || out.count("bfile")) {
+		if (out.count("bed") || out.count("bfile")) {
 			cerr << "\nERROR: --include-snp-file currently unsupported for plink genotype files.\n\n";
 			exit(1);
 		}

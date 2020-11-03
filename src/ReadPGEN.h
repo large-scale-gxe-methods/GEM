@@ -23,7 +23,7 @@ public:
 	vector<uint32_t> begin;
 	vector<uint32_t> end;
 	uint32_t threads;
-	bool filterVariants;
+	bool filterVariants = false;
 	// Temporary
 	int stream_snps;
 	double  maf;
@@ -49,6 +49,6 @@ public:
 	void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, Pgen test);
+void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test);
 
 #endif

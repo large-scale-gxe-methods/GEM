@@ -247,99 +247,117 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 
 
 
-//void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
-//
-//	uint32_t nSNPS = pgen.raw_variant_ct;
-//	bool checkSNPID = false;
-//	bool checkInclude = false;
-//	int count = 0;
-//	std::set<std::string> includeVariant;
-//
-//
-//	if (cmd.doFilters) {
-//
-//		filterVariants = true;
-//		if (!cmd.includeVariantFile.empty()) {
-//			checkInclude = true;
-//			std::ifstream fInclude;
-//			string IDline;
-//			fInclude.open(cmd.includeVariantFile);
-//			if (!fInclude.is_open()) {
-//				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened." << endl << endl;
-//				exit(1);
-//			}
-//
-//			string vars;
-//			getline(fInclude, IDline);
-//			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
-//			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
-//
-//			if (IDline == "id") {
-//				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their id... \n";
-//				checkSNPID = true;
-//			}
-//			else {
-//				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'id' for PGEN files." << endl << endl;
-//				exit(1);
-//			}
-//
-//			while (fInclude >> vars) {
-//				includeVariant.insert(vars);
-//				count++;
-//			}
-//			nSNPS = count;
-//			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
-//			//count = ceil(count / Mbgen_begin.size());
-//
-//
-//			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
-//			if (nSNPS < threads) {
-//				threads = nSNPS;
-//				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
-//				cout << "Using " << threads << " for multithreading... \n\n";
-//			}
-//			else {
-//				cout << "Using " << threads << " for multithreading... \n\n";
-//			}
-//
-//		}
-//
-//		begin.resize(threads);
-//		end.resize(threads);
-//
-//
-//		std::ifstream fIDMat;
-//		fIDMat.open(cmd.pvarFile);
-//
-//		string IDline;
-//		getline(fIDMat, IDline);
-//		std::istringstream iss(IDline);
-//		string value;
-//		vector <string> values;
-//
-//		getline(iss, value, '\t');
-//
-//		int k = 0;
-//		for (uint32_t snploop = 0; snploop < raw_variant_ct; snploop++) {
-//			while (getline(iss, value, '\t')) {
-//				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-//				values.push_back(value);
-//			}
-//
-//			if (includeVariant.find(rsID) != includeVariant.end()) {
-//				pgenVariantPos[k] = snploop;
-//				k++;
-//			}
-//			
-//		}
-//
-//	}
-//}
+void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
+
+	uint32_t nSNPS = pgen.raw_variant_ct;
+	bool checkSNPID = false;
+	bool checkInclude = false;
+	int count = 0;
+	std::set<std::string> includeVariant;
+	threads = cmd.threads;
+
+
+	if (cmd.doFilters) {
+
+		filterVariants = true;
+		if (!cmd.includeVariantFile.empty()) {
+			checkInclude = true;
+			std::ifstream fInclude;
+			string IDline;
+			fInclude.open(cmd.includeVariantFile);
+			if (!fInclude.is_open()) {
+				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened." << endl << endl;
+				exit(1);
+			}
+
+			string vars;
+			getline(fInclude, IDline);
+			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
+			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
+
+			if (IDline == "snpid") {
+				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
+				checkSNPID = true;
+			}
+			else {
+				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files." << endl << endl;
+				exit(1);
+			}
+
+			while (fInclude >> vars) {
+				includeVariant.insert(vars);
+				count++;
+			}
+			nSNPS = count;
+			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
+			//count = ceil(count / Mbgen_begin.size());
+
+
+			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
+			if (nSNPS < threads) {
+				threads = nSNPS;
+				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+			else {
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+
+		}
+
+		begin.resize(threads);
+		end.resize(threads);
+
+		for (uint t = 0; t < threads; t++) {
+			begin[t] = floor((nSNPS / threads) * t);
+			end[t] = ((t + 1) == threads) ? nSNPS - 1 : floor(((nSNPS / threads) * (t + 1)) - 1);
+		}
+
+		std::ifstream fIDMat;
+		fIDMat.open(cmd.pvarFile);
+
+		string IDline;
+		getline(fIDMat, IDline);
+		std::istringstream iss(IDline);
+		string value;
+		vector <string> values;
+
+		while (getline(iss, value, '\t')) {
+			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			values.push_back(value);
+		}
+
+		int k = 0;
+		long long unsigned int pvalIndex = 0;
+		while (getline(fIDMat, IDline)) {
+			std::istringstream iss(IDline);
+			string value;
+			vector <string> values;
+
+			while (getline(iss, value, '\t')) {
+				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+				values.push_back(value);
+			}
+			if (includeVariant.find(values[2]) != includeVariant.end()) {
+				pgenVariantPos.push_back(pvalIndex);
+				k++;
+
+				values.clear();
+			}
+			pvalIndex++;
+		}
+
+		if (k != nSNPS) {
+			cerr << "\nERROR: There are one or more SNPs in .pvar file with " << values[2] << " column not in " << cmd.includeVariantFile << "\n\n";
+			exit(1);
+		}
+	}
+}
 
 
 
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, Pgen test) {
+void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test) {
 
 		auto start_time = std::chrono::high_resolution_clock::now();
 		std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -380,9 +398,17 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 		string IDline;
 		getline(fIDMat, IDline);
 		uint32_t skipIndex = 0;
-		while (skipIndex != begin) {
-			getline(fIDMat, IDline);
-			skipIndex++;
+		if (!filterVariants) {
+			while (skipIndex != begin) {
+				getline(fIDMat, IDline);
+				skipIndex++;
+			}
+		}
+		else {
+			while (skipIndex != pgenPos[begin]) {
+				getline(fIDMat, IDline);
+				skipIndex++;
+			}
 		}
 
 		const char* geno_filename = pgenFile.c_str();
@@ -471,7 +497,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 		int variant_index = 0;
 		int keepIndex = 0;
 	    vector<double> buf(file_sample_ct);
-		while (snploop <= raw_variant_ct) {
+		while (snploop <= end) {
 
 			int stream_i = 0;
 			while (stream_i < stream_snps) {
@@ -494,16 +520,30 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				}
 
 				uint32_t dosage_ct;
-				reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, snploop, 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
-				plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
-
-				getline(fIDMat, IDline);
-				std::istringstream iss(IDline);
 				string value;
 				vector <string> values;
-				while (getline(iss, value, '\t')) {
-					values.push_back(value);
+				if (!filterVariants) {
+					reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, snploop, 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
+					getline(fIDMat, IDline);
+					std::istringstream iss(IDline);
+					while (getline(iss, value, '\t')) {
+						values.push_back(value);
+					}
 				}
+				else {
+					while (skipIndex != pgenPos[snploop]) {
+						getline(fIDMat, IDline);
+						skipIndex++;
+					}
+					getline(fIDMat, IDline);
+					skipIndex++;
+					std::istringstream iss(IDline);
+					while (getline(iss, value, '\t')) {
+						values.push_back(value);
+					}
+					reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, pgenPos[snploop], 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
+				}
+				plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
 				values[4].erase(std::remove(values[4].begin(), values[4].end(), '\r'), values[4].end());
 				snploop++;
 

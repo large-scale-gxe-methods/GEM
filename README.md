@@ -23,7 +23,7 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 ## Installation  
 Library Dependencies:  
 * BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not installed, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br /> <br />For AMD processors, ATLAS or OPENBLAS may be better alternatives. <br /><br />
-* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem boost_iostreams``` that will need to be installed prior to executing the makefile.  
+* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem``` that will need to be installed prior to executing the makefile.  
 
 <br />
 

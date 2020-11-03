@@ -404,7 +404,7 @@ void print_help() {
 		<< "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest." << endl
 		<< "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
 		<< "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
-		<< "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be includedfor adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
+		<< "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
 		<< "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
 		<< "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
 		<< "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl

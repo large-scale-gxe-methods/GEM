@@ -162,9 +162,9 @@ Filtering Options:
         Default: 0.05  
   
 --include-snp-file  
-     Path to file containing a subset of variants in the specified BGEN file to be used for analysis. 
-     The first line in this file is the header that specifies which variant identifier in the BGEN file  
-     is used for ID matching. This must be either 'snpid' or 'rsid'. There should be one variant 
+     Path to file containing a subset of variants in the specified genotype file to be used for analysis. 
+     The first line in this file is the header that specifies which variant identifier in the genotype file  
+     is used for ID matching. This must be 'snpid' or 'rsid' (BGEN only). There should be one variant 
      identifier per line after the header. Variants not listed in this file will be excluded from analysis.
   
   

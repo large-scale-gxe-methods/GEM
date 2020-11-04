@@ -149,8 +149,108 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 
 
+void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
-void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, Bed test) {
+	uint32_t nSNPS = bed.n_variants;
+	bool checkSNPID = false;
+	bool checkInclude = false;
+	int count = 0;
+	std::set<std::string> includeVariant;
+	threads = cmd.threads;
+
+
+	if (cmd.doFilters) {
+
+		filterVariants = true;
+		if (!cmd.includeVariantFile.empty()) {
+			checkInclude = true;
+			std::ifstream fInclude;
+			string IDline;
+			fInclude.open(cmd.includeVariantFile);
+			if (!fInclude.is_open()) {
+				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened." << endl << endl;
+				exit(1);
+			}
+
+			string vars;
+			getline(fInclude, IDline);
+			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
+			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
+
+			if (IDline == "snpid") {
+				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
+				checkSNPID = true;
+			}
+			else {
+				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files." << endl << endl;
+				exit(1);
+			}
+
+			while (fInclude >> vars) {
+				if (includeVariant.find(vars) != includeVariant.end()) {
+					cout << "\nERROR: " << vars << " is a duplicate variant in " << cmd.includeVariantFile << ".\n\n";
+					exit(1);
+				}
+				includeVariant.insert(vars);
+				count++;
+			}
+			nSNPS = count;
+			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
+			//count = ceil(count / Mbgen_begin.size());
+
+
+			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
+			if (nSNPS < threads) {
+				threads = nSNPS;
+				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+			else {
+				cout << "Using " << threads << " for multithreading... \n\n";
+			}
+
+		}
+
+		begin.resize(threads);
+		end.resize(threads);
+
+		for (uint t = 0; t < threads; t++) {
+			begin[t] = floor((nSNPS / threads) * t);
+			end[t] = ((t + 1) == threads) ? nSNPS - 1 : floor(((nSNPS / threads) * (t + 1)) - 1);
+		}
+
+		std::ifstream fIDMat;
+		fIDMat.open(cmd.bimFile);
+
+		string IDline;
+
+		int k = 0;
+		long long unsigned int pvalIndex = 0;
+		while (getline(fIDMat, IDline)) {
+			std::istringstream iss(IDline);
+			string value;
+			vector <string> values;
+
+			while (getline(iss, value, '\t')) {
+				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+				values.push_back(value);
+			}
+			if (includeVariant.find(values[1]) != includeVariant.end()) {
+				bedVariantPos.push_back(pvalIndex);
+				k++;
+			}
+			pvalIndex++;
+		}
+
+		if (k != nSNPS) {
+			cerr << "\nERROR: There are one or more SNPs in second column of .bim file not in " << cmd.includeVariantFile << ".\n\n";
+			exit(1);
+		}
+	}
+}
+
+
+void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> bedPos, Bed test) {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -193,9 +293,17 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 
 	string IDline;
 	uint32_t skipIndex = 0;
-	while (skipIndex != begin) {
-		getline(fIDMat, IDline);
-		skipIndex++;
+	if (!filterVariants) {
+		while (skipIndex != begin) {
+			getline(fIDMat, IDline);
+			skipIndex++;
+		}
+	}
+	else {
+		while (skipIndex != bedPos[begin]) {
+			getline(fIDMat, IDline);
+			skipIndex++;
+		}
 	}
 
 
@@ -223,14 +331,32 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 				ZGS_col = Sq1 * stream_snps;
 				break;
 			}
-			readbedfile.seekg(snploop * nblocks + 3);
-			getline(fIDMat, IDline);
-			std::istringstream iss(IDline);
+
 			string value;
 			vector <string> values;
-			while (getline(iss, value, '\t')) {
-				values.push_back(value);
+			if (!filterVariants) {
+				readbedfile.seekg(snploop * nblocks + 3);
+				getline(fIDMat, IDline);
+				std::istringstream iss(IDline);
+				while (getline(iss, value, '\t')) {
+					values.push_back(value);
+				}
 			}
+			else {
+				while (skipIndex != bedPos[snploop]) {
+					getline(fIDMat, IDline);
+					skipIndex++;
+				}
+				readbedfile.seekg(bedPos[snploop] * nblocks + 3);
+				getline(fIDMat, IDline);
+				skipIndex++;
+				std::istringstream iss(IDline);
+				while (getline(iss, value, '\t')) {
+					values.push_back(value);
+				}
+			}
+			
+
 			values[5].erase(std::remove(values[5].begin(), values[5].end(), '\r'), values[5].end());
 			snploop++;
 

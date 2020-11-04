@@ -544,13 +544,12 @@ int main(int argc, char* argv[]) {
 		if (!cmd.doFilters) {
 			//Preparing for parallelizing of BGEN file
 			uint32_t threads = cmd.threads;
-			pgen.threads = threads;
 			if (pgen.raw_variant_ct < threads) {
 				threads = pgen.raw_variant_ct;
 				cout << "Number of variants (" << pgen.raw_variant_ct << ") is less than the number of specified threads (" << threads << ")...\n";
 				cout << "Using " << threads << " thread(s) instead... \n\n";
 			}
-
+			pgen.threads = threads;
 			pgen.begin.resize(threads);
 			pgen.end.resize(threads);
 
@@ -820,13 +819,13 @@ int main(int argc, char* argv[]) {
 		if (!cmd.doFilters) {
 
 			uint32_t threads = cmd.threads;
-			bed.threads = threads;
 			if (bed.n_variants < threads) {
 				threads = bed.n_variants;
 				cout << "Number of variants (" << bed.n_variants << ") is less than the number of specified threads (" << threads << ")...\n";
 				cout << "Using " << threads << " thread(s) instead... \n\n";
 			}
 
+			bed.threads = threads;
 			bed.begin.resize(threads);
 			bed.end.resize(threads);
 
@@ -847,7 +846,7 @@ int main(int argc, char* argv[]) {
 				boost::thread_group thread_grp;
 				start_time = std::chrono::high_resolution_clock::now();
 				for (uint32_t i = 0; i < bed.threads; ++i) {
-					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, boost::ref(bed)));
+					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, bed.filterVariants, bed.bedVariantPos, boost::ref(bed)));
 				}
 				thread_grp.join_all();
 				cout << "Joining threads... \n";
@@ -861,7 +860,7 @@ int main(int argc, char* argv[]) {
 				cout << "The SNP major allele in the BED file will be used for association testing.\n";
 				cout << "Running with single thread...\n";  
 
-				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed);
+				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed.filterVariants, bed.bedVariantPos, bed);
 				cout << "Done. \n";
 				cout << "*********************************************************\n";
 
@@ -870,8 +869,34 @@ int main(int argc, char* argv[]) {
 
 		}
 		else {
-			cerr << "\nERROR: --include-snp-file currently unsupported for PGEN/BED files.\n\n";
-			exit(1);
+
+			bed.getBedVariantPos(bed, cmd);
+			if (bed.threads > 1) {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < bed.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, bed.filterVariants, bed.bedVariantPos, boost::ref(bed)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+			}
+			else {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running with single thread...\n";
+
+				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed.filterVariants, bed.bedVariantPos, bed);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
 		}
 
 

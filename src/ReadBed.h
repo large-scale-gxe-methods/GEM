@@ -24,7 +24,9 @@ public:
 	vector<uint32_t> begin;
 	vector<uint32_t> end;
 	uint32_t threads;
-	bool filterVariants;
+	bool filterVariants = false;
+	std::vector<long long unsigned int> bedVariantPos;
+
 	// Temporary
 	int stream_snps;
 	double  maf;
@@ -46,9 +48,9 @@ public:
 	void processBed(string bedFile, string bimFile, string famFile);
 	//void processBim(Pgen pgen, string pvarFile);
 	void processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
-	//void getPgenVariantPos(Pgen pgen, CommandLine cmd);
+	void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 
-void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, Bed test);
+void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> bedPos, Bed test);
 
 #endif

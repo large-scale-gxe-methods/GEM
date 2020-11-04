@@ -285,6 +285,10 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 			}
 
 			while (fInclude >> vars) {
+				if (includeVariant.find(vars) != includeVariant.end()) {
+					cout << "\nERROR: " << vars << " is a duplicate variant in " << cmd.includeVariantFile << ".\n\n";
+					exit(1);
+				}
 				includeVariant.insert(vars);
 				count++;
 			}
@@ -348,7 +352,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 		}
 
 		if (k != nSNPS) {
-			cerr << "\nERROR: There are one or more SNPs in .pvar file with " << values[2] << " column not in " << cmd.includeVariantFile << "\n\n";
+			cerr << "\nERROR: There are one or more SNPs in .pvar file with " << values[2] << " column not in " << cmd.includeVariantFile << ".\n\n";
 			exit(1);
 		}
 	}

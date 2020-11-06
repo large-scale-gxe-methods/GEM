@@ -22,7 +22,7 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 
 ## Installation  
 Library Dependencies:  
-* BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not installed, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br /> <br />For AMD processors, ATLAS or OPENBLAS may be better alternatives. <br /><br />
+* BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not installed, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br />
 * Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem``` that will need to be installed prior to executing the makefile.  
 
 <br />
@@ -69,7 +69,7 @@ General Options:
   
   
   
-Input File Options:  
+Input and Output File Options:  
 
 --pheno-file  
      Path to the phenotype file.  
@@ -83,6 +83,7 @@ Input File Options:
   
 --pfile  
      Path and prefix to the .pgen, .pvar, and .psam files.  
+     If this flag is used, then --pgen/--pvar/--psam don’t need to be specified.
   
 --pgen  
      Path to the pgen file.  
@@ -95,6 +96,7 @@ Input File Options:
   
 --bfile  
      Path and prefix to the .bed, .bim and .fam files.  
+     If this flag is used, then --bed/--bim/--fam don’t need to be specified.
   
 --bed  
      Path to the bed file.  
@@ -124,11 +126,11 @@ Phenotype File Options:
 
 --int-covar-names  
      Any column names in the phenotype file naming the covariate(s) for which interactions should be included 
-     for adjustment (mutually exclusive with --exposure-names).  
+     for adjustment (do not include with --exposure-names).  
 
 --covar-names  
      Any column names in the phenotype file naming the covariates for which only main effects should be included
-     for adjustment (mutually exclusive with both --exposure-names and --int-covar-names).  
+     for adjustment (do not include with --exposure-names or --int-covar-names).  
 
 --pheno-type
      0 indicates a continuous phenotype and 1 indicates a binary phenotype.  
@@ -154,7 +156,7 @@ Phenotype File Options:
 Filtering Options:  
 
 --maf
-     Minimum threshold value [0, 1.0] to exclude variants based on the minor allele frequency.
+     Minimum threshold value [0, 0.5] to exclude variants based on the minor allele frequency.
         Default: 0.001
   
 --miss-geno-cutoff
@@ -164,7 +166,7 @@ Filtering Options:
 --include-snp-file  
      Path to file containing a subset of variants in the specified genotype file to be used for analysis. 
      The first line in this file is the header that specifies which variant identifier in the genotype file  
-     is used for ID matching. This must be 'snpid' or 'rsid' (BGEN only). There should be one variant 
+     is used for ID matching. This must be 'snpid' (PLINK or BGEN) or 'rsid' (BGEN only). There should be one variant 
      identifier per line after the header. Variants not listed in this file will be excluded from analysis.
   
   
@@ -196,7 +198,8 @@ Performance Options:
      
 * ##### Sample File
     A .sample file is required when the .bgen file does not contain sample identifiers.  
-    Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format. The first column must contain the sample identifiers.  
+    Formats for .sample files should follow QCTOOL v2 ([.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html)) format.  
+    The first column must contain the sample identifiers to be matched with phenotype file.  
     
 <br /> 
 
@@ -227,7 +230,7 @@ Var_Beta_Interaction_k_j - The variance associated with the kth and jth interact
                            where j = {1..length(--exposure-names)}  
 
 # P-values
-P_Value_Marginal    - Marginal genetic effect p-value
+P_Value_Marginal    - Marginal genetic effect p-value (GEM does not calculate a genetic main effect that is adjusted for the genetic interaction term(s))
 P_Value_Interaction - Interaction effect p-value
 P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect)
 ```

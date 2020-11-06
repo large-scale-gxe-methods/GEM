@@ -291,13 +291,10 @@ int main(int argc, char* argv[]) {
 		samIDCol = colNames[samIDHeaderName];
 	}
 
-	for (int i = 0; i < numSelCol; i++) {
-		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
-			cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
+	for (int i = 0; i < numExpSelCol; i++) {
+		if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
+			cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
 			exit(1);
-		}
-		else {
-			colSelVec[i] = colNames[covSelHeadersName[i]];
 		}
 	}
 
@@ -310,12 +307,17 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	for (int i = 0; i < numExpSelCol; i++) {
-		if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
-			cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
+	for (int i = 0; i < numSelCol; i++) {
+		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
+			cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
 			exit(1);
 		}
+		else {
+			colSelVec[i] = colNames[covSelHeadersName[i]];
+		}
 	}
+
+
 
 	// Erase all elements and leaving it with a size of 0.
 	colNames.clear();

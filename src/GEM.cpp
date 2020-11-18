@@ -36,7 +36,7 @@
 #include "declars.h"
 #define VERSION 1.2
 
-
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
 
 
 int main(int argc, char* argv[]) {
@@ -226,6 +226,7 @@ int main(int argc, char* argv[]) {
 
 
 	// Rearranging covSelHeaders
+	int numCovCol = numSelCol;
 	numSelCol = numSelCol + numIntSelCol + numExpSelCol;
 	vector<int> colSelVec(numSelCol);
 	for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
@@ -510,6 +511,33 @@ int main(int argc, char* argv[]) {
 		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
 		sigma2 = sigma2 / (samSize - (numSelCol + 1));
 		if (phenoTyp == 1) sigma2 = 1.0;
+		double* resid = &residvec[0];
+
+		if (!robust) {
+			for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+				XTransX[i] = XTransX[i] * sigma2;
+			}
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = pgen.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
+
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol + 1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+		}
 
 		cout << "Execution time... ";
 		auto end_time = std::chrono::high_resolution_clock::now();
@@ -517,7 +545,6 @@ int main(int argc, char* argv[]) {
 		cout << "Done.\n";
 		cout << "*********************************************************\n";
 
-		double* resid = &residvec[0];
 
 		delete[] XTransY;
 		delete[] beta;
@@ -783,17 +810,48 @@ int main(int argc, char* argv[]) {
 			residvec[i] = phenoY[i] - Xbeta[i];
 			sigma2 += residvec[i] * residvec[i];
 		}
+		double* resid = &residvec[0];
+
 		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
 		sigma2 = sigma2 / (samSize - (numSelCol + 1));
 		if (phenoTyp == 1) sigma2 = 1.0;
+
+		if (!robust) {
+			for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+				XTransX[i] = XTransX[i] * sigma2;
+			}
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = bed.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
+
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol + 1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+			delete[] XR2;
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
+
+		}
 
 		cout << "Execution time... ";
 		auto end_time = std::chrono::high_resolution_clock::now();
 		printExecutionTime(start_time, end_time);
 		cout << "Done.\n";
 		cout << "*********************************************************\n";
-
-		double* resid = &residvec[0];
 
 		delete[] XTransY;
 		delete[] beta;
@@ -992,7 +1050,6 @@ int main(int argc, char* argv[]) {
 		double* beta = new double[(numSelCol + 1)];
 		matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
 
-		
 		while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
 			iter++;
 			// X * beta
@@ -1038,7 +1095,6 @@ int main(int argc, char* argv[]) {
 
 		// X*[invert (XTransX)]
 		double* XinvXTX = new double[samSize * (numSelCol + 1)];
-
 		if (phenoTyp == 1) {
 			double* WX = new double[samSize * (numSelCol + 1)];
 			for (int i = 0; i < samSize; i++) {
@@ -1068,9 +1124,42 @@ int main(int argc, char* argv[]) {
 			residvec[i] = phenoY[i] - Xbeta[i];
 			sigma2 += residvec[i] * residvec[i];
 		}
+		double* resid = &residvec[0];
+
 		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
 		sigma2 = sigma2 / (samSize - (numSelCol + 1));
 		if (phenoTyp == 1) sigma2 = 1.0;
+
+
+		vector<double> XR2vec;
+
+		if (!robust) {
+		  for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+			XTransX[i] = XTransX[i] * sigma2;
+		  }
+		  printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = bgen.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol+1) + j] = XR2vec[i * (numSelCol+1) + j] * resid[i] * resid[i];
+					
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol+1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX,  XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+		}
+	
+		
 
 		cout << "Execution time... ";
 		auto end_time = std::chrono::high_resolution_clock::now();
@@ -1078,7 +1167,6 @@ int main(int argc, char* argv[]) {
 		cout << "Done.\n";
 		cout << "*********************************************************\n";
 
-		double* resid = &residvec[0];
 
 		delete[] XTransY;
 		delete[] beta;
@@ -1198,3 +1286,49 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
+
+
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta) {
+
+	boost::math::chi_squared chisq_dist_M(1);
+
+	cout << "\nCoefficients: \n";
+	cout << boost::format("%-20s %-14s %-16s %-16s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value"; // 'simple' style.
+	for (int i = 0; i < numCovs; i++) {
+
+		double stdError = sqrt(covVarMat[i * numCovs + i]);
+		double zvalue = beta[i] / stdError;
+		double pr = (isnan(zvalue)) ? NAN : boost::math::cdf(complement(chisq_dist_M, (beta[i] * beta[i]) / covVarMat[i * numCovs + i]));
+
+		if (i == 0) {
+			cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % "Intercept" % beta[i] % stdError % zvalue % pr;
+		}
+		else {
+			cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % covNames[i - 1] % beta[i] % stdError % zvalue % pr;
+		}
+	}
+
+	cout << "\nVariance-Covariance Matrix: \n";
+	for (int i = 0; i < numCovs; i++) {
+		for (int j = 0; j < numCovs; j++) {
+			if (i == 0) {
+				if (j == 0) {
+					cout << boost::format("%+15s %15.10f") % "Intercept" % covVarMat[j * numCovs + i];
+				}
+				else {
+					cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
+				}
+			}
+			else {
+				if (j == 0) {
+					cout << boost::format("%+15s %15.10f") % covNames[i - 1] % covVarMat[j * numCovs + i];
+				}
+				else {
+					cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
+				}
+			}
+		}
+		cout << "\n";
+	}
+	cout << "\n";
+}

@@ -1,6 +1,6 @@
 CC=gcc  # Do not change this for libdeflate package.
 CXX=g++
-CXXFLAGS = -std=c++11 -O2 -g
+CXXFLAGS = -std=c++11 -O2 -g -march=native
 
 # Uncomment line below for LAPACK/BLAS only and comment other lines beginning with LIBS.
 #LIBS= -llapack -lblas -ldl -pthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem

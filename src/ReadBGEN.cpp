@@ -1448,6 +1448,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				matAdd(expS2DS2, S2DS2third,  expSq * expSq, -1.0);
 				matAdd(expS2DS2, S2DS2forth,  expSq * expSq, 1.0);
 	
+
 				// invert (S2TransS2)
 				matInv(expS2TransS2, expSq);
 
@@ -1460,6 +1461,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 				// Stemp2 * Inv(S2TransS2)
 				matNmatNprod(Stemp2, expS2TransS2, VarbetaInt[i], expSq, expSq, expSq);
+				
 
 				for (int j = 0; j < expSq; j++) {
 					for (int k = 0; k < expSq; k++) {
@@ -1477,7 +1479,6 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
 				}
 
-
 				// invert VarbetaInt[i]
 				matInv(InvVarbetaint, expSq);
 				double* Stemp3 = new double[expSq];
@@ -1494,6 +1495,14 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				else {
 					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
 				}
+
+
+				//for (int ind = 0; ind < intSq1 * intSq1; i++) {
+				//	ZGSR2tZGStmp1 /= ZGStZGS[tmp1];
+				//}
+				//double* test = new double[intSq1 * intSq1];
+				//matNmatNprod(invZGStZGStmp1, ZGSR2tZGStmp1, test, intSq1, intSq1, intSq1);
+
 
 				double statJoint = statM + statInt;
 				if (isnan(statJoint) || statJoint <= 0.0) {

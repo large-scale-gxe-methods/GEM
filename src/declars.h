@@ -35,6 +35,7 @@
 #include <boost/thread/tss.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp> 
+#include <boost/format.hpp>
 #include "zlib.h"
 
 

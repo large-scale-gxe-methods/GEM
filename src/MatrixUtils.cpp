@@ -27,7 +27,6 @@ extern "C"{
 
  void dlacpy_(char* uplo, const int* m, const int* n, double* a,
               const int* lda, double* b, const int* ldb);
-
 } 
 
 void initvec(double* v, int N){

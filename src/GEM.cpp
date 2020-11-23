@@ -537,6 +537,10 @@ int main(int argc, char* argv[]) {
 			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
 
 			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
 		}
 
 		cout << "Execution time... ";
@@ -840,7 +844,6 @@ int main(int argc, char* argv[]) {
 			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
 
 			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
-			delete[] XR2;
 			delete[] XR2tX;
 			delete[] XTransXtXR2tX;
 			delete[] XTransXR2;
@@ -1157,6 +1160,9 @@ int main(int argc, char* argv[]) {
 			matmatTprod(XTransX, XTransXtXR2tX,  XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
 
 			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
 		}
 	
 		

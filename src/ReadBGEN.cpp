@@ -1210,7 +1210,6 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 		}
 		delete[] XtransZGS;
 
-
 		// transpose(ZGS) * resid
 		double* ZGStR = new double[ZGS_col];
 		matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
@@ -1361,116 +1360,39 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 			}
 		}
 		else if (robust == 1) {
-
 			for (int i = 0; i < stream_snps; i++) {
 
 				betaInt[i] = new double[expSq];
 				VarbetaInt[i] = new double[expSq * expSq];
 
-				//betamain
+				//BetaMain
 				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
 				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 				VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
 
-				double* InvVarbetaint = new double[expSq * expSq];
+				// ZGStR
+				double* subZGStR = new double[Sq1];
+				subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i* Sq1);
+
+				// ZGSR2tZGS
+				double* subZGSR2tZGS = new double[Sq1 * Sq1];
+				subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+
+				// inv(ZGStZGS[)
+				double* invZGStZGS = new double[Sq1 * Sq1];
+				subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+				matInv(invZGStZGS, Sq1);
 
 
-				// inv(ZGStZGS[tmp1])
-				double* invZGStZGStmp1 = new double[intSq1 * intSq1];
-				subMatrix(ZGStZGS, invZGStZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
-				matInv(invZGStZGStmp1, intSq1);
-				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col]
-				double* ZGStZGSsGRow = new double[expSq * intSq1];
-				subMatrix(ZGStZGS, ZGStZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
+				double* betaAll = new double[Sq1 * 1];
+				matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+				double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
+				matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+				double* VarBetaAll = new double[Sq1 * Sq1];
+				matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
 
 
-				/* For S2TransR*/
-				// ZGStR[i * Sq1 + ind1 + 1]
-				double* expZGStR = new double[expSq];
-				subMatrix(ZGStR, expZGStR, expSq, 1, expSq, expSq, (i* Sq1) + intSq1);
-				// ZGStR[i * Sq1]
-				double* int1ZGStR = new double[intSq1];
-				subMatrix(ZGStR, int1ZGStR, intSq1, 1, expSq + intSq, intSq1, (i* Sq1));
-				// ZGStR[i * Sq1] / ZGStZGS[tmp1]
-				double* invZGStmpInt1ZGStR = new double[intSq1];
-				matvecprod(invZGStZGStmp1, int1ZGStR, invZGStmpInt1ZGStR, intSq1, intSq1);
-				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-				double* S2TransRright = new double[expSq];
-				matNmatNprod(ZGStZGSsGRow, invZGStmpInt1ZGStR, S2TransRright, expSq, intSq1, 1);
-				matAdd(expZGStR, S2TransRright, expSq, -1.0);
-
-
-				/* For S2TransS2S2*/
-				double* expS2TransS2 = new double[expSq * expSq];
-				subMatrix(ZGStZGS, expS2TransS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
-				// ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-				double* invZGStmp1IntExpZGStZGS = new double[intSq1 * expSq];
-				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, intSq1, intSq1, expSq);
-				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-				double* S2TransS2right = new double[expSq * expSq];
-				matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, S2TransS2right, expSq, intSq1, expSq);
-				matAdd(expS2TransS2, S2TransS2right, expSq* expSq, -1.0);
-
-
-				/* For S2DS2*/
-				double* expS2DS2 = new double[expSq * expSq];
-				subMatrix(ZGSR2tZGS, expS2DS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
-				// ZGSR2tZGS[tmp1 + ind2 + 1]
-				double* intExpZGSR2tZGS = new double[expSq * intSq1];
-				subMatrix(ZGSR2tZGS, intExpZGSR2tZGS, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
-				// ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col]
-				double* ZGSR2tZGSsGRow = new double[expSq * intSq1];
-				subMatrix(ZGSR2tZGS, ZGSR2tZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
-				// ZGSR2tZGS[tmp1]
-				double* ZGSR2tZGStmp1 = new double[intSq1 * intSq1];
-				subMatrix(ZGSR2tZGS, ZGSR2tZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
-				
-			
-				// ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-				double* invZGStmp1IntExpZGSR2tZGS = new double[intSq1 * expSq];
-				matTmatprod(invZGStZGStmp1, intExpZGSR2tZGS, invZGStmp1IntExpZGSR2tZGS, intSq1, intSq1, expSq);
-				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-				double* S2DS2second = new double[expSq * expSq];
-				matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGSR2tZGS, S2DS2second, expSq, intSq1, expSq);
-				// ZGSR2tZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-				double* S2DS2third = new double[expSq * expSq];
-				matNmatNprod(ZGSR2tZGSsGRow, invZGStmp1IntExpZGStZGS, S2DS2third, expSq, intSq1, expSq);
-				// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGSR2tZGS[tmp1] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1] / ZGStZGS[tmp1]
-				double* invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
-				matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
-				double* ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS = new double[intSq1 * expSq];
-				matNmatNprod(ZGSR2tZGStmp1, invZGStZGStmp1_intExpZGStZGS, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, intSq1, intSq1, expSq);
-				double* S2DS2Forthtemp = new double[intSq1 * expSq];
-			    matNmatNprod(invZGStZGStmp1, ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS, S2DS2Forthtemp, intSq1, intSq1, expSq);
-				double* S2DS2forth = new double[expSq * expSq];
-				matNmatNprod(ZGStZGSsGRow, S2DS2Forthtemp, S2DS2forth, expSq, intSq1, expSq);
-				matAdd(expS2DS2, S2DS2second, expSq * expSq, -1.0);
-				matAdd(expS2DS2, S2DS2third,  expSq * expSq, -1.0);
-				matAdd(expS2DS2, S2DS2forth,  expSq * expSq, 1.0);
-	
-
-				// invert (S2TransS2)
-				matInv(expS2TransS2, expSq);
-
-				// betaInt = invert(S2TransS2) * S2TransR
-				matvecprod(expS2TransS2, expZGStR, betaInt[i], expSq, expSq);
-
-				// Inv(S2TransS2) * S2DS2
-				double* Stemp2 = new double[expSq * expSq];
-				matmatprod(expS2TransS2, expS2DS2, Stemp2, expSq, expSq, expSq);
-
-				// Stemp2 * Inv(S2TransS2)
-				matNmatNprod(Stemp2, expS2TransS2, VarbetaInt[i], expSq, expSq, expSq);
-				
-
-				for (int j = 0; j < expSq; j++) {
-					for (int k = 0; k < expSq; k++) {
-						InvVarbetaint[j * expSq + k] = VarbetaInt[i][j * expSq + k];
-					}
-				}
-
-
-				//calculating P values
+				//calculating Marginal P values
 				double statM = betaM[i] * betaM[i] / VarbetaM[i];
 				if (isnan(statM) || statM <= 0.0) {
 					PvalM[i] = NAN;
@@ -1479,16 +1401,26 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
 				}
 
-				// invert VarbetaInt[i]
-				matInv(InvVarbetaint, expSq);
-				double* Stemp3 = new double[expSq];
-				matvecprod(InvVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 
+				// VarBetaInt
+				subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+
+				double* invVarbetaint = new double[expSq * expSq];
+				subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1* Sq1 + intSq1));
+				matInv(invVarbetaint, expSq);
+
+				// Beta Int
+				subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+
+				// StatInt
+				double* Stemp3 = new double[expSq];
+				matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 				double statInt = 0.0;
 				for (int j = 0; j < expSq; j++) {
 					statInt += betaInt[i][j] * Stemp3[j];
 				}
 
+				//calculating Interaction P values
 				if (isnan(statInt) || statInt <= 0.0) {
 					PvalInt[i] = NAN;
 				}
@@ -1496,52 +1428,52 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
 				}
 
-
-				//for (int ind = 0; ind < intSq1 * intSq1; i++) {
-				//	ZGSR2tZGStmp1 /= ZGStZGS[tmp1];
-				//}
-				//double* test = new double[intSq1 * intSq1];
-				//matNmatNprod(invZGStZGStmp1, ZGSR2tZGStmp1, test, intSq1, intSq1, intSq1);
-
-
-				double statJoint = statM + statInt;
+				vector<double> invAvec((1 + expSq) * (1 + expSq));
+				vector<double> betaMIntvec(1 + expSq);
+				int betaIndex = 0;
+				int tmpIndex = 0;
+				for (int k = 0; k < Sq1; k++) {
+					if (k > 0 && k <= intSq) { continue; }
+					else {
+						betaMIntvec[betaIndex] = betaAll[k];
+						betaIndex++;
+						for (int j = 0; j < Sq1; j++) {
+							if (j > 0 && j <= intSq) {continue;}
+							else {
+								invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
+								tmpIndex++;
+							}
+						}
+					}
+				}
+				double* invA = &invAvec[0];
+				double* betaMInt = &betaMIntvec[0];
+				matInv(invA, 1 + expSq);
+				double* Stemp4 = new double[1 + expSq];
+				matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+				double statJoint = 0.0;
+				for (int k = 0; k < 1 + expSq; k++) {
+					statJoint += betaMInt[k] * Stemp4[k];
+				}
 				if (isnan(statJoint) || statJoint <= 0.0) {
 					PvalJoint[i] = NAN;
 				}
 				else {
-					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+				    PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 				}
 
 
-				delete[]Stemp2;
-				delete[]Stemp3;
-				delete[]InvVarbetaint;
-				delete[]invZGStZGStmp1;
-				delete[]ZGStZGSsGRow;
 
-				/* For S2TransR*/
-				delete[]expZGStR;
-				delete[]int1ZGStR;
-				delete[]invZGStmpInt1ZGStR;
-				delete[]S2TransRright;
+				delete[] subZGStR;
+				delete[] subZGSR2tZGS;
+				delete[] invZGStZGS;
+				delete[] betaAll;
+				delete[] ZGSR2tZGSxinvZGStZGS;
+				delete[] VarBetaAll;
+				delete[] invVarbetaint;
+				delete[] Stemp3;
+				delete[] Stemp4;
 
-				/* For S2TransS2S2*/
-				delete[]expS2TransS2;
-				delete[]invZGStmp1IntExpZGStZGS;
-				delete[]S2TransS2right;
-
-				/* For S2DS2*/
-				delete[]expS2DS2;
-				delete[]intExpZGSR2tZGS;
-				delete[]ZGSR2tZGSsGRow;
-				delete[]ZGSR2tZGStmp1;
-				delete[]invZGStmp1IntExpZGSR2tZGS;
-				delete[]S2DS2second;
-				delete[]S2DS2third;
-				delete[]invZGStZGStmp1_intExpZGStZGS;
-				delete[]ZGSR2tZGS_invZGStZGStmp1_intExpZGStZGS;
-				delete[]S2DS2Forthtemp;
-			    delete[]S2DS2forth;
 			}
 		} // end of if robust == 1
 

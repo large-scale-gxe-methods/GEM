@@ -688,9 +688,8 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 			boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 
 
-
-
 			if (robust == 0) {
+
 				for (int i = 0; i < stream_snps; i++) {
 					// initialize dynamic 2D array
 					betaInt[i] = new double[expSq];
@@ -701,62 +700,25 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 					betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 					VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
 
-					//double* S2TransS2     = new double[Sq * Sq];
-					//double* S2TransR      = new double[Sq];
-					double* InvVarbetaint = new double[expSq * expSq];
+					// ZGStR
+					double* subZGStR = new double[Sq1];
+					subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
 
-					// inv(ZGStZGS[tmp1])
-					double* invZGStZGStmp1 = new double[intSq1 * intSq1];
-					subMatrix(ZGStZGS, invZGStZGStmp1, intSq1, intSq1, ZGS_col, intSq1, tmp1);
-					matInv(invZGStZGStmp1, intSq1);
-					// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col]
-					double* ZGStZGSsGRow = new double[expSq * intSq1];
-					subMatrix(ZGStZGS, ZGStZGSsGRow, expSq, intSq1, ZGS_col, expSq, tmp1 + intSq1);
-
-					/* For S2TransR*/
-					// ZGStR[i * Sq1 + ind1 + 1]
-					double* expZGStR = new double[expSq];
-					subMatrix(ZGStR, expZGStR, expSq, 1, expSq, expSq, (i * Sq1) + intSq1);
-					// ZGStR[i * Sq1]
-					double* int1ZGStR = new double[intSq1];
-					subMatrix(ZGStR, int1ZGStR, intSq1, 1, expSq + intSq, intSq1, (i * Sq1));
-					// ZGStR[i * Sq1] / ZGStZGS[tmp1]
-					double* invZGStmpInt1ZGStR = new double[intSq1];
-					matvecprod(invZGStZGStmp1, int1ZGStR, invZGStmpInt1ZGStR, intSq1, intSq1);
-					// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1];
-					double* S2TransRright = new double[expSq];
-					matNmatNprod(ZGStZGSsGRow, invZGStmpInt1ZGStR, S2TransRright, expSq, intSq1, 1);
-					matAdd(expZGStR, S2TransRright, expSq, -1.0);
+					// inv(ZGStZGS[)
+					double* invZGStZGS = new double[Sq1 * Sq1];
+					subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+					matInv(invZGStZGS, Sq1);
 
 
-					/* For S2TransS2S2*/
-					double* expS2TransS2 = new double[expSq * expSq];
-					subMatrix(ZGStZGS, expS2TransS2, expSq, expSq, ZGS_col, expSq, tmp1 + (intSq1 * ZGS_col + intSq1));
-					// ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-					double* invZGStmp1IntExpZGStZGS = new double[intSq1 * expSq];
-					matTmatprod(invZGStZGStmp1, ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, intSq1, intSq1, expSq);
-					// ZGStZGS[tmp1 + (ind1 + 1) * ZGS_col] * ZGStZGS[tmp1 + ind2 + 1] / ZGStZGS[tmp1]
-					double* S2TransS2right = new double[expSq * expSq];
-					matNmatNprod(ZGStZGSsGRow, invZGStmp1IntExpZGStZGS, S2TransS2right, expSq, intSq1, expSq);
-					matAdd(expS2TransS2, S2TransS2right, expSq * expSq, -1.0);
-
-
-					// invert (S2TransS2)
-					matInv(expS2TransS2, expSq);
-					// betaInt = invert(S2TransS2) * S2TransR
-					matvecprod(expS2TransS2, expZGStR, betaInt[i], expSq, expSq);
-
-					// Inv(S2TransS2) * S2DS2
-					double* Stemp2 = new double[expSq * expSq];
-
-					for (int j = 0; j < expSq; j++) {
-						for (int k = 0; k < expSq; k++) {
-							VarbetaInt[i][j * expSq + k] = sigma2 * expS2TransS2[j * expSq + k];
-							InvVarbetaint[j * expSq + k] = VarbetaInt[i][j * expSq + k];
-						}
+					double* betaAll = new double[Sq1 * 1];
+					matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+					double* VarBetaAll = new double[Sq1 * Sq1];
+					subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
+					for (int k = 0; k < Sq1 * Sq1; k++) {
+						VarBetaAll[k] *= sigma2;
 					}
 
-					// calculating P values
+					//calculating Marginal P values
 					double statM = betaM[i] * betaM[i] / VarbetaM[i];
 					if (isnan(statM) || statM <= 0.0) {
 						PvalM[i] = NAN;
@@ -765,16 +727,26 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 						PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
 					}
 
-					// invert VarbetaInt[i]
-					matInv(InvVarbetaint, expSq);
-					double* Stemp3 = new double[expSq];
-					matvecprod(InvVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 
+					// VarBetaInt
+					subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+
+					double* invVarbetaint = new double[expSq * expSq];
+					subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+					matInv(invVarbetaint, expSq);
+
+					// Beta Int
+					subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+
+					// StatInt
+					double* Stemp3 = new double[expSq];
+					matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
 					double statInt = 0.0;
 					for (int j = 0; j < expSq; j++) {
 						statInt += betaInt[i][j] * Stemp3[j];
 					}
 
+					//calculating Interaction P values
 					if (isnan(statInt) || statInt <= 0.0) {
 						PvalInt[i] = NAN;
 					}
@@ -782,7 +754,33 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 						PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
 					}
 
-					double statJoint = statM + statInt;
+					vector<double> invAvec((1 + expSq) * (1 + expSq));
+					vector<double> betaMIntvec(1 + expSq);
+					int betaIndex = 0;
+					int tmpIndex = 0;
+					for (int k = 0; k < Sq1; k++) {
+						if (k > 0 && k <= intSq) { continue; }
+						else {
+							betaMIntvec[betaIndex] = betaAll[k];
+							betaIndex++;
+							for (int j = 0; j < Sq1; j++) {
+								if (j > 0 && j <= intSq) { continue; }
+								else {
+									invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
+									tmpIndex++;
+								}
+							}
+						}
+					}
+					double* invA = &invAvec[0];
+					double* betaMInt = &betaMIntvec[0];
+					matInv(invA, 1 + expSq);
+					double* Stemp4 = new double[1 + expSq];
+					matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+					double statJoint = 0.0;
+					for (int k = 0; k < 1 + expSq; k++) {
+						statJoint += betaMInt[k] * Stemp4[k];
+					}
 					if (isnan(statJoint) || statJoint <= 0.0) {
 						PvalJoint[i] = NAN;
 					}
@@ -790,25 +788,13 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 						PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 					}
 
-					//delete[] S2TransS2;
-					//delete[] S2TransR;
-					///delete[] ZGStZGSsGsInt;
-					delete[]Stemp2;
-					delete[]Stemp3;
-					delete[]InvVarbetaint;
-					delete[]invZGStZGStmp1;
-					delete[]ZGStZGSsGRow;
-
-					/* For S2TransR*/
-					delete[]expZGStR;
-					delete[]int1ZGStR;
-					delete[]invZGStmpInt1ZGStR;
-					delete[]S2TransRright;
-
-					/* For S2TransS2S2*/
-					delete[]expS2TransS2;
-					delete[]invZGStmp1IntExpZGStZGS;
-					delete[]S2TransS2right;
+					delete[] subZGStR;
+					delete[] invZGStZGS;
+					delete[] betaAll;
+					delete[] VarBetaAll;
+					delete[] invVarbetaint;
+					delete[] Stemp3;
+					delete[] Stemp4;
 				}
 			}
 			else if (robust == 1) {

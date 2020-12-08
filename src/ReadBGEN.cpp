@@ -129,7 +129,7 @@ This function is revised based on the Parse function in BOLT-LMM v2.3 source cod
 ***********************************************************************************/
 
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
-void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize) {
+void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
 
 
 	int k = 0;
@@ -251,7 +251,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 				auto tmp_valvec = phenomap[strtmp];
 				if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
 					sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-					// covdata[k*(numSelCol+1) + 0] = 1.0;
 					for (int c = 0; c < numSelCol; c++) {
 						sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
 					}
@@ -277,10 +276,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	phenodata.resize(k);
 	covdata.resize(k * (numSelCol + 1));
 	samSize = k;
-
-	new_samSize = samSize;
-	new_covdata = covdata;
-	new_phenodata = phenodata;
 
 
 	if (samSize == 0) {
@@ -310,7 +305,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	}
 
 
-
 	int ii = 0;
 	include_idx.resize(samSize);
 	for (uint i = 0; i < bgen.Nbgen; i++) {
@@ -321,6 +315,75 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	}
 
 
+	vector<double> tmp1(samSize, 1);
+	double* tmpMean = new double[numSelCol + 1];
+	vector<double> tmpSD(numSelCol + 1);
+
+	if (center) {
+		matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
+		if (!scale) {
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+				tmpSD[i] = 1.0;
+			}
+		}
+		else {
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
+				}
+			}
+
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
+			}
+		}
+
+		for (int i = 0; i < samSize; i++) {
+			for (int j = 1; j < numSelCol + 1; j++) {
+				covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
+			}
+		}
+
+	}
+	else {
+		if (!scale) {
+			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
+				}
+			}
+
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
+				}
+			}
+		}
+	}
+
+
+	new_samSize = samSize;
+	new_covdata = covdata;
+	new_phenodata = phenodata;
+	for (int i = 0; i < samSize; i++) {
+		for (int j = 0; j < numSelCol + 1; j++) {
+			cout << new_covdata[i * (numSelCol + 1) + j] << endl;
+		}
+	}
 
 	cout << "****************************************************************************\n";
 	if (genoUnMatchID.empty()) {

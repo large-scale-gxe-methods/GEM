@@ -1020,7 +1020,7 @@ int main(int argc, char* argv[]) {
 		***************************************************************/
 		Bgen bgen;
 		bgen.processBgenHeaderBlock(cmd.genofile);
-		bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+		bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
 
 
 		/******************************************************************

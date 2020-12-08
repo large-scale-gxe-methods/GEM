@@ -49,7 +49,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		("delim", po::value<std::string>()->default_value(","), "")
 		("missing-value", po::value<std::string>()->default_value("NA"), "")
 		("robust", po::value<int>()->default_value(0), "")
-		("tol", po::value<double>()->default_value(.0000001));
+		("tol", po::value<double>()->default_value(.0000001))
+		("center", po::value<double>()->default_value(1))
+		("scale", po::value<double>()->default_value(0));
 
 	// Filtering options
 	po::options_description filter("Filtering options");
@@ -308,7 +310,12 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	if (out.count("tol")) {
 		tol = out["tol"].as<double>();
 	}
-
+	if (out.count("center")) {
+		center = out["center"].as<double>();
+	}
+	if (out.count("scale")) {
+		scale = out["scale"].as<double>();
+	}
 
 
 	// Filtering options

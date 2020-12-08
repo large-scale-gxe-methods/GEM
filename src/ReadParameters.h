@@ -51,6 +51,8 @@ public:
 	bool doFilters;
 
 	// Performance options
+	double center;
+	double scale;
 	double tol;
 	int robust;
 	int threads;

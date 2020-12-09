@@ -42,7 +42,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	phenofile.add_options()
 		("sampleid-name", po::value<std::string>(), "")
 		("pheno-type", po::value<int>(), "")
-		("pheno-name", po::value<std::vector<std::string>>()->multitoken(), "")
+		("pheno-name", po::value<std::string>(), "")
 		("covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
 		("int-covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
 		("exposure-names", po::value<std::vector<std::string>>()->multitoken(), "")
@@ -252,7 +252,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		exit(1);
 	}
 	if (out.count("pheno-name")) {
-		phenoName = out["pheno-name"].as<std::vector<std::string>>();
+		phenoName = out["pheno-name"].as<string>();
 	}
 	else {
 		cerr << "\nERROR: Phenotype column name (--pheno-name) is not specified.\n\n";

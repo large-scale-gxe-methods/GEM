@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
 	CommandLine cmd;
 	cmd.processCommandLine(argc, argv);
 
-	for (int ph = 0; ph < cmd.phenoName.size(); ph++) {
 
 	/****************************************************
 	 Parameters
@@ -67,7 +66,7 @@ int main(int argc, char* argv[]) {
 	char delim = cmd.pheno_delim[0];
 	if (delim == '\0') delim = ' ';
 
-	string phenoHeaderName = cmd.phenoName[ph];
+	string phenoHeaderName = cmd.phenoName;
 	string samIDHeaderName = cmd.sampleID;
 	string phenoMissingKey = cmd.missing;
 	string output = cmd.outFile;
@@ -1287,7 +1286,7 @@ int main(int argc, char* argv[]) {
 
 		delete[] XTransX;
 		delete[] XinvXTX;
-	}
+	
 	}
 	return 0;
 }

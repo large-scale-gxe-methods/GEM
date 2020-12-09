@@ -40,7 +40,7 @@ public:
 	std::vector<std::string> cov;
 	std::vector<std::string> icov;
 	std::vector<std::string> exp;
-	std::vector<std::string> phenoName;
+	std::string phenoName;
 	std::string sampleID;
 	int phenoType;
 

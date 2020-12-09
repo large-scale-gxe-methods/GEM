@@ -379,11 +379,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	new_samSize = samSize;
 	new_covdata = covdata;
 	new_phenodata = phenodata;
-	for (int i = 0; i < samSize; i++) {
-		for (int j = 0; j < numSelCol + 1; j++) {
-			cout << new_covdata[i * (numSelCol + 1) + j] << endl;
-		}
-	}
 
 	cout << "****************************************************************************\n";
 	if (genoUnMatchID.empty()) {

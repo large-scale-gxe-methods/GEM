@@ -45,7 +45,7 @@ public:
 
 	void processPgenHeader(string pgenFile);
 	void processPvar(Pgen pgen, string pvarFile);
-	void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
+	void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
 	void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 

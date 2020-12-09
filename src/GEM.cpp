@@ -402,7 +402,7 @@ int main(int argc, char* argv[]) {
 
 		pgen.processPgenHeader(cmd.pgenFile);
 		pgen.processPvar(pgen, cmd.pvarFile);
-		pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+		pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
 
 		sampleIds.clear();
 		phenomap.clear(); 
@@ -708,7 +708,7 @@ int main(int argc, char* argv[]) {
 
 		Bed bed;
 		bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
-		bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
+		bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
 
 		sampleIds.clear();
 		phenomap.clear(); 

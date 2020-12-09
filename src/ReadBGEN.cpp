@@ -351,7 +351,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 	}
 	else {
-		if (!scale) {
+		if (scale) {
 			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
 			for (int i = 1; i < numSelCol + 1; i++) {
 				tmpMean[i] /= double(samSize * 1.0);
@@ -369,7 +369,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 			for (int i = 0; i < samSize; i++) {
 				for (int j = 1; j < numSelCol + 1; j++) {
-					covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
+					covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
 				}
 			}
 		}

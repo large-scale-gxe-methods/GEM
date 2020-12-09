@@ -92,7 +92,7 @@ void Pgen::processPgenHeader(string pgenFile) {
 
 
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
-void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize) {
+void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
 
 	 unordered_set<int> genoUnMatchID;
 
@@ -151,11 +151,6 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 	covdata.resize(k * (numSelCol + 1));
 	samSize = k;
 
-	new_samSize = samSize;
-	new_covdata = covdata;
-	new_phenodata = phenodata;
-
-
 	if (samSize == 0) {
 		cout << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n";
 		cout << "\nCheck if sample IDs are consistent between the phenotype file and .psam file, or check if (--sampleid-name) is specified correctly. \n\n";
@@ -172,6 +167,70 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
 	      }
 	}
+
+
+	vector<double> tmp1(samSize, 1);
+	double* tmpMean = new double[numSelCol + 1];
+	vector<double> tmpSD(numSelCol + 1);
+	if (center) {
+		matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
+		if (!scale) {
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+				tmpSD[i] = 1.0;
+			}
+		}
+		else {
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
+				}
+			}
+
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
+			}
+		}
+
+		for (int i = 0; i < samSize; i++) {
+			for (int j = 1; j < numSelCol + 1; j++) {
+				covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
+			}
+		}
+
+	}
+	else {
+		if (scale) {
+			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpMean[i] /= double(samSize * 1.0);
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
+				}
+			}
+
+			for (int i = 1; i < numSelCol + 1; i++) {
+				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
+			}
+
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 1; j < numSelCol + 1; j++) {
+					covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
+				}
+			}
+		}
+	}
+
+	new_samSize = samSize;
+	new_covdata = covdata;
+	new_phenodata = phenodata;
 
 	cout << "****************************************************************************\n";
 	if (genoUnMatchID.empty()) {

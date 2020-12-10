@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
 	cout << "GNU General Public License v3\n";
 	cout << "*********************************************************\n";
 
+	cout << "Update: 12/9/2020 9:52pm"
 	// Process command line
 	CommandLine cmd;
 	cmd.processCommandLine(argc, argv);

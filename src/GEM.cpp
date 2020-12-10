@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 	string phenoHeaderName = cmd.phenoName[ph];
 	string samIDHeaderName = cmd.sampleID;
 	string phenoMissingKey = cmd.missing;
-	string output = cmd.outFile;
+	string output = std::to_string(ph) + "_" + cmd.outFile;
 	std::unordered_map<string, int> covHM;
 	std::unordered_map<string, int> intHM;
 	std::unordered_map<string, int> expHM;

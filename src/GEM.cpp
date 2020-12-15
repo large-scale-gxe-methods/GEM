@@ -63,8 +63,18 @@ int main(int argc, char* argv[]) {
 	int robust = cmd.robust;
 	int phenoTyp = cmd.phenoType;
 	int stream_snps = cmd.stream_snps;
-	char delim = cmd.pheno_delim[0];
-	if (delim == '\0') delim = ' ';
+
+
+	char delim;
+	if ((cmd.pheno_delim[0] == '\\' && cmd.pheno_delim[1] == 't') || cmd.pheno_delim[0] == 't') {
+		delim = '\t';
+	}
+	else if ((cmd.pheno_delim[0] == '\\' && cmd.pheno_delim[1] == '0') || cmd.pheno_delim[0] == '0') {
+		delim = ' ';
+	}
+	else {
+		delim = cmd.pheno_delim[0];
+	}
 
 	string phenoHeaderName = cmd.phenoName;
 	string samIDHeaderName = cmd.sampleID;

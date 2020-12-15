@@ -303,7 +303,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 		case 1:
 			break;
 		default:
-			cerr << "\nERROR: --robust must be 0 (non-robust) or 1 (robust). \n\n";
+			cerr << "\nERROR: Please specify --robust with a value equal to 0 (false) or 1 (true). \n\n";
 			exit(1);
 		}
 	}
@@ -312,9 +312,19 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 	}
 	if (out.count("center")) {
 		center = out["center"].as<double>();
+
+		if (center != 0.0 && center != 1.0) {
+			cerr << "\nERROR: Please specify --center with a value equal to 0 (false) or 1 (true).\n\n";
+			exit(1);
+		}
 	}
 	if (out.count("scale")) {
 		scale = out["scale"].as<double>();
+
+		if (scale != 0.0 && scale != 1.0) {
+			cerr << "\nERROR: Please specify --scale with a value equal to 0 (false) or 1 (true).\n\n";
+			exit(1);
+		}
 	}
 
 
@@ -411,8 +421,10 @@ void print_help() {
 		<< "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
 		<< "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
 		<< "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
-		<< "   --delim \t\t Delimiter separating values in the phenotype file. \n \t\t\t    Default: , (comma-separated)" << endl
-		<< "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl;
+		<< "   --delim \t\t Delimiter separating values in the phenotype file. Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
+		<< "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
+		<< "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates. \n \t\t\t    Default: 1" << endl
+		<< "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl;
 	cout << endl << endl;
 
 

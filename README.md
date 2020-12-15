@@ -144,14 +144,20 @@ Phenotype File Options:
         Default: 0.0000001  
 
 --delim  
-     Delimiter separating values in the phenotype file.  
+     Delimiter separating values in the phenotype file. Tab delimiter should be represented as \t and space delimiter as \0.
         Default: , (comma-separated)  
 
 --missing-value  
      Indicates how missing values in the phenotype file are stored.  
         Default: NA
   
-  
+--center 
+     0 for no centering to be done and 1 to center ALL exposures and covariates.
+        Default: 1
+
+--scale
+     0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
+        Default: 0
    
 Filtering Options:  
 

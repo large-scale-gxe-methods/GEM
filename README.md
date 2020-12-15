@@ -159,6 +159,8 @@ Phenotype File Options:
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
         Default: 0
    
+
+
 Filtering Options:  
 
 --maf
@@ -176,6 +178,7 @@ Filtering Options:
      identifier per line after the header. Variants not listed in this file will be excluded from analysis.
   
   
+
 Performance Options:  
 
 --threads

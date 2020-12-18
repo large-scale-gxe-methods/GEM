@@ -258,34 +258,21 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 	}
 
 	string IDline;
-	getline(fIDMat, IDline);
-	std::istringstream iss(IDline);
 	string value;
 	vector <string> values;
 
-	while (getline(iss, value, '\t')) {
-		value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-		values.push_back(value);
-	}
-	if (values[0] != "#CHROM") {
-		cerr << "\nERROR: First line in .pvar file should begin with #CHROM.\n\n";
-		exit(1);
-	}
-	if (values[1] != "POS") {
-		cerr << "\nERROR: Second column should be POS in .pvar file.\n\n";
-		exit(1);
-	}
-	if (values[2] != "ID") {
-		cerr << "\nERROR: Third column should be ID in .pvar file.\n\n";
-		exit(1);
-	}
-	if (values[3] != "REF") {
-		cerr << "\nERROR: Forth column should be REF in .pvar file.\n\n";
-		exit(1);
-	}
-	if (values[4] != "ALT") {
-		cerr << "\nERROR: Fifth column should be ALT in .pvar file.\n\n";
-		exit(1);
+	bool tmp = true;
+	while (getline(fIDMat, IDline)) {
+
+		std::istringstream iss(IDline);
+		while (getline(iss, value, '\t')) {
+			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			values.push_back(value);
+		}
+		if (values[0].compare("#CHROM") == 0) {
+			break;
+		}
+		values.clear();
 	}
 
 	uint nVariants = 0;
@@ -300,9 +287,6 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 	fIDMat.close();
 
 }
-
-
-
 
 
 
@@ -380,14 +364,19 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 		fIDMat.open(cmd.pvarFile);
 
 		string IDline;
-		getline(fIDMat, IDline);
-		std::istringstream iss(IDline);
 		string value;
 		vector <string> values;
 
-		while (getline(iss, value, '\t')) {
-			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-			values.push_back(value);
+		while (getline(fIDMat, IDline)) {
+			std::istringstream iss(IDline);
+			while (getline(iss, value, '\t')) {
+				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+				values.push_back(value);
+			}
+			if (values[0].compare("#CHROM") == 0) {
+				break;
+			}
+			values.clear();
 		}
 
 		int k = 0;
@@ -455,11 +444,24 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 		std::vector<uint> missingIndex;
 		vector <double> AF(stream_snps);
 		int ZGS_col = Sq1 * stream_snps;
+
 		std::ifstream fIDMat;
 		fIDMat.open(pvarFile);
-
 		string IDline;
-		getline(fIDMat, IDline);
+		string tmpvalue;
+		vector <string> tmpvalues;
+		while (getline(fIDMat, IDline)) {
+			std::istringstream iss(IDline);
+			while (getline(iss, tmpvalue, '\t')) {
+				tmpvalue.erase(std::remove(tmpvalue.begin(), tmpvalue.end(), '\r'), tmpvalue.end());
+				tmpvalues.push_back(tmpvalue);
+			}
+			if (tmpvalues[0].compare("#CHROM") == 0) {
+				break;
+			}
+			tmpvalues.clear();
+		}
+
 		uint32_t skipIndex = 0;
 		if (!filterVariants) {
 			while (skipIndex != begin) {

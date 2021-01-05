@@ -87,7 +87,14 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 	for (uint m = 0; m < bed.n_samples; m++) {
 		getline(fIDMat, IDline);
 		std::istringstream iss(IDline);
-		iss >> FID >> strtmp;
+
+		string value;
+		vector <string> values;
+		while (getline(iss, value, '\t')) {
+			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			values.push_back(value);
+		}
+		string strtmp = values[1];
 
 		int itmp = k;
 		if (phenomap.find(strtmp) != phenomap.end()) {

@@ -197,13 +197,22 @@ Performance Options:
 
 * ##### Phenotype File
     A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates.  
+    All binary phenotypes, exposures, and covariates should be coded numerically (e.g., males/females as 0/1)
 
 * ##### Genotype Files
     1. BGEN v1.1, v1.2 or v1.3 genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
     The BGEN file should only contain bi-allelic unphased/phased genotypes. The second allele in the BGEN file is counted in association testing.   
 
     2. Plink BED/PGEN genotype files described here [BED/PGEN Format](https://www.cog-genomics.org/plink/2.0/formats).  
-    The BED files should be stored in variant-major form. The variant in the 6th column in the .bim file is counted in association testing. For PGEN files, there should only be bi-allelic genotypes. The second allele is counted in association testing; usually the "ALT" column in .pvar file.  
+    <ins>BED</ins>  
+    .fam files should follow the format described [here](https://www.cog-genomics.org/plink/2.0/formats#fam). The first column must be the FID and the second column must be the IID. GEM will use the IID column for sample identifier matching with the phenotype file.  
+    .bim files should contain the chromosome, variant id, cM, base-pair coordinate, ALT allele, and REF allele columns in this order as described [here](https://www.cog-genomics.org/plink/2.0/formats#bim).  
+    The BED files should be stored in variant-major form. The variant in the 6th column in the .bim file is counted in association testing.  
+    
+    <ins>PGEN</ins>  
+    .psam files should follow plink2.0 format described [here](https://www.cog-genomics.org/plink/2.0/formats#psam). If a header line is present, then a column name #IID must be present to be used for sample identifier matching with the phenotype file. If no header line is present, then the columns are assumed to be in the .fam file order.  
+    .pvar files are described [here](https://www.cog-genomics.org/plink/2.0/formats#pvar). If a header line starting with #CHROM is present, then column names POS, ID, REF, and ALT should also be present. If the .pvar file contains no header line, it is assumed that the .pvar file is in .bim file order.  
+    For .pgen files, there should only be bi-allelic genotypes. The second allele is counted in association testing; usually the "ALT" column in .pvar file.
      
 * ##### Sample File
     A .sample file is required when the .bgen file does not contain sample identifiers.  

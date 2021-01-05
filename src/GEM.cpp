@@ -613,7 +613,7 @@ int main(int argc, char* argv[]) {
 				boost::thread_group thread_grp;
 				start_time = std::chrono::high_resolution_clock::now();
 				for (uint32_t i = 0; i < pgen.threads; ++i) {
-					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
+					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
 				}
 				thread_grp.join_all();
 				cout << "Joining threads... \n";
@@ -628,7 +628,7 @@ int main(int argc, char* argv[]) {
 				cout << "The second allele in the PGEN file will be used for association testing.\n";
 				cout << "Running with single thread...\n";
 
-				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.filterVariants, pgen.pgenVariantPos, pgen);
+				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, pgen);
 			}
 
 		}
@@ -643,7 +643,7 @@ int main(int argc, char* argv[]) {
 				boost::thread_group thread_grp;
 				start_time = std::chrono::high_resolution_clock::now();
 				for (uint32_t i = 0; i < pgen.threads; ++i) {
-					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
+					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
 				}
 				thread_grp.join_all();
 				cout << "Joining threads... \n";
@@ -658,7 +658,7 @@ int main(int argc, char* argv[]) {
 				cout << "The second allele in the PGEN file will be used for association testing.\n";
 				cout << "Running with single thread...\n";
 
-				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.filterVariants, pgen.pgenVariantPos, pgen);
+				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, pgen);
 			}
 		}
 
@@ -668,7 +668,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}
@@ -976,7 +976,7 @@ int main(int argc, char* argv[]) {
 		cout << "Combining results... \n";
 		start_time = std::chrono::high_resolution_clock::now();
 		std::ofstream results(output, std::ofstream::binary);
-		results << "ID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 		for (int i = 1; i <= numExpSelCol; i++) {
 			results << "Beta_Interaction" << "_" << i << "\t";
 		}

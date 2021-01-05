@@ -98,36 +98,81 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
 	 std::ifstream fIDMat;
 	 fIDMat.open(psamFile);
-
 	 if (!fIDMat.is_open()) {
 		 cerr << "\nERROR: .psam file could not be opened.\n\n";
 	 	 exit(1);
 	 }
 
 	 string IDline;
-	 getline(fIDMat, IDline);
+	 string value;
+	 vector <string> values;
+	 int prev = fIDMat.tellg();
+	 while (getline(fIDMat, IDline)) {
+		 std::istringstream iss(IDline);
+		 while (getline(iss, value, '\t')) {
+			 value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			 values.push_back(value);
+		 }
+		 if (values[0].rfind("##", 0) != 0) {
+			 break;
+		 }
+		 prev = fIDMat.tellg();
+		 values.clear();
+	 }
+	 cout << values[0] << endl;
+	 int iidIndex;
+	 if ((values[0].compare("#FID") == 0) || (values[0].compare("#IID") == 0)) {
+		 std::vector<std::string>::iterator it;
+		 it = find(values.begin(), values.end(), "#IID");
+		 iidIndex = std::distance(values.begin(), it);
 
-	uint nSamples = 0;
-	while (getline(fIDMat, IDline)) {
-		nSamples++;
-	}
-	if (nSamples != pgen.raw_sample_ct) {
-		cerr << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
-		exit(1);
-	}
-	else {
-		fIDMat.clear();
-		fIDMat.seekg(0, fIDMat.beg);
-		getline(fIDMat, IDline);
-	}
+		 uint nSamples = 0;
+		 while (getline(fIDMat, IDline)) {
+			 nSamples++;
+		 }
+
+		 if (nSamples != pgen.raw_sample_ct) {
+			 cerr << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
+			 exit(1);
+		 }
+		 fIDMat.clear();
+		 fIDMat.seekg(prev);
+		 getline(fIDMat, IDline);
+		 values.clear();
+
+	 }
+	 else {
+		 cout << "\nWARNING: No header line with #FID or #IID present in .psam file.\n";
+		 cout << "Assuming the .psam file column order is FID, IID, PAT, MAT, SEX, PHENO1, as shown here https://www.cog-genomics.org/plink/2.0/formats#psam. \n";
+		 iidIndex = 1;
+
+		 uint nSamples = 1;
+		 while (getline(fIDMat, IDline)) {
+			 nSamples++;
+		 }
+		 if (nSamples != pgen.raw_sample_ct) {
+			 cerr << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
+			 exit(1);
+		 }
+		 fIDMat.clear();
+		 fIDMat.seekg(prev);
+		 values.clear();
+	 }
+
 
 	int k = 0;
 	for (uint m = 0; m < pgen.raw_sample_ct; m++) {
 	     getline(fIDMat, IDline);
 	     std::istringstream iss(IDline);
-	     string strtmp;
-	     iss >> strtmp;
 
+		 string value;
+		 vector <string> values;
+		 while (getline(iss, value, '\t')) {
+			 value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			 values.push_back(value);
+		 }
+
+	     string strtmp = values[iidIndex];
 		 int itmp = k;
 		 if (phenomap.find(strtmp) != phenomap.end()) {
 			 auto tmp_valvec = phenomap[strtmp];
@@ -260,32 +305,104 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 	string IDline;
 	string value;
 	vector <string> values;
-
-	bool tmp = true;
 	while (getline(fIDMat, IDline)) {
-
 		std::istringstream iss(IDline);
 		while (getline(iss, value, '\t')) {
 			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 			values.push_back(value);
 		}
-		if (values[0].compare("#CHROM") == 0) {
+		if (values[0].rfind("##", 0) != 0) {
 			break;
 		}
 		values.clear();
 	}
 
-	uint nVariants = 0;
-	while (getline(fIDMat, IDline)) {
-		nVariants++;
+	if (values[0].compare("#CHROM") == 0) {
+		std::vector<std::string>::iterator it;
+		
+		it = find(values.begin(), values.end(), "ID");
+		if (it != values.end()) {
+			int idx = std::distance(values.begin(), it);
+			pvarIndex.push_back(idx);
+		}
+		else {
+			cerr << "\nERROR: Cannot find ID column header name in .pvar file when #CHROM header line is present.\n\n";
+		}
+
+		pvarIndex.push_back(0);
+
+		it = find(values.begin(), values.end(), "POS");
+		if (it != values.end()) {
+			int idx = std::distance(values.begin(), it);
+			pvarIndex.push_back(idx);
+		}
+		else {
+			cerr << "\nERROR: Cannot find POS column header name in .pvar file when #CHROM header line is present.\n\n";
+		}
+
+		it = find(values.begin(), values.end(), "REF");
+		if (it != values.end()) {
+			int idx = std::distance(values.begin(), it);
+			pvarIndex.push_back(idx);
+		}
+		else {
+			cerr << "\nERROR: Cannot find REF column header name in .pvar file when #CHROM header line is present.\n\n";
+		}
+
+		it = find(values.begin(), values.end(), "ALT");
+		if (it != values.end()) {
+			int idx = std::distance(values.begin(), it);
+			pvarIndex.push_back(idx);
+		}
+		else {
+			cerr << "\nERROR: Cannot find ALT column header name in .pvar file when #CHROM header line is present.\n\n";
+		}
+
+		uint nVariants = 0;
+		while (getline(fIDMat, IDline)) {
+			nVariants++;
+		}
+		if (nVariants != pgen.raw_variant_ct) {
+			cout << "\nERROR: Number of variants in .pvar file (" << nVariants << ") does not match the number of variants in pgen file (" << pgen.raw_variant_ct << ").\n\n";
+			exit(1);
+		}
+
 	}
-	if (nVariants != pgen.raw_variant_ct) {
-		cout << "\nERROR: Number of variants in .pvar file (" << nVariants << ") does not match the number of variants in pgen file (" << pgen.raw_variant_ct << ").\n\n";
-		exit(1);
+	else {
+		if (values.size() == 5) {
+			cout << "\nWARNING: No header line with #CHROM present in .pvar file. Number of columns in .pvar file is 5.\n";
+			cout << "Assuming the .pvar file column order is CHROM, ID, POS, ALT, REF as shown here https://www.cog-genomics.org/plink/2.0/formats#pvar. \n";
+			pvarIndex.push_back(1);
+			pvarIndex.push_back(0);
+			pvarIndex.push_back(2);
+			pvarIndex.push_back(3);
+			pvarIndex.push_back(4);
+		}
+		else if (values.size() == 6) {
+			cout << "\nWARNING: No header line with #CHROM present in .pvar file. Number of columns in .pvar file is 6.\n";
+			cout << "Assuming the .pvar file column order is CHROM, ID, CM, POS, ALT, REF as shown here https://www.cog-genomics.org/plink/2.0/formats#pvar. \n";
+			pvarIndex.push_back(1);
+			pvarIndex.push_back(0);
+			pvarIndex.push_back(3);
+			pvarIndex.push_back(4);
+			pvarIndex.push_back(5);
+		}
+		else {
+			cerr << "\nERROR: Number of columns is not 5 or 6  in .pvar file when the #CHROM header line is not present ( https://www.cog-genomics.org/plink/2.0/formats#pvar ).\n\n";
+			exit(1);
+		}
+
+		uint nVariants = 1;
+		while (getline(fIDMat, IDline)) {
+			nVariants++;
+		}
+		if (nVariants != pgen.raw_variant_ct) {
+			cout << "\nERROR: Number of variants in .pvar file (" << nVariants << ") does not match the number of variants in pgen file (" << pgen.raw_variant_ct << ").\n\n";
+			exit(1);
+		}
 	}
 
 	fIDMat.close();
-
 }
 
 
@@ -298,7 +415,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 	int count = 0;
 	std::set<std::string> includeVariant;
 	threads = cmd.threads;
-
+	vector<int> pvarIndex = pgen.pvarIndex;
 
 	if (cmd.doFilters) {
 
@@ -366,18 +483,27 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 		string IDline;
 		string value;
 		vector <string> values;
-
+		int prev = fIDMat.tellg();
+		int pi = 2;
 		while (getline(fIDMat, IDline)) {
 			std::istringstream iss(IDline);
 			while (getline(iss, value, '\t')) {
 				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 				values.push_back(value);
 			}
-			if (values[0].compare("#CHROM") == 0) {
+			if (values[0].rfind("##", 0) != 0) {
 				break;
 			}
+			prev = fIDMat.tellg();
 			values.clear();
 		}
+		if (values[0].compare("#CHROM") != 0) {
+			fIDMat.seekg(prev);
+			if (values.size() == 6) {
+				pi = 3;
+			}
+		}
+
 
 		int k = 0;
 		long long unsigned int pvalIndex = 0;
@@ -390,7 +516,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 				values.push_back(value);
 			}
-			if (includeVariant.find(values[2]) != includeVariant.end()) {
+			if (includeVariant.find(values[pi]) != includeVariant.end()) {
 				pgenVariantPos.push_back(pvalIndex);
 				k++;
 
@@ -400,16 +526,18 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 		}
 
 		if (k != nSNPS) {
-			cerr << "\nERROR: There are one or more SNPs in .pvar file with " << values[2] << " column not in " << cmd.includeVariantFile << ".\n\n";
+			cerr << "\nERROR: There are one or more SNPs in " << cmd.includeVariantFile << " file that is not in the .pvar file.\n\n";
 			exit(1);
 		}
+
+		fIDMat.close();
 	}
 }
 
 
 
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test) {
+void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test) {
 
 		auto start_time = std::chrono::high_resolution_clock::now();
 		std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -445,22 +573,29 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 		vector <double> AF(stream_snps);
 		int ZGS_col = Sq1 * stream_snps;
 
+		int pvarLength = pvarIndex.size();
 		std::ifstream fIDMat;
 		fIDMat.open(pvarFile);
 		string IDline;
 		string tmpvalue;
 		vector <string> tmpvalues;
+		int prev = fIDMat.tellg();
 		while (getline(fIDMat, IDline)) {
 			std::istringstream iss(IDline);
 			while (getline(iss, tmpvalue, '\t')) {
 				tmpvalue.erase(std::remove(tmpvalue.begin(), tmpvalue.end(), '\r'), tmpvalue.end());
 				tmpvalues.push_back(tmpvalue);
 			}
-			if (tmpvalues[0].compare("#CHROM") == 0) {
+			if (tmpvalues[0].rfind("##", 0) != 0) {
 				break;
 			}
+			prev = fIDMat.tellg();
 			tmpvalues.clear();
 		}
+		if (tmpvalues[0].compare("#CHROM") != 0) {
+			fIDMat.seekg(prev);
+		}
+
 
 		uint32_t skipIndex = 0;
 		if (!filterVariants) {
@@ -554,9 +689,10 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 		pgr_alloc_iter = &(pgr_alloc_iter[dosage_main_byte_ct]);
 
 		uint32_t _subset_size = file_sample_ct;
-
 		plink2::PgrSampleSubsetIndex _subset_index;
 		pgr_alloc_iter = &(pgr_alloc_iter[plink2::kPglBitTransposeBufbytes]);
+
+
 
 		uint32_t snploop = begin;
 		int variant_index = 0;
@@ -574,7 +710,6 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				if (snploop == end + 1 && stream_i != 0) {
 					stream_snps = stream_i;
 					ZGS_col = Sq1 * stream_snps;
-
 					break;
 				}
 
@@ -609,7 +744,6 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 					reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, pgenPos[snploop], 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
 				}
 				plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
-				values[4].erase(std::remove(values[4].begin(), values[4].end(), '\r'), values[4].end());
 				snploop++;
 
 				int tmp1 = stream_i * Sq1 * samSize;
@@ -666,7 +800,15 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 					}
 					missingIndex.clear();
 				}
-				geno_snpid[stream_i] = values[2] + "\t" + values[0] + "\t" + values[1] + "\t" + values[3] + "\t" + values[4] + "\t" + std::to_string(samSize - nMissing);
+
+				string tmpString = "";
+				for (int p = 0; p < pvarLength; p++) {
+					if (p == pvarLength - 1) {
+						values[pvarIndex[p]].erase(std::remove(values[pvarIndex[p]].begin(), values[pvarIndex[p]].end(), '\r'), values[pvarIndex[p]].end());
+					}
+					tmpString = tmpString + values[pvarIndex[p]] + "\t";
+				}
+				geno_snpid[stream_i] = tmpString + std::to_string(samSize - nMissing);
 
 				for (int j = 0; j < Sq; j++) {
 					int tmp3 = samSize * (j + 1) + tmp1;

@@ -43,12 +43,14 @@ public:
 	std::string outFile;
 	std::vector<long long unsigned int> pgenVariantPos;
 
+	vector<int> pvarIndex;
+
 	void processPgenHeader(string pgenFile);
 	void processPvar(Pgen pgen, string pvarFile);
 	void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
 	void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test);
+void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test);
 
 #endif

@@ -208,7 +208,6 @@ Performance Options:
     .fam files should follow the format described [here](https://www.cog-genomics.org/plink/2.0/formats#fam). The first column must be the FID and the second column must be the IID. GEM will use the IID column for sample identifier matching with the phenotype file.  
     .bim files should contain the chromosome, variant id, cM, base-pair coordinate, ALT allele, and REF allele columns in this order as described [here](https://www.cog-genomics.org/plink/2.0/formats#bim).  
     The BED files should be stored in variant-major form. The variant in the 6th column in the .bim file is counted in association testing.  
-    
     <ins>PGEN</ins>  
     .psam files should follow plink2.0 format described [here](https://www.cog-genomics.org/plink/2.0/formats#psam). If a header line is present, then a column name #IID must be present to be used for sample identifier matching with the phenotype file. If no header line is present, then the columns are assumed to be in the .fam file order.  
     .pvar files are described [here](https://www.cog-genomics.org/plink/2.0/formats#pvar). If a header line starting with #CHROM is present, then column names POS, ID, REF, and ALT should also be present. If the .pvar file contains no header line, it is assumed that the .pvar file is in .bim file order.  

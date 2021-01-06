@@ -119,12 +119,30 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 		 prev = fIDMat.tellg();
 		 values.clear();
 	 }
-	 cout << values[0] << endl;
+
 	 int iidIndex;
-	 if ((values[0].compare("#FID") == 0) || (values[0].compare("#IID") == 0)) {
+	 if ((values[0].compare("#FID") == 0)) {
 		 std::vector<std::string>::iterator it;
-		 it = find(values.begin(), values.end(), "#IID");
+		 it = find(values.begin(), values.end(), "IID");
 		 iidIndex = std::distance(values.begin(), it);
+
+		 uint nSamples = 0;
+		 while (getline(fIDMat, IDline)) {
+			 nSamples++;
+		 }
+
+		 if (nSamples != pgen.raw_sample_ct) {
+			 cerr << "\nERROR: Number of sample identifiers in .psam file (" << nSamples << ") does not match the number of samples specified in pgen file (" << pgen.raw_sample_ct << ").\n\n";
+			 exit(1);
+		 }
+		 fIDMat.clear();
+		 fIDMat.seekg(prev);
+		 getline(fIDMat, IDline);
+		 values.clear();
+
+	 }
+	 else if ((values[0].compare("#IID") == 0)) {
+		 iidIndex = 0;
 
 		 uint nSamples = 0;
 		 while (getline(fIDMat, IDline)) {

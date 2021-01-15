@@ -15,6 +15,8 @@ public:
 
 	uint32_t n_samples = 0;
 	uint32_t n_variants = 0;
+	char famDelim;
+	char bimDelim;
 
 	int new_samSize;
 	std::vector<double>   new_covdata;

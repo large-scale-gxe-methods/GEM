@@ -27,7 +27,7 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 		exit(1);
 	}
 
-
+	// Fam file
 	std::ifstream readFam;
 	string IDline;
 	readFam.open(famFile);
@@ -35,13 +35,43 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 		cerr << "\nERROR: Cannot open .fam file " << famFile << ".\n\n";
 		exit(1);
 	}
-	uint nsamples = 0;
+
+	getline(readFam, IDline);
+	std::istringstream iss(IDline);
+	string value;
+	vector <string> values;
+	char tmpDelim = ' ';
+	while (getline(iss, value, tmpDelim)) {
+		value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+		values.push_back(value);
+	}
+
+	if (values.size() <= 1) {
+		values.clear();
+		readFam.clear();
+		readFam.seekg(0, readFam.beg);
+		getline(readFam, IDline);
+		std::istringstream iss(IDline);
+		while (getline(iss, value, '\t')) {
+			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			values.push_back(value);
+		}
+		if (values.size() > 1) {
+			tmpDelim = '\t';
+		}
+		else {
+			cerr << "\nERROR: .fam file should be space or tab separated.\n\n";
+		}
+	}
+	famDelim = tmpDelim;
+	uint nsamples = 1;
 	while (getline(readFam, IDline)) {
 		   nsamples++;
 	}
 	readFam.close();
 
 
+	// Bim File
 	std::ifstream readBim;
 	string var;
 	readBim.open(bimFile);
@@ -49,7 +79,36 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 		cerr << "\nERROR: Cannot open .bim file " << bimFile << ".\n\n";
 		exit(1);
 	}
-	uint nvars = 0;
+
+	getline(readBim, IDline);
+	std::istringstream iss2(IDline);
+	values.clear();
+	tmpDelim = ' ';
+	while (getline(iss2, value, tmpDelim)) {
+		value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+		values.push_back(value);
+	}
+
+	if ((values.size() != 5) && (values.size() != 6)) {
+		values.clear();
+		readBim.clear();
+		readBim.seekg(0, readBim.beg);
+		getline(readBim, IDline);
+		std::istringstream iss2(IDline);
+		while (getline(iss2, value, '\t')) {
+			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+			values.push_back(value);
+		}
+		if ((values.size() == 5) || (values.size() == 6)) {
+			tmpDelim = '\t';
+		}
+		else {
+			cerr << "\nERROR: .fam file should be space or tab separated.\n\n";
+		}
+	}
+	bimDelim = tmpDelim;
+
+	uint nvars = 1;
 	while (getline(readBim, var)) {
 		nvars++;
 	}
@@ -80,9 +139,6 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 	}
 
 
-	string iid;
-	vector <string> values;
-
 	int k = 0;
 	for (uint m = 0; m < bed.n_samples; m++) {
 		getline(fIDMat, IDline);
@@ -90,7 +146,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 		string value;
 		vector <string> values;
-		while (getline(iss, value, '\t')) {
+		while (getline(iss, value, bed.famDelim)) {
 			value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 			values.push_back(value);
 		}
@@ -358,6 +414,7 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 	uint n_samples = test.n_samples;
 	uint n_variants = test.n_variants;
 
+	char bimDelim = test.bimDelim;
 	std::ifstream fIDMat;
 	fIDMat.open(bimFile);
 
@@ -405,10 +462,10 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 			string value;
 			vector <string> values;
 			if (!filterVariants) {
-				readbedfile.seekg(snploop * nblocks + 3);
+				readbedfile.seekg((std::streamoff)snploop * nblocks + 3, readbedfile.beg);
 				getline(fIDMat, IDline);
 				std::istringstream iss(IDline);
-				while (getline(iss, value, '\t')) {
+				while (getline(iss, value, bimDelim)) {
 					values.push_back(value);
 				}
 			}
@@ -417,11 +474,11 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 					getline(fIDMat, IDline);
 					skipIndex++;
 				}
-				readbedfile.seekg(bedPos[snploop] * nblocks + 3);
+				readbedfile.seekg((std::streamoff)bedPos[snploop] * nblocks + 3);
 				getline(fIDMat, IDline);
 				skipIndex++;
 				std::istringstream iss(IDline);
-				while (getline(iss, value, '\t')) {
+				while (getline(iss, value, bimDelim)) {
 					values.push_back(value);
 				}
 			}

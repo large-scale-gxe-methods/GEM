@@ -259,16 +259,9 @@ P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic
 
 To run GEM using the example data, execute GEM with the following code.
 ```unix
-./GEM --bgen example.bgen --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --pheno-type 1 --robust 1 --missing-value NaN 
+./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --pheno-type 1 --robust 1 --missing-value NaN --out my_example.out
 ```
 The results should look like the following output file [example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
-
-<br />
-
-GEM allows interaction covariate adjustments by specifying the ```--int-covar-names``` parameter.     
-```unix
-./GEM --bgen example.bgen --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 --exposure-names cov1 --int-covar-names cov3 --pheno-type 1 --robust 1 --missing-value NaN 
-```
 
 <br />
 <br />

@@ -314,6 +314,19 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 		}
 	}
 
+	cout << "****************************************************************************\n";
+	if (genoUnMatchID.empty()) {
+		cout << "After processes of sample IDMatching and checking missing values, the sample size does not change.\n\n";
+	}
+	else {
+		cout << "After processes of sample IDMatching and checking missing values, the sample size changes from "
+			<< samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
+	}
+	cout << "Sample IDMatching and checking missing values processes have been completed.\n";
+	cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
+	cout << "****************************************************************************\n";
+
+
 
 	vector<double> tmp1(samSize, 1);
 	double* tmpMean = new double[numSelCol + 1];
@@ -322,12 +335,14 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	if (center) {
 		matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
 		if (!scale) {
+			cout << "Centering ALL exposures and covariates..." << endl;
 			for (int i = 1; i < numSelCol + 1; i++) {
 				tmpMean[i] /= double(samSize * 1.0);
 				tmpSD[i] = 1.0;
 			}
 		}
 		else {
+			cout << "Centering and scaling ALL exposures and covariates..." << endl;
 			for (int i = 1; i < numSelCol + 1; i++) {
 				tmpMean[i] /= double(samSize * 1.0);
 			}
@@ -352,6 +367,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	}
 	else {
 		if (scale) {
+			cout << "Scaling ALL exposures and covariates..." << endl;
 			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
 			for (int i = 1; i < numSelCol + 1; i++) {
 				tmpMean[i] /= double(samSize * 1.0);
@@ -379,17 +395,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 	new_samSize = samSize;
 	new_covdata = covdata;
 	new_phenodata = phenodata;
-
-	cout << "****************************************************************************\n";
-	if (genoUnMatchID.empty()) {
-		cout << "After processes of sample IDMatching and checking missing values, the sample size does not change.\n\n";
-	} else {
-		cout << "After processes of sample IDMatching and checking missing values, the sample size changes from "
-			<< samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
-	}
-	cout << "Sample IDMatching and checking missing values processes have been completed.\n";
-	cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
-	cout << "****************************************************************************\n";
 }
 
 

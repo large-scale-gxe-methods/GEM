@@ -478,8 +478,8 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 
 			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 			if (nSNPS < threads) {
+				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
 				threads = nSNPS;
-				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
 				cout << "Using " << threads << " for multithreading... \n\n";
 			}
 			else {

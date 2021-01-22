@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
 	cout << "\n*********************************************************\n";
 	cout << "Welcome to GEM v" << VERSION << "\n";
-	cout << "(C) 2018-2020 Liang Hong, Han Chen, Duy Pham \n";
+	cout << "(C) 2018-2021 Liang Hong, Han Chen, Duy Pham \n";
 	cout << "GNU General Public License v3\n";
 	cout << "*********************************************************\n";
 
@@ -235,7 +235,6 @@ int main(int argc, char* argv[]) {
 
 
 	// Rearranging covSelHeaders
-	int numCovCol = numSelCol;
 	numSelCol = numSelCol + numIntSelCol + numExpSelCol;
 	vector<int> colSelVec(numSelCol);
 	for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
@@ -587,8 +586,8 @@ int main(int argc, char* argv[]) {
 			//Preparing for parallelizing of BGEN file
 			uint32_t threads = cmd.threads;
 			if (pgen.raw_variant_ct < threads) {
-				threads = pgen.raw_variant_ct;
 				cout << "Number of variants (" << pgen.raw_variant_ct << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = pgen.raw_variant_ct;
 				cout << "Using " << threads << " thread(s) instead... \n\n";
 			}
 			pgen.threads = threads;
@@ -892,8 +891,8 @@ int main(int argc, char* argv[]) {
 
 			uint32_t threads = cmd.threads;
 			if (bed.n_variants < threads) {
-				threads = bed.n_variants;
 				cout << "Number of variants (" << bed.n_variants << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = bed.n_variants;
 				cout << "Using " << threads << " thread(s) instead... \n\n";
 			}
 

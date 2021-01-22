@@ -107,7 +107,7 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 		}
 	}
 	bimDelim = tmpDelim;
-
+	bimLast = values.size() - 1;
 	uint nvars = 1;
 	while (getline(readBim, var)) {
 		nvars++;
@@ -127,17 +127,16 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
 void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
 
+
 	unordered_set<int> genoUnMatchID;
 
 	std::ifstream fIDMat;
 	string IDline, FID, strtmp;
-
 	fIDMat.open(famFile);
 	if (!fIDMat.is_open()) {
 		cerr << "\nERROR: .fam file could not be opened.\n\n";
 		exit(1);
 	}
-
 
 	int k = 0;
 	for (uint m = 0; m < bed.n_samples; m++) {
@@ -151,7 +150,6 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 			values.push_back(value);
 		}
 		string strtmp = values[1];
-
 		int itmp = k;
 		if (phenomap.find(strtmp) != phenomap.end()) {
 			auto tmp_valvec = phenomap[strtmp];
@@ -169,15 +167,15 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 	}
 	fIDMat.close();
 
-
 	//After IDMatching, resizing phenodata and covdata, and updating samSize;
 	phenodata.resize(k);
 	covdata.resize(k * (numSelCol + 1));
 	samSize = k;
 
 	if (samSize == 0) {
-		cout << "\nerror: sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n";
-		cout << "\ncheck if sample ids are consistent between the phenotype file and .psam file, or check if (--sampleid-name) is specified correctly. \n\n";
+		cout << "\nERROR: sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n";
+		cout << "       check if sample ids are consistent between the phenotype file and .fam file, or check\n";
+		cout << "       if (--sampleid-name) is specified correctly. \n\n";
 		exit(1);
 	}
 
@@ -191,7 +189,6 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 		}
 	}
-
 
 
 	vector<double> tmp1(samSize, 1);
@@ -278,8 +275,6 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 	uint32_t nSNPS = bed.n_variants;
-	bool checkSNPID = false;
-	bool checkInclude = false;
 	int count = 0;
 	std::set<std::string> includeVariant;
 	threads = cmd.threads;
@@ -289,7 +284,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 		filterVariants = true;
 		if (!cmd.includeVariantFile.empty()) {
-			checkInclude = true;
 			std::ifstream fInclude;
 			string IDline;
 			fInclude.open(cmd.includeVariantFile);
@@ -305,7 +299,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 			if (IDline == "snpid") {
 				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
-				checkSNPID = true;
 			}
 			else {
 				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files." << endl << endl;
@@ -327,8 +320,8 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 			if (nSNPS < threads) {
-				threads = nSNPS;
 				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = nSNPS;
 				cout << "Using " << threads << " for multithreading... \n\n";
 			}
 			else {
@@ -350,14 +343,14 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 		string IDline;
 
-		int k = 0;
+		uint32_t k = 0;
 		long long unsigned int pvalIndex = 0;
 		while (getline(fIDMat, IDline)) {
 			std::istringstream iss(IDline);
 			string value;
 			vector <string> values;
 
-			while (getline(iss, value, '\t')) {
+			while (getline(iss, value, bed.bimDelim)) {
 				value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
 				values.push_back(value);
 			}
@@ -412,9 +405,9 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 	vector <double> AF(stream_snps);
 	int ZGS_col = Sq1 * stream_snps;
 	uint n_samples = test.n_samples;
-	uint n_variants = test.n_variants;
 
 	char bimDelim = test.bimDelim;
+	int bimLast = test.bimLast;
 	std::ifstream fIDMat;
 	fIDMat.open(bimFile);
 
@@ -474,7 +467,7 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 					getline(fIDMat, IDline);
 					skipIndex++;
 				}
-				readbedfile.seekg((std::streamoff)bedPos[snploop] * nblocks + 3);
+				readbedfile.seekg((std::streamoff)bedPos[snploop] * nblocks + 3, readbedfile.beg);
 				getline(fIDMat, IDline);
 				skipIndex++;
 				std::istringstream iss(IDline);
@@ -482,9 +475,6 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 					values.push_back(value);
 				}
 			}
-			
-
-			values[5].erase(std::remove(values[5].begin(), values[5].end(), '\r'), values[5].end());
 			snploop++;
 
 
@@ -512,10 +502,10 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 
 
 					if (temp[0] == 0 && temp[1] == 0) {
-						geno = 0.0;
+						geno = 2.0;
 					}
 					else if (temp[0] == 1 && temp[1] == 1) {
-						geno = 2.0;
+						geno = 0.0;
 					}
 					else if (temp[0] == 0 && temp[1] == 1) {
 						geno = 1.0;
@@ -570,7 +560,10 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 				}
 				missingIndex.clear();
 			}
-			geno_snpid[stream_i] = values[1] + "\t" + values[0] + "\t" + values[3] + "\t" + values[4] + "\t" + values[5] + "\t" + std::to_string(samSize - nMissing);
+
+
+			values[bimLast].erase(std::remove(values[bimLast].begin(), values[bimLast].end(), '\r'), values[bimLast].end());
+			geno_snpid[stream_i] = values[1] + "\t" + values[0] + "\t" + values[bimLast - 2] + "\t" + values[bimLast] + "\t" + values[bimLast - 1] + "\t" + std::to_string(samSize - nMissing);
 
 			for (int j = 0; j < Sq; j++) {
 				int tmp3 = samSize * (j + 1) + tmp1;

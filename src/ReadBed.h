@@ -17,7 +17,7 @@ public:
 	uint32_t n_variants = 0;
 	char famDelim;
 	char bimDelim;
-
+	int bimLast; 
 	int new_samSize;
 	std::vector<double>   new_covdata;
 	std::vector<double>   new_phenodata;

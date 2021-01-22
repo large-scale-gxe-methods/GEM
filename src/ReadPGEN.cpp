@@ -428,8 +428,6 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 	uint32_t nSNPS = pgen.raw_variant_ct;
-	bool checkSNPID = false;
-	bool checkInclude = false;
 	int count = 0;
 	std::set<std::string> includeVariant;
 	threads = cmd.threads;
@@ -439,7 +437,6 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 		filterVariants = true;
 		if (!cmd.includeVariantFile.empty()) {
-			checkInclude = true;
 			std::ifstream fInclude;
 			string IDline;
 			fInclude.open(cmd.includeVariantFile);
@@ -455,7 +452,6 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 			if (IDline == "snpid") {
 				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
-				checkSNPID = true;
 			}
 			else {
 				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files." << endl << endl;
@@ -477,8 +473,8 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 			if (nSNPS < threads) {
-				threads = nSNPS;
 				cout << "Number of variants (" << nSNPS << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = nSNPS;
 				cout << "Using " << threads << " for multithreading... \n\n";
 			}
 			else {
@@ -502,7 +498,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 		string value;
 		vector <string> values;
 		int prev = fIDMat.tellg();
-		int pi = 2;
+		int pi;
 		while (getline(fIDMat, IDline)) {
 			std::istringstream iss(IDline);
 			while (getline(iss, value, '\t')) {
@@ -515,15 +511,18 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 			prev = fIDMat.tellg();
 			values.clear();
 		}
-		if (values[0].compare("#CHROM") != 0) {
+		if (values[0].compare("#CHROM") == 0) {
+			std::vector<std::string>::iterator it;
+			it = find(values.begin(), values.end(), "ID");
+			pi = std::distance(values.begin(), it);
+		}
+		else {
 			fIDMat.seekg(prev);
-			if (values.size() == 6) {
-				pi = 3;
-			}
+			pi = 1;
 		}
 
 
-		int k = 0;
+		uint32_t k = 0;
 		long long unsigned int pvalIndex = 0;
 		while (getline(fIDMat, IDline)) {
 			std::istringstream iss(IDline);

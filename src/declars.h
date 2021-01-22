@@ -33,8 +33,8 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/tss.hpp>
-#include <boost/asio.hpp>
-#include <boost/filesystem.hpp> 
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include "zlib.h"
 
 
@@ -60,3 +60,5 @@ typedef unsigned short ushort;
 #include "MatrixUtils.h"
 #include "ReadParameters.h"
 #include "ReadBGEN.h"
+#include "ReadPGEN.h"
+#include "ReadBed.h"

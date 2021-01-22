@@ -27,7 +27,6 @@ extern "C"{
 
  void dlacpy_(char* uplo, const int* m, const int* n, double* a,
               const int* lda, double* b, const int* ldb);
-
 } 
 
 void initvec(double* v, int N){
@@ -51,7 +50,7 @@ void matTmatprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB)
 
 void matNmatNprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB){
   double alpha= 1.0, beta= 0.0;
-  char no= 'N', tr= 'T';
+  char no= 'N';
   int m= Nrow, n= NcolB, k=Ncol, lda= Nrow, incx= Ncol, incy= Nrow;
   double* tmp= new double[Nrow*NcolB];
   initvec(tmp, Nrow*NcolB);
@@ -64,7 +63,7 @@ void matNmatNprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB
 
 void matmatprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB){
   double alpha= 1.0, beta= 0.0;
-  char no= 'N', tr= 'T';
+  char tr= 'T';
   int m= Nrow, n= NcolB, k=Ncol, lda= Ncol, incx= NcolB, incy= Nrow;
   double* tmp= new double[Nrow*NcolB];
   initvec(tmp, Nrow*NcolB);
@@ -103,7 +102,7 @@ void matTvecprod(double* A, double* v, double* u, int Nrow, int Ncol){
 
 void matvecprod(double* A, double* v, double* u, int Nrow, int Ncol){
   double alpha= 1.0, beta= 0.0;
-  char no= 'N', tr= 'T';
+  char tr= 'T';
   int m= Nrow, n= 1, k=Ncol, lda= Ncol, incx= 1, incy= Nrow;
   double* tmp= new double[Nrow];
   initvec(tmp, Nrow);
@@ -145,50 +144,7 @@ void matAdd(double* A, double* B, int N, double alpha) {
 }
 
 
-
 void subMatrix(double* A, double* u, int M, int N, int NrowA, int NrowB, int start) {
     char uplo = 'A';
     dlacpy_(&uplo, &M, &N, &A[start], &NrowA, u, &NrowB);
-}
-
-
-
-
-void SmatTmatprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int startB) {
-    double alpha = 1.0, beta = 0.0;
-    char no = 'N', tr = 'T';
-    int k = Nrow, lda = Ncol, incx = NrowB, incy = Ncol;
-    double* tmp = new double[Ncol * NcolB];
-    initvec(tmp, Ncol * NcolB);
-    dgemm_(&no, &tr, &m, &n, &k, &alpha, A, &lda, v+startB, &incx, &beta, tmp, &incy);
-    for (int i = 0; i < Ncol * NcolB; ++i) {
-        u[i] = tmp[i];
-    }
-    delete[] tmp;
-}
-
-void SmatNmatNprod(double* A, double* v, double* u, int m, int n, int Nrow, int Ncol, int NrowB, int NcolB, int StartA) {
-    double alpha = 1.0, beta = 0.0;
-    char no = 'N', tr = 'T';
-    int k = Ncol, lda = Nrow, incx = NrowB, incy = m;
-    double* tmp = new double[NcolB * NcolB];
-    initvec(tmp, NcolB * NcolB);
-    dgemm_(&no, &no, &m, &n, &k, &alpha, A+StartA, &lda, v, &incx, &beta, tmp, &incy);
-    for (int i = 0; i < NcolB * NcolB; ++i) {
-        u[i] = tmp[i];
-    }
-    delete[] tmp;
-}
-
-void matSvecprod(double* A, double* v, double* u, int Nrow, int Ncol, int StartV) {
-    double alpha = 1.0, beta = 0.0;
-    char no = 'N', tr = 'T';
-    int m = Nrow, n = 1, k = Ncol, lda = Ncol, incx = 1, incy = Nrow;
-    double* tmp = new double[Nrow];
-    initvec(tmp, Nrow);
-    dgemm_(&tr, &tr, &m, &n, &k, &alpha, A, &lda, v + StartV, &incx, &beta, tmp, &incy);
-    for (int i = 0; i < Nrow; ++i) {
-        u[i] = tmp[i];
-    }
-    delete[] tmp;
 }

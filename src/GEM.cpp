@@ -34,27 +34,27 @@
  */
 
 #include "declars.h"
-#define VERSION 1.1
+#define VERSION 1.2
 
-
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
 
 
 int main(int argc, char* argv[]) {
 
-
-	Time clock;
-
+	cout << "\n*********************************************************\n";
+	cout << "Welcome to GEM v" << VERSION << "\n";
+	cout << "(C) 2018-2021 Liang Hong, Han Chen, Duy Pham \n";
+	cout << "GNU General Public License v3\n";
+	cout << "*********************************************************\n";
 
 	// Process command line
 	CommandLine cmd;
 	cmd.processCommandLine(argc, argv);
 
 
-
 	/****************************************************
 	 Parameters
 	****************************************************/
-	double exetime = 0;
 	double epsilon = cmd.tol;
 
 	int samSize;
@@ -63,8 +63,18 @@ int main(int argc, char* argv[]) {
 	int robust = cmd.robust;
 	int phenoTyp = cmd.phenoType;
 	int stream_snps = cmd.stream_snps;
-	char delim = cmd.pheno_delim[0];
-	if (delim == '\0') delim = ' ';
+
+
+	char delim;
+	if ((cmd.pheno_delim[0] == '\\' && cmd.pheno_delim[1] == 't') || cmd.pheno_delim[0] == 't') {
+		delim = '\t';
+	}
+	else if ((cmd.pheno_delim[0] == '\\' && cmd.pheno_delim[1] == '0') || cmd.pheno_delim[0] == '0') {
+		delim = ' ';
+	}
+	else {
+		delim = cmd.pheno_delim[0];
+	}
 
 	string phenoHeaderName = cmd.phenoName;
 	string samIDHeaderName = cmd.sampleID;
@@ -171,11 +181,6 @@ int main(int argc, char* argv[]) {
 	/****************************************************
 	 Print parameter info
 	****************************************************/
-	cout << "\n*********************************************************\n";
-	cout << "Welcome to GEM v" << VERSION << "\n";
-	cout << "(C) 2018-2020 Liang Hong, Han Chen, Duy Pham \n";
-	cout << "GNU General Public License v3\n";
-	cout << "*********************************************************\n";
 	cout << "The Phenotype File is: " << cmd.phenoFile << "\n";
 	cout << "The Selected Phenotype is: " << phenoHeaderName << '\n';
 	cout << "Continuous or Binary? "; phenoTyp == 0 ? cout << "Continuous \n" : cout << "Binary \n";
@@ -251,7 +256,7 @@ int main(int argc, char* argv[]) {
 
 	// Process header line: store column names and assign corresponding column numbers.
 	string phenopath(cmd.phenoFile);
-	int  phenoncols;
+	long unsigned int  phenoncols;
 
 	std::ifstream finph;
 	finph.open(phenopath);
@@ -295,13 +300,10 @@ int main(int argc, char* argv[]) {
 		samIDCol = colNames[samIDHeaderName];
 	}
 
-	for (int i = 0; i < numSelCol; i++) {
-		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
-			cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
+	for (int i = 0; i < numExpSelCol; i++) {
+		if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
+			cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
 			exit(1);
-		}
-		else {
-			colSelVec[i] = colNames[covSelHeadersName[i]];
 		}
 	}
 
@@ -314,12 +316,17 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	for (int i = 0; i < numExpSelCol; i++) {
-		if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
-			cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
+	for (int i = 0; i < numSelCol; i++) {
+		if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
+			cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
 			exit(1);
 		}
+		else {
+			colSelVec[i] = colNames[covSelHeadersName[i]];
+		}
 	}
+
+
 
 	// Erase all elements and leaving it with a size of 0.
 	colNames.clear();
@@ -397,255 +404,945 @@ int main(int argc, char* argv[]) {
 
 
 
+	if (cmd.usePgenFile) {
 
+		Pgen pgen;
 
+		pgen.processPgenHeader(cmd.pgenFile);
+		pgen.processPvar(pgen, cmd.pvarFile);
+		pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
 
+		sampleIds.clear();
+		phenomap.clear(); 
+		phenodata.clear();
+		covdata.clear();
 
+		samSize = pgen.new_samSize;
+		double* phenoY = &pgen.new_phenodata[0];
+		double* covX = &pgen.new_covdata[0];
 
+		vector <double> residvec(samSize);
+		// for logistic regression
+		vector <double> miu(samSize);
+		int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
+		int iter = 1;
 
-	/***************************************************************
-	  Read General information of bgen data.
-	  Conduct Sample IDMatching process if necessary.
-	***************************************************************/
-	Bgen bgen;
-	bgen.processBgenHeaderBlock(cmd.genofile);
-	bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize);
-
-	sampleIds.clear(); // clear memory
-	phenomap.clear(); // clear phenomap
-	phenodata.clear();
-	covdata.clear();
-
-
-
-	/******************************************************************
-	  Genome-Wide Associate Study using Linear or Logistic regression
-	  and Processing Geno Files (.bgen)
-	******************************************************************/
-	cout << "Starting GWAS... \n\n";
-	samSize = bgen.new_samSize;
-	double* phenoY = &bgen.new_phenodata[0];
-	double* covX = &bgen.new_covdata[0];
-	vector <double> residvec(samSize);
-
-	// for logistic regression
-	vector <double> miu(samSize);
-	int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
-	int iter = 1;
-
-
-	cout << "Precalculations and fitting null model..." << endl;
-	auto start_time = std::chrono::high_resolution_clock::now();
-	// transpose(X) * X
-	double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
-	matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
-	// invert (XTransX)
-	matInv(XTransX, numSelCol + 1);
-	// transpose(X) * Y
-	double* XTransY = new double[(numSelCol + 1)];
-	matTvecprod(covX, phenoY, XTransY, samSize, numSelCol + 1);
-	// beta = invert(XTransX) * XTransY
-	double* beta = new double[(numSelCol + 1)];
-	matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
-
-	while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
-		iter++;
-		// X * beta
-		double* XbetaFL = new double[samSize];
-		matvecprod(covX, beta, XbetaFL, samSize, numSelCol + 1);
-		double* Yip1 = new double[samSize];
-		// W * X and W * Y
-		double* WX = new double[samSize * (numSelCol + 1)];
-		double* WYip1 = new double[samSize];
-		for (int i = 0; i < samSize; i++) {
-			miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
-			Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
-			WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
-			for (int j = 0; j < numSelCol + 1; j++) {
-				WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
-			}
-		}
-		// transpose(X) * WX
-		matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+		cout << "Precalculations and fitting null model..." << endl;
+		auto start_time = std::chrono::high_resolution_clock::now();
+		// transpose(X) * X
+		double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
+		matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
 		// invert (XTransX)
 		matInv(XTransX, numSelCol + 1);
-		// transpose(X) * WYip1
-		matTvecprod(covX, WYip1, XTransY, samSize, numSelCol + 1);
+		// transpose(X) * Y
+		double* XTransY = new double[(numSelCol + 1)];
+		matTvecprod(covX, phenoY, XTransY, samSize, numSelCol + 1);
 		// beta = invert(XTransX) * XTransY
-		double* betaT = new double[(numSelCol + 1)];
-		matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
-		Check = 0;
-		for (int i = 0; i < numSelCol + 1; i++) {
-			if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
-			beta[i] = betaT[i];
+		double* beta = new double[(numSelCol + 1)];
+		matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
+
+		while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
+			iter++;
+			// X * beta
+			double* XbetaFL = new double[samSize];
+			matvecprod(covX, beta, XbetaFL, samSize, numSelCol + 1);
+			double* Yip1 = new double[samSize];
+			// W * X and W * Y
+			double* WX = new double[samSize * (numSelCol + 1)];
+			double* WYip1 = new double[samSize];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
+				Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
+				WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			// transpose(X) * WYip1
+			matTvecprod(covX, WYip1, XTransY, samSize, numSelCol + 1);
+			// beta = invert(XTransX) * XTransY
+			double* betaT = new double[(numSelCol + 1)];
+			matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
+			Check = 0;
+			for (int i = 0; i < numSelCol + 1; i++) {
+				if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
+				beta[i] = betaT[i];
+			}
+
+			delete[] Yip1;
+			delete[] WYip1;
+			delete[] WX;
+			delete[] XbetaFL;
+			delete[] betaT;
 		}
 
-		delete[] Yip1;
-		delete[] WYip1;
-		delete[] WX;
-		delete[] XbetaFL;
-		delete[] betaT;
-	}
+		// X * beta
+		double* Xbeta = new double[samSize];
+		matvecprod(covX, beta, Xbeta, samSize, numSelCol + 1);
 
-	// X * beta
-	double* Xbeta = new double[samSize];
-	matvecprod(covX, beta, Xbeta, samSize, numSelCol + 1);
+		// X*[invert (XTransX)]
+		double* XinvXTX = new double[samSize * (numSelCol + 1)];
 
-	// X*[invert (XTransX)]
-	double* XinvXTX = new double[samSize * (numSelCol + 1)];
+		if (phenoTyp == 1) {
+			double* WX = new double[samSize * (numSelCol + 1)];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
+				Xbeta[i] = miu[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			matmatprod(WX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+			delete[] WX;
 
-	if (phenoTyp == 1) {
-		double* WX = new double[samSize * (numSelCol + 1)];
+			cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
+		}
+		else {
+			matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+		}
+
+
+		// residual = Y - X * beta
+		double sigma2 = 0;
 		for (int i = 0; i < samSize; i++) {
-			miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
-			Xbeta[i] = miu[i];
-			for (int j = 0; j < numSelCol + 1; j++) {
-				WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
+			residvec[i] = phenoY[i] - Xbeta[i];
+			sigma2 += residvec[i] * residvec[i];
+		}
+		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
+		sigma2 = sigma2 / (samSize - (numSelCol + 1));
+		if (phenoTyp == 1) sigma2 = 1.0;
+		double* resid = &residvec[0];
+
+		if (!robust) {
+			for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+				XTransX[i] = XTransX[i] * sigma2;
+			}
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = pgen.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
+
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol + 1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
+		}
+
+		cout << "Execution time... ";
+		auto end_time = std::chrono::high_resolution_clock::now();
+		printExecutionTime(start_time, end_time);
+		cout << "Done.\n";
+		cout << "*********************************************************\n";
+
+
+		delete[] XTransY;
+		delete[] beta;
+		delete[] Xbeta;
+
+		cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
+		cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
+
+		pgen.numSelCol = numSelCol;
+		pgen.numIntSelCol = numIntSelCol;
+		pgen.numExpSelCol = numExpSelCol;
+		pgen.Sq = Sq;
+		pgen.robust = robust;
+		pgen.stream_snps = stream_snps;
+		pgen.maf = cmd.MAF;
+		pgen.missGeno = cmd.missGenoRate;
+		pgen.miu = miu;
+		pgen.phenoTyp = phenoTyp;
+		pgen.covX = covX;
+		pgen.XinvXTX = XinvXTX;
+		pgen.resid = resid;
+		pgen.sigma2 = sigma2;
+		pgen.outFile = cmd.outFile;
+
+
+		if (!cmd.doFilters) {
+			//Preparing for parallelizing of BGEN file
+			uint32_t threads = cmd.threads;
+			if (pgen.raw_variant_ct < threads) {
+				cout << "Number of variants (" << pgen.raw_variant_ct << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = pgen.raw_variant_ct;
+				cout << "Using " << threads << " thread(s) instead... \n\n";
+			}
+			pgen.threads = threads;
+			pgen.begin.resize(threads);
+			pgen.end.resize(threads);
+
+			for (uint32_t t = 0; t < threads; t++) {
+				pgen.begin[t] = floor((pgen.raw_variant_ct / threads) * t);
+
+				if ((t + 1) == (threads)) {
+					pgen.end[t] = pgen.raw_variant_ct - 1;
+				}
+				else {
+					pgen.end[t] = floor(((pgen.raw_variant_ct / threads) * (t + 1)) - 1);
+				}
+			}
+
+			if (threads > 1) {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < pgen.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+			else {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running with single thread...\n";
+
+				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, pgen);
+			}
+
+		}
+		else {
+
+			pgen.getPgenVariantPos(pgen, cmd);
+
+			if(pgen.threads > 1) {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < pgen.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemPGEN, pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, boost::ref(pgen)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+			else {
+				cout << "The second allele in the PGEN file will be used for association testing.\n";
+				cout << "Running with single thread...\n";
+
+				gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos, pgen);
 			}
 		}
-		// transpose(X) * WX
-		matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+
+
+
+		// Write all results from each thread to 1 file
+		cout << "Combining results... \n";
+		start_time = std::chrono::high_resolution_clock::now();
+		std::ofstream results(output, std::ofstream::binary);
+		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		for (int i = 1; i <= numExpSelCol; i++) {
+			results << "Beta_Interaction" << "_" << i << "\t";
+		}
+		for (int i = 1; i <= numExpSelCol; i++) {
+			for (int j = 1; j <= numExpSelCol; j++) {
+				results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+			}
+		}
+		results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+
+
+		for (uint32_t i = 0; i < pgen.threads; i++) {
+			std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
+			std::ifstream thread_output(threadOutputFile);
+			results << thread_output.rdbuf();
+
+			thread_output.close();
+			boost::filesystem::remove(threadOutputFile.c_str());
+
+		}
+		results.close();
+		end_time = std::chrono::high_resolution_clock::now();
+		cout << "Execution time... ";
+		printExecutionTime(start_time, end_time);
+		cout << "Done. \n";
+
+
+
+		// Finished
+		cout << "*********************************************************\n";
+		std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+		double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+		cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+		cout << "Total CPU Time = " << cpuduration << "  Seconds\n";
+		//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
+		cout << "*********************************************************\n";
+
+
+		delete[] XTransX;
+		delete[] XinvXTX;
+
+	}
+
+
+	if (cmd.useBedFile) {
+
+		Bed bed;
+		bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
+		bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
+
+		sampleIds.clear();
+		phenomap.clear(); 
+		phenodata.clear();
+		covdata.clear();
+
+		samSize = bed.new_samSize;
+		double* phenoY = &bed.new_phenodata[0];
+		double* covX = &bed.new_covdata[0];
+		vector <double> residvec(samSize);
+
+		// for logistic regression
+		vector <double> miu(samSize);
+		int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
+		int iter = 1;
+
+		cout << "Precalculations and fitting null model..." << endl;
+		auto start_time = std::chrono::high_resolution_clock::now();
+		// transpose(X) * X
+		double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
+		matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
 		// invert (XTransX)
 		matInv(XTransX, numSelCol + 1);
-		matmatprod(WX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
-		delete[] WX;
+		// transpose(X) * Y
+		double* XTransY = new double[(numSelCol + 1)];
+		matTvecprod(covX, phenoY, XTransY, samSize, numSelCol + 1);
+		// beta = invert(XTransX) * XTransY
+		double* beta = new double[(numSelCol + 1)];
+		matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
 
-		cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
+		while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
+			iter++;
+			// X * beta
+			double* XbetaFL = new double[samSize];
+			matvecprod(covX, beta, XbetaFL, samSize, numSelCol + 1);
+			double* Yip1 = new double[samSize];
+			// W * X and W * Y
+			double* WX = new double[samSize * (numSelCol + 1)];
+			double* WYip1 = new double[samSize];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
+				Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
+				WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			// transpose(X) * WYip1
+			matTvecprod(covX, WYip1, XTransY, samSize, numSelCol + 1);
+			// beta = invert(XTransX) * XTransY
+			double* betaT = new double[(numSelCol + 1)];
+			matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
+			Check = 0;
+			for (int i = 0; i < numSelCol + 1; i++) {
+				if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
+				beta[i] = betaT[i];
+			}
+
+			delete[] Yip1;
+			delete[] WYip1;
+			delete[] WX;
+			delete[] XbetaFL;
+			delete[] betaT;
+		}
+
+		// X * beta
+		double* Xbeta = new double[samSize];
+		matvecprod(covX, beta, Xbeta, samSize, numSelCol + 1);
+
+		// X*[invert (XTransX)]
+		double* XinvXTX = new double[samSize * (numSelCol + 1)];
+
+		if (phenoTyp == 1) {
+			double* WX = new double[samSize * (numSelCol + 1)];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
+				Xbeta[i] = miu[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			matmatprod(WX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+			delete[] WX;
+
+			cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
+		}
+		else {
+			matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+		}
+
+
+		// residual = Y - X * beta
+		double sigma2 = 0;
+		for (int i = 0; i < samSize; i++) {
+			residvec[i] = phenoY[i] - Xbeta[i];
+			sigma2 += residvec[i] * residvec[i];
+		}
+		double* resid = &residvec[0];
+
+		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
+		sigma2 = sigma2 / (samSize - (numSelCol + 1));
+		if (phenoTyp == 1) sigma2 = 1.0;
+
+		if (!robust) {
+			for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+				XTransX[i] = XTransX[i] * sigma2;
+			}
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = bed.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
+
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol + 1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
+
+		}
+
+		cout << "Execution time... ";
+		auto end_time = std::chrono::high_resolution_clock::now();
+		printExecutionTime(start_time, end_time);
+		cout << "Done.\n";
+		cout << "*********************************************************\n";
+
+		delete[] XTransY;
+		delete[] beta;
+		delete[] Xbeta;
+
+		cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
+		cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
+
+		bed.numSelCol = numSelCol;
+		bed.numIntSelCol = numIntSelCol;
+		bed.numExpSelCol = numExpSelCol;
+		bed.Sq = Sq;
+		bed.robust = robust;
+		bed.stream_snps = stream_snps;
+		bed.maf = cmd.MAF;
+		bed.missGeno = cmd.missGenoRate;
+		bed.miu = miu;
+		bed.phenoTyp = phenoTyp;
+		bed.covX = covX;
+		bed.XinvXTX = XinvXTX;
+		bed.resid = resid;
+		bed.sigma2 = sigma2;
+		bed.outFile = cmd.outFile;
+
+		if (!cmd.doFilters) {
+
+			uint32_t threads = cmd.threads;
+			if (bed.n_variants < threads) {
+				cout << "Number of variants (" << bed.n_variants << ") is less than the number of specified threads (" << threads << ")...\n";
+				threads = bed.n_variants;
+				cout << "Using " << threads << " thread(s) instead... \n\n";
+			}
+
+			bed.threads = threads;
+			bed.begin.resize(threads);
+			bed.end.resize(threads);
+
+			for (uint32_t t = 0; t < threads; t++) {
+				bed.begin[t] = floor((bed.n_variants / threads) * t);
+				if ((t + 1) == (threads)) {
+					bed.end[t] = bed.n_variants - 1;
+				}
+				else {
+					bed.end[t] = floor(((bed.n_variants / threads) * (t + 1)) - 1);
+				}
+			}
+
+			if (threads > 1) {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < bed.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, bed.filterVariants, bed.bedVariantPos, boost::ref(bed)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+			}
+			else {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running with single thread...\n";  
+
+				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed.filterVariants, bed.bedVariantPos, bed);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+
+
+		}
+		else {
+
+			bed.getBedVariantPos(bed, cmd);
+			if (bed.threads > 1) {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running multithreading...\n";
+
+				boost::thread_group thread_grp;
+				start_time = std::chrono::high_resolution_clock::now();
+				for (uint32_t i = 0; i < bed.threads; ++i) {
+					thread_grp.create_thread(boost::bind(&gemBED, bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, bed.filterVariants, bed.bedVariantPos, boost::ref(bed)));
+				}
+				thread_grp.join_all();
+				cout << "Joining threads... \n";
+				end_time = std::chrono::high_resolution_clock::now();
+				cout << "Execution time... ";
+				printExecutionTime(start_time, end_time);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+			}
+			else {
+				cout << "The SNP major allele in the BED file will be used for association testing.\n";
+				cout << "Running with single thread...\n";
+
+				gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed.filterVariants, bed.bedVariantPos, bed);
+				cout << "Done. \n";
+				cout << "*********************************************************\n";
+
+			}
+		}
+
+
+		// Write all results from each thread to 1 file
+		cout << "Combining results... \n";
+		start_time = std::chrono::high_resolution_clock::now();
+		std::ofstream results(output, std::ofstream::binary);
+		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		for (int i = 1; i <= numExpSelCol; i++) {
+			results << "Beta_Interaction" << "_" << i << "\t";
+		}
+		for (int i = 1; i <= numExpSelCol; i++) {
+			for (int j = 1; j <= numExpSelCol; j++) {
+				results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+			}
+		}
+		results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+
+
+		for (uint32_t i = 0; i < bed.threads; i++) {
+			std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
+			std::ifstream thread_output(threadOutputFile);
+			results << thread_output.rdbuf();
+
+			thread_output.close();
+			boost::filesystem::remove(threadOutputFile.c_str());
+
+		}
+		results.close();
+		end_time = std::chrono::high_resolution_clock::now();
+		cout << "Execution time... ";
+		printExecutionTime(start_time, end_time);
+		cout << "Done. \n";
+
+
+
+		// Finished
+		cout << "*********************************************************\n";
+		std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+		double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+		cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+		cout << "Total CPU Time = " << cpuduration << "  Seconds\n";
+		//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
+		cout << "*********************************************************\n";
+
+
+		delete[] XTransX;
+		delete[] XinvXTX;
+
 	}
-	else {
-		matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
-	}
 
 
-	// residual = Y - X * beta
-	double sigma2 = 0;
-	for (int i = 0; i < samSize; i++) {
-		residvec[i] = phenoY[i] - Xbeta[i];
-		sigma2 += residvec[i] * residvec[i];
-	}
-	// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
-	sigma2 = sigma2 / (samSize - (numSelCol + 1));
-	if (phenoTyp == 1) sigma2 = 1.0;
 
-	cout << "Execution time... ";
-	auto end_time = std::chrono::high_resolution_clock::now();
-	printExecutionTime(start_time, end_time);
-	cout << "Done.\n";
-	cout << "*********************************************************\n";
-
-	double* resid = &residvec[0];
-
-	delete[] XTransY;
-	delete[] beta;
-	delete[] Xbeta;
-
-	cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
-	cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
+	if (cmd.useBgenFile) {
+		/***************************************************************
+		  Read General information of bgen data.
+		  Conduct Sample IDMatching process if necessary.
+		***************************************************************/
+		Bgen bgen;
+		bgen.processBgenHeaderBlock(cmd.genofile);
+		bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
 
 
-	bgen.numSelCol = numSelCol;
-	bgen.numIntSelCol = numIntSelCol;
-	bgen.numExpSelCol = numExpSelCol;
-	bgen.Sq = Sq;
-	bgen.robust = robust;
-	bgen.stream_snps = stream_snps;
-	bgen.maf = cmd.MAF;
-	bgen.missGeno = cmd.missGenoRate;
-	bgen.miu = miu;
-	bgen.phenoTyp = phenoTyp;
-	bgen.covX = covX;
-	bgen.XinvXTX = XinvXTX;
-	bgen.resid = resid;
-	bgen.sigma2 = sigma2;
-	bgen.outFile = cmd.outFile;
+		/******************************************************************
+		  Genome-Wide Associate Study using Linear or Logistic regression
+		  and Processing Geno Files (.bgen)
+		******************************************************************/
+		cout << "Starting GWAS... \n\n";
+		samSize = bgen.new_samSize;
+		double* phenoY = &bgen.new_phenodata[0];
+		double* covX = &bgen.new_covdata[0];
+		vector <double> residvec(samSize);
+
+		// for logistic regression
+		vector <double> miu(samSize);
+		int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
+		int iter = 1;
 
 
-	start_time = std::chrono::high_resolution_clock::now();
-	bgen.getPositionOfBgenVariant(bgen, cmd);
-	end_time = std::chrono::high_resolution_clock::now();
-	cout << "Execution time... ";
-	printExecutionTime(start_time, end_time);
-	cout << "Done.\n";
-	cout << "*********************************************************\n";
+		cout << "Precalculations and fitting null model..." << endl;
+		auto start_time = std::chrono::high_resolution_clock::now();
+		// transpose(X) * X
+		double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
+		matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+		// invert (XTransX)
+		matInv(XTransX, numSelCol + 1);
+		// transpose(X) * Y
+		double* XTransY = new double[(numSelCol + 1)];
+		matTvecprod(covX, phenoY, XTransY, samSize, numSelCol + 1);
+		// beta = invert(XTransX) * XTransY
+		double* beta = new double[(numSelCol + 1)];
+		matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
+
+		while ((phenoTyp == 1) && (Check != (numSelCol + 1))) { // logistic regression
+			iter++;
+			// X * beta
+			double* XbetaFL = new double[samSize];
+			matvecprod(covX, beta, XbetaFL, samSize, numSelCol + 1);
+			double* Yip1 = new double[samSize];
+			// W * X and W * Y
+			double* WX = new double[samSize * (numSelCol + 1)];
+			double* WYip1 = new double[samSize];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
+				Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
+				WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			// transpose(X) * WYip1
+			matTvecprod(covX, WYip1, XTransY, samSize, numSelCol + 1);
+			// beta = invert(XTransX) * XTransY
+			double* betaT = new double[(numSelCol + 1)];
+			matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
+			Check = 0;
+			for (int i = 0; i < numSelCol + 1; i++) {
+				if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
+				beta[i] = betaT[i];
+			}
+
+			delete[] Yip1;
+			delete[] WYip1;
+			delete[] WX;
+			delete[] XbetaFL;
+			delete[] betaT;
+		}
+
+		// X * beta
+		double* Xbeta = new double[samSize];
+		matvecprod(covX, beta, Xbeta, samSize, numSelCol + 1);
+
+		// X*[invert (XTransX)]
+		double* XinvXTX = new double[samSize * (numSelCol + 1)];
+		if (phenoTyp == 1) {
+			double* WX = new double[samSize * (numSelCol + 1)];
+			for (int i = 0; i < samSize; i++) {
+				miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
+				Xbeta[i] = miu[i];
+				for (int j = 0; j < numSelCol + 1; j++) {
+					WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
+				}
+			}
+			// transpose(X) * WX
+			matTmatprod(covX, WX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
+			// invert (XTransX)
+			matInv(XTransX, numSelCol + 1);
+			matmatprod(WX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+			delete[] WX;
+
+			cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
+		}
+		else {
+			matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
+		}
 
 
-	//Preparing for parallelizing of BGEN file
-	if (cmd.threads > 1) {
-	    cout << "Running multithreading...\n";
-	}
-    else {
-	   cout << "Running with single thread...\n";
-	}
+		// residual = Y - X * beta
+		double sigma2 = 0;
+		for (int i = 0; i < samSize; i++) {
+			residvec[i] = phenoY[i] - Xbeta[i];
+			sigma2 += residvec[i] * residvec[i];
+		}
+		double* resid = &residvec[0];
+
+		// sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
+		sigma2 = sigma2 / (samSize - (numSelCol + 1));
+		if (phenoTyp == 1) sigma2 = 1.0;
 
 
-	boost::thread_group thread_grp;
-	start_time = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < bgen.threads; ++i) {
-		thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
-	}
-	thread_grp.join_all();
-	cout << "Joining threads... \n";
-	end_time = std::chrono::high_resolution_clock::now();
-	cout << "Execution time... ";
-	printExecutionTime(start_time, end_time);
-	cout << "Done. \n";
-	cout << "*********************************************************\n";
+		vector<double> XR2vec;
+
+		if (!robust) {
+		  for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+			XTransX[i] = XTransX[i] * sigma2;
+		  }
+		  printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+		}
+		else {
+			vector<double> XR2vec = bgen.new_covdata;
+			for (int i = 0; i < samSize; i++) {
+				for (int j = 0; j < numSelCol + 1; j++) {
+					XR2vec[i * (numSelCol+1) + j] = XR2vec[i * (numSelCol+1) + j] * resid[i] * resid[i];
+					
+				}
+			}
+
+			double* XR2 = &XR2vec[0];
+			double* XR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matTmatprod(XR2, covX, XR2tX, samSize, numSelCol+1, numSelCol + 1);
+			double* XTransXtXR2tX = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XR2tX, XTransX, XTransXtXR2tX, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+			double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
+			matmatTprod(XTransX, XTransXtXR2tX,  XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
+
+			printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+			delete[] XR2tX;
+			delete[] XTransXtXR2tX;
+			delete[] XTransXR2;
+		}
 	
+		
+
+		cout << "Execution time... ";
+		auto end_time = std::chrono::high_resolution_clock::now();
+		printExecutionTime(start_time, end_time);
+		cout << "Done.\n";
+		cout << "*********************************************************\n";
+
+
+		delete[] XTransY;
+		delete[] beta;
+		delete[] Xbeta;
+
+		cout << "Streaming SNPs for speeding up GWAS analysis in parallel. \n";
+		cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
+
+
+		bgen.numSelCol = numSelCol;
+		bgen.numIntSelCol = numIntSelCol;
+		bgen.numExpSelCol = numExpSelCol;
+		bgen.Sq = Sq;
+		bgen.robust = robust;
+		bgen.stream_snps = stream_snps;
+		bgen.maf = cmd.MAF;
+		bgen.missGeno = cmd.missGenoRate;
+		bgen.miu = miu;
+		bgen.phenoTyp = phenoTyp;
+		bgen.covX = covX;
+		bgen.XinvXTX = XinvXTX;
+		bgen.resid = resid;
+		bgen.sigma2 = sigma2;
+		bgen.outFile = cmd.outFile;
+
+
+		start_time = std::chrono::high_resolution_clock::now();
+		bgen.getPositionOfBgenVariant(bgen, cmd);
+		end_time = std::chrono::high_resolution_clock::now();
+		cout << "Execution time... ";
+		printExecutionTime(start_time, end_time);
+		cout << "Done.\n";
+		cout << "*********************************************************\n";
+
+
+		//Preparing for parallelizing of BGEN file
+		if (cmd.threads > 1) {
+			cout << "The second allele in the BGEN file will be used for association testing.\n";
+			cout << "Running multithreading...\n";
+
+			boost::thread_group thread_grp;
+			start_time = std::chrono::high_resolution_clock::now();
+			for (uint i = 0; i < bgen.threads; ++i) {
+				thread_grp.create_thread(boost::bind(&BgenParallelGWAS, bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.genofile, bgen.filterVariants, i, boost::ref(bgen)));
+			}
+			thread_grp.join_all();
+			cout << "Joining threads... \n";
+			end_time = std::chrono::high_resolution_clock::now();
+			cout << "Execution time... ";
+			printExecutionTime(start_time, end_time);
+			cout << "Done. \n";
+			cout << "*********************************************************\n";
+		}
+		else {
+			cout << "The second allele in the BGEN file will be used for association testing.\n";
+			cout << "Running with single thread...\n";
+
+
+			BgenParallelGWAS(bgen.Mbgen_begin[0], bgen.Mbgen_end[0], bgen.bgenVariantPos[0], bgen.keepVariants[0], cmd.genofile, bgen.filterVariants, 0, bgen);
+			cout << "Done. \n";
+			cout << "*********************************************************\n";
+		}
+
+
+
+		// Write all results from each thread to 1 file
+		cout << "Combining results... \n";
+		start_time = std::chrono::high_resolution_clock::now();
+		std::ofstream results(output, std::ofstream::binary);
+		results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+		for (int i = 1; i <= numExpSelCol; i++) {
+			results << "Beta_Interaction" << "_" << i << "\t";
+		}
+		for (int i = 1; i <= numExpSelCol; i++) {
+			for (int j = 1; j <= numExpSelCol; j++) {
+				results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+			}
+		}
+		results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+
+
+		for (uint i = 0; i < bgen.threads; i++) {
+			std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
+			std::ifstream thread_output(threadOutputFile);
+			results << thread_output.rdbuf();
+
+			thread_output.close();
+			boost::filesystem::remove(threadOutputFile.c_str());
+
+		}
+		results.close();
+		end_time = std::chrono::high_resolution_clock::now();
+		cout << "Execution time... ";
+		printExecutionTime(start_time, end_time);
+		cout << "Done. \n";
 
 
 
 
-	// Write all results from each thread to 1 file
-	cout << "Combining results... \n";
-	start_time = std::chrono::high_resolution_clock::now();
-	std::ofstream results(output, std::ofstream::binary);
-	results << "SNPID" << "\t" << "rsID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Allele1" << "\t" << "Allele2" << "\t" << "N_Samples" << "\t"  << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-	for (int i = 1; i <= numExpSelCol; i++) {
-		results << "Beta_Interaction" << "_" << i << "\t";
+
+
+		// Finished
+		cout << "*********************************************************\n";
+		std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+		double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+		cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+		cout << "Total CPU Time = " << cpuduration << "  Seconds\n";
+		//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
+		cout << "*********************************************************\n";
+
+
+
+		delete[] XTransX;
+		delete[] XinvXTX;
+	
 	}
-	for (int i = 1; i <= numExpSelCol; i++) {
-		 for (int j = 1; j <= numExpSelCol; j++) {
-			  results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
-		 }
-	}
-	results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
-
-
-	for (int i = 0; i < bgen.threads; i++) {
-		std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
-		std::ifstream thread_output(threadOutputFile);
-		results << thread_output.rdbuf();
-
-		thread_output.close();
-		boost::filesystem::remove(threadOutputFile.c_str());
-
-	}
-	results.close();
-	end_time = std::chrono::high_resolution_clock::now();
-	cout << "Execution time... ";
-	printExecutionTime(start_time, end_time);
-	cout << "Done. \n";
-
-
-
-
-
-
-	// Finished
-	cout << "*********************************************************\n";
-	std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
-	double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-	cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-	cout << "Total CPU Time = "  << cpuduration << "  Seconds\n";
-	//cout << "Execution Wall Time = " << exetime << "  Seconds\n";
-	cout << "*********************************************************\n";
-
-
-
-	delete[] XTransX;
-	delete[] XinvXTX;
-
-
 	return 0;
 }
 
+
+
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta) {
+
+	boost::math::chi_squared chisq_dist_M(1);
+
+	cout << "\nCoefficients: \n";
+	cout << boost::format("%-20s %-14s %-16s %-16s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value"; // 'simple' style.
+	for (int i = 0; i < numCovs; i++) {
+
+		double stdError = sqrt(covVarMat[i * numCovs + i]);
+		double zvalue = beta[i] / stdError;
+		double pr = (isnan(zvalue)) ? NAN : boost::math::cdf(complement(chisq_dist_M, (beta[i] * beta[i]) / covVarMat[i * numCovs + i]));
+
+		if (i == 0) {
+			cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % "Intercept" % beta[i] % stdError % zvalue % pr;
+		}
+		else {
+			cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % covNames[i - 1] % beta[i] % stdError % zvalue % pr;
+		}
+	}
+
+	cout << "\nVariance-Covariance Matrix: \n";
+	for (int i = 0; i < numCovs; i++) {
+		for (int j = 0; j < numCovs; j++) {
+			if (i == 0) {
+				if (j == 0) {
+					cout << boost::format("%+15s %15.10f") % "Intercept" % covVarMat[j * numCovs + i];
+				}
+				else {
+					cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
+				}
+			}
+			else {
+				if (j == 0) {
+					cout << boost::format("%+15s %15.10f") % covNames[i - 1] % covVarMat[j * numCovs + i];
+				}
+				else {
+					cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
+				}
+			}
+		}
+		cout << "\n";
+	}
+	cout << "\n";
+}

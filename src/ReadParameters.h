@@ -7,45 +7,57 @@
 
 class CommandLine {
 
-	public:
+public:
 
-		char genofile[300];
-		char samplefile[300];
+	char genofile[300];
+	char pgenfile[300];
+	char samplefile[300];
 
+	// Genotype files
+	std::string bgenFile;
+	std::string sampleFile;
+	std::string pgenFile;
+	std::string pvarFile;
+	std::string psamFile;
+	std::string bedFile;
+	std::string bimFile;
+	std::string famFile;
+	bool useSampleFile = false;
+	bool useBgenFile = false;
+	bool usePgenFile = false;
+	bool useBedFile = false;
 
-		// Input files
-		std::string pFile;
-		std::string bgenFile;
-		std::string sampleFile;
-		std::string phenoFile;
-		std::string outFile;
-		bool useSampleFile = false;
+	// Phenotype file
+	std::string phenoFile;
+	std::string delim;
+	std::string missing;
+	char pheno_delim[300];
 
-		// Inputs
-		std::vector<std::string> cov;
-		std::vector<std::string> icov;
-		std::vector<std::string> exp;
-		std::string phenoName;
-		std::string sampleID;
-		int phenoType;
-	
-		// Filtering options
-		double MAF;
-		double missGenoRate;
-		std::string includeVariantFile;
-		bool doFilters;
+	// Out file
+	std::string outFile;
 
-		std::string delim;
-		char pheno_delim[300];
-		std::string missing;
+	// Inputs
+	std::vector<std::string> cov;
+	std::vector<std::string> icov;
+	std::vector<std::string> exp;
+	std::string phenoName;
+	std::string sampleID;
+	int phenoType;
 
+	// Filtering options
+	double MAF;
+	double missGenoRate;
+	std::string includeVariantFile;
+	bool doFilters;
 
-		// Performance options
-		int threads;
-		int stream_snps;
-		int robust;
-		double tol;
-		void processCommandLine(int argc, char* argv[]);
+	// Performance options
+	double center;
+	double scale;
+	double tol;
+	int robust;
+	int threads;
+	int stream_snps;
+	void processCommandLine(int argc, char* argv[]);
 };
 
 

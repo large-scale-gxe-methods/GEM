@@ -35,7 +35,7 @@ class Bgen {
 		std::vector<unsigned int> includeVariantIndex;
 
 		// For multithreading BGEN file
-		int threads;
+		uint threads;
 		bool filterVariants;
 		std::vector<uint> Mbgen_begin;
 		std::vector<uint> Mbgen_end;
@@ -61,9 +61,9 @@ class Bgen {
 		int robust;
 		std::string outFile;
 		void processBgenHeaderBlock(char genofile[300]);
-		void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize);
+		void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
 		void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void BgenParallelGWAS(int begin, int end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
+void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
 #endif

@@ -43,27 +43,13 @@ class Bgen {
 		std::vector<vector<uint>> keepVariants;
 
 
-		// Temporary
-		int stream_snps;
-		double  maf;
-		double missGeno;
-		vector < double > miu;
-		int     phenoTyp;
-		double  sigma2;
-		double* covX;
-		double* XinvXTX;
-		double* resid;
-		int numSelCol;
-		int numIntSelCol;
-		int numExpSelCol;
-		int Sq;
-		int samSize;
-		int robust;
-		std::string outFile;
-		void processBgenHeaderBlock(char genofile[300]);
+		void processBgenHeaderBlock(string bgenfile);
 		void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
 		void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test);
+void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, string bgenFile, bool filterVariants, int thread_num,
+			int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
+			uint Nbgen, uint Layout, uint CompressedSNPBlocks,
+			double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile);
 #endif

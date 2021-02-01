@@ -244,69 +244,6 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 	cout << "****************************************************************************\n";
 
 
-
-	vector<double> tmp1(samSize, 1);
-	double* tmpMean = new double[numSelCol + 1];
-	vector<double> tmpSD(numSelCol + 1);
-	if (center) {
-		matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-		if (!scale) {
-			cout << "Centering ALL exposures and covariates..." << endl;
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-				tmpSD[i] = 1.0;
-			}
-		}
-		else {
-			cout << "Centering and scaling ALL exposures and covariates..." << endl;
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
-				}
-			}
-
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
-			}
-		}
-
-		for (int i = 0; i < samSize; i++) {
-			for (int j = 1; j < numSelCol + 1; j++) {
-				covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
-			}
-		}
-
-	}
-	else {
-		if (scale) {
-			cout << "Scaling ALL exposures and covariates..." << endl;
-			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
-				}
-			}
-
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
-				}
-			}
-		}
-	}
-
 	new_samSize = samSize;
 	new_covdata = covdata;
 	new_phenodata = phenodata;
@@ -389,6 +326,7 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 			cout << "\nERROR: Number of variants in .pvar file (" << nVariants << ") does not match the number of variants in pgen file (" << pgen.raw_variant_ct << ").\n\n";
 			exit(1);
 		}
+		pvarLast = 4;
 
 	}
 	else {
@@ -398,8 +336,9 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 			pvarIndex.push_back(1);
 			pvarIndex.push_back(0);
 			pvarIndex.push_back(2);
-			pvarIndex.push_back(3);
 			pvarIndex.push_back(4);
+			pvarIndex.push_back(3);
+			pvarLast = 4;
 		}
 		else if (values.size() == 6) {
 			cout << "\nWARNING: No header line with #CHROM present in .pvar file. Number of columns in .pvar file is 6.\n";
@@ -407,8 +346,9 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 			pvarIndex.push_back(1);
 			pvarIndex.push_back(0);
 			pvarIndex.push_back(3);
-			pvarIndex.push_back(4);
 			pvarIndex.push_back(5);
+			pvarIndex.push_back(4);
+			pvarLast = 5;
 		}
 		else {
 			cerr << "\nERROR: Number of columns is not 5 or 6  in .pvar file when the #CHROM header line is not present ( https://www.cog-genomics.org/plink/2.0/formats#pvar ).\n\n";
@@ -459,7 +399,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
 			}
 			else {
-				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files." << endl << endl;
+				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be 'snpid' for PGEN files.\n\n";
 				exit(1);
 			}
 
@@ -472,9 +412,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 				count++;
 			}
 			nSNPS = count;
-			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
-			//count = ceil(count / Mbgen_begin.size());
-
+			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n\n";
 
 			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 			if (nSNPS < threads) {
@@ -554,38 +492,49 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 		fIDMat.close();
 	}
+	else {
+		 threads = cmd.threads;
+		 if (pgen.raw_variant_ct < threads) {
+			 cout << "Number of variants (" << pgen.raw_variant_ct << ") is less than the number of specified threads (" << threads << ")...\n";
+		     threads = pgen.raw_variant_ct;
+	 	     cout << "Using " << threads << " thread(s) instead... \n\n";
+	     }
+		 begin.resize(threads);
+		 end.resize(threads);
+
+		 for (uint32_t t = 0; t < threads; t++) {
+			  begin[t] = floor((pgen.raw_variant_ct / threads) * t);
+
+			  if ((t + 1) == (threads)) {
+				  end[t] = pgen.raw_variant_ct - 1;
+			  }
+			  else {
+				  end[t] = floor(((pgen.raw_variant_ct / threads) * (t + 1)) - 1);
+			  }
+		 }
+	}
+
 }
 
 
 
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos, Pgen test) {
+void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos,
+			int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
+			int pvarLast, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile) {
 
 		auto start_time = std::chrono::high_resolution_clock::now();
-		std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+		std::string output = outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
 		std::ofstream results(output, std::ofstream::binary);
 		std::ostringstream oss;
 
 
-		int Sq = test.Sq;
 		int Sq1 = Sq + 1;
-		int intSq = test.numIntSelCol;
+		int intSq = numIntSelCol;
 		int intSq1 = intSq + 1;
-		int expSq = test.numExpSelCol;
-		int phenoType = test.phenoTyp;
-		int robust = test.robust;
-		int samSize = test.new_samSize;
-		int numSelCol = test.numSelCol;
-		int stream_snps = test.stream_snps;
-		double MAF = test.maf;
+		int expSq = numExpSelCol;
 		double maxMAF = 1.0 - MAF;
-		double missGenoCutoff = test.missGeno;
-		double sigma2 = test.sigma2;
-		double* resid = test.resid;
-		double* XinvXTX = test.XinvXTX;
-		double* covX = test.covX;
-		vector <double> miu = test.miu;
-		vector<long int> include_idx = test.include_idx;
+
 		vector <string> geno_snpid(stream_snps);
 		vector <double> ZGSvec(samSize   * (1 + Sq) * stream_snps);
 		vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
@@ -728,7 +677,6 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				if ((snploop == (end + 1)) && stream_i == 0) {
 					break;
 				}
-
 				if (snploop == end + 1 && stream_i != 0) {
 					stream_snps = stream_i;
 					ZGS_col = Sq1 * stream_snps;
@@ -824,10 +772,8 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 				}
 
 				string tmpString = "";
+				values[pvarLast].erase(std::remove(values[pvarLast].begin(), values[pvarLast].end(), '\r'), values[pvarLast].end());
 				for (int p = 0; p < pvarLength; p++) {
-					if (p == pvarLength - 1) {
-						values[pvarIndex[p]].erase(std::remove(values[pvarIndex[p]].begin(), values[pvarIndex[p]].end(), '\r'), values[pvarIndex[p]].end());
-					}
 					tmpString = tmpString + values[pvarIndex[p]] + "\t";
 				}
 				geno_snpid[stream_i] = tmpString + std::to_string(samSize - nMissing);
@@ -1206,7 +1152,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 
 		auto end_time = std::chrono::high_resolution_clock::now();
 		cout << "Thread " << thread_num << " finished in ";
-		printExecutionTime(start_time, end_time);
+		printExecutionTime1(start_time, end_time);
 }
 	
 

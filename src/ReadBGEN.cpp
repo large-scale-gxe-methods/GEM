@@ -8,8 +8,10 @@ This function is revised based on the Parse function in BOLT-LMM v2.3 source cod
 *************************************/
 
 // Read BGEN v1.1, v1.2, and v1.3 header block and flags.
-void Bgen::processBgenHeaderBlock(char genofile[300]) {
+void Bgen::processBgenHeaderBlock(string bgenfile) {
 
+	char genofile[300];
+	strcpy(genofile, bgenfile.c_str());
 	string genopath(genofile);
 	if (genopath.substr(genopath.length() - 5, 5) != ".bgen") {
 		cout << "\nERROR: " << genopath << " does not have a .bgen extension. \n\n";
@@ -24,15 +26,11 @@ void Bgen::processBgenHeaderBlock(char genofile[300]) {
 
 
 	cout << "General information of BGEN file. \n";
-
-	// First four bytes (offset)
 	if (!fread(&offset, 4, 1, fin)) {
 		cerr << "\nERROR: Cannot read BGEN header (offset).\n\n";
 		exit(1);
 	}
 
-
-	// The header block
 	uint L_H; 
 	if (!fread(&L_H, 4, 1, fin)) {
 		cerr << "\nERROR: Cannot read BGEN header (LH).\n\n";
@@ -328,70 +326,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 
 
-	vector<double> tmp1(samSize, 1);
-	double* tmpMean = new double[numSelCol + 1];
-	vector<double> tmpSD(numSelCol + 1);
-
-	if (center) {
-		matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-		if (!scale) {
-			cout << "Centering ALL exposures and covariates..." << endl;
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-				tmpSD[i] = 1.0;
-			}
-		}
-		else {
-			cout << "Centering and scaling ALL exposures and covariates..." << endl;
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
-				}
-			}
-
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
-			}
-		}
-
-		for (int i = 0; i < samSize; i++) {
-			for (int j = 1; j < numSelCol + 1; j++) {
-				covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
-			}
-		}
-
-	}
-	else {
-		if (scale) {
-			cout << "Scaling ALL exposures and covariates..." << endl;
-			matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpMean[i] /= double(samSize * 1.0);
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
-				}
-			}
-
-			for (int i = 1; i < numSelCol + 1; i++) {
-				tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
-			}
-
-			for (int i = 0; i < samSize; i++) {
-				for (int j = 1; j < numSelCol + 1; j++) {
-					covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
-				}
-			}
-		}
-	}
-
-
 	new_samSize = samSize;
 	new_covdata = covdata;
 	new_phenodata = phenodata;
@@ -440,20 +374,18 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 		filterVariants = true;
 		if (!cmd.includeVariantFile.empty()) {
 			checkInclude = true;
+
 			std::ifstream fInclude;
 			fInclude.open(cmd.includeVariantFile);
 			if (!fInclude.is_open()) {
-				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened." << endl << endl;
+				cerr << "\nERROR: The file (" << cmd.includeVariantFile << ") could not be opened.\n\n";
 				exit(1);
 			}
-
 
 			string vars;
 			getline(fInclude, IDline);
 			std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
 			IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
-
-
 			if (IDline == "snpid") {
 				cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
 				checkSNPID = true;
@@ -463,10 +395,9 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				checkRSID = true;
 			}
 			else {
-				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be snpid or rsid." << endl << endl;
+				cerr << "\nERROR: Header name of " << cmd.includeVariantFile << " must be snpid or rsid.\n\n";
 				exit(1);
 			}
-
 
 			while (fInclude >> vars) {
 				if (includeVariant.find(vars) != includeVariant.end()) {
@@ -477,9 +408,7 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				count++;
 			}
 			nSNPS = count;
-			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n" << endl;
-			//count = ceil(count / Mbgen_begin.size());
-
+			cout << "Detected " << nSNPS << " variants to be used for analysis... \nAll other variants will be excluded.\n\n\n";
 
 			cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 			if (nSNPS < threads) {
@@ -491,6 +420,7 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				cout << "Using " << threads << " for multithreading... \n\n";
 			}
 		}
+
 
 		cout << "Dividing BGEN file into " << threads << " block(s)...\n";
 		cout << "Identifying start position of each block...\n";
@@ -508,12 +438,11 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 			endIndex[t] = ((t + 1) == threads) ? nSNPS - 1 : floor(((nSNPS / threads) * (t + 1)) - 1);
 		}
 
+
+
 		FILE* fin = bgen.fin;
 		fseek(fin, offset + 4, SEEK_SET);
-
-		// Identifying the start position of each BGEN variant block for multithreading when no bgen index file present.
 		for (uint snploop = 0; snploop < Mbgen; snploop++) {
-
 			long long unsigned int prev = ftell(fin);
 
 			uint Nrow;
@@ -525,10 +454,11 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				}
 			}
 
+			ushort LS; 
+			ret = fread(&LS, 2, 1, fin);
 
-			ushort LS; ret = fread(&LS, 2, 1, fin);
-
-			ret = fread(snpID, 1, LS, fin); snpID[LS] = '\0';
+			ret = fread(snpID, 1, LS, fin);
+			snpID[LS] = '\0';
 			if (checkSNPID) {
 				if ((checkInclude) && (includeVariant.find(snpID) != includeVariant.end())) {
 					sucessCount++;
@@ -541,19 +471,17 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 					if (index == endIndex[k]) {
 						Mbgen_end[k] = snploop;
 						k++;
-						if (k == threads) {
-							break;
-						}
+						if (k == threads) {break;}
 					}
 					index++;
 				}
 			}
 
-			// The length of the rsid
 			ushort LR; 
 			ret = fread(&LR, 2, 1, fin);
 
-			ret = fread(rsID, 1, LR, fin); rsID[LR] = '\0';
+			ret = fread(rsID, 1, LR, fin); 
+			rsID[LR] = '\0';
 			if (checkRSID) {
 				if (checkInclude && (includeVariant.find(rsID) != includeVariant.end())) {
 					sucessCount++;
@@ -566,18 +494,20 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 					if (index == endIndex[k]) {
 						Mbgen_end[k] = snploop;
 						k++;
-						if (k == threads) {
-							break;
-						}
+						if (k == threads) {break;}
 					}
 					index++;
 				}
 			}
 
-			ushort LC; ret = fread(&LC, 2, 1, fin);
-			ret = fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
+			ushort LC; 
+			ret = fread(&LC, 2, 1, fin);
 
-			uint32_t physpos; ret = fread(&physpos, 4, 1, fin);
+			ret = fread(chrStr, 1, LC, fin); 
+			chrStr[LC] = '\0';
+
+			uint32_t physpos; 
+			ret = fread(&physpos, 4, 1, fin);
 
 			uint16_t LKnum;
 			if (Layout == 2) {
@@ -588,29 +518,34 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				}
 			}
 
-			// Length of the first allele
-			uint32_t LA; ret = fread(&LA, 4, 1, fin);
-			ret = fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+			uint32_t LA; 
+			ret = fread(&LA, 4, 1, fin);
+			ret = fread(allele1, 1, LA, fin); 
+			allele1[LA] = '\0';
 
-			uint32_t LB; ret = fread(&LB, 4, 1, fin);
-			ret = fread(allele0, 1, LB, fin); allele0[LB] = '\0';
+			uint32_t LB; 
+			ret = fread(&LB, 4, 1, fin);
+			ret = fread(allele0, 1, LB, fin); 
+			allele0[LB] = '\0';
 
 
-			// Seeks past the uncompressed genotype.
 			if (Layout == 2) {
 				if (CompressedSNPBlocks > 0) {
-					uint zLen; ret = fread(&zLen, 4, 1, fin);
+					uint zLen; 
+					ret = fread(&zLen, 4, 1, fin);
 					fseek(fin, 4 + zLen - 4, SEEK_CUR);
 
 				}
 				else {
-					uint zLen; ret = fread(&zLen, 4, 1, fin);
+					uint zLen; 
+					ret = fread(&zLen, 4, 1, fin);
 					fseek(fin, zLen, SEEK_CUR);
 				}
 			}
 			else {
 				if (CompressedSNPBlocks == 1) {
-					uint zLen; ret = fread(&zLen, 4, 1, fin);
+					uint zLen; 
+					ret = fread(&zLen, 4, 1, fin);
 					fseek(fin, zLen, SEEK_CUR);
 
 				}
@@ -632,12 +567,10 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 		cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
 		if (Mbgen < threads) {
 			threads = Mbgen;
-			nSNPS = Mbgen;
 			cout << "Number of variants (" << Mbgen << ") is less than the number of specified threads (" << cmd.threads << ")...\n";
 			cout << "Using " << threads << " for multithreading... \n\n";
 		}
 		else {
-			nSNPS = Mbgen;
 			cout << "Using " << threads << " for multithreading... \n\n";
 		}
 
@@ -647,53 +580,50 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 		bgenVariantPos.resize(threads);
 		keepVariants.resize(threads);
 
-		for (uint t = 0; t < threads; t++) {
-			Mbgen_begin[t] = floor((nSNPS / threads) * t);
-
-			if ((t + 1) == (threads)) {
-				Mbgen_end[t] = nSNPS - 1;
-			}
-			else {
-				Mbgen_end[t] = floor(((nSNPS / threads) * (t + 1)) - 1);
-			}
+		for (uint t = 0; t < threads-1; t++) {
+			Mbgen_begin[t] = floor((Mbgen / threads) * t);
+			Mbgen_end[t] = floor(((Mbgen / threads) * (t + 1)) - 1);
 		}
+		Mbgen_begin[threads-1] = floor((Mbgen / threads) * (threads - 1));
+		Mbgen_end[threads-1] = Mbgen - 1;
 
+
+		uint t = 0;
 		FILE* fin = bgen.fin;
 		fseek(fin, offset + 4, SEEK_SET);
-
-		// Identifying the start position of each BGEN variant block for multithreading when no bgen index file present.
-		uint t = 0;
 		for (uint snploop = 0; snploop < Mbgen; snploop++) {
 
 			if (snploop == Mbgen_begin[t]) {
 				bgenVariantPos[t] = ftell(fin);
 				t++;
-
-				if (t == (Mbgen_begin.size())) {
-					break;
-				}
 			}
 
-			// Number of individuals. Only present when Layout == 1
 			uint Nrow;
 			if (Layout == 1) {
-				ret = fread(&Nrow, 4, 1, fin); // cout << "Nrow: " << Nrow << " " << std::flush;  
+				ret = fread(&Nrow, 4, 1, fin);
 				if (Nrow != Nbgen) {
 					cerr << "\nERROR: Number of samples (" << Nrow << ") with genotype probabilities does not match number of samples specified in BGEN file (" << Nbgen << ").\n\n";
 					exit(1);
 				}
 			}
 
-			ushort LS; ret = fread(&LS, 2, 1, fin);
-			ret = fread(snpID, 1, LS, fin); snpID[LS] = '\0';
+			ushort LS; 
+			ret = fread(&LS, 2, 1, fin);
+			ret = fread(snpID, 1, LS, fin); 
+			snpID[LS] = '\0';
 
-			ushort LR; ret = fread(&LR, 2, 1, fin);
-			ret = fread(rsID, 1, LR, fin); rsID[LR] = '\0';
+			ushort LR; 
+			ret = fread(&LR, 2, 1, fin);
+			ret = fread(rsID, 1, LR, fin); 
+			rsID[LR] = '\0';
 
-			ushort LC; ret = fread(&LC, 2, 1, fin);
-			ret = fread(chrStr, 1, LC, fin); chrStr[LC] = '\0';
+			ushort LC; 
+			ret = fread(&LC, 2, 1, fin);
+			ret = fread(chrStr, 1, LC, fin); 
+			chrStr[LC] = '\0';
 
-			uint32_t physpos; ret = fread(&physpos, 4, 1, fin);
+			uint32_t physpos; 
+			ret = fread(&physpos, 4, 1, fin);
 
 			uint16_t LKnum;
 			if (Layout == 2) {
@@ -704,28 +634,35 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 				}
 			}
 
-			uint32_t LA; ret = fread(&LA, 4, 1, fin);
-			ret = fread(allele1, 1, LA, fin); allele1[LA] = '\0';
+			uint32_t LA; 
+			ret = fread(&LA, 4, 1, fin);
+			ret = fread(allele1, 1, LA, fin); 
+			allele1[LA] = '\0';
 
-			uint32_t LB; ret = fread(&LB, 4, 1, fin);
-			ret = fread(allele0, 1, LB, fin); allele0[LB] = '\0';
+			uint32_t LB; 
+			ret = fread(&LB, 4, 1, fin);
+			ret = fread(allele0, 1, LB, fin); 
+			allele0[LB] = '\0';
 
 
 			// Seeks past the uncompressed genotype.
 			if (Layout == 2) {
 				if (CompressedSNPBlocks > 0) {
-					uint zLen;  ret = fread(&zLen, 4, 1, fin);
+					uint zLen;  
+					ret = fread(&zLen, 4, 1, fin);
 					ret = fseek(fin, 4 + zLen - 4, SEEK_CUR);
 
 				}
 				else {
-					uint zLen;  ret = fread(&zLen, 4, 1, fin);
+					uint zLen; 
+					ret = fread(&zLen, 4, 1, fin);
 					ret = fseek(fin, zLen, SEEK_CUR);
 				}
 			}
 			else {
 				if (CompressedSNPBlocks == 1) {
-					uint zLen;  ret = fread(&zLen, 4, 1, fin);
+					uint zLen;  
+					ret = fread(&zLen, 4, 1, fin);
 					ret = fseek(fin, zLen, SEEK_CUR);
 
 				}
@@ -782,17 +719,16 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, char genobgen[300], bool filterVariants, int thread_num, Bgen test) {
+void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants,  string bgenFile, bool filterVariants, int thread_num,
+			int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
+			uint Nbgen, uint Layout, uint CompressedSNPBlocks,
+			double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile) {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
-	std::string output = test.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+	std::string output = outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
 	std::ofstream results(output, std::ofstream::binary);
 	std::ostringstream oss;
 
-
-	uint Nbgen  = test.Nbgen;
-	uint Layout = test.Layout;
-	uint CompressedSNPBlocks = test.CompressedSNPBlocks;
 
 	uint maxLA = 65536;
 	char* snpID   = new char[maxLA + 1];
@@ -806,9 +742,8 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 	vector <uchar> zBuf1;
 	vector <uint16_t> shortBuf1;
-	uLongf destLen1;
+	uLongf destLen1 = 6 * Nbgen;
 	if (Layout == 1) {
-		destLen1 = 6 * Nbgen;
 		if (CompressedSNPBlocks == 0) {
 			zBuf1.resize(destLen1);
 		}
@@ -817,31 +752,15 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 		}
 	}
 
-
-	int Sq     = test.Sq;
-	int Sq1    = Sq + 1;
-	int intSq  = test.numIntSelCol;
-	int intSq1 = intSq + 1;
-	int expSq        = test.numExpSelCol;
-	int phenoType    = test.phenoTyp;
-	int robust       = test.robust;
-	int samSize      = test.new_samSize;
-	int numSelCol    = test.numSelCol;
-	int stream_snps  = test.stream_snps;
-	double MAF       = test.maf;
-	double maxMAF    = 1 - MAF;
-	double missGenoCutoff = test.missGeno;
-	double sigma2    = test.sigma2;
-	double* resid    = test.resid;
-	double* XinvXTX  = test.XinvXTX;
-	double* covX = test.covX;
+	int Sq1     = Sq + 1;
+	int intSq   = numIntSelCol;
+	int intSq1  = intSq + 1;
+	int expSq   = numExpSelCol;
 	int ZGS_col = Sq1 * stream_snps;
-	vector <double> miu = test.miu;
-	vector<long int> include_idx = test.include_idx;
+	double maxMAF = 1 - MAF;
+	vector<uint> missingIndex;
 	vector <double> AF(stream_snps);
 	vector <string> geno_snpid(stream_snps);
-	std::vector<uint> missingIndex;
-
 
 	vector <double> ZGSvec(samSize   * (1 + Sq) * stream_snps);
 	vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
@@ -850,11 +769,14 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 	
 	struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
+
+
+	char genobgen[300];
+	strcpy(genobgen, bgenFile.c_str());
 	FILE* fin3;
 	fin3 = fopen(genobgen, "rb");
 	fseek(fin3, byte, SEEK_SET);
 
-	
 	uint snploop = begin;
 	int variant_index = 0;
 	int keepIndex = 0;
@@ -867,11 +789,9 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 			if (snploop == (end + 1) && stream_i == 0) {
 				break;
 			}
-
 			if (snploop == end + 1 && stream_i != 0) {
 				stream_snps = stream_i;
 				ZGS_col = Sq1 * stream_snps;
-
 				break;
 			}
 			snploop++;
@@ -886,16 +806,23 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 			}
 
-			ushort LS; ret = fread(&LS, 2, 1, fin3);
-			ret = fread(snpID, 1, LS, fin3); snpID[LS] = '\0';
+			ushort LS; 
+			ret = fread(&LS, 2, 1, fin3);
+			ret = fread(snpID, 1, LS, fin3); 
+			snpID[LS] = '\0';
 
-			ushort LR; ret = fread(&LR, 2, 1, fin3);
-			ret = fread(rsID, 1, LR, fin3); rsID[LR] = '\0';
+			ushort LR; 
+			ret = fread(&LR, 2, 1, fin3);
+			ret = fread(rsID, 1, LR, fin3); 
+			rsID[LR] = '\0';
 
-			ushort LC; ret = fread(&LC, 2, 1, fin3);
-			ret = fread(chrStr, 1, LC, fin3); chrStr[LC] = '\0';
+			ushort LC; 
+			ret = fread(&LC, 2, 1, fin3);
+			ret = fread(chrStr, 1, LC, fin3); 
+			chrStr[LC] = '\0';
 
-			uint32_t physpos; ret = fread(&physpos, 4, 1, fin3);
+			uint32_t physpos; 
+			ret = fread(&physpos, 4, 1, fin3);
 			physpos_tmp = std::to_string(physpos);
 
 			uint16_t LKnum;
@@ -907,17 +834,22 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 			}
 
-			uint32_t LA;  ret = fread(&LA, 4, 1, fin3);
-			ret = fread(allele1, 1, LA, fin3); allele1[LA] = '\0';
+			uint32_t LA;  
+			ret = fread(&LA, 4, 1, fin3);
+			ret = fread(allele1, 1, LA, fin3); 
+			allele1[LA] = '\0';
 
-			uint32_t LB; ret = fread(&LB, 4, 1, fin3);
-			ret = fread(allele0, 1, LB, fin3); allele0[LB] = '\0';
+			uint32_t LB; 
+			ret = fread(&LB, 4, 1, fin3);
+			ret = fread(allele0, 1, LB, fin3); 
+			allele0[LB] = '\0';
 
 
 			if (Layout == 1) {
 				uint16_t* probs_start;
 				if (CompressedSNPBlocks == 1) {
-					uint zLen; ret = fread(&zLen, 4, 1, fin3);
+					uint zLen; 
+					ret = fread(&zLen, 4, 1, fin3);
 					zBuf1.resize(zLen);
 					ret = fread(&zBuf1[0], 1, zLen, fin3);
 					if (libdeflate_zlib_decompress(decompressor, &zBuf1[0], zLen, &shortBuf1[0], destLen1, NULL) != LIBDEFLATE_SUCCESS) {
@@ -964,7 +896,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 					}
 				}
 
-				double gmean = AF[stream_i] / double(samSize - nMissing);
+				double gmean  = AF[stream_i] / double(samSize - nMissing);
 				double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
 				double percMissing = nMissing / (samSize * 1.0);
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
@@ -977,22 +909,22 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 				if (nMissing > 0) {
 					if (phenoType == 0) {
-						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						for (size_t nm = 0; nm < missingIndex.size(); nm++) {
 							int tmp5 = tmp1 + missingIndex[nm];
 							ZGSvec[tmp5] = gmean;
 						}
 					}
 					else {
-						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						for (size_t nm = 0; nm < missingIndex.size(); nm++) {
 							int tmp5 = tmp1 + missingIndex[nm];
 							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
 						}
 					}
 					missingIndex.clear();
 				}
+
 				geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
 				
-
 				for (int j = 0; j < Sq; j++) {
 					 int tmp3 = samSize * (j + 1) + tmp1;
 
@@ -1000,14 +932,14 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 						  int tmp4 = i * (numSelCol + 1);
 						  ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
 					 }
-
 				}
 
 			} // end of reading genotype data when Layout = 1
 
 
 			if (Layout == 2) {
-				uint zLen; ret = fread(&zLen, 4, 1, fin3);
+				uint zLen; 
+				ret = fread(&zLen, 4, 1, fin3);
 
 				if (filterVariants && keepVariants[keepIndex] + 1 != snploop) {
 					if (CompressedSNPBlocks > 0) {
@@ -1056,13 +988,15 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				}
 
 
-				uint32_t N; memcpy(&N, bufAt, sizeof(int32_t));
+				uint32_t N; 
+				memcpy(&N, bufAt, sizeof(int32_t));
 				if (N != Nbgen) {
 					cerr << "\nERROR: " << snpID << " number of samples (" << N << ") with genotype probabilties does not match number of samples specified in BGEN file (" << Nbgen << ").\n\n";
 					exit(1);
 				}
 
-				uint16_t K; memcpy(&K, &(bufAt[4]), sizeof(int16_t));
+				uint16_t K; 
+				memcpy(&K, &(bufAt[4]), sizeof(int16_t));
 				if (K != 2U) {
 					cout << "\nERROR: There are SNP(s) with more than 2 alleles (non-bi-allelic). Currently unsupported. \n\n";
 					exit(1);
@@ -1190,7 +1124,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 
 				double gmean = AF[stream_i] / double(samSize - nMissing);
-				double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
+				double cur_AF = gmean / 2.0;
 				double percMissing = nMissing / (samSize * 1.0);
 				if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
 					AF[stream_i] = 0.0;
@@ -1202,13 +1136,13 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 				
 				if (nMissing > 0) {
 					if (phenoType == 0) {
-						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						for (size_t nm = 0; nm < missingIndex.size(); nm++) {
 							int tmp5 = tmp1 + missingIndex[nm];
 							ZGSvec[tmp5] = gmean;
 						}
 					}
 					else {
-						for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+						for (size_t nm = 0; nm < missingIndex.size(); nm++) {
 							int tmp5 = tmp1 + missingIndex[nm];
 							ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
 						}
@@ -1594,7 +1528,7 @@ void BgenParallelGWAS(uint begin, uint end, long long unsigned int byte, vector<
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	cout << "Thread " << thread_num << " finished in ";
-	printExecutionTime(start_time, end_time);
+	printExecutionTime1(start_time, end_time);
 }
 
 

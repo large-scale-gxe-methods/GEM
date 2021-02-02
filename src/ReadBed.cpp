@@ -586,40 +586,16 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 		double* PvalM = new double[stream_snps];
 		double* PvalInt = new double[stream_snps];
 		double* PvalJoint = new double[stream_snps];
+
 		boost::math::chi_squared chisq_dist_M(1);
-		boost::math::chi_squared chisq_dist_Int(expSq);
-		boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-
 		if (robust == 0) {
 			for (int i = 0; i < stream_snps; i++) {
-				// initialize dynamic 2D array
-				betaInt[i] = new double[expSq];
-				VarbetaInt[i] = new double[expSq * expSq];
 
 				// betamain
 				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
 				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 				VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
 
-				// ZGStR
-				double* subZGStR = new double[Sq1];
-				subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
-
-				// inv(ZGStZGS[)
-				double* invZGStZGS = new double[Sq1 * Sq1];
-				subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-				matInv(invZGStZGS, Sq1);
-
-
-				double* betaAll = new double[Sq1 * 1];
-				matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-				double* VarBetaAll = new double[Sq1 * Sq1];
-				subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
-				for (int k = 0; k < Sq1 * Sq1; k++) {
-					VarBetaAll[k] *= sigma2;
-				}
-
 				//calculating Marginal P values
 				double statM = betaM[i] * betaM[i] / VarbetaM[i];
 				if (isnan(statM) || statM <= 0.0) {
@@ -629,111 +605,108 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
 				}
 
+				if (expSq > 0) {
+					boost::math::chi_squared chisq_dist_Int(expSq);
+					boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 
-				// VarBetaInt
-				subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+					betaInt[i] = new double[expSq];
+					VarbetaInt[i] = new double[expSq * expSq];
 
-				double* invVarbetaint = new double[expSq * expSq];
-				subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-				matInv(invVarbetaint, expSq);
+					// ZGStR
+					double* subZGStR = new double[Sq1];
+					subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
 
-				// Beta Int
-				subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+					// inv(ZGStZGS)
+					double* invZGStZGS = new double[Sq1 * Sq1];
+					subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+					matInv(invZGStZGS, Sq1);
 
-				// StatInt
-				double* Stemp3 = new double[expSq];
-				matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-				double statInt = 0.0;
-				for (int j = 0; j < expSq; j++) {
-					statInt += betaInt[i][j] * Stemp3[j];
-				}
+					double* betaAll = new double[Sq1 * 1];
+					matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+					double* VarBetaAll = new double[Sq1 * Sq1];
+					subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
+					for (int k = 0; k < Sq1 * Sq1; k++) {
+						VarBetaAll[k] *= sigma2;
+					}
 
-				//calculating Interaction P values
-				if (isnan(statInt) || statInt <= 0.0) {
-					PvalInt[i] = NAN;
-				}
-				else {
-					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-				}
+					// VarBetaInt
+					subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
 
-				vector<double> invAvec((1 + expSq) * (1 + expSq));
-				vector<double> betaMIntvec(1 + expSq);
-				int betaIndex = 0;
-				int tmpIndex = 0;
-				for (int k = 0; k < Sq1; k++) {
-					if (k > 0 && k <= intSq) { continue; }
+					double* invVarbetaint = new double[expSq * expSq];
+					subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+					matInv(invVarbetaint, expSq);
+
+					// Beta Int
+					subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+
+					// StatInt
+					double* Stemp3 = new double[expSq];
+					matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
+					double statInt = 0.0;
+					for (int j = 0; j < expSq; j++) {
+						statInt += betaInt[i][j] * Stemp3[j];
+					}
+
+					//calculating Interaction P values
+					if (isnan(statInt) || statInt <= 0.0) {
+						PvalInt[i] = NAN;
+					}
 					else {
-						betaMIntvec[betaIndex] = betaAll[k];
-						betaIndex++;
-						for (int j = 0; j < Sq1; j++) {
-							if (j > 0 && j <= intSq) { continue; }
-							else {
-								invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-								tmpIndex++;
+						PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
+					}
+
+					vector<double> invAvec((1 + expSq) * (1 + expSq));
+					vector<double> betaMIntvec(1 + expSq);
+					int betaIndex = 0;
+					int tmpIndex = 0;
+					for (int k = 0; k < Sq1; k++) {
+						if (k > 0 && k <= intSq) { continue; }
+						else {
+							betaMIntvec[betaIndex] = betaAll[k];
+							betaIndex++;
+							for (int j = 0; j < Sq1; j++) {
+								if (j > 0 && j <= intSq) { continue; }
+								else {
+									invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
+									tmpIndex++;
+								}
 							}
 						}
 					}
-				}
-				double* invA = &invAvec[0];
-				double* betaMInt = &betaMIntvec[0];
-				matInv(invA, 1 + expSq);
-				double* Stemp4 = new double[1 + expSq];
-				matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
-				double statJoint = 0.0;
-				for (int k = 0; k < 1 + expSq; k++) {
-					statJoint += betaMInt[k] * Stemp4[k];
-				}
-				if (isnan(statJoint) || statJoint <= 0.0) {
-					PvalJoint[i] = NAN;
-				}
-				else {
-					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-				}
+					double* invA = &invAvec[0];
+					double* betaMInt = &betaMIntvec[0];
+					matInv(invA, 1 + expSq);
+					double* Stemp4 = new double[1 + expSq];
+					matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+					double statJoint = 0.0;
+					for (int k = 0; k < 1 + expSq; k++) {
+						statJoint += betaMInt[k] * Stemp4[k];
+					}
+					if (isnan(statJoint) || statJoint <= 0.0) {
+						PvalJoint[i] = NAN;
+					}
+					else {
+						PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+					}
 
-
-
-				delete[] subZGStR;
-				delete[] invZGStZGS;
-				delete[] betaAll;
-				delete[] VarBetaAll;
-				delete[] invVarbetaint;
-				delete[] Stemp3;
-				delete[] Stemp4;
+					delete[] subZGStR;
+					delete[] invZGStZGS;
+					delete[] betaAll;
+					delete[] VarBetaAll;
+					delete[] invVarbetaint;
+					delete[] Stemp3;
+					delete[] Stemp4;
+				}
 			}
 		}
 		else if (robust == 1) {
 			for (int i = 0; i < stream_snps; i++) {
-
-				betaInt[i] = new double[expSq];
-				VarbetaInt[i] = new double[expSq * expSq];
 
 				//BetaMain
 				int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
 				betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
 				VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
 
-				// ZGStR
-				double* subZGStR = new double[Sq1];
-				subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
-
-				// ZGSR2tZGS
-				double* subZGSR2tZGS = new double[Sq1 * Sq1];
-				subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-
-				// inv(ZGStZGS[)
-				double* invZGStZGS = new double[Sq1 * Sq1];
-				subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-				matInv(invZGStZGS, Sq1);
-
-
-				double* betaAll = new double[Sq1 * 1];
-				matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-				double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-				matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
-				double* VarBetaAll = new double[Sq1 * Sq1];
-				matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
-
-
 				//calculating Marginal P values
 				double statM = betaM[i] * betaM[i] / VarbetaM[i];
 				if (isnan(statM) || statM <= 0.0) {
@@ -743,80 +716,108 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 					PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
 				}
 
+				if (expSq > 0) {
+					boost::math::chi_squared chisq_dist_Int(expSq);
+					boost::math::chi_squared chisq_dist_Joint(1 + expSq);
 
-				// VarBetaInt
-				subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+					betaInt[i] = new double[expSq];
+					VarbetaInt[i] = new double[expSq * expSq];
 
-				double* invVarbetaint = new double[expSq * expSq];
-				subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-				matInv(invVarbetaint, expSq);
+					// ZGStR
+					double* subZGStR = new double[Sq1];
+					subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
 
-				// Beta Int
-				subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+					// ZGSR2tZGS
+					double* subZGSR2tZGS = new double[Sq1 * Sq1];
+					subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
 
-				// StatInt
-				double* Stemp3 = new double[expSq];
-				matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-				double statInt = 0.0;
-				for (int j = 0; j < expSq; j++) {
-					statInt += betaInt[i][j] * Stemp3[j];
-				}
+					// inv(ZGStZGS)
+					double* invZGStZGS = new double[Sq1 * Sq1];
+					subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+					matInv(invZGStZGS, Sq1);
 
-				//calculating Interaction P values
-				if (isnan(statInt) || statInt <= 0.0) {
-					PvalInt[i] = NAN;
-				}
-				else {
-					PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-				}
 
-				vector<double> invAvec((1 + expSq) * (1 + expSq));
-				vector<double> betaMIntvec(1 + expSq);
-				int betaIndex = 0;
-				int tmpIndex = 0;
-				for (int k = 0; k < Sq1; k++) {
-					if (k > 0 && k <= intSq) { continue; }
+					double* betaAll = new double[Sq1 * 1];
+					matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+					double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
+					matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+					double* VarBetaAll = new double[Sq1 * Sq1];
+					matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
+
+
+
+					// VarBetaInt
+					subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+
+					double* invVarbetaint = new double[expSq * expSq];
+					subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+					matInv(invVarbetaint, expSq);
+
+					// Beta Int
+					subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
+
+					// StatInt
+					double* Stemp3 = new double[expSq];
+					matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
+					double statInt = 0.0;
+					for (int j = 0; j < expSq; j++) {
+						statInt += betaInt[i][j] * Stemp3[j];
+					}
+
+					//calculating Interaction P values
+					if (isnan(statInt) || statInt <= 0.0) {
+						PvalInt[i] = NAN;
+					}
 					else {
-						betaMIntvec[betaIndex] = betaAll[k];
-						betaIndex++;
-						for (int j = 0; j < Sq1; j++) {
-							if (j > 0 && j <= intSq) { continue; }
-							else {
-								invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-								tmpIndex++;
+						PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
+					}
+
+					vector<double> invAvec((1 + expSq) * (1 + expSq));
+					vector<double> betaMIntvec(1 + expSq);
+					int betaIndex = 0;
+					int tmpIndex = 0;
+					for (int k = 0; k < Sq1; k++) {
+						if (k > 0 && k <= intSq) { continue; }
+						else {
+							betaMIntvec[betaIndex] = betaAll[k];
+							betaIndex++;
+							for (int j = 0; j < Sq1; j++) {
+								if (j > 0 && j <= intSq) { continue; }
+								else {
+									invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
+									tmpIndex++;
+								}
 							}
 						}
 					}
-				}
-				double* invA = &invAvec[0];
-				double* betaMInt = &betaMIntvec[0];
-				matInv(invA, 1 + expSq);
-				double* Stemp4 = new double[1 + expSq];
-				matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
-				double statJoint = 0.0;
-				for (int k = 0; k < 1 + expSq; k++) {
-					statJoint += betaMInt[k] * Stemp4[k];
-				}
-				if (isnan(statJoint) || statJoint <= 0.0) {
-					PvalJoint[i] = NAN;
-				}
-				else {
-					PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+					double* invA = &invAvec[0];
+					double* betaMInt = &betaMIntvec[0];
+					matInv(invA, 1 + expSq);
+					double* Stemp4 = new double[1 + expSq];
+					matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+					double statJoint = 0.0;
+					for (int k = 0; k < 1 + expSq; k++) {
+						statJoint += betaMInt[k] * Stemp4[k];
+					}
+					if (isnan(statJoint) || statJoint <= 0.0) {
+						PvalJoint[i] = NAN;
+					}
+					else {
+						PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+					}
+
+					delete[] subZGStR;
+					delete[] subZGSR2tZGS;
+					delete[] invZGStZGS;
+					delete[] betaAll;
+					delete[] ZGSR2tZGSxinvZGStZGS;
+					delete[] VarBetaAll;
+					delete[] invVarbetaint;
+					delete[] Stemp3;
+					delete[] Stemp4;
 				}
 
-
-
-				delete[] subZGStR;
-				delete[] subZGSR2tZGS;
-				delete[] invZGStZGS;
-				delete[] betaAll;
-				delete[] ZGSR2tZGSxinvZGStZGS;
-				delete[] VarBetaAll;
-				delete[] invVarbetaint;
-				delete[] Stemp3;
-				delete[] Stemp4;
-
-		}
+			}
 		} // end of if robust == 1
 
 
@@ -825,31 +826,37 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 			for (int ii = 0; ii < expSq; ii++) {
 				oss << betaInt[i][ii] << "\t";
 			}
-
 			for (int ii = 0; ii < expSq; ii++) {
 				for (int jj = 0; jj < expSq; jj++) {
 					oss << VarbetaInt[i][ii * expSq + jj] << "\t";
 				}
 			}
-			oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+			if (expSq > 0) {
+				oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+			}
+			else {
+				oss << PvalM[i] << "\n";
+			}
 			AF[i] = 0.0;
 		}
-
 		delete[] ZGStR;
 		delete[] ZGStZGS;
 		delete[] ZGSR2tZGS;
 
 		delete[] betaM;
 		delete[] VarbetaM;
-		for (int i = 0; i < stream_snps; i++) {
-			delete[] betaInt[i];
-			delete[] VarbetaInt[i];
+
+		if (expSq > 0) {
+			for (int i = 0; i < stream_snps; i++) {
+				delete[] betaInt[i];
+				delete[] VarbetaInt[i];
+			}
+			delete[] betaInt;
+			delete[] VarbetaInt;
+			delete[] PvalInt;
+			delete[] PvalJoint;
 		}
-		delete[] betaInt;
-		delete[] VarbetaInt;
 		delete[] PvalM;
-		delete[] PvalInt;
-		delete[] PvalJoint;
 
 		if (variant_index % 10000 == 0) {
 			results << oss.str();

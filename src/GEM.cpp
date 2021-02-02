@@ -38,7 +38,7 @@
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
-
+void printOutputHeader(bool useBgen, int numExpSelCol, string output);
 
 int main(int argc, char* argv[]) {
 
@@ -271,12 +271,6 @@ int main(int argc, char* argv[]) {
 
 		}
 		cmd.threads = pgen.threads;
-
-		// Initialize header for output file
-		std::ofstream results(output, std::ofstream::binary);
-		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-		results.close();
-
 	}
 
 	if (cmd.useBedFile) {
@@ -327,12 +321,6 @@ int main(int argc, char* argv[]) {
 
 		}
 		cmd.threads = bed.threads;
-
-		// Initialize header for output file
-		std::ofstream results(output, std::ofstream::binary);
-		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-		results.close();
-
 	}
 
 	if (cmd.useBgenFile) {
@@ -389,29 +377,14 @@ int main(int argc, char* argv[]) {
 
 		}
 		cmd.threads = bgen.threads;
-
-		// Initialize header for output file
-		std::ofstream results(output, std::ofstream::binary);
-		results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-		results.close();
 	}
 
 
 	// Write all results from each thread to 1 file
 	cout << "Combining results... \n";
+	printOutputHeader(cmd.useBgenFile, numExpSelCol, output);
 	auto start_time = std::chrono::high_resolution_clock::now();
 	std::ofstream results(output, std::ios_base::app);
-	for (int i = 1; i <= numExpSelCol; i++) {
-		 results << "Beta_Interaction" << "_" << i << "\t";
-	}
-	for (int i = 1; i <= numExpSelCol; i++) {
-		 for (int j = 1; j <= numExpSelCol; j++) {
-			  results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
-		 }
-	}
-	results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
-	
-
 	for (int i = 0; i < cmd.threads; i++) {
 		 std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
 		 std::ifstream thread_output(threadOutputFile);
@@ -664,8 +637,6 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
 
 
 
-
-
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta) {
 
 	boost::math::chi_squared chisq_dist_M(1);
@@ -712,3 +683,31 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 }
 
 
+void printOutputHeader(bool useBgen, int numExpSelCol, string output) {
+	// Initialize header for output file
+	std::ofstream results(output, std::ofstream::binary);
+
+	if (useBgen) {
+		results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+	}
+	else {
+		results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+	}
+
+	if (numExpSelCol > 0) {
+		for (int i = 1; i <= numExpSelCol; i++) {
+			results << "Beta_Interaction" << "_" << i << "\t";
+		}
+		for (int i = 1; i <= numExpSelCol; i++) {
+			for (int j = 1; j <= numExpSelCol; j++) {
+				results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+			}
+		}
+		results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+
+	}
+	else {
+		results << "P_Value_Marginal\n";
+	}
+	results.close();
+}

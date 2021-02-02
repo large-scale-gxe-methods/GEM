@@ -13,31 +13,31 @@ class Bed {
 
 public:
 
-	uint32_t n_samples = 0;
-	uint32_t n_variants = 0;
-	char famDelim;
-	char bimDelim;
-	int bimLast; 
-	int new_samSize;
-	std::vector<double>   new_covdata;
-	std::vector<double>   new_phenodata;
-	std::vector<long int> include_idx;
+    uint32_t n_samples = 0;
+    uint32_t n_variants = 0;
+    char famDelim;
+    char bimDelim;
+    int bimLast; 
+    int new_samSize;
+    std::vector<double>   new_covdata;
+    std::vector<double>   new_phenodata;
+    std::vector<long int> include_idx;
 
-	vector<uint32_t> begin;
-	vector<uint32_t> end;
-	uint32_t threads;
-	bool filterVariants = false;
-	std::vector<long long unsigned int> bedVariantPos;
+    vector<uint32_t> begin;
+    vector<uint32_t> end;
+    uint32_t threads;
+    bool filterVariants = false;
+    std::vector<long long unsigned int> bedVariantPos;
 
 
-	void processBed(string bedFile, string bimFile, string famFile);
-	void processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
-	void getBedVariantPos(Bed bed, CommandLine cmd);
+    void processBed(string bedFile, string bimFile, string famFile);
+    void processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
+    void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 
 void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> bedPos,
-	int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-	char bimDelim, int bimLast, uint n_samples, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu,
-	vector<long int> include_idx, string outFile);
+    int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
+    char bimDelim, int bimLast, uint n_samples, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu,
+    vector<long int> include_idx, string outFile);
 
 #endif

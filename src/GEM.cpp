@@ -38,7 +38,7 @@
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
-void printOutputHeader(bool useBgen, int numExpSelCol, string output);
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle);
 
 int main(int argc, char* argv[]) {
 
@@ -73,11 +73,10 @@ int main(int argc, char* argv[]) {
     // Rearranging exposures, interaction covariates, and covariates for matrix operations
     numSelCol = numSelCol + numIntSelCol + numExpSelCol;
     vector<int> colSelVec(numSelCol);
-    for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
     if (numIntSelCol != 0) {
         for (int i = numIntSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), intCovSelHeadersName[i]); }
     }
-
+    for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
 
 
     // Start clock
@@ -138,16 +137,12 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
     }
-
-    if (numIntSelCol != 0) {
-        for (int i = 0; i < numIntSelCol; i++) {
-            if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
-                cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
-                exit(1);
-            }
+    for (int i = 0; i < numIntSelCol; i++) {
+        if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
+            cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
+            exit(1);
         }
     }
-
     for (int i = 0; i < numSelCol; i++) {
         if (colNames.find(covSelHeadersName[i]) == colNames.end()) {
             cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
@@ -192,8 +187,7 @@ int main(int argc, char* argv[]) {
         vector <string> values;
         while (getline(iss, value, delim)) values.push_back(value);
         if (values.size() != phenoncols) {
-            cerr << "ERROR: Wrong number of entries in data row:\n";
-            cerr << line << '\n';
+            cerr << "ERROR: Wrong number of entries in data row.";
             cerr << "Expected " << phenoncols << " fields; parsed " << values.size() << '\n';
             exit(1);
         }
@@ -219,8 +213,6 @@ int main(int argc, char* argv[]) {
 
 
 
-
-
     if (cmd.usePgenFile) {
         Pgen pgen;
 
@@ -241,38 +233,29 @@ int main(int argc, char* argv[]) {
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
         fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
 
-        cout << "Streaming SNPs to speed up GWAS analysis in parallel. \n";
-        cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
-
         pgen.getPgenVariantPos(pgen, cmd);
+        cout << "The ALT allele in the .pvar file will be used for association testing.\n";
+        auto start_time = std::chrono::high_resolution_clock::now();
         if (pgen.threads > 1) {
-            cout << "The ALT allele in the .pvar file will be used for association testing.\n";
             cout << "Running multithreading...\n";
-            auto start_time = std::chrono::high_resolution_clock::now();
-#pragma omp parallel for num_threads(pgen.threads)
-            for (uint32_t i = 0; i < pgen.threads; ++i) {
-                 gemPGEN(pgen.begin[i], pgen.end[i], cmd.pgenFile, cmd.pvarFile, i, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos,
-                         Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                         pgen.pvarLast, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, pgen.include_idx, cmd.outFile);
-            }
-            auto end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
-
+            boost::thread_group thread_grp;
+		    for (uint i = 0; i < pgen.threads; i++) {
+				thread_grp.create_thread(boost::bind(&gemPGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
+			}
+            thread_grp.join_all();
+            cout << "Joining threads... \n";
         }
         else {
-            cout << "The ALT allele in the .pvar file will be used for association testing.\n";
             cout << "Running with single thread...\n";
-            auto start_time = std::chrono::high_resolution_clock::now();
-            gemPGEN(pgen.begin[0], pgen.end[0], cmd.pgenFile, cmd.pvarFile, 0, pgen.pvarIndex, pgen.filterVariants, pgen.pgenVariantPos,
-                    Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                    pgen.pvarLast, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, pgen.include_idx, cmd.outFile);
-            auto end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
+            gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, pgen, cmd);
 
         }
         cmd.threads = pgen.threads;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        printExecutionTime(start_time, end_time);
     }
 
+    
     if (cmd.useBedFile) {
         Bed bed;
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
@@ -291,38 +274,28 @@ int main(int argc, char* argv[]) {
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
         fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
 
-        cout << "Streaming SNPs to speed up GWAS analysis in parallel. \n";
-        cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
-
         bed.getBedVariantPos(bed, cmd);
+        cout << "The ALT allele in the .bim file will be used for association testing.\n";
+        auto start_time = std::chrono::high_resolution_clock::now();
         if (bed.threads > 1) {
-            cout << "The ALT allele in the .bim file will be used for association testing.\n";
             cout << "Running multithreading...\n";
-            auto start_time = std::chrono::high_resolution_clock::now();
-#pragma omp parallel for num_threads(bed.threads)
-            for (uint32_t i = 0; i < bed.threads; ++i) {
-                gemBED(bed.begin[i], bed.end[i], cmd.bedFile, cmd.bimFile, i, bed.filterVariants, bed.bedVariantPos,
-                       Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                       bed.bimDelim, bed.bimLast, bed.n_samples, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bed.include_idx, cmd.outFile);
-            }
-            auto end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
-
+            boost::thread_group thread_grp;
+			for (uint i = 0; i < bed.threads; i++) {
+				thread_grp.create_thread(boost::bind(&gemBED, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(bed), boost::ref(cmd)));
+			}
+			thread_grp.join_all();
+			cout << "Joining threads... \n";
         }
         else {
-            cout << "The ALT allele in the .bim file will be used for association testing.\n";
-            cout << "Running with single thread...\n";
             auto start_time = std::chrono::high_resolution_clock::now();
-            gemBED(bed.begin[0], bed.end[0], cmd.bedFile, cmd.bimFile, 0, bed.filterVariants, bed.bedVariantPos,
-                   Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                   bed.bimDelim, bed.bimLast, bed.n_samples, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bed.include_idx, cmd.outFile);
-            auto end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
-
+            gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bed, cmd);
         }
         cmd.threads = bed.threads;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        printExecutionTime(start_time, end_time);
     }
 
+    
     if (cmd.useBgenFile) {
         Bgen bgen;
         bgen.processBgenHeaderBlock(cmd.bgenFile);
@@ -341,49 +314,37 @@ int main(int argc, char* argv[]) {
         vector <double> XinvXTXvec(samSize * (numSelCol + 1));
         fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
 
-        cout << "Streaming SNPs to speed up GWAS analysis in parallel. \n";
-        cout << "Number of SNPs in each batch is: " << stream_snps << "\n\n";
-
         auto start_time = std::chrono::high_resolution_clock::now();
         bgen.getPositionOfBgenVariant(bgen, cmd);
         auto end_time = std::chrono::high_resolution_clock::now();
         printExecutionTime(start_time, end_time);
 
-
         //Preparing for parallelizing of BGEN file
+        cout << "The second allele in the BGEN file will be used for association testing.\n";
+        start_time = std::chrono::high_resolution_clock::now();
         if (bgen.threads > 1) {
-            cout << "The second allele in the BGEN file will be used for association testing.\n";
             cout << "Running multithreading...\n";
-            start_time = std::chrono::high_resolution_clock::now();
-#pragma omp parallel for num_threads(bgen.threads)
-            for (uint i = 0; i < bgen.threads; ++i) {
-                gemBGEN(bgen.Mbgen_begin[i], bgen.Mbgen_end[i], bgen.bgenVariantPos[i], bgen.keepVariants[i], cmd.bgenFile, bgen.filterVariants, i,
-                        Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                        bgen.Nbgen, bgen.Layout, bgen.CompressedSNPBlocks, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bgen.include_idx, cmd.outFile);
-            }
-            end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
-
+            boost::thread_group thread_grp;
+			for (uint i = 0; i < bgen.threads; i++) {
+				thread_grp.create_thread(boost::bind(&gemBGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
+			}
+			thread_grp.join_all();
+			cout << "Joining threads... \n";
         }
         else {
-            cout << "The second allele in the BGEN file will be used for association testing.\n";
             cout << "Running with single thread...\n";
-            auto start_time = std::chrono::high_resolution_clock::now();
-            gemBGEN(bgen.Mbgen_begin[0], bgen.Mbgen_end[0], bgen.bgenVariantPos[0], bgen.keepVariants[0], cmd.bgenFile, bgen.filterVariants, 0,
-                Sq, numSelCol, numIntSelCol, numExpSelCol, cmd.phenoType, robust, samSize, stream_snps, cmd.MAF, cmd.missGenoRate,
-                bgen.Nbgen, bgen.Layout, bgen.CompressedSNPBlocks, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bgen.include_idx, cmd.outFile);
-            auto end_time = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time, end_time);
-
+            gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bgen, cmd);
         }
         cmd.threads = bgen.threads;
+        end_time = std::chrono::high_resolution_clock::now();
+        printExecutionTime(start_time, end_time);
     }
 
 
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
-    printOutputHeader(cmd.useBgenFile, numExpSelCol, output);
     auto start_time = std::chrono::high_resolution_clock::now();
+    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle);
     std::ofstream results(output, std::ios_base::app);
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
@@ -394,6 +355,7 @@ int main(int argc, char* argv[]) {
          boost::filesystem::remove(threadOutputFile.c_str());
 
     }
+
     results.close();
     auto end_time = std::chrono::high_resolution_clock::now();
     printExecutionTime(start_time, end_time);
@@ -404,7 +366,6 @@ int main(int argc, char* argv[]) {
     double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
     cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
     cout << "Total CPU Time = " << cpuduration << "  Seconds\n";
-    //cout << "Execution Wall Time = " << exetime << "  Seconds\n";
     cout << "*********************************************************\n";
     
     
@@ -435,13 +396,11 @@ void center(int center, int scale, int samSize, int numSelCol, vector<double> co
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
             }
-
             for (int i = 0; i < samSize; i++) {
                 for (int j = 1; j < numSelCol + 1; j++) {
                     tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
                 }
             }
-
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
             }
@@ -461,17 +420,14 @@ void center(int center, int scale, int samSize, int numSelCol, vector<double> co
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
             }
-
             for (int i = 0; i < samSize; i++) {
                 for (int j = 1; j < numSelCol + 1; j++) {
                     tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
                 }
             }
-
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
             }
-
             for (int i = 0; i < samSize; i++) {
                 for (int j = 1; j < numSelCol + 1; j++) {
                     covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
@@ -623,7 +579,6 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
     auto end_time = std::chrono::high_resolution_clock::now();
     printExecutionTime(start_time, end_time);
 
-
     delete[] XTransX;
     delete[] XTransY;
     delete[] beta;
@@ -639,43 +594,23 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
 
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta) {
 
+    covNames.insert(covNames.begin(), "Intercept");
     boost::math::chi_squared chisq_dist_M(1);
 
     cout << "\nCoefficients: \n";
-    cout << boost::format("%-20s %-14s %-16s %-16s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value"; // 'simple' style.
+    cout << boost::format("%-20s %-14s %-16s %-16s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value";
     for (int i = 0; i < numCovs; i++) {
-
-        double stdError = sqrt(covVarMat[i * numCovs + i]);
-        double zvalue = beta[i] / stdError;
-        double pr = (isnan(zvalue)) ? NAN : boost::math::cdf(complement(chisq_dist_M, (beta[i] * beta[i]) / covVarMat[i * numCovs + i]));
-
-        if (i == 0) {
-            cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % "Intercept" % beta[i] % stdError % zvalue % pr;
-        }
-        else {
-            cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % covNames[i - 1] % beta[i] % stdError % zvalue % pr;
-        }
+         double stdError = sqrt(covVarMat[i * numCovs + i]);
+         double zvalue = beta[i] / stdError;
+         double pr = (isnan(zvalue)) ? NAN : boost::math::cdf(complement(chisq_dist_M, (beta[i] * beta[i]) / covVarMat[i * numCovs + i]));
+         cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % covNames[i] % beta[i] % stdError % zvalue % pr;
     }
 
     cout << "\nVariance-Covariance Matrix: \n";
     for (int i = 0; i < numCovs; i++) {
+        cout << boost::format("%+15s") % covNames[i];
         for (int j = 0; j < numCovs; j++) {
-            if (i == 0) {
-                if (j == 0) {
-                    cout << boost::format("%+15s %15.10f") % "Intercept" % covVarMat[j * numCovs + i];
-                }
-                else {
-                    cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
-                }
-            }
-            else {
-                if (j == 0) {
-                    cout << boost::format("%+15s %15.10f") % covNames[i - 1] % covVarMat[j * numCovs + i];
-                }
-                else {
-                    cout << boost::format("%16.10f") % covVarMat[j * numCovs + i];
-                }
-            }
+            cout << boost::format("%15.10f") % covVarMat[j * numCovs + i];
         }
         cout << "\n";
     }
@@ -683,8 +618,8 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 }
 
 
-void printOutputHeader(bool useBgen, int numExpSelCol, string output) {
-    // Initialize header for output file
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle) {
+
     std::ofstream results(output, std::ofstream::binary);
 
     if (useBgen) {
@@ -694,20 +629,45 @@ void printOutputHeader(bool useBgen, int numExpSelCol, string output) {
         results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
     }
 
-    if (numExpSelCol > 0) {
-        for (int i = 1; i <= numExpSelCol; i++) {
-            results << "Beta_Interaction" << "_" << i << "\t";
+   
+    for (int i = 0; i < Sq1-1; i++) {
+        covNames[i] = "Gx" + covNames[i];
+    }
+    covNames.insert(covNames.begin(), "G");
+
+    int printStart = 1; int printEnd = numExpSelCol+1; bool printFull = false;
+    if (outStyle.compare("meta") == 0) {
+        printStart = 0; printEnd = Sq1;
+    } else if (outStyle.compare("full") == 0) {
+        printStart = 0; printEnd = Sq1; printFull = true;
+    }
+
+    if (numExpSelCol != 0) {
+        for (int i = printStart; i < printEnd; i++) {
+            results << "Beta_" << covNames[i] << "\t";
         }
-        for (int i = 1; i <= numExpSelCol; i++) {
-            for (int j = 1; j <= numExpSelCol; j++) {
-                results << "Var_Beta_Interaction" << "_" << i << "_" << j << "\t";
+        for (int i = printStart; i < printEnd; i++) {
+             results << "Var_Beta_" << covNames[i] << "\t";  
+        }
+        for (int i = printStart; i < printEnd; i++) {
+            for (int j = printStart; j < printEnd; j++) {
+                if (i != j) {
+                   results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t";  
+                } 
+            }
+        }
+        if (printFull) {
+            for (int i = printStart; i < printEnd; i++) {
+                for (int j = printStart; j < printEnd; j++) {
+                    results << "V_" << covNames[i] << "_" << covNames[j] << "\t";
+                }
             }
         }
         results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
-
     }
     else {
         results << "P_Value_Marginal\n";
     }
+
     results.close();
 }

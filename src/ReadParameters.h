@@ -32,6 +32,7 @@ public:
 
 	// Out file
 	std::string outFile;
+	std::string outStyle;
 
 	// Inputs
 	std::string phenoName;

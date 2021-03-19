@@ -143,8 +143,20 @@ void matAdd(double* A, double* B, int N, double alpha) {
   daxpy_(&length, &alpha, B, &incOne, A, &incOne); 
 }
 
-
 void subMatrix(double* A, double* u, int M, int N, int NrowA, int NrowB, int start) {
     char uplo = 'A';
-    dlacpy_(&uplo, &M, &N, &A[start], &NrowA, u, &NrowB);
+    dlacpy_(&uplo, &M, &N, A+start, &NrowA, u, &NrowB);
+}
+
+void matvecSprod(double* A, double* v, double* u, int Nrow, int Ncol, int start){
+  double alpha= 1.0, beta= 0.0;
+  char tr= 'T';
+  int m= Nrow, n= 1, k=Ncol, lda= Ncol, incx= 1, incy= Nrow;
+  double* tmp= new double[Nrow];
+  initvec(tmp, Nrow);
+  dgemm_(&tr,&tr,&m,&n,&k,&alpha,A,&lda,v+start,&incx,&beta,tmp,&incy);
+  for(int i= 0; i<Nrow; ++i){
+    u[i]= tmp[i];
+  }
+  delete [] tmp;
 }

@@ -48,8 +48,5 @@ class Bgen {
         void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants, string bgenFile, bool filterVariants, int thread_num,
-            int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-            uint Nbgen, uint Layout, uint CompressedSNPBlocks,
-            double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile);
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd);
 #endif

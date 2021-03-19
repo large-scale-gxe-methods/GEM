@@ -1,5 +1,6 @@
 #include "declars.h"
 #include "ReadBGEN.h"
+#include "ReadParameters.h"
 #include "../thirdparty/zstd-1.4.5/lib/zstd.h"
 #include "../thirdparty/libdeflate-1.6/libdeflate.h"
 
@@ -24,8 +25,7 @@ void Bgen::processBgenHeaderBlock(string bgenfile) {
         exit(1);
     }
 
-
-    cout << "General information of BGEN file. \n";
+    cout << "General information of BGEN file: \n";
     if (!fread(&offset, 4, 1, fin)) {
         cerr << "\nERROR: Cannot read BGEN header (offset).\n\n";
         exit(1);
@@ -132,10 +132,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
     int k = 0;
     unordered_set<int> genoUnMatchID;
-
-    
     std::vector<string> tempID;
-
     if ((bgen.SampleIdentifiers == 0) || useSample) {
 
         if (bgen.SampleIdentifiers == 0 && !useSample) {
@@ -222,27 +219,23 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
         }
 
 
-        int tempIndex = 0;
         for (uint m = 0; m < bgen.Nbgen; m++) {
             ushort LSID; 
             if (!fread(&LSID, 2, 1, bgen.fin)) { 
                 cerr << "\nERROR: Cannot read BGEN sample block (LSID).\n\n"; 
                 exit(1); 
             }
-            if (fread(samID, 1, LSID, bgen.fin)) { 
-                samID[LSID] = '\0';
-            } 
-            else { 
-                cerr << "\nERROR: Cannot read BGEN sample block (sample id).\n\n"; 
-                exit(1); 
+            if (!fread(samID, 1, LSID, bgen.fin)) {
+                cerr << "\nERROR: Cannot read BGEN sample block (sample id).\n\n";
+                exit(1);
             }
-
+            samID[LSID] = '\0';
 
             string strtmp(samID);
             int itmp = k;
-            if (tempIndex < 5) {
+            
+            if (m < 5) {
                 tempID.push_back(strtmp);
-                tempIndex++;
             }
 
             if (phenomap.find(strtmp) != phenomap.end()) {
@@ -252,13 +245,11 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
                     for (int c = 0; c < numSelCol; c++) {
                         sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
                     }
-
                     k++;
                 }
                 phenomap.erase(strtmp);
             }
 
-            // save the index with unmatched ID into genoUnMatchID.
             if (itmp == k) {
                 genoUnMatchID.insert(m);
             }
@@ -266,8 +257,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
         delete[] samID;
     } // end SampleIdentifiers == 1
-
-
 
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
@@ -278,27 +267,20 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
     if (samSize == 0) {
         cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
-
         if (bgen.SampleIdentifiers == 1 && !useSample) {
-            int print_i = 0;
+            int print_i = 5;
             if (bgen.Nbgen < 5) { 
                 print_i = bgen.Nbgen; 
             }
-            else { 
-                print_i = 5;
-            }
-            cout << "ID matching was done using the BGEN sample identifier block. \nHere are the first " << print_i << " sample identifiers in the block: \n";
+            cout << "ID matching was done using the BGEN sample identifier block. \nHere are the first " << print_i << " sample identifiers in BGEN file: \n";
             for (int i = 0; i < print_i; i++) {
                 cout << " " << tempID[i] << "\n";
             }
-            cout << "\nRename the sample identifiers in the BGEN file or use a .sample file (--sample) instead. \n\n";
-
         }
 
         if (bgen.SampleIdentifiers == 0 || useSample) {
             cout << "Check if sample IDs are consistent between the phenotype file and sample file, or check if (--sampleid-name) is specified correctly. \n\n";
         }
-
         exit(1);
     }
 
@@ -596,6 +578,9 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
             if (snploop == Mbgen_begin[t]) {
                 bgenVariantPos[t] = ftell(fin);
                 t++;
+                if (t == (Mbgen_begin.size())) {
+					break;
+				}
             }
 
             uint Nrow;
@@ -719,13 +704,10 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> keepVariants,  string bgenFile, bool filterVariants, int thread_num,
-            int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-            uint Nbgen, uint Layout, uint CompressedSNPBlocks,
-            double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile) {
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    std::string output = outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+    std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
 
@@ -736,6 +718,10 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
     char* chrStr  = new char[maxLA + 1];
     char* allele1 = new char[maxLA + 1];
     char* allele0 = new char[maxLA + 1];
+    uint Nbgen  = bgen.Nbgen;
+    uint Layout = bgen.Layout;
+    uint CompressedSNPBlocks = bgen.CompressedSNPBlocks;
+
     string physpos_tmp;
     vector <uchar> zBuf;
     vector <uchar> shortBuf;
@@ -752,30 +738,51 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
         }
     }
 
-    int Sq1     = Sq + 1;
-    int intSq1  = numIntSelCol + 1;
-    int expSq   = numExpSelCol;
+    bool filterVariants = bgen.filterVariants;
+    string outStyle = cmd.outStyle;
+    int stream_snps = cmd.stream_snps;
+    int phenoType   = cmd.phenoType;
+    int samSize     = bgen.new_samSize;
+    int robust      = cmd.robust;
+    int intSq1      = cmd.numIntSelCol + 1;
+    int expSq       = cmd.numExpSelCol;
+    int expSq1      = expSq+1;
+    int Sq1         = intSq1 + expSq;
+    int Sq          = Sq1-1;
+    int numSelCol1  = cmd.numSelCol + Sq1;
+    double MAF      = cmd.MAF;
+    double maxMAF   = 1 - MAF;
+    double missGenoCutoff = cmd.missGenoRate;
+    vector<long int> include_idx = bgen.include_idx;
+    vector<uint> keepVariants = bgen.keepVariants[thread_num];
+    uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
+    
     int ZGS_col = Sq1 * stream_snps;
-    double maxMAF = 1 - MAF;
-    vector<uint> missingIndex;
+    vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
+    vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
+    vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
     vector <double> AF(stream_snps);
+    vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
-
-    vector <double> ZGSvec(samSize   * (1 + Sq) * stream_snps);
-    vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
-    vector <double> WZGSvec(samSize  * (1 + Sq) * stream_snps);
     double* WZGS = &WZGSvec[0];
     
+    boost::math::chi_squared chisq_dist_M(1);
+
     struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
+    int printStart = 1; int printEnd = expSq1;
+    bool printFull = false;
+    if (outStyle.compare("meta") == 0) {
+        printStart = 0; printEnd = Sq1;
+    } else if (outStyle.compare("full") == 0) {
+        printStart = 0; printEnd = Sq1; printFull = true;
+    }
 
-    char genobgen[300];
-    strcpy(genobgen, bgenFile.c_str());
     FILE* fin3;
-    fin3 = fopen(genobgen, "rb");
+    fin3 = fopen(cmd.bgenFile.c_str(), "rb");
+    long long unsigned int byte = bgen.bgenVariantPos[thread_num];
     fseek(fin3, byte, SEEK_SET);
 
-    uint snploop = begin;
     int variant_index = 0;
     int keepIndex = 0;
     int ret;
@@ -927,7 +934,7 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                      int tmp3 = samSize * (j + 1) + tmp1;
 
                      for (int i = 0; i < samSize; i++) {
-                          int tmp4 = i * (numSelCol + 1);
+                          int tmp4 = i * numSelCol1;
                           ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
                      }
                 }
@@ -967,10 +974,8 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     uLongf destLen = DLen;
 
                     size_t ret = ZSTD_decompress(&shortBuf[0], destLen, &zBuf[0], zLen - 4);
-                    if (ret > destLen) {
-                        if (ZSTD_isError(ret)) {
-                            cout << "ZSTD ERROR: " << ZSTD_getErrorName(ret);
-                        }
+                    if (ZSTD_isError(ret)) {
+                        cout << "ZSTD ERROR: " << ZSTD_getErrorName(ret);
                     }
                     bufAt = &shortBuf[0];
                 }
@@ -1140,7 +1145,6 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                             ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
                         }
                     }
-
                     missingIndex.clear();
                 }
                 geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
@@ -1148,7 +1152,7 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                 for (int j = 0; j < Sq; j++) {
                      int tmp3 = samSize * (j + 1) + tmp1;
                      for (int i = 0; i < samSize; i++) {
-                        int tmp4 = i * (numSelCol + 1);
+                        int tmp4 = i * numSelCol1;
                         ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
                      }
                 }
@@ -1172,11 +1176,11 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
         // transpose(X) * ZGS
         // it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
         // important!!!! 
-        double* XtransZGS = new double[(numSelCol + 1) * ZGS_col];
-        matNmatNprod(covX, ZGS, XtransZGS, numSelCol + 1, samSize, ZGS_col);
+        double* XtransZGS = new double[numSelCol1 * ZGS_col];
+        matNmatNprod(covX, ZGS, XtransZGS, numSelCol1, samSize, ZGS_col);
 
         if (phenoType == 0) {
-            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
             matAdd(ZGS, ZGSR2, samSize * ZGS_col, -1);
             if (robust == 1) {
                 for (int j = 0; j < ZGS_col; j++) {
@@ -1188,7 +1192,7 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
         }
         else if (phenoType == 1) {
             WZGSvec = ZGSvec;
-            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
             matAdd(WZGS, ZGSR2, samSize* ZGS_col, -1);
 
             for (int j = 0; j < ZGS_col; j++) {
@@ -1221,13 +1225,12 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
 
         double*  betaM      = new double[stream_snps];
         double*  VarbetaM   = new double[stream_snps];
-        double** betaInt    = new double* [stream_snps];
-        double** VarbetaInt = new double* [stream_snps];
         double*  PvalM      = new double[stream_snps];
         double*  PvalInt    = new double[stream_snps];
         double*  PvalJoint  = new double[stream_snps];
+        double** betaAll    = new double* [stream_snps];
+        double** VarBetaAll = new double* [stream_snps];
 
-        boost::math::chi_squared chisq_dist_M(1);
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
 
@@ -1245,48 +1248,39 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
                 }
 
-                if (expSq > 0) {
+                if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
-                    boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-                    betaInt[i] = new double[expSq];
-                    VarbetaInt[i] = new double[expSq * expSq];
-
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, VarBetaAll[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);
+                    matInv(VarBetaAll[i], Sq1);
 
-                    double* betaAll = new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-                    double* VarBetaAll = new double[Sq1 * Sq1];
-                    subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
+                    betaAll[i] = new double[Sq1];
+                    matvecprod(VarBetaAll[i], subZGStR, betaAll[i], Sq1, Sq1);
                     for (int k = 0; k < Sq1 * Sq1; k++) {
-                        VarBetaAll[k] *= sigma2;
+                        VarBetaAll[i][k] *= sigma2;
                     }
 
-                    // VarBetaInt
-                    subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
+                    //invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
-                    subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
                     matInv(invVarbetaint, expSq);
-
-                    // Beta Int
-                    subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
-                    matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-                    double statInt = 0.0;
-                    for (int j = 0; j < expSq; j++) {
-                        statInt += betaInt[i][j] * Stemp3[j];
-                    }
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
 
+                    double statInt = 0.0;
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
+                    }
+                    
                     //calculating Interaction P values
                     if (isnan(statInt) || statInt <= 0.0) {
                         PvalInt[i] = NAN;
@@ -1295,33 +1289,18 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                         PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
                     }
 
-                    vector<double> invAvec((1 + expSq) * (1 + expSq));
-                    vector<double> betaMIntvec(1 + expSq);
-                    int betaIndex = 0;
-                    int tmpIndex = 0;
-                    for (int k = 0; k < Sq1; k++) {
-                        if (k > 0 && k <= numIntSelCol) { continue; }
-                        else {
-                            betaMIntvec[betaIndex] = betaAll[k];
-                            betaIndex++;
-                            for (int j = 0; j < Sq1; j++) {
-                                if (j > 0 && j <= numIntSelCol) { continue; }
-                                else {
-                                    invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                    tmpIndex++;
-                                }
-                            }
-                        }
-                    }
-                    double* invA = &invAvec[0];
-                    double* betaMInt = &betaMIntvec[0];
-                    matInv(invA, 1 + expSq);
-                    double* Stemp4 = new double[1 + expSq];
-                    matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
+
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+                    
                     double statJoint = 0.0;
-                    for (int k = 0; k < 1 + expSq; k++) {
-                        statJoint += betaMInt[k] * Stemp4[k];
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
                     }
+
                     if (isnan(statJoint) || statJoint <= 0.0) {
                         PvalJoint[i] = NAN;
                     }
@@ -1330,12 +1309,10 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     }
 
                     delete[] subZGStR;
-                    delete[] invZGStZGS;
-                    delete[] betaAll;
-                    delete[] VarBetaAll;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
                     delete[] Stemp4;
+                    delete[] invA;
                 }
             }
         }
@@ -1356,13 +1333,10 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
                 }
 
-                if (expSq > 0) {
+                if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
-                    boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-                    betaInt[i] = new double[expSq];
-                    VarbetaInt[i] = new double[expSq * expSq];
-
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
@@ -1377,29 +1351,25 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     matInv(invZGStZGS, Sq1);
 
 
-                    double* betaAll = new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+                    betaAll[i]= new double[Sq1 * 1];
+                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
                     matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
-                    double* VarBetaAll = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
 
-                    // VarBetaInt
-                    subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
+                    // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
-                    subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
 
-                    // Beta Int
-                    subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
-                    matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
                     double statInt = 0.0;
-                    for (int j = 0; j < expSq; j++) {
-                        statInt += betaInt[i][j] * Stemp3[j];
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
                     }
 
                     //calculating Interaction P values
@@ -1410,33 +1380,18 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                         PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
                     }
 
-                    vector<double> invAvec((1 + expSq) * (1 + expSq));
-                    vector<double> betaMIntvec(1 + expSq);
-                    int betaIndex = 0;
-                    int tmpIndex = 0;
-                    for (int k = 0; k < Sq1; k++) {
-                        if (k > 0 && k <= numIntSelCol) { continue; }
-                        else {
-                            betaMIntvec[betaIndex] = betaAll[k];
-                            betaIndex++;
-                            for (int j = 0; j < Sq1; j++) {
-                                if (j > 0 && j <= numIntSelCol) { continue; }
-                                else {
-                                    invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                    tmpIndex++;
-                                }
-                            }
-                        }
-                    }
-                    double* invA = &invAvec[0];
-                    double* betaMInt = &betaMIntvec[0];
-                    matInv(invA, 1 + expSq);
-                    double* Stemp4 = new double[1 + expSq];
-                    matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
+
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+
                     double statJoint = 0.0;
-                    for (int k = 0; k < 1 + expSq; k++) {
-                        statJoint += betaMInt[k] * Stemp4[k];
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
                     }
+
                     if (isnan(statJoint) || statJoint <= 0.0) {
                         PvalJoint[i] = NAN;
                     }
@@ -1447,12 +1402,11 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
                     delete[] invZGStZGS;
-                    delete[] betaAll;
                     delete[] ZGSR2tZGSxinvZGStZGS;
-                    delete[] VarBetaAll;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
                     delete[] Stemp4;
+                    delete[] invA;
                 }
 
             }
@@ -1461,15 +1415,24 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
 
         for (int i = 0; i < stream_snps; i++) {
             oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
-            for (int ii = 0; ii < expSq; ii++) {
-                 oss << betaInt[i][ii] << "\t";
+            for (int ii = printStart; ii < printEnd; ii++) {
+                 oss << betaAll[i][ii] << "\t";
             }
-            for (int ii = 0; ii < expSq; ii++) {
-                for (int jj = 0; jj < expSq; jj++) {
-                    oss << VarbetaInt[i][ii * expSq + jj] << "\t";
+            for (int ii = printStart; ii < printEnd; ii++) {
+                for (int jj = printStart; jj < printEnd; jj++) {
+                    oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                 }
             }
-            if (expSq > 0) {
+
+            if (printFull) {
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                    }
+                }
+            }
+
+            if (expSq != 0) {
                 oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
             }
             else {
@@ -1484,18 +1447,15 @@ void gemBGEN(uint begin, uint end, long long unsigned int byte, vector<uint> kee
         delete[] betaM;
         delete[] VarbetaM;
 
-        if (expSq > 0) {
-            for (int i = 0; i < stream_snps; i++) {
-                delete[] betaInt[i];
-                delete[] VarbetaInt[i];
-            }
-            delete[] betaInt;
-            delete[] VarbetaInt;
-            delete[] PvalInt;
-            delete[] PvalJoint;
+        for (int i = 0; i < stream_snps; i++) {
+            delete[] betaAll[i];
+            delete[] VarBetaAll[i];
         }
+        delete[] betaAll;
+        delete[] VarBetaAll;
+        delete[] PvalInt;
+        delete[] PvalJoint;
         delete[] PvalM;
-
         if (variant_index % 10000 == 0) {
             results << oss.str();
             oss.str(std::string());

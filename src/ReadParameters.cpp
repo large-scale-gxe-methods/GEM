@@ -28,7 +28,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("help, h", "")
         ("version", "");
 
-    // Input file options
+    // Input/Output file options
     po::options_description files("Input file options");
     files.add_options()
         ("bgen", po::value<std::string>(), "")
@@ -42,7 +42,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("bim", po::value<std::string>(), "")
         ("fam", po::value<std::string>(), "")
         ("pheno-file", po::value<std::string>(), "")
-        ("out", po::value<std::string>()->default_value("gem.out"), "");
+        ("out", po::value<std::string>()->default_value("gem.out"), "")
+        ("output-style", po::value<std::string>()->default_value("minimum"), "");
 
     // Phenotype file
     po::options_description phenofile("Phenotype file options");
@@ -238,9 +239,14 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         results.close();
 
         boost::filesystem::remove(outFile.c_str());
-
     }
-
+    if (out.count("output-style")) {
+        outStyle = out["output-style"].as<string>();
+        if (outStyle.compare("minimum") != 0 && outStyle.compare("meta") != 0  && outStyle.compare("full") != 0 ) {
+            cerr << "\nERROR: --output-style should be minimum, meta or full.\n\n";
+            exit(1);
+        }
+    }
 
     // Phenotype file
     if (out.count("sampleid-name")) {
@@ -492,6 +498,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         cout << "Logistic Convergence Threshold: " << tol << "\n";
     }
     cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
+    cout << "Number of SNPS in batch: " << stream_snps << "\n";
     cout << "Number of Threads: " << threads << "\n";
     cout << "Output File: " << outFile << "\n";
     cout << "*********************************************************\n";
@@ -505,12 +512,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
 void print_help() {
 
-    cout << "\n\nWelcome to GEM" << endl;
-    cout << "Version: " << VERSION << endl;
-    cout << "(C) 2018-2021 Liang Hong, Han Chen, Duy Pham \n";
-    cout << "GNU General Public License v3\n\n\n";
-
-
     cout << "General Options: " << endl
         << "   --help \t\t Prints available options and exits." << endl
         << "   --version \t\t Prints the version of GEM and exits." << endl;
@@ -518,7 +519,7 @@ void print_help() {
 
 
 
-    cout << "Input File Options: " << endl
+    cout << "Input/Output File Options: " << endl
         << "   --pheno-file \t Path to the phenotype file." << endl
         << "   --bgen \t\t Path to the BGEN file." << endl
         << "   --sample \t\t Path to the sample file. Required when the BGEN file does not contain sample identifiers." << endl
@@ -530,7 +531,8 @@ void print_help() {
         << "   --bed \t\t Path to the bed file." << endl
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
-        << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl;
+        << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
+        << "   --output-style \t 'minimum', 'meta', and 'full' \n \t\t\t    Default: minimum" << endl;       
     cout << endl << endl;
 
 

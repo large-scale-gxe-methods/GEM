@@ -34,8 +34,6 @@ public:
     void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos,
-    int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-    int pvarLast, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile);
+void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd);
 
 #endif

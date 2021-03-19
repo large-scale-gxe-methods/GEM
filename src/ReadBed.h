@@ -35,9 +35,6 @@ public:
     void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 
-void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> bedPos,
-    int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-    char bimDelim, int bimLast, uint n_samples, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu,
-    vector<long int> include_idx, string outFile);
+void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd);
 
 #endif

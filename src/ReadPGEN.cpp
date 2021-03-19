@@ -91,7 +91,7 @@ void Pgen::processPgenHeader(string pgenFile) {
 
 
 
-// This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
+// This functions reads the .psam file
 void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
 
      unordered_set<int> genoUnMatchID;
@@ -211,7 +211,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
     phenodata.resize(k);
-    covdata.resize(k * (numSelCol + 1));
+    covdata.resize(k * (numSelCol+1));
     samSize = k;
 
     if (samSize == 0) {
@@ -504,7 +504,6 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
          for (uint32_t t = 0; t < threads; t++) {
               begin[t] = floor((pgen.raw_variant_ct / threads) * t);
-
               if ((t + 1) == (threads)) {
                   end[t] = pgen.raw_variant_ct - 1;
               }
@@ -519,34 +518,49 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 
 
-void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int thread_num, vector<int> pvarIndex, bool filterVariants, std::vector<long long unsigned int> pgenPos,
-            int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-            int pvarLast, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, vector<long int> include_idx, string outFile) {
+void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd) {
 
         auto start_time = std::chrono::high_resolution_clock::now();
-        std::string output = outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+        std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
         std::ofstream results(output, std::ofstream::binary);
         std::ostringstream oss;
 
 
-        int Sq1 = Sq + 1;
-        int intSq = numIntSelCol;
-        int intSq1 = intSq + 1;
-        int expSq = numExpSelCol;
-        double maxMAF = 1.0 - MAF;
+        bool filterVariants = pgen.filterVariants;
+        string outStyle = cmd.outStyle;
+        int stream_snps = cmd.stream_snps;
+        int phenoType   = cmd.phenoType;
+        int samSize     = pgen.new_samSize;
+        int robust      = cmd.robust;
+        int intSq1      = cmd.numIntSelCol + 1;
+        int expSq       = cmd.numExpSelCol;
+        int expSq1      = expSq+1;
+        int Sq1         = intSq1 + expSq;
+        int Sq          = Sq1-1;
+        int numSelCol1  = cmd.numSelCol + Sq1;
+        double MAF      = cmd.MAF;
+        double maxMAF   = 1 - MAF;
+        double missGenoCutoff = cmd.missGenoRate;
 
-        vector <string> geno_snpid(stream_snps);
-        vector <double> ZGSvec(samSize   * (1 + Sq) * stream_snps);
-        vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
-        vector <double> WZGSvec(samSize  * (1 + Sq) * stream_snps);
-        double* WZGS = &WZGSvec[0];
-        std::vector<uint> missingIndex;
-        vector <double> AF(stream_snps);
+        int pvarLast = pgen.pvarLast;
+        vector<int> pvarIndex = pgen.pvarIndex;
+        vector<long int> include_idx = pgen.include_idx;
+        uint32_t snploop = pgen.begin[thread_num], end = pgen.end[thread_num];
+        std::vector<long long unsigned int> pgenPos = pgen.pgenVariantPos;
+
         int ZGS_col = Sq1 * stream_snps;
+        vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
+        vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
+        vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
+        vector <double> AF(stream_snps);
+        vector<uint> missingIndex;
+        vector <string> geno_snpid(stream_snps);
+        double* WZGS = &WZGSvec[0];
 
-        int pvarLength = pvarIndex.size();
+
+        int pvarLength = pgen.pvarIndex.size();
         std::ifstream fIDMat;
-        fIDMat.open(pvarFile);
+        fIDMat.open(cmd.pvarFile);
         string IDline;
         string tmpvalue;
         vector <string> tmpvalues;
@@ -570,19 +584,19 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
 
         uint32_t skipIndex = 0;
         if (!filterVariants) {
-            while (skipIndex != begin) {
+            while (skipIndex != snploop) {
                 getline(fIDMat, IDline);
                 skipIndex++;
             }
         }
         else {
-            while (skipIndex != pgenPos[begin]) {
+            while (skipIndex != pgenPos[snploop]) {
                 getline(fIDMat, IDline);
                 skipIndex++;
             }
         }
 
-        const char* geno_filename = pgenFile.c_str();
+        const char* geno_filename = cmd.pgenFile.c_str();
 
         plink2::PgenFileInfo _info_ptr;
         plink2::PreinitPgfi(&_info_ptr);
@@ -664,8 +678,16 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
         pgr_alloc_iter = &(pgr_alloc_iter[plink2::kPglBitTransposeBufbytes]);
 
 
+        int printStart = 1; int printEnd = expSq1;
+        bool printFull = false;
+        if (cmd.outStyle.compare("meta") == 0) {
+            printStart = 0; printEnd = Sq1;
+        } else if (cmd.outStyle.compare("full") == 0) {
+            printStart = 0; printEnd = Sq1; printFull = true;
+        }
+        
+        boost::math::chi_squared chisq_dist_M(1);
 
-        uint32_t snploop = begin;
         int variant_index = 0;
         int keepIndex = 0;
         vector<double> buf(file_sample_ct);
@@ -781,7 +803,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
                 for (int j = 0; j < Sq; j++) {
                     int tmp3 = samSize * (j + 1) + tmp1;
                     for (int i = 0; i < samSize; i++) {
-                        int tmp4 = i * (numSelCol + 1);
+                        int tmp4 = i * numSelCol1;
                         ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
                     }
                 }
@@ -801,11 +823,11 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
             // transpose(X) * ZGS
             // it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
             // important!!!!
-            double* XtransZGS = new double[(numSelCol + 1) * ZGS_col];
-            matNmatNprod(covX, ZGS, XtransZGS, numSelCol + 1, samSize, ZGS_col);
+            double* XtransZGS = new double[numSelCol1 * ZGS_col];
+            matNmatNprod(covX, ZGS, XtransZGS, numSelCol1, samSize, ZGS_col);
 
             if (phenoType == 0) {
-                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
+                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
                 matAdd(ZGS, ZGSR2, samSize * ZGS_col, -1);
                 if (robust == 1) {
                     for (int j = 0; j < ZGS_col; j++) {
@@ -817,7 +839,7 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
             }
             else if (phenoType == 1) {
                 WZGSvec = ZGSvec;
-                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
+                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
                 matAdd(WZGS, ZGSR2, samSize * ZGS_col, -1);
 
                 for (int j = 0; j < ZGS_col; j++) {
@@ -847,288 +869,242 @@ void gemPGEN(uint32_t begin, uint32_t end, string pgenFile, string pvarFile, int
             if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
 
 
-            double* betaM = new double[stream_snps];
-            double* VarbetaM = new double[stream_snps];
-            double** betaInt = new double* [stream_snps];
-            double** VarbetaInt = new double* [stream_snps];
-            double* PvalM = new double[stream_snps];
-            double* PvalInt = new double[stream_snps];
-            double* PvalJoint = new double[stream_snps];
+        double*  betaM      = new double[stream_snps];
+        double*  VarbetaM   = new double[stream_snps];
+        double*  PvalM      = new double[stream_snps];
+        double*  PvalInt    = new double[stream_snps];
+        double*  PvalJoint  = new double[stream_snps];
+        double** betaAll    = new double* [stream_snps];
+        double** VarBetaAll = new double* [stream_snps];
 
-            boost::math::chi_squared chisq_dist_M(1);
-            if (robust == 0) {
-                for (int i = 0; i < stream_snps; i++) {
+        if (robust == 0) {
+            for (int i = 0; i < stream_snps; i++) {
 
-                    // betamain
-                    int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
-                    betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
-                    VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
+                // betamain
+                int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
+                betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
+                VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
 
-                    //calculating Marginal P values
-                    double statM = betaM[i] * betaM[i] / VarbetaM[i];
-                    if (isnan(statM) || statM <= 0.0) {
-                        PvalM[i] = NAN;
+                //calculating Marginal P values
+                double statM = betaM[i] * betaM[i] / VarbetaM[i];
+                if (isnan(statM) || statM <= 0.0) {
+                    PvalM[i] = NAN;
+                } 
+                else {
+                    PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
+                }
+
+                if (expSq != 0) {
+                    boost::math::chi_squared chisq_dist_Int(expSq);
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    // ZGStR
+                    double* subZGStR = new double[Sq1];
+                    subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
+
+                    // inv(ZGStZGS)
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, VarBetaAll[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);
+                    matInv(VarBetaAll[i], Sq1);
+
+                    betaAll[i] = new double[Sq1];
+                    matvecprod(VarBetaAll[i], subZGStR, betaAll[i], Sq1, Sq1);
+                    for (int k = 0; k < Sq1 * Sq1; k++) {
+                        VarBetaAll[i][k] *= sigma2;
+                    }
+
+                    //invVarBetaInt
+                    double* invVarbetaint = new double[expSq * expSq];
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
+                    matInv(invVarbetaint, expSq);
+
+                    // StatInt
+                    double* Stemp3 = new double[expSq];
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
+
+                    double statInt = 0.0;
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
+                    }
+                    
+                    //calculating Interaction P values
+                    if (isnan(statInt) || statInt <= 0.0) {
+                        PvalInt[i] = NAN;
                     }
                     else {
-                        PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
+                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
                     }
 
-                    if (expSq > 0) {
-                        boost::math::chi_squared chisq_dist_Int(expSq);
-                        boost::math::chi_squared chisq_dist_Joint(1 + expSq);
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
 
-                        betaInt[i] = new double[expSq];
-                        VarbetaInt[i] = new double[expSq * expSq];
-
-                        // ZGStR
-                        double* subZGStR = new double[Sq1];
-                        subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
-
-                        // inv(ZGStZGS)
-                        double* invZGStZGS = new double[Sq1 * Sq1];
-                        subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                        matInv(invZGStZGS, Sq1);
-
-                        double* betaAll = new double[Sq1 * 1];
-                        matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-                        double* VarBetaAll = new double[Sq1 * Sq1];
-                        subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
-                        for (int k = 0; k < Sq1 * Sq1; k++) {
-                            VarBetaAll[k] *= sigma2;
-                        }
-
-                        // VarBetaInt
-                        subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
-                        double* invVarbetaint = new double[expSq * expSq];
-                        subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-                        matInv(invVarbetaint, expSq);
-
-                        // Beta Int
-                        subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
-
-                        // StatInt
-                        double* Stemp3 = new double[expSq];
-                        matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-                        double statInt = 0.0;
-                        for (int j = 0; j < expSq; j++) {
-                            statInt += betaInt[i][j] * Stemp3[j];
-                        }
-
-                        //calculating Interaction P values
-                        if (isnan(statInt) || statInt <= 0.0) {
-                            PvalInt[i] = NAN;
-                        }
-                        else {
-                            PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                        }
-
-                        vector<double> invAvec((1 + expSq) * (1 + expSq));
-                        vector<double> betaMIntvec(1 + expSq);
-                        int betaIndex = 0;
-                        int tmpIndex = 0;
-                        for (int k = 0; k < Sq1; k++) {
-                            if (k > 0 && k <= intSq) { continue; }
-                            else {
-                                betaMIntvec[betaIndex] = betaAll[k];
-                                betaIndex++;
-                                for (int j = 0; j < Sq1; j++) {
-                                    if (j > 0 && j <= intSq) { continue; }
-                                    else {
-                                        invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                        tmpIndex++;
-                                    }
-                                }
-                            }
-                        }
-                        double* invA = &invAvec[0];
-                        double* betaMInt = &betaMIntvec[0];
-                        matInv(invA, 1 + expSq);
-                        double* Stemp4 = new double[1 + expSq];
-                        matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
-                        double statJoint = 0.0;
-                        for (int k = 0; k < 1 + expSq; k++) {
-                            statJoint += betaMInt[k] * Stemp4[k];
-                        }
-                        if (isnan(statJoint) || statJoint <= 0.0) {
-                            PvalJoint[i] = NAN;
-                        }
-                        else {
-                            PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-                        }
-
-                        delete[] subZGStR;
-                        delete[] invZGStZGS;
-                        delete[] betaAll;
-                        delete[] VarBetaAll;
-                        delete[] invVarbetaint;
-                        delete[] Stemp3;
-                        delete[] Stemp4;
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+                    
+                    double statJoint = 0.0;
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
                     }
+
+                    if (isnan(statJoint) || statJoint <= 0.0) {
+                        PvalJoint[i] = NAN;
+                    }
+                    else {
+                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+                    }
+
+                    delete[] subZGStR;
+                    delete[] invVarbetaint;
+                    delete[] Stemp3;
+                    delete[] Stemp4;
+                    delete[] invA;
                 }
             }
-            else if (robust == 1) {
-                for (int i = 0; i < stream_snps; i++) {
-
-                    //BetaMain
-                    int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
-                    betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
-                    VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
-
-                    //calculating Marginal P values
-                    double statM = betaM[i] * betaM[i] / VarbetaM[i];
-                    if (isnan(statM) || statM <= 0.0) {
-                        PvalM[i] = NAN;
-                    }
-                    else {
-                        PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
-                    }
-
-                    if (expSq > 0) {
-                        boost::math::chi_squared chisq_dist_Int(expSq);
-                        boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-                        betaInt[i] = new double[expSq];
-                        VarbetaInt[i] = new double[expSq * expSq];
-
-                        // ZGStR
-                        double* subZGStR = new double[Sq1];
-                        subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
-
-                        // ZGSR2tZGS
-                        double* subZGSR2tZGS = new double[Sq1 * Sq1];
-                        subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-
-                        // inv(ZGStZGS)
-                        double* invZGStZGS = new double[Sq1 * Sq1];
-                        subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                        matInv(invZGStZGS, Sq1);
-
-
-                        double* betaAll = new double[Sq1 * 1];
-                        matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-                        double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-                        matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
-                        double* VarBetaAll = new double[Sq1 * Sq1];
-                        matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
-
-
-
-                        // VarBetaInt
-                        subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
-                        double* invVarbetaint = new double[expSq * expSq];
-                        subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-                        matInv(invVarbetaint, expSq);
-
-                        // Beta Int
-                        subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
-
-                        // StatInt
-                        double* Stemp3 = new double[expSq];
-                        matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-                        double statInt = 0.0;
-                        for (int j = 0; j < expSq; j++) {
-                            statInt += betaInt[i][j] * Stemp3[j];
-                        }
-
-                        //calculating Interaction P values
-                        if (isnan(statInt) || statInt <= 0.0) {
-                            PvalInt[i] = NAN;
-                        }
-                        else {
-                            PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                        }
-
-                        vector<double> invAvec((1 + expSq) * (1 + expSq));
-                        vector<double> betaMIntvec(1 + expSq);
-                        int betaIndex = 0;
-                        int tmpIndex = 0;
-                        for (int k = 0; k < Sq1; k++) {
-                            if (k > 0 && k <= intSq) { continue; }
-                            else {
-                                betaMIntvec[betaIndex] = betaAll[k];
-                                betaIndex++;
-                                for (int j = 0; j < Sq1; j++) {
-                                    if (j > 0 && j <= intSq) { continue; }
-                                    else {
-                                        invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                        tmpIndex++;
-                                    }
-                                }
-                            }
-                        }
-                        double* invA = &invAvec[0];
-                        double* betaMInt = &betaMIntvec[0];
-                        matInv(invA, 1 + expSq);
-                        double* Stemp4 = new double[1 + expSq];
-                        matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
-                        double statJoint = 0.0;
-                        for (int k = 0; k < 1 + expSq; k++) {
-                            statJoint += betaMInt[k] * Stemp4[k];
-                        }
-                        if (isnan(statJoint) || statJoint <= 0.0) {
-                            PvalJoint[i] = NAN;
-                        }
-                        else {
-                            PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-                        }
-
-                        delete[] subZGStR;
-                        delete[] subZGSR2tZGS;
-                        delete[] invZGStZGS;
-                        delete[] betaAll;
-                        delete[] ZGSR2tZGSxinvZGStZGS;
-                        delete[] VarBetaAll;
-                        delete[] invVarbetaint;
-                        delete[] Stemp3;
-                        delete[] Stemp4;
-                    }
-
-                }
-            } // end of if robust == 1
-
+        }
+        else if (robust == 1) {
             for (int i = 0; i < stream_snps; i++) {
-                oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
-                for (int ii = 0; ii < expSq; ii++) {
-                    oss << betaInt[i][ii] << "\t";
-                }
-                for (int ii = 0; ii < expSq; ii++) {
-                    for (int jj = 0; jj < expSq; jj++) {
-                        oss << VarbetaInt[i][ii * expSq + jj] << "\t";
-                    }
-                }
-                if (expSq > 0) {
-                    oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+
+                //BetaMain
+                int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
+                betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
+                VarbetaM[i] = ZGSR2tZGS[tmp1] / (ZGStZGS[tmp1] * ZGStZGS[tmp1]);
+
+                //calculating Marginal P values
+                double statM = betaM[i] * betaM[i] / VarbetaM[i];
+                if (isnan(statM) || statM <= 0.0) {
+                    PvalM[i] = NAN;
                 }
                 else {
-                    oss << PvalM[i] << "\n";
+                    PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
                 }
-                AF[i] = 0.0;
-            }
-            delete[] ZGStR;
-            delete[] ZGStZGS;
-            delete[] ZGSR2tZGS;
 
-            delete[] betaM;
-            delete[] VarbetaM;
-            if (expSq > 0) {
-                for (int i = 0; i < stream_snps; i++) {
-                    delete[] betaInt[i];
-                    delete[] VarbetaInt[i];
+                if (expSq != 0) {
+                    boost::math::chi_squared chisq_dist_Int(expSq);
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    // ZGStR
+                    double* subZGStR = new double[Sq1];
+                    subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
+
+                    // ZGSR2tZGS
+                    double* subZGSR2tZGS = new double[Sq1 * Sq1];
+                    subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+
+                    // inv(ZGStZGS)
+                    double* invZGStZGS = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+                    matInv(invZGStZGS, Sq1);
+
+
+                    betaAll[i]= new double[Sq1 * 1];
+                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
+                    double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
+                    // invVarBetaInt
+                    double* invVarbetaint = new double[expSq * expSq];
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
+                    matInv(invVarbetaint, expSq);
+
+
+                    // StatInt
+                    double* Stemp3 = new double[expSq];
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
+                    double statInt = 0.0;
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
+                    }
+
+                    //calculating Interaction P values
+                    if (isnan(statInt) || statInt <= 0.0) {
+                        PvalInt[i] = NAN;
+                    }
+                    else {
+                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
+                    }
+
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
+
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+
+                    double statJoint = 0.0;
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
+                    }
+
+                    if (isnan(statJoint) || statJoint <= 0.0) {
+                        PvalJoint[i] = NAN;
+                    }
+                    else {
+                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+                    }
+
+                    delete[] subZGStR;
+                    delete[] subZGSR2tZGS;
+                    delete[] invZGStZGS;
+                    delete[] ZGSR2tZGSxinvZGStZGS;
+                    delete[] invVarbetaint;
+                    delete[] Stemp3;
+                    delete[] Stemp4;
+                    delete[] invA;
                 }
-                delete[] betaInt;
-                delete[] VarbetaInt;
-                delete[] PvalInt;
-                delete[] PvalJoint;
-            }
-            delete[] PvalM;
 
-            if (variant_index % 10000 == 0) {
-                results << oss.str();
-                oss.str(std::string());
-                oss.clear();
             }
+        } // end of if robust == 1
+
+
+        for (int i = 0; i < stream_snps; i++) {
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+            for (int ii = printStart; ii < printEnd; ii++) {
+                 oss << betaAll[i][ii] << "\t";
+            }
+            for (int ii = printStart; ii < printEnd; ii++) {
+                for (int jj = printStart; jj < printEnd; jj++) {
+                    oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
+                }
+            }
+
+            if (printFull) {
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                    }
+                }
+            }
+
+            if (expSq != 0) {
+                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+            }
+            else {
+                oss << PvalM[i] << "\n";
+            }
+            AF[i] = 0.0;
+        }
+        delete[] ZGStR;
+        delete[] ZGStZGS;
+        delete[] ZGSR2tZGS;
+
+        delete[] betaM;
+        delete[] VarbetaM;
+
+        for (int i = 0; i < stream_snps; i++) {
+            delete[] betaAll[i];
+            delete[] VarBetaAll[i];
+        }
+        delete[] betaAll;
+        delete[] VarBetaAll;
+        delete[] PvalInt;
+        delete[] PvalJoint;
+        delete[] PvalM;
+        if (variant_index % 10000 == 0) {
+            results << oss.str();
+            oss.str(std::string());
+            oss.clear();
+        }
         }
 
         if (variant_index % 10000 != 0) {

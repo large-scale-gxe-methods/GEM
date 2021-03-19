@@ -329,56 +329,80 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 }
 
 
-void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int thread_num, bool filterVariants, std::vector<long long unsigned int> bedPos,
-            int Sq, int numSelCol, int numIntSelCol, int numExpSelCol, int phenoType, int robust, int samSize, int stream_snps, double MAF, double missGenoCutoff,
-            char bimDelim, int bimLast, uint n_samples, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu,
-            vector<long int> include_idx, string outFile) {
+void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    std::string output = outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+    std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
 
+    bool filterVariants = bed.filterVariants;
+    string outStyle = cmd.outStyle;
+    int stream_snps = cmd.stream_snps;
+    int phenoType   = cmd.phenoType;
+    int samSize     = bed.new_samSize;
+    int robust      = cmd.robust;
+    int intSq1      = cmd.numIntSelCol + 1;
+    int expSq       = cmd.numExpSelCol;
+    int expSq1      = expSq+1;
+    int Sq1         = intSq1 + expSq;
+    int Sq          = Sq1-1;
+    int numSelCol1  = cmd.numSelCol + Sq1;
+    double MAF      = cmd.MAF;
+    double maxMAF   = 1 - MAF;
+    double missGenoCutoff = cmd.missGenoRate;
 
-    int Sq1 = Sq + 1;
-    int intSq = numIntSelCol;
-    int intSq1 = intSq + 1;
-    int expSq = numExpSelCol;
-    double maxMAF = 1.0 - MAF;
-    vector <string> geno_snpid(stream_snps);
-    vector <double> ZGSvec(samSize * (1 + Sq) * stream_snps);
-    vector <double> ZGSR2vec(samSize * (1 + Sq) * stream_snps);
-    vector <double> WZGSvec(samSize * (1 + Sq) * stream_snps);
-    double* WZGS = &WZGSvec[0];
-    std::vector<uint> missingIndex;
-    vector <double> AF(stream_snps);
+    char bimDelim = bed.bimDelim;
+    int bimLast = bed.bimLast;
+    vector<long int> include_idx = bed.include_idx;
+    uint32_t n_samples = bed.n_samples;
+    uint32_t snploop = bed.begin[thread_num], end = bed.end[thread_num];
+    std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
+
     int ZGS_col = Sq1 * stream_snps;
+    vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
+    vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
+    vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
+    vector <double> AF(stream_snps);
+    vector<uint> missingIndex;
+    vector <string> geno_snpid(stream_snps);
+    double* WZGS = &WZGSvec[0];
 
     std::ifstream fIDMat;
-    fIDMat.open(bimFile);
+    fIDMat.open(cmd.bimFile);
     string IDline;
     uint32_t skipIndex = 0;
+
     if (!filterVariants) {
-        while (skipIndex != begin) {
+        while (skipIndex != snploop) {
             getline(fIDMat, IDline);
             skipIndex++;
         }
     }
     else {
-        while (skipIndex != bedPos[begin]) {
+        while (skipIndex != bedPos[snploop]) {
             getline(fIDMat, IDline);
             skipIndex++;
         }
     }
 
+    int printStart = 1; int printEnd = expSq1;
+    bool printFull = false;
+    if (cmd.outStyle.compare("meta") == 0) {
+        printStart = 0; printEnd = Sq1;
+    } else if (cmd.outStyle.compare("full") == 0) {
+        printStart = 0; printEnd = Sq1; printFull = true;
+    }
 
-    std::ifstream readbedfile(bedFile.c_str(), std::ios::binary);
+
+    boost::math::chi_squared chisq_dist_M(1);
+    
+    std::ifstream readbedfile(cmd.bedFile.c_str(), std::ios::binary);
     uint nblocks = (n_samples + 3) / 4, pos;
     unsigned char temp[2];
     unsigned char* buffer = new unsigned char[nblocks];
+  
 
-
-    uint32_t snploop = begin;
     int variant_index = 0;
     int keepIndex = 0;
     double geno;
@@ -513,7 +537,7 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
             for (int j = 0; j < Sq; j++) {
                 int tmp3 = samSize * (j + 1) + tmp1;
                 for (int i = 0; i < samSize; i++) {
-                    int tmp4 = i * (numSelCol + 1);
+                    int tmp4 = i * (numSelCol1);
                     ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
                 }
             }
@@ -526,47 +550,49 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
             break;
         }
 
-        /***************************************************************/
+         /***************************************************************/
         //	genodata and envirment data
-        double* ZGS = &ZGSvec[0];
+        double* ZGS   = &ZGSvec[0];
         double* ZGSR2 = &ZGSR2vec[0];
+
         // transpose(X) * ZGS
         // it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
-        // important!!!!
-        double* XtransZGS = new double[(numSelCol + 1) * ZGS_col];
-        matNmatNprod(covX, ZGS, XtransZGS, numSelCol + 1, samSize, ZGS_col);
+        // important!!!! 
+        double* XtransZGS = new double[numSelCol1 * ZGS_col];
+        matNmatNprod(covX, ZGS, XtransZGS, numSelCol1, samSize, ZGS_col);
 
         if (phenoType == 0) {
-            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
             matAdd(ZGS, ZGSR2, samSize * ZGS_col, -1);
             if (robust == 1) {
                 for (int j = 0; j < ZGS_col; j++) {
-                    for (int i = 0; i < samSize; i++) {
-                        ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
-                    }
+                     for (int i = 0; i < samSize; i++) {
+                          ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
+                     }
                 }
             }
         }
         else if (phenoType == 1) {
             WZGSvec = ZGSvec;
-            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, (numSelCol + 1), ZGS_col);
-            matAdd(WZGS, ZGSR2, samSize * ZGS_col, -1);
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
+            matAdd(WZGS, ZGSR2, samSize* ZGS_col, -1);
 
             for (int j = 0; j < ZGS_col; j++) {
                 for (int i = 0; i < samSize; i++) {
-                    ZGS[j * samSize + i] = WZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]);
-                    if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
+                     ZGS[j * samSize + i] = WZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]);
+                     if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
                 }
             }
         }
         delete[] XtransZGS;
 
-
         // transpose(ZGS) * resid
         double* ZGStR = new double[ZGS_col];
         matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
+
         // transpose(ZGS) * ZGS
         double* ZGStZGS = new double[ZGS_col * ZGS_col];
+
         if (phenoType == 0) {
             matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
         }
@@ -579,15 +605,14 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
         if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
 
 
-        double* betaM = new double[stream_snps];
-        double* VarbetaM = new double[stream_snps];
-        double** betaInt = new double* [stream_snps];
-        double** VarbetaInt = new double* [stream_snps];
-        double* PvalM = new double[stream_snps];
-        double* PvalInt = new double[stream_snps];
-        double* PvalJoint = new double[stream_snps];
+        double*  betaM      = new double[stream_snps];
+        double*  VarbetaM   = new double[stream_snps];
+        double*  PvalM      = new double[stream_snps];
+        double*  PvalInt    = new double[stream_snps];
+        double*  PvalJoint  = new double[stream_snps];
+        double** betaAll    = new double* [stream_snps];
+        double** VarBetaAll = new double* [stream_snps];
 
-        boost::math::chi_squared chisq_dist_M(1);
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
 
@@ -600,53 +625,44 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                 double statM = betaM[i] * betaM[i] / VarbetaM[i];
                 if (isnan(statM) || statM <= 0.0) {
                     PvalM[i] = NAN;
-                }
+                } 
                 else {
                     PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
                 }
 
-                if (expSq > 0) {
+                if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
-                    boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-                    betaInt[i] = new double[expSq];
-                    VarbetaInt[i] = new double[expSq * expSq];
-
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, VarBetaAll[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);
+                    matInv(VarBetaAll[i], Sq1);
 
-                    double* betaAll = new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
-                    double* VarBetaAll = new double[Sq1 * Sq1];
-                    subMatrix(invZGStZGS, VarBetaAll, Sq1, Sq1, Sq1, Sq1, 0);
+                    betaAll[i] = new double[Sq1];
+                    matvecprod(VarBetaAll[i], subZGStR, betaAll[i], Sq1, Sq1);
                     for (int k = 0; k < Sq1 * Sq1; k++) {
-                        VarBetaAll[k] *= sigma2;
+                        VarBetaAll[i][k] *= sigma2;
                     }
 
-                    // VarBetaInt
-                    subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
+                    //invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
-                    subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
                     matInv(invVarbetaint, expSq);
-
-                    // Beta Int
-                    subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
-                    matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
-                    double statInt = 0.0;
-                    for (int j = 0; j < expSq; j++) {
-                        statInt += betaInt[i][j] * Stemp3[j];
-                    }
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
 
+                    double statInt = 0.0;
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
+                    }
+                    
                     //calculating Interaction P values
                     if (isnan(statInt) || statInt <= 0.0) {
                         PvalInt[i] = NAN;
@@ -655,33 +671,18 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                         PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
                     }
 
-                    vector<double> invAvec((1 + expSq) * (1 + expSq));
-                    vector<double> betaMIntvec(1 + expSq);
-                    int betaIndex = 0;
-                    int tmpIndex = 0;
-                    for (int k = 0; k < Sq1; k++) {
-                        if (k > 0 && k <= intSq) { continue; }
-                        else {
-                            betaMIntvec[betaIndex] = betaAll[k];
-                            betaIndex++;
-                            for (int j = 0; j < Sq1; j++) {
-                                if (j > 0 && j <= intSq) { continue; }
-                                else {
-                                    invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                    tmpIndex++;
-                                }
-                            }
-                        }
-                    }
-                    double* invA = &invAvec[0];
-                    double* betaMInt = &betaMIntvec[0];
-                    matInv(invA, 1 + expSq);
-                    double* Stemp4 = new double[1 + expSq];
-                    matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
+
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+                    
                     double statJoint = 0.0;
-                    for (int k = 0; k < 1 + expSq; k++) {
-                        statJoint += betaMInt[k] * Stemp4[k];
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
                     }
+
                     if (isnan(statJoint) || statJoint <= 0.0) {
                         PvalJoint[i] = NAN;
                     }
@@ -690,12 +691,10 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                     }
 
                     delete[] subZGStR;
-                    delete[] invZGStZGS;
-                    delete[] betaAll;
-                    delete[] VarBetaAll;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
                     delete[] Stemp4;
+                    delete[] invA;
                 }
             }
         }
@@ -716,13 +715,10 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                     PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
                 }
 
-                if (expSq > 0) {
+                if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
-                    boost::math::chi_squared chisq_dist_Joint(1 + expSq);
-
-                    betaInt[i] = new double[expSq];
-                    VarbetaInt[i] = new double[expSq * expSq];
-
+                    boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
@@ -737,31 +733,25 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                     matInv(invZGStZGS, Sq1);
 
 
-                    double* betaAll = new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll, Sq1, Sq1);
+                    betaAll[i]= new double[Sq1 * 1];
+                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
                     matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
-                    double* VarBetaAll = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll, Sq1, Sq1, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
 
-
-
-                    // VarBetaInt
-                    subMatrix(VarBetaAll, VarbetaInt[i], expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
-
+                    // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
-                    subMatrix(VarBetaAll, invVarbetaint, expSq, expSq, Sq1, expSq, (intSq1 * Sq1 + intSq1));
+                    subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
 
-                    // Beta Int
-                    subMatrix(betaAll, betaInt[i], expSq, 1, expSq, 1, intSq1);
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
-                    matvecprod(invVarbetaint, betaInt[i], Stemp3, expSq, expSq);
+                    matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
                     double statInt = 0.0;
-                    for (int j = 0; j < expSq; j++) {
-                        statInt += betaInt[i][j] * Stemp3[j];
+                    for (int j = 1; j < expSq1; j++) {
+                        statInt += betaAll[i][j] * Stemp3[j-1];
                     }
 
                     //calculating Interaction P values
@@ -772,33 +762,18 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                         PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
                     }
 
-                    vector<double> invAvec((1 + expSq) * (1 + expSq));
-                    vector<double> betaMIntvec(1 + expSq);
-                    int betaIndex = 0;
-                    int tmpIndex = 0;
-                    for (int k = 0; k < Sq1; k++) {
-                        if (k > 0 && k <= intSq) { continue; }
-                        else {
-                            betaMIntvec[betaIndex] = betaAll[k];
-                            betaIndex++;
-                            for (int j = 0; j < Sq1; j++) {
-                                if (j > 0 && j <= intSq) { continue; }
-                                else {
-                                    invAvec[tmpIndex] = VarBetaAll[(k * Sq1) + j];
-                                    tmpIndex++;
-                                }
-                            }
-                        }
-                    }
-                    double* invA = &invAvec[0];
-                    double* betaMInt = &betaMIntvec[0];
-                    matInv(invA, 1 + expSq);
-                    double* Stemp4 = new double[1 + expSq];
-                    matvecprod(invA, betaMInt, Stemp4, 1 + expSq, 1 + expSq);
+                    double* invA = new double[expSq1 * expSq1];
+                    subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                    matInv(invA, expSq1);
+
+                    double* Stemp4 = new double[expSq1];
+                    matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+
                     double statJoint = 0.0;
-                    for (int k = 0; k < 1 + expSq; k++) {
-                        statJoint += betaMInt[k] * Stemp4[k];
+                    for (int k = 0; k < expSq1; k++) {
+                        statJoint += betaAll[i][k] * Stemp4[k];
                     }
+
                     if (isnan(statJoint) || statJoint <= 0.0) {
                         PvalJoint[i] = NAN;
                     }
@@ -809,12 +784,11 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
                     delete[] invZGStZGS;
-                    delete[] betaAll;
                     delete[] ZGSR2tZGSxinvZGStZGS;
-                    delete[] VarBetaAll;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
                     delete[] Stemp4;
+                    delete[] invA;
                 }
 
             }
@@ -823,15 +797,24 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
 
         for (int i = 0; i < stream_snps; i++) {
             oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
-            for (int ii = 0; ii < expSq; ii++) {
-                oss << betaInt[i][ii] << "\t";
+            for (int ii = printStart; ii < printEnd; ii++) {
+                 oss << betaAll[i][ii] << "\t";
             }
-            for (int ii = 0; ii < expSq; ii++) {
-                for (int jj = 0; jj < expSq; jj++) {
-                    oss << VarbetaInt[i][ii * expSq + jj] << "\t";
+            for (int ii = printStart; ii < printEnd; ii++) {
+                for (int jj = printStart; jj < printEnd; jj++) {
+                    oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                 }
             }
-            if (expSq > 0) {
+
+            if (printFull) {
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                    }
+                }
+            }
+
+            if (expSq != 0) {
                 oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
             }
             else {
@@ -846,18 +829,15 @@ void gemBED(uint32_t begin, uint32_t end, string bedFile, string bimFile, int th
         delete[] betaM;
         delete[] VarbetaM;
 
-        if (expSq > 0) {
-            for (int i = 0; i < stream_snps; i++) {
-                delete[] betaInt[i];
-                delete[] VarbetaInt[i];
-            }
-            delete[] betaInt;
-            delete[] VarbetaInt;
-            delete[] PvalInt;
-            delete[] PvalJoint;
+        for (int i = 0; i < stream_snps; i++) {
+            delete[] betaAll[i];
+            delete[] VarBetaAll[i];
         }
+        delete[] betaAll;
+        delete[] VarBetaAll;
+        delete[] PvalInt;
+        delete[] PvalJoint;
         delete[] PvalM;
-
         if (variant_index % 10000 == 0) {
             results << oss.str();
             oss.str(std::string());

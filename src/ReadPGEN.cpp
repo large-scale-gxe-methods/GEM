@@ -680,7 +680,10 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
 
         int printStart = 1; int printEnd = expSq1;
         bool printFull = false;
-        if (cmd.outStyle.compare("meta") == 0) {
+        if (expSq == 0) {
+            printStart = 0; printEnd = 0;
+        }
+        else if (cmd.outStyle.compare("meta") == 0) {
             printStart = 0; printEnd = Sq1;
         } else if (cmd.outStyle.compare("full") == 0) {
             printStart = 0; printEnd = Sq1; printFull = true;
@@ -1091,9 +1094,11 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
         delete[] betaM;
         delete[] VarbetaM;
 
-        for (int i = 0; i < stream_snps; i++) {
-            delete[] betaAll[i];
-            delete[] VarBetaAll[i];
+        if (expSq != 0) {
+            for (int i = 0; i < stream_snps; i++) {
+                delete[] betaAll[i];
+                delete[] VarBetaAll[i];
+            }
         }
         delete[] betaAll;
         delete[] VarBetaAll;

@@ -222,17 +222,15 @@ int main(int argc, char* argv[]) {
         sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
 
         samSize = pgen.new_samSize;
-        vector<double> covX   = pgen.new_covdata;
-        vector<double> phenoY = pgen.new_phenodata;
-        center(cmd.center, cmd.scale, samSize, numSelCol, covX, &covX);
+        center(cmd.center, cmd.scale, samSize, numSelCol, pgen.new_covdata, &pgen.new_covdata);
 
         cout << "Starting GWAS... \n\n";
         double sigma2;
-        vector <double> miuvec(samSize);
-        vector <double> residvec(samSize);
+        vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
-
+        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, pgen.new_phenodata, pgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        pgen.new_phenodata.clear();
+        
         pgen.getPgenVariantPos(pgen, cmd);
         cout << "The ALT allele in the .pvar file will be used for association testing.\n";
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -240,14 +238,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 		    for (uint i = 0; i < pgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemPGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemPGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
 			}
             thread_grp.join_all();
             cout << "Joining threads... \n";
         }
         else {
             cout << "Running with single thread...\n";
-            gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, pgen, cmd);
+            gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, pgen, cmd);
 
         }
         cmd.threads = pgen.threads;
@@ -263,16 +261,14 @@ int main(int argc, char* argv[]) {
         sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
 
         samSize = bed.new_samSize;
-        vector<double> covX = bed.new_covdata;
-        vector<double> phenoY = bed.new_phenodata;
-        center(cmd.center, cmd.scale, samSize, numSelCol, covX, &covX);
+        center(cmd.center, cmd.scale, samSize, numSelCol, bed.new_covdata, &bed.new_covdata);
 
         cout << "Starting GWAS... \n\n";
         double sigma2;
-        vector <double> miuvec(samSize);
-        vector <double> residvec(samSize);
+        vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, bed.new_phenodata, bed.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        bed.new_phenodata.clear();
 
         bed.getBedVariantPos(bed, cmd);
         cout << "The ALT allele in the .bim file will be used for association testing.\n";
@@ -281,14 +277,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bed.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBED, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(bed), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBED, i, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, boost::ref(bed), boost::ref(cmd)));
 			}
 			thread_grp.join_all();
 			cout << "Joining threads... \n";
         }
         else {
             auto start_time = std::chrono::high_resolution_clock::now();
-            gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bed, cmd);
+            gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, bed, cmd);
         }
         cmd.threads = bed.threads;
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -300,19 +296,17 @@ int main(int argc, char* argv[]) {
         Bgen bgen;
         bgen.processBgenHeaderBlock(cmd.bgenFile);
         bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
-        sampleIds.clear();phenomap.clear();phenodata.clear();covdata.clear();
+        sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
 
         samSize = bgen.new_samSize;
-        vector<double> covX = bgen.new_covdata;
-        vector<double> phenoY = bgen.new_phenodata;
-        center(cmd.center, cmd.scale, samSize, numSelCol, covX, &covX);
+        center(cmd.center, cmd.scale, samSize, numSelCol, bgen.new_covdata, &bgen.new_covdata);
         
         cout << "Starting GWAS... \n\n";
         double sigma2;
-        vector <double> miuvec(samSize);
-        vector <double> residvec(samSize);
+        vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize * (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, phenoY, covX, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, bgen.new_phenodata, bgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        bgen.new_phenodata.clear();
 
         auto start_time = std::chrono::high_resolution_clock::now();
         bgen.getPositionOfBgenVariant(bgen, cmd);
@@ -326,14 +320,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
 			}
 			thread_grp.join_all();
 			cout << "Joining threads... \n";
         }
         else {
             cout << "Running with single thread...\n";
-            gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &covX[0], miuvec, bgen, cmd);
+            gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, bgen, cmd);
         }
         cmd.threads = bgen.threads;
         end_time = std::chrono::high_resolution_clock::now();
@@ -355,7 +349,6 @@ int main(int argc, char* argv[]) {
          boost::filesystem::remove(threadOutputFile.c_str());
 
     }
-
     results.close();
     auto end_time = std::chrono::high_resolution_clock::now();
     printExecutionTime(start_time, end_time);
@@ -435,7 +428,7 @@ void center(int center, int scale, int samSize, int numSelCol, vector<double> co
             }
         }
     }
-
+    delete[] tmpMean;
     *covdata_ret = covdata;
 }
 
@@ -635,7 +628,8 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     }
     covNames.insert(covNames.begin(), "G");
 
-    int printStart = 1; int printEnd = numExpSelCol+1; bool printFull = false;
+    bool printFull = false;
+    int printStart = 1; int printEnd = numExpSelCol+1; 
     if (outStyle.compare("meta") == 0) {
         printStart = 0; printEnd = Sq1;
     } else if (outStyle.compare("full") == 0) {

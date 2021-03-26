@@ -111,7 +111,11 @@ Input and Output File Options:
      Full path and extension to where GEM output results.  
      Default: gem.out
   
-  
+--output-style  
+     Modifies the output of GEM. Must be one of the following:
+	minimum: Output the summary statistics for only the GxE and marginal G terms.
+        meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms
+        full: 'meta' output plus additional fields constituting the full G/GxE/GxCovariate covariance matrix
   
 Phenotype File Options:
 
@@ -123,6 +127,7 @@ Phenotype File Options:
 
 --exposure-names  
      One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests.  
+     If no exposures are included, GEM will only perform the marginal test.  
 
 --int-covar-names  
      Any column names in the phenotype file naming the covariate(s) for which interactions should be included 

@@ -804,11 +804,15 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
+                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+            }
+            for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
+                    if (ii != jj) {
+                        oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
+                    }
                 }
             }
-
             if (printFull) {
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {

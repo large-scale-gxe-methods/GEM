@@ -1269,12 +1269,11 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     for (int k = 0; k < Sq1 * Sq1; k++) {
                         VarBetaAll[i][k] *= sigma2;
                     }
-
                     //invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
                     matInv(invVarbetaint, expSq);
-
+                    
                     // StatInt
                     double* Stemp3 = new double[expSq];
                     matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
@@ -1422,11 +1421,15 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
+                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+            }
+            for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
+                    if (ii != jj) {
+                        oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
+                    }
                 }
             }
-
             if (printFull) {
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {

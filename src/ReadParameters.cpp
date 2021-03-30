@@ -535,7 +535,7 @@ void print_help() {
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
         << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
-        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta' output plus additional fields constituting the full G/GxE/GxCovariate covariance matrix \n \t\t\t    Default: minimum" << endl;       
+        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta'meta output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
     cout << endl << endl;
 
 

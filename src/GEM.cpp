@@ -624,7 +624,7 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
 
    
     for (int i = 0; i < Sq1-1; i++) {
-        covNames[i] = "Gx" + covNames[i];
+        covNames[i] = "G-" + covNames[i];
     }
     covNames.insert(covNames.begin(), "G");
 

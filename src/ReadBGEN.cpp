@@ -7,7 +7,7 @@
 /**************************************
 This function is revised based on the Parse function in BOLT-LMM v2.3 source code
 *************************************/
-
+typedef std::numeric_limits< double > dbl;
 // Read BGEN v1.1, v1.2, and v1.3 header block and flags.
 void Bgen::processBgenHeaderBlock(string bgenfile) {
 
@@ -1373,7 +1373,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     for (int j = 1; j < expSq1; j++) {
                         statInt += betaAll[i][j] * Stemp3[j-1];
                     }
-
+            
                     //calculating Interaction P values
                     if (isnan(statInt) || statInt <= 0.0) {
                         PvalInt[i] = NAN;

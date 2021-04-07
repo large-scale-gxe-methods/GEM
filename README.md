@@ -251,7 +251,7 @@ Beta_G-E           - The coefficient estimate for the interaction terms.
 Var_Beta_G-E       - The variance associated with the interaction terms.
 Cov_Beta_G-*_G-*   - The covariance for all GxE terms.
 
-P_Value_Main        - Genetic main effect p-value (after adjusting for interaction and covariates).
+P_Value_Marginal    - Marginal genetic effect p-value.
 P_Value_Interaction - Interaction effect p-value.
 P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect).
 ```

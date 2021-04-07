@@ -247,8 +247,8 @@ AF                - The allele frequency of the effect allele.
 
 Beta_Marginal      - The coefficient estimate for the marginal genetic effect.
 Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate.
-Beta_G-E           - The coefficient estimate for the interaction term.
-Var_Beta_G-E       - The variance associated with the interaction term.
+Beta_G-E           - The coefficient estimate for the interaction terms.
+Var_Beta_G-E       - The variance associated with the interaction terms.
 Cov_Beta_G-*_G-*   - The covariance for all GxE terms.
 
 P_Value_Main        - Genetic main effect p-value (after adjusting for interaction and covariates).
@@ -262,7 +262,7 @@ In addition to the "minimum" output, the "meta" option will also output the foll
 Beta_G           - The coefficient estimate for the genetic main effect.
 Beta_G-C         - The coefficient estimate for any interaction covariate terms.
 Var_Beta_G       - The variance associated with the genetic main effect.
-Var_Beta_G-C     - The variance associated with any interaction covariate term.
+Var_Beta_G-C     - The variance associated with any interaction covariate terms.
 Cov_Beta_G-*_G-* - The set of covariance terms (genetic main effect, GxE, and any interaction covariate term) defining the full covariance matrix. 
 ```
 

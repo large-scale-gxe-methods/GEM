@@ -22,8 +22,10 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 
 ## Installation  
 Library Dependencies:  
-* BLAS/LAPACK. For Intel processors, we recommend that the BLAS/LAPACK libraries are linked with optimized math routine libraries such as the Math Kernal Library (MKL) for top performance. The MKL library is set as the default in the makefile. If MKL is not installed, replace ```-lmkl_gf_lp64 -lmkl_sequential -lmkl_core``` in the makefile with the LAPACK/BLAS libraries ```-llapack -lblas```. <br />
-* Boost C++ libraries. GEM links the following Boost libraries  ```boost_program_options boost_thread boost_system boost_filesystem``` that will need to be installed prior to executing the makefile.  
+* BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
+* Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
+
+These dependencies will need to be installed prior to executing make.  
 
 <br />
 
@@ -69,7 +71,7 @@ General Options:
   
   
   
-Input and Output File Options:  
+Input/Output File Options:  
 
 --pheno-file  
      Path to the phenotype file.  
@@ -204,60 +206,68 @@ Performance Options:
 #### Input Files
 
 * ##### Phenotype File
-    A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates.  
+    A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter.
     All binary phenotypes, exposures, and covariates should be coded numerically (e.g., males/females as 0/1)
 
 * ##### Genotype Files
-    1. BGEN v1.1, v1.2 or v1.3 genotype files described here [BGEN Format](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
-    The BGEN file should only contain bi-allelic unphased/phased genotypes. The second allele in the BGEN file is counted in association testing.   
-
-    2. Plink BED/PGEN genotype files.  
-    <ins>BED</ins>  
-    **.fam** files should follow the format described [here](https://www.cog-genomics.org/plink/2.0/formats#fam). The first column must be the FID and the second column must be the IID. GEM will use the IID column for sample identifier matching with the phenotype file.  
-    **.bim** files should contain the chromosome, variant id, cM (optional), base-pair coordinate, ALT allele, and REF allele columns in this order as described [here](https://www.cog-genomics.org/plink/2.0/formats#bim).  
-    **.bed** files must be stored in variant-major form. The ALT allele in the .bim file is counted in association testing.  
-    <ins>PGEN</ins>  
-    **.psam** files should follow plink2.0 format described [here](https://www.cog-genomics.org/plink/2.0/formats#psam). If a header line is present, then a column name with #IID (if the first colum is not #FID) or IID (if the first column is #FID) must be present to be used for sample identifier matching with the phenotype file. If no header line is present, then the columns are assumed to be in the .fam file order as described in the link.  
-    **.pvar** files are described [here](https://www.cog-genomics.org/plink/2.0/formats#pvar). If a header line starting with #CHROM is present, then column names POS, ID, REF, and ALT should also be present. If the .pvar file contains no header line, it is assumed that the .pvar file is in .bim file order.  
-    **.pgen** files should only contain bi-allelic genotypes. The second allele is counted in association testing; usually the ALT column in .pvar file.
+    * [BGEN genotype file](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+    Variants that are non-biallelic should be filtered from the BGEN file. Note that since there are no indication of a REF/ALT allele in the BGEN file, the second allele is the effect allele counted in association testing.   
+    A [.sample file](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html) is required as input when the .bgen file does not contain a sample identifier block.
      
-* ##### Sample File
-    A .sample file is required when the .bgen file does not contain sample identifiers.  
-    .sample files should follow QCTOOL v2 format described here: [.sample example](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html).  
-    The first column must contain the sample identifiers to be matched with phenotype file.  
+
+    * Plink BED/PGEN genotype files.  
+    <ins>BED</ins>  
+    [**.fam**](https://www.cog-genomics.org/plink/2.0/formats#fam) - The .fam file can be space or tab-delimited and must contain at least 2 columns where the first column is the family ID (FID) and the second column is the individual ID (IID). GEM will use the IID column for sample identifier matching with the phenotype file.  
+    [**.bim**](https://www.cog-genomics.org/plink/2.0/formats#bim) - The .bim file can also be space or tab-delimited and should be in the following order: the chromosome, variant id, cM (optional), base-pair coordinate, ALT allele, and REF allele.  
+    [**.bed**](https://www.cog-genomics.org/plink/2.0/formats#bed) - A bed file must be stored in variant-major form. The ALT allele specified in the .bim file is the effect allele counted in association testing.   
+    <ins>PGEN</ins>  
+    [**.psam**](https://www.cog-genomics.org/plink/2.0/formats#psam) - The .psam file is a tab-delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name #IID (if the first column is not #FID) or IID (if the first column is #FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with #IID or #FID is present, then the columns are assumed to be in .fam file order.   
+    [**.pvar**](https://www.cog-genomics.org/plink/2.0/formats#pvar) - The .pvar file is a tab-delimited text file containing the variant information. If header lines are present, the last header line should start with #CHROM. If #CHROM is present, then the columns POS, ID, REF, and ALT must also be present. All previous header lines will be ignored. If the .pvar file contain no header lines beginning with #CHROM, it is assumed that the columns are in .bim file order.  
+    [**.pgen**](https://www.cog-genomics.org/plink/2.0/formats#pgen) - The .pvar file should be filtered for non-biallelic variants. The ALT allele specified in the .pvar file is the effect allele counted in association testing.
+     
+
     
 <br /> 
 
 #### Output File Format  
 
-GEM will write results to the output file specified with the --out paramater (or 'gem.out' if no output file is specified).  
-Below are details of the column header in the output file.  
+GEM will write results to the output file specified with the --out parameter (or 'gem.out' if no output file is specified).  
+Below are details of the column header in the output file depending on the --output-style (minimum/meta/full).  
 
-```diff
-# SNP Info  
-SNPID     - The SNP identifier as retrieved from the genotype file.
-RSID      - The reference SNP ID number. (BGEN only)
-CHR       - The chromosome of the SNP.
-POS       - The physical position of the SNP.
-Non_Effect_Allele - The allele not counted for in association testing.  
-Effect_Allele - The allele that is counted in association testing.  
-N_samples - The number of samples without missing genotypes.
-AF        - The allele frequency of the second allele in the BGEN file.
+minimum:
+```diff 
+SNPID             - The SNP identifier as retrieved from the genotype file.
+RSID              - The reference SNP ID number. (BGEN only)
+CHR               - The chromosome of the SNP.
+POS               - The physical position of the SNP.
+Non_Effect_Allele - The allele not counted in association testing.  
+Effect_Allele     - The allele that is counted in association testing.  
+N_samples         - The number of samples without missing genotypes.
+AF                - The allele frequency of the effect allele.
 
+Beta_Marginal      - The coefficient estimate for the marginal genetic effect.
+Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate.
+Beta_G-E           - The coefficient estimate for the interaction term.
+Var_Beta_G-E       - The variance associated with the interaction term.
+Cov_Beta_G-*_G-*   - The covariance for all GxE terms.
 
-# Betas and Variances
-Beta_Marginal      - The coefficient estimate for the marginal genetic effect
-Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate
-Beta_Interaction_k - The coefficient estimate for the kth interaction term, 
-                     where k = {1..length(--exposure-names)}
-Var_Beta_Interaction_k_j - The variance associated with the kth and jth interaction term, 
-                           where j = {1..length(--exposure-names)}  
-
-# P-values
-P_Value_Marginal    - Marginal genetic effect p-value (GEM does not calculate a genetic main effect that is adjusted for the genetic interaction term(s))
-P_Value_Interaction - Interaction effect p-value
-P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect)
+P_Value_Main        - Genetic main effect p-value (after adjusting for interaction and covariates).
+P_Value_Interaction - Interaction effect p-value.
+P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect).
 ```
+
+meta:  
+In addition to the "minimum" output, the "meta" option will also output the following columns:
+```diff 
+Beta_G           - The coefficient estimate for the genetic main effect.
+Beta_G-C         - The coefficient estimate for any interaction covariate terms.
+Var_Beta_G       - The variance associated with the genetic main effect.
+Var_Beta_G-C     - The variance associated with any interaction covariate term.
+Cov_Beta_G-*_G-* - The set of covariance terms (genetic main effect, GxE, and any interaction covariate term) defining the full covariance matrix. 
+```
+
+full:  
+The "full" option provides, in addition to "meta", output columns storing intermediate quantities necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
 
 <br />
 <br />

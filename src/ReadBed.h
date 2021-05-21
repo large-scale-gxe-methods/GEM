@@ -35,6 +35,6 @@ public:
     void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 
-void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd);
+void gemBED(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd);
 
 #endif

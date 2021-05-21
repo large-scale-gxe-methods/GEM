@@ -48,5 +48,5 @@ class Bgen {
         void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd);
+void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd);
 #endif

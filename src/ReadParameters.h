@@ -37,7 +37,6 @@ public:
 	// Inputs
 	std::string phenoName;
 	std::string sampleID;
-	int phenoType;
 
 	int numSelCol    = 0;
 	int numExpSelCol = 0;

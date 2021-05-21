@@ -34,6 +34,6 @@ public:
     void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 
-void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd);
+void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd);
 
 #endif

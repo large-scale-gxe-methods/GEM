@@ -329,7 +329,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 }
 
 
-void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd) {
+void gemBED(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -339,7 +339,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
     bool filterVariants = bed.filterVariants;
     string outStyle = cmd.outStyle;
     int stream_snps = cmd.stream_snps;
-    int phenoType   = cmd.phenoType;
     int samSize     = bed.new_samSize;
     int robust      = cmd.robust;
     int intSq1      = cmd.numIntSelCol + 1;
@@ -808,15 +807,18 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
             }
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    if (ii != jj) {
+                    if (ii < jj) {
                         oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                     }
                 }
             }
-            if (printFull) {
+            if ((robust == 1) && printFull) {
+                int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                        if (ii <= jj) {
+                            oss << ZGStZGS[ii*ZGS_col + jj + tmp1] << "\t";
+                        }
                     }
                 }
             }

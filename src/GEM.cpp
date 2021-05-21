@@ -35,10 +35,11 @@
 
 #include "declars.h"
 
+int checkBinary(vector<double>data_in);
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle);
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2);
 
 int main(int argc, char* argv[]) {
 
@@ -52,7 +53,6 @@ int main(int argc, char* argv[]) {
     int phenoCol;
     int samIDCol;
     int robust      = cmd.robust;
-    int phenoTyp    = cmd.phenoType;
     int stream_snps = cmd.stream_snps;
     char delim      = cmd.pheno_delim;
     double epsilon  = cmd.tol;
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
         vector <string> values;
         while (getline(iss, value, delim)) values.push_back(value);
         if (values.size() != phenoncols) {
-            cerr << "ERROR: Wrong number of entries in data row.";
+            cerr << "ERROR: Wrong number of entries in " << r  << " row.";
             cerr << "Expected " << phenoncols << " fields; parsed " << values.size() << '\n';
             exit(1);
         }
@@ -211,8 +211,9 @@ int main(int argc, char* argv[]) {
     cout << "End of reading phenotype and covariate data. \n";
     cout << "*********************************************************\n";
 
-
-
+    int phenoType = checkBinary(phenodata);
+    cout << phenoType << endl;
+    double sigma2;
     if (cmd.usePgenFile) {
         Pgen pgen;
 
@@ -225,10 +226,9 @@ int main(int argc, char* argv[]) {
         center(cmd.center, cmd.scale, samSize, numSelCol, pgen.new_covdata, &pgen.new_covdata);
 
         cout << "Starting GWAS... \n\n";
-        double sigma2;
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, pgen.new_phenodata, pgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        fitNullModel(samSize, numSelCol, phenoType, epsilon, robust, covSelHeadersName, pgen.new_phenodata, pgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
         pgen.new_phenodata.clear();
         
         pgen.getPgenVariantPos(pgen, cmd);
@@ -238,14 +238,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 		    for (uint i = 0; i < pgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemPGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemPGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
 			}
             thread_grp.join_all();
             cout << "Joining threads... \n";
         }
         else {
             cout << "Running with single thread...\n";
-            gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, pgen, cmd);
+            gemPGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, pgen, cmd);
 
         }
         cmd.threads = pgen.threads;
@@ -264,10 +264,9 @@ int main(int argc, char* argv[]) {
         center(cmd.center, cmd.scale, samSize, numSelCol, bed.new_covdata, &bed.new_covdata);
 
         cout << "Starting GWAS... \n\n";
-        double sigma2;
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, bed.new_phenodata, bed.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        fitNullModel(samSize, numSelCol, phenoType, epsilon, robust, covSelHeadersName, bed.new_phenodata, bed.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
         bed.new_phenodata.clear();
 
         bed.getBedVariantPos(bed, cmd);
@@ -277,14 +276,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bed.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBED, i, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, boost::ref(bed), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBED, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, boost::ref(bed), boost::ref(cmd)));
 			}
 			thread_grp.join_all();
 			cout << "Joining threads... \n";
         }
         else {
             auto start_time = std::chrono::high_resolution_clock::now();
-            gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, bed, cmd);
+            gemBED(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, bed, cmd);
         }
         cmd.threads = bed.threads;
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -302,10 +301,9 @@ int main(int argc, char* argv[]) {
         center(cmd.center, cmd.scale, samSize, numSelCol, bgen.new_covdata, &bgen.new_covdata);
         
         cout << "Starting GWAS... \n\n";
-        double sigma2;
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize * (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, phenoTyp, epsilon, robust, covSelHeadersName, bgen.new_phenodata, bgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        fitNullModel(samSize, numSelCol, phenoType, epsilon, robust, covSelHeadersName, bgen.new_phenodata, bgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
         bgen.new_phenodata.clear();
 
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -320,14 +318,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
 			}
 			thread_grp.join_all();
 			cout << "Joining threads... \n";
         }
         else {
             cout << "Running with single thread...\n";
-            gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, bgen, cmd);
+            gemBGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, bgen, cmd);
         }
         cmd.threads = bgen.threads;
         end_time = std::chrono::high_resolution_clock::now();
@@ -338,7 +336,7 @@ int main(int argc, char* argv[]) {
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
     auto start_time = std::chrono::high_resolution_clock::now();
-    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle);
+    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle, cmd.robust, sigma2);
     std::ofstream results(output, std::ios_base::app);
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
@@ -366,7 +364,23 @@ int main(int argc, char* argv[]) {
 }
 
 
+int checkBinary(vector<double>data_in) {
 
+    int is_bin = 1;
+    std::unordered_map<double, int> map;
+
+    for (size_t i = 0; i < data_in.size(); i++) {
+        if (!map.count(data_in[i])) {
+            map[data_in[i]] = 1;
+            if (map.size() > 2) {
+                is_bin = 0;
+                break;
+            }
+        }
+    }
+    return is_bin;
+
+}
 
 
 
@@ -611,9 +625,13 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 }
 
 
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle) {
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2) {
 
     std::ofstream results(output, std::ofstream::binary);
+
+    if (outStyle.compare("full") == 0) {
+        results << "#dispersion: " << sigma2 << "\n";
+    }
 
     if (useBgen) {
         results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
@@ -645,15 +663,17 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
         }
         for (int i = printStart; i < printEnd; i++) {
             for (int j = printStart; j < printEnd; j++) {
-                if (i != j) {
+                if (i < j) {
                    results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t";  
                 } 
             }
         }
-        if (printFull) {
+        if ((robust == 1) && printFull) {
             for (int i = printStart; i < printEnd; i++) {
                 for (int j = printStart; j < printEnd; j++) {
-                    results << "V_" << covNames[i] << "_" << covNames[j] << "\t";
+                    if (i <= j) {
+                        results << "V_" << covNames[i] << "_" << covNames[j] << "\t"; 
+                    }
                 }
             }
         }

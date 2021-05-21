@@ -704,7 +704,7 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd) {
+void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -741,7 +741,6 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
     bool filterVariants = bgen.filterVariants;
     string outStyle = cmd.outStyle;
     int stream_snps = cmd.stream_snps;
-    int phenoType   = cmd.phenoType;
     int samSize     = bgen.new_samSize;
     int robust      = cmd.robust;
     int intSq1      = cmd.numIntSelCol + 1;
@@ -756,7 +755,6 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
     vector<long int> include_idx = bgen.include_idx;
     vector<uint> keepVariants = bgen.keepVariants[thread_num];
     uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
-    
     int ZGS_col = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
@@ -765,7 +763,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
     vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
-    
+
     boost::math::chi_squared chisq_dist_M(1);
 
     struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
@@ -931,7 +929,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     missingIndex.clear();
                 }
 
-                geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
+                geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
                 
                 for (int j = 0; j < Sq; j++) {
                      int tmp3 = samSize * (j + 1) + tmp1;
@@ -1150,7 +1148,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     }
                     missingIndex.clear();
                 }
-                geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
+                geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA")  + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
 
                 for (int j = 0; j < Sq; j++) {
                      int tmp3 = samSize * (j + 1) + tmp1;
@@ -1425,15 +1423,18 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
             }
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    if (ii != jj) {
+                    if (ii < jj) {
                         oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                     }
                 }
             }
-            if (printFull) {
+            if ((robust == 1) && printFull) {
+                int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                        if (ii <= jj) {
+                            oss << ZGStZGS[ii*ZGS_col + jj + tmp1] << "\t";
+                        }
                     }
                 }
             }

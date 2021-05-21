@@ -49,7 +49,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     po::options_description phenofile("Phenotype file options");
     phenofile.add_options()
         ("sampleid-name", po::value<std::string>(), "")
-        ("pheno-type", po::value<int>(), "")
         ("pheno-name", po::value<std::string>(), "")
         ("covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("int-covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
@@ -267,20 +266,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         exit(1);
 
     }
-    if (out.count("pheno-type")) {
-        phenoType = out["pheno-type"].as<int>();
-
-        if (phenoType != 0 && phenoType != 1) {
-            cerr << "\nERROR: --pheno-type must be 0 (continuous) or 1 (binary). \n\n";
-            exit(1);
-        }
-
-    }
-    else {
-        cerr << "\nERROR: --pheno-type is not specified. Must be 0 (continuous) or 1 (binary). \n\n";
-        exit(1);
-
-    }
 
 
     if (out.count("exposure-names")) {
@@ -455,56 +440,55 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
 
     
-    // Print parameter info
-    cout << "The Phenotype File is: " << phenoFile << "\n";
-    cout << "The Phenotype is: " << phenoName << '\n';
-    cout << "Continuous or Binary: "; phenoType == 0 ? cout << "Continuous \n" : cout << "Binary \n";
-    cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
+    // // Print parameter info
+    // cout << "The Phenotype File is: " << phenoFile << "\n";
+    // cout << "The Phenotype is: " << phenoName << '\n';
+    // cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
 
-    if (numSelCol == 0) {
-        cout << "No Covariates Selected" << "\n";
-    }
-    else {
-        cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
-        cout << "The Selected Covariates are:  ";
-        for (int i = 0; i < numSelCol; i++) {
-            cout << cov[i] << "   ";
-        }
-        cout << "\n";
-    }
+    // if (numSelCol == 0) {
+    //     cout << "No Covariates Selected" << "\n";
+    // }
+    // else {
+    //     cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
+    //     cout << "The Selected Covariates are:  ";
+    //     for (int i = 0; i < numSelCol; i++) {
+    //         cout << cov[i] << "   ";
+    //     }
+    //     cout << "\n";
+    // }
 
-    if (numIntSelCol == 0) {
-        cout << "No Interaction Covariates Selected" << "\n";
-    }
-    else {
-        cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
-        cout << "The Selected Interaction Covariates are:  ";
-        for (int i = 0; i < numIntSelCol; i++) {
-            cout << icov[i] << "   ";
-        }
-        cout << "\n";
-    }
+    // if (numIntSelCol == 0) {
+    //     cout << "No Interaction Covariates Selected" << "\n";
+    // }
+    // else {
+    //     cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
+    //     cout << "The Selected Interaction Covariates are:  ";
+    //     for (int i = 0; i < numIntSelCol; i++) {
+    //         cout << icov[i] << "   ";
+    //     }
+    //     cout << "\n";
+    // }
 
-    if (numExpSelCol == 0) {
-        cout << "No Exposures Selected" << "\n";
-    }
-    else {
-        cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
-        cout << "The Selected Exposures are:  ";
-        for (int i = 0; i < numExpSelCol; i++) {
-            cout << exp[i] << "   ";
-        }
-        cout << "\n\n";
-    }
+    // if (numExpSelCol == 0) {
+    //     cout << "No Exposures Selected" << "\n";
+    // }
+    // else {
+    //     cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
+    //     cout << "The Selected Exposures are:  ";
+    //     for (int i = 0; i < numExpSelCol; i++) {
+    //         cout << exp[i] << "   ";
+    //     }
+    //     cout << "\n\n";
+    // }
 
-    if (phenoType == 1) {
-        cout << "Logistic Convergence Threshold: " << tol << "\n";
-    }
-    cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
-    cout << "Number of SNPS in batch: " << stream_snps << "\n";
-    cout << "Number of Threads: " << threads << "\n";
-    cout << "Output File: " << outFile << "\n";
-    cout << "*********************************************************\n";
+    // if (phenoType == 1) {
+    //     cout << "Logistic Convergence Threshold: " << tol << "\n";
+    // }
+    // cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
+    // cout << "Number of SNPS in batch: " << stream_snps << "\n";
+    // cout << "Number of Threads: " << threads << "\n";
+    // cout << "Output File: " << outFile << "\n";
+    // cout << "*********************************************************\n";
 
 }
 
@@ -545,7 +529,6 @@ void print_help() {
         << "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
         << "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
         << "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
-        << "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
         << "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
         << "   --delim \t\t Delimiter separating values in the phenotype file. Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl

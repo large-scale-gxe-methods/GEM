@@ -1,3 +1,4 @@
+
 #include "declars.h"
 #include "ReadBGEN.h"
 #include "ReadParameters.h"
@@ -127,12 +128,14 @@ This function is revised based on the Parse function in BOLT-LMM v2.3 source cod
 ***********************************************************************************/
 
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
-void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
+void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     int k = 0;
     unordered_set<int> genoUnMatchID;
     std::vector<string> tempID;
+    new_phenodata.resize(samSize);
+    new_covdata.resize(samSize * (numSelCol+1));
     if ((bgen.SampleIdentifiers == 0) || useSample) {
 
         if (bgen.SampleIdentifiers == 0 && !useSample) {
@@ -141,12 +144,10 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             exit(1);
         }
 
-
         std::ifstream fIDMat;
         fIDMat.open(samplefile);
-
         if (!fIDMat.is_open()) {
-            cerr << "\nERROR: Sample file could not be opened." << endl << endl;
+            cerr << "\nERROR: Sample file could not be opened.\n\n";
             exit(1);
         }
 
@@ -179,16 +180,14 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
                 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-                    // covdata[k*(numSelCol+1) + 0] = 1.0;
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
                     }
+                    sampleID.push_back(strtmp);
                     k++;
                 }
-
-                // erase the used element in phenomap
-                phenomap.erase(strtmp);
             }
 
             // save the index with unmatched ID into genoUnMatchID.
@@ -241,13 +240,14 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
                 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
                     }
+                    sampleID.push_back(strtmp);
                     k++;
                 }
-                phenomap.erase(strtmp);
             }
 
             if (itmp == k) {
@@ -260,8 +260,8 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
-    phenodata.resize(k);
-    covdata.resize(k * (numSelCol + 1));
+    new_phenodata.resize(k);
+    new_covdata.resize(k * (numSelCol + 1));
     samSize = k;
 
 
@@ -307,10 +307,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     cout << "****************************************************************************\n";
 
 
-
     new_samSize = samSize;
-    new_covdata = covdata;
-    new_phenodata = phenodata;
 }
 
 
@@ -704,7 +701,7 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd) {
+void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu,  std::unordered_map<long int, vector<int>> binMap, Bgen bgen, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -752,10 +749,26 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
     double MAF      = cmd.MAF;
     double maxMAF   = 1 - MAF;
     double missGenoCutoff = cmd.missGenoRate;
+
     vector<long int> include_idx = bgen.include_idx;
     vector<uint> keepVariants = bgen.keepVariants[thread_num];
     uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
-    int ZGS_col = Sq1 * stream_snps;
+
+    size_t numBinE;
+    bool strata = (binMap.size() > 0 ) ? true : false;
+    vector<vector<double>> binE_AF_0(stream_snps), binE_AF_1(stream_snps), binE_N_0(stream_snps), binE_N_1(stream_snps);
+    if (strata) {
+        numBinE = binMap[include_idx[0]].size();
+
+        for (int ss = 0; ss < stream_snps; ss++) {
+            binE_AF_0[ss].resize(numBinE, 0.0);
+            binE_AF_1[ss].resize(numBinE, 0.0);
+            binE_N_0[ss].resize(numBinE,  0.0);
+            binE_N_1[ss].resize(numBinE,  0.0);
+        }
+    }
+
+    int ZGS_col  = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
@@ -763,12 +776,13 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
     vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
-
+    double* covX = &bgen.new_covdata[0];
     boost::math::chi_squared chisq_dist_M(1);
 
     struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
-    int printStart = 1; int printEnd = expSq1;
+    int printStart = 1; 
+    int printEnd   = expSq1;
     bool printFull = false;
     if (expSq == 0) {
         printStart = 0; printEnd = 0;
@@ -778,6 +792,7 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
     } else if (outStyle.compare("full") == 0) {
         printStart = 0; printEnd = Sq1; printFull = true;
     }
+
 
     FILE* fin3;
     fin3 = fopen(cmd.bgenFile.c_str(), "rb");
@@ -850,7 +865,8 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
             ret = fread(allele0, 1, LB, fin3); 
             allele0[LB] = '\0';
 
-
+            uint nMissing = 0;
+            int tmp1 = stream_i * Sq1 * samSize;
             if (Layout == 1) {
                 uint16_t* probs_start;
                 if (CompressedSNPBlocks == 1) {
@@ -872,10 +888,8 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
                 // read genotype probabilities
                 const double scale = 1.0 / 32768;
-                int tmp1 = stream_i * Sq1 * samSize;
 
                 int idx_k = 0;
-                uint nMissing = 0;
                 for (uint i = 0; i < Nbgen; i++) {
                     if (include_idx[idx_k] == i) {
                         double p11 = probs_start[3 * i] * scale;
@@ -897,47 +911,22 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                             else {
                                 ZGSvec[tmp2] = dosage;
                             }
+
+                            if (strata) {
+                                for (size_t e = 0; e < numBinE; e++) {
+                                    if (binMap[include_idx[idx_k]][e]) {
+                                        binE_AF_0[stream_i][e]+=dosage;
+                                        binE_N_0[stream_i][e]+=1.0;
+                                    } else {
+                                        binE_AF_1[stream_i][e]+=dosage;
+                                        binE_N_1[stream_i][e]+=1.0;;
+                                    }
+                                }
+                            }
                         }
+
                         idx_k++;
                     }
-                }
-
-                double gmean  = AF[stream_i] / double(samSize - nMissing);
-                double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
-                double percMissing = nMissing / (samSize * 1.0);
-                if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                    AF[stream_i] = 0.0;
-                    continue;
-                }
-                else {
-                    AF[stream_i] = cur_AF;
-                }
-
-                if (nMissing > 0) {
-                    if (phenoType == 0) {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = gmean;
-                        }
-                    }
-                    else {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
-                        }
-                    }
-                    missingIndex.clear();
-                }
-
-                geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
-                
-                for (int j = 0; j < Sq; j++) {
-                     int tmp3 = samSize * (j + 1) + tmp1;
-
-                     for (int i = 0; i < samSize; i++) {
-                          int tmp4 = i * numSelCol1;
-                          ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
-                     }
                 }
 
             } // end of reading genotype data when Layout = 1
@@ -1031,10 +1020,7 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 const uintptr_t probs_offset = bit_precision / 8;
 
 
-
-                int tmp1 = stream_i * Sq1 * samSize;
                 int idx_k = 0;
-                uint nMissing = 0;
                 if (!is_phased) {
                     for (uint32_t i = 0; i < N; i++) {
                         const uint32_t missing_and_ploidy = missing_and_ploidy_info[i];
@@ -1072,6 +1058,18 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                             }
                             else {
                                 ZGSvec[tmp2] = dosage;
+                            }
+
+                            if (strata) {
+                                for (size_t e = 0; e < numBinE; e++) {
+                                    if (binMap[include_idx[idx_k]][e]) {
+                                        binE_AF_0[stream_i][e]+=dosage;
+                                        binE_N_0[stream_i][e]+=1.0;
+                                    } else {
+                                        binE_AF_1[stream_i][e]+=dosage;
+                                        binE_N_1[stream_i][e]+=1.0;;
+                                    }
+                                }
                             }
                             idx_k++;
                         }
@@ -1116,50 +1114,75 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                                 ZGSvec[tmp2] = dosage;
                             }
 
+                            if (strata) {
+                                for (size_t e = 0; e < numBinE; e++) {
+                                    if (binMap[include_idx[idx_k]][e]) {
+                                        binE_AF_0[stream_i][e]+=dosage;
+                                        binE_N_0[stream_i][e]+=1.0;
+                                    } else {
+                                        binE_AF_1[stream_i][e]+=dosage;
+                                        binE_N_1[stream_i][e]+=1.0;;
+                                    }
+                                }
+                            }
+
                             idx_k++;
                         }
                     }
                 }
-
-
-                double gmean = AF[stream_i] / double(samSize - nMissing);
-                double cur_AF = gmean / 2.0;
-                double percMissing = nMissing / (samSize * 1.0);
-                if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                    AF[stream_i] = 0.0;
-                    continue;
-                }
-                else {
-                    AF[stream_i] = cur_AF;
-                }
-                
-                if (nMissing > 0) {
-                    if (phenoType == 0) {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = gmean;
-                        }
-                    }
-                    else {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
-                        }
-                    }
-                    missingIndex.clear();
-                }
-                geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA")  + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
-
-                for (int j = 0; j < Sq; j++) {
-                     int tmp3 = samSize * (j + 1) + tmp1;
-                     for (int i = 0; i < samSize; i++) {
-                        int tmp4 = i * numSelCol1;
-                        ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
-                     }
-                }
-
             } // end of layout 2
     
+            double gmean  = AF[stream_i] / double(samSize - nMissing);
+            double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
+            double percMissing = nMissing / (samSize * 1.0);
+            if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
+                AF[stream_i] = 0.0;
+                if (strata) {
+                    for (size_t k = 0; k < numBinE; k++) {
+                        binE_N_0[stream_i][k] = 0.0;
+                        binE_N_1[stream_i][k] = 0.0;
+                        binE_AF_0[stream_i][k] = 0.0;
+                        binE_AF_1[stream_i][k] = 0.0;
+                    }
+                }
+                continue;
+            }
+            else {
+                AF[stream_i] = cur_AF;
+            }
+
+            if (strata) {
+                for (size_t e = 0; e < numBinE; e++) {
+                    binE_AF_0[stream_i][e] = (binE_N_0[stream_i][e] >= 1.0) ? binE_AF_0[stream_i][e] / binE_N_0[stream_i][e] / 2.0 : NAN;
+                    binE_AF_1[stream_i][e] = (binE_N_1[stream_i][e] >= 1.0) ? binE_AF_1[stream_i][e] / binE_N_1[stream_i][e] / 2.0 : NAN;
+                }
+            }
+            if (nMissing > 0) {
+                if (phenoType == 0) {
+                    for (size_t nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = gmean;
+                    }
+                }
+                else {
+                    for (size_t nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+                    }
+                }
+                missingIndex.clear();
+            }
+
+            geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
+                
+            for (int j = 0; j < Sq; j++) {
+                int tmp3 = samSize * (j + 1) + tmp1;
+
+                for (int i = 0; i < samSize; i++) {
+                    int tmp4 = i * numSelCol1;
+                    ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
+                }
+            }
             variant_index++;
             stream_i++;
             keepIndex++;
@@ -1231,6 +1254,10 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         double*  PvalJoint  = new double[stream_snps];
         double** betaAll    = new double* [stream_snps];
         double** VarBetaAll = new double* [stream_snps];
+        double** invZGStZGS = nullptr;
+        if (robust == 1 ) {
+            invZGStZGS =  new double* [stream_snps];
+        }
 
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
@@ -1346,23 +1373,22 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                     subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
-
+                    invZGStZGS[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);   
+                    matInv(invZGStZGS[i], Sq1);
 
                     betaAll[i]= new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
+                    matvecprod(invZGStZGS[i], subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-                    matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
                     VarBetaAll[i] = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
 
                     // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
-
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
@@ -1399,9 +1425,14 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                         PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
                     }
 
+                    if (printFull) {
+                        for (int k = 0; k < Sq1 * Sq1; k++) {
+                            invZGStZGS[i][k] *= sigma2;
+                        }
+                    }
+
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
-                    delete[] invZGStZGS;
                     delete[] ZGSR2tZGSxinvZGStZGS;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
@@ -1414,12 +1445,23 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t";      
+            if (strata) {
+                for (size_t k = 0; k < numBinE; k++) {
+                    oss << binE_N_0[i][k] << "\t" << binE_AF_0[i][k] << "\t" << binE_N_1[i][k] << "\t" << binE_AF_1[i][k] << "\t";
+                    binE_N_0[i][k] = 0.0;
+                    binE_N_1[i][k] = 0.0;
+                    binE_AF_0[i][k] = 0.0;
+                    binE_AF_1[i][k] = 0.0;
+                }
+            }
+            oss << betaM[i] << "\t" << VarbetaM[i] << "\t";
+
             for (int ii = printStart; ii < printEnd; ii++) {
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
-                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+                oss << sqrt(VarBetaAll[i][ii * Sq1 + ii]) << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
@@ -1432,25 +1474,34 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        if (ii <= jj) {
-                            oss << ZGStZGS[ii*ZGS_col + jj + tmp1] << "\t";
+                        if (ii == jj) {
+                            oss << sqrt(invZGStZGS[i][ii*Sq1 + jj]) << "\t";
+                        }
+                    }
+                }
+
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        if (ii < jj) {
+                            oss << invZGStZGS[i][ii*Sq1 + jj] << "\t";
                         }
                     }
                 }
             }
 
             if (expSq != 0) {
-                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << "\n";
             }
             else {
                 oss << PvalM[i] << "\n";
             }
             AF[i] = 0.0;
         }
+
+
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;
-
         delete[] betaM;
         delete[] VarbetaM;
 
@@ -1459,9 +1510,16 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 delete[] betaAll[i];
                 delete[] VarBetaAll[i];
             }
+            if (robust == 1) {
+                for (int i = 0; i < stream_snps; i++) {
+                    delete[] invZGStZGS[i];
+                }
+            }
         }
+
         delete[] betaAll;
         delete[] VarBetaAll;
+        delete[] invZGStZGS;
         delete[] PvalInt;
         delete[] PvalJoint;
         delete[] PvalM;

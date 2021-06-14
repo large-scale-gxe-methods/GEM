@@ -16,6 +16,7 @@ public:
     uint32_t raw_sample_ct;
 
     int new_samSize;
+    std::vector<string>   sampleID;
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
@@ -27,13 +28,14 @@ public:
     std::vector<long long unsigned int> pgenVariantPos;
     vector<int> pvarIndex;
     int pvarLast;
+    vector<int> binE_idx;
 
     void processPgenHeader(string pgenFile);
     void processPvar(Pgen pgen, string pvarFile);
-    void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
+    void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
     void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 
-void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd);
+void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Pgen pgen, CommandLine cmd);
 
 #endif

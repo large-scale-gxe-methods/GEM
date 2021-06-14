@@ -28,6 +28,7 @@ class Bgen {
 
         // For ID matching
         int new_samSize;
+        std::vector<string>   sampleID;
         std::vector<double>   new_covdata;
         std::vector<double>   new_phenodata;
         std::vector<long int> include_idx;
@@ -44,9 +45,9 @@ class Bgen {
 
 
         void processBgenHeaderBlock(string bgenfile);
-        void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
+        void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
         void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd);
+void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Bgen bgen, CommandLine cmd);
 #endif

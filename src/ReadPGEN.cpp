@@ -92,10 +92,11 @@ void Pgen::processPgenHeader(string pgenFile) {
 
 
 // This functions reads the .psam file
-void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
+void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
      unordered_set<int> genoUnMatchID;
-
+     new_phenodata.resize(samSize);
+     new_covdata.resize(samSize * (numSelCol+1));
      std::ifstream fIDMat;
      fIDMat.open(psamFile);
      if (!fIDMat.is_open()) {
@@ -195,13 +196,14 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
          if (phenomap.find(strtmp) != phenomap.end()) {
              auto tmp_valvec = phenomap[strtmp];
              if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                 sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-                 for (int c = 0; c < numSelCol; c++) {
-                      sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
-                 }
+                 sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                 new_covdata[k * (numSelCol+1)] = 1.0;
+                for (int c = 0; c < numSelCol; c++) {
+                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
+                }
+                sampleID.push_back(strtmp);
                 k++;
              }
-             phenomap.erase(strtmp);
          }
 
          if (itmp == k) genoUnMatchID.insert(m);
@@ -210,8 +212,8 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
     
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
-    phenodata.resize(k);
-    covdata.resize(k * (numSelCol+1));
+    new_phenodata.resize(k);
+    new_covdata.resize(k * (numSelCol+1));
     samSize = k;
 
     if (samSize == 0) {
@@ -245,8 +247,6 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
 
     new_samSize = samSize;
-    new_covdata = covdata;
-    new_phenodata = phenodata;
 
 }
 
@@ -518,7 +518,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 
 
-void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Pgen pgen, CommandLine cmd) {
+void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Pgen pgen, CommandLine cmd) {
 
         auto start_time = std::chrono::high_resolution_clock::now();
         std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -540,10 +540,23 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         double MAF      = cmd.MAF;
         double maxMAF   = 1 - MAF;
         double missGenoCutoff = cmd.missGenoRate;
+        vector<long int> include_idx = pgen.include_idx;
+
+        size_t numBinE;
+        bool strata = (binMap.size() > 0 ) ? true : false;
+        vector<vector<double>> binE_AF_0(stream_snps), binE_AF_1(stream_snps), binE_N_0(stream_snps), binE_N_1(stream_snps);
+        if (strata) {
+            numBinE = binMap[include_idx[0]].size();
+            for (int ss = 0; ss < stream_snps; ss++) {
+                binE_AF_0[ss].resize(numBinE, 0.0);
+                binE_AF_1[ss].resize(numBinE, 0.0);
+                binE_N_0[ss].resize(numBinE,  0.0);
+                binE_N_1[ss].resize(numBinE,  0.0);
+            }
+        }
 
         int pvarLast = pgen.pvarLast;
         vector<int> pvarIndex = pgen.pvarIndex;
-        vector<long int> include_idx = pgen.include_idx;
         uint32_t snploop = pgen.begin[thread_num], end = pgen.end[thread_num];
         std::vector<long long unsigned int> pgenPos = pgen.pgenVariantPos;
 
@@ -555,6 +568,7 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         vector<uint> missingIndex;
         vector <string> geno_snpid(stream_snps);
         double* WZGS = &WZGSvec[0];
+        double* covX = &pgen.new_covdata[0];   
 
 
         int pvarLength = pgen.pvarIndex.size();
@@ -606,8 +620,6 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
             throw std::runtime_error(errstr_buf);
         }
-        assert((header_ctrl & 0x30) == 0); // no alt allele counts
-        assert((header_ctrl & 0xc0) != 0xc0); // no explicit nonref_flags
 
         const uint32_t raw_variant_ct = _info_ptr.raw_variant_ct;
         const uint32_t file_sample_ct = _info_ptr.raw_sample_ct;
@@ -654,14 +666,9 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
         _subset_include_interleaved_vec[-1] = 0;
 
-        //uint32_t* _subset_cumulative_popcounts = reinterpret_cast<uint32_t*>(pgr_alloc_iter);
         pgr_alloc_iter = &(pgr_alloc_iter[cumulative_popcounts_byte_ct]);
         _pgv.genovec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
         pgr_alloc_iter = &(pgr_alloc_iter[genovec_byte_ct]);
-        _pgv.patch_01_set = nullptr;
-        _pgv.patch_01_vals = nullptr;
-        _pgv.patch_10_set = nullptr;
-        _pgv.patch_10_vals = nullptr;
 
         _pgv.phasepresent = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
         pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
@@ -763,20 +770,49 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                          else {
                              ZGSvec[tmp2] = buf[n];
                          }
+
+                         if (strata) {
+                             for (size_t e = 0; e < numBinE; e++) {
+                                 if (binMap[include_idx[idx_k]][e]) {
+                                     binE_AF_0[stream_i][e]+=buf[n];
+                                     binE_N_0[stream_i][e]+=1.0;
+                                 } else {
+                                     binE_AF_1[stream_i][e]+=buf[n];
+                                     binE_N_1[stream_i][e]+=1.0;;
+                                 }
+                             }
+                         }
                          idx_k++;
                      }
 
                 }
+
                 double gmean = AF[stream_i] / double(samSize - nMissing);
                 double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
                 double percMissing = nMissing / (samSize * 1.0);
                 
                 if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                     AF[stream_i] = 0;
-                     continue;
+                    AF[stream_i] = 0.0;
+                    if (strata) {
+                        for (size_t e = 0; e < numBinE; e++) {
+                            binE_N_0[stream_i][e] = 0.0;
+                            binE_N_1[stream_i][e] = 0.0;
+                            binE_AF_0[stream_i][e] = 0.0;
+                            binE_AF_1[stream_i][e] = 0.0;
+                        }
+                    }
+                    continue;
                 }
                 else {
-                     AF[stream_i] = cur_AF;
+                    AF[stream_i] = cur_AF;
+                }
+
+
+                if (strata) {
+                    for (size_t e = 0; e < numBinE; e++) {
+                        binE_AF_0[stream_i][e] = (binE_N_0[stream_i][e] >= 1.0) ? binE_AF_0[stream_i][e] / binE_N_0[stream_i][e] / 2.0 : NAN;
+                        binE_AF_1[stream_i][e] = (binE_N_1[stream_i][e] >= 1.0) ? binE_AF_1[stream_i][e] / binE_N_1[stream_i][e] / 2.0 : NAN;
+                    }
                 }
 
                 if (nMissing > 0) {
@@ -878,6 +914,10 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
         double*  PvalJoint  = new double[stream_snps];
         double** betaAll    = new double* [stream_snps];
         double** VarBetaAll = new double* [stream_snps];
+        double** invZGStZGS = nullptr;
+        if (robust == 1 ) {
+            invZGStZGS =  new double* [stream_snps];
+        }
 
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
@@ -899,6 +939,7 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
                     boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
@@ -913,12 +954,11 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                     for (int k = 0; k < Sq1 * Sq1; k++) {
                         VarBetaAll[i][k] *= sigma2;
                     }
-
                     //invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
                     matInv(invVarbetaint, expSq);
-
+                    
                     // StatInt
                     double* Stemp3 = new double[expSq];
                     matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
@@ -983,6 +1023,7 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
                     boost::math::chi_squared chisq_dist_Joint(expSq1);
+                    
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
@@ -992,23 +1033,22 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                     subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
-
+                    invZGStZGS[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);   
+                    matInv(invZGStZGS[i], Sq1);
 
                     betaAll[i]= new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
+                    matvecprod(invZGStZGS[i], subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-                    matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
                     VarBetaAll[i] = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
 
                     // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
-
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
@@ -1017,7 +1057,7 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                     for (int j = 1; j < expSq1; j++) {
                         statInt += betaAll[i][j] * Stemp3[j-1];
                     }
-
+            
                     //calculating Interaction P values
                     if (isnan(statInt) || statInt <= 0.0) {
                         PvalInt[i] = NAN;
@@ -1045,9 +1085,14 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                         PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
                     }
 
+                    if (printFull) {
+                        for (int k = 0; k < Sq1 * Sq1; k++) {
+                            invZGStZGS[i][k] *= sigma2;
+                        }
+                    }
+
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
-                    delete[] invZGStZGS;
                     delete[] ZGSR2tZGSxinvZGStZGS;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
@@ -1060,12 +1105,23 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+            if (strata) {
+                for (size_t k = 0; k < numBinE; k++) {
+                    oss << binE_N_0[i][k] << "\t" << binE_AF_0[i][k] << "\t" << binE_N_1[i][k] << "\t" << binE_AF_1[i][k] << "\t";
+                    binE_N_0[i][k] = 0.0;
+                    binE_N_1[i][k] = 0.0;
+                    binE_AF_0[i][k] = 0.0;
+                    binE_AF_1[i][k] = 0.0;
+                }
+            }
+            oss << betaM[i] << "\t" << VarbetaM[i] << "\t";
+
             for (int ii = printStart; ii < printEnd; ii++) {
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
-                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+                oss << sqrt(VarBetaAll[i][ii * Sq1 + ii]) << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
@@ -1078,36 +1134,53 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                 int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        if (ii <= jj) {
-                            oss << ZGStZGS[ii*ZGS_col + jj + tmp1] << "\t";
+                        if (ii == jj) {
+                            oss << sqrt(invZGStZGS[i][ii*Sq1 + jj]) << "\t";
                         }
                     }
                 }
+
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        if (ii < jj) {
+                            oss << invZGStZGS[i][ii*Sq1 + jj] << "\t";
+                        }
+                    }
+                }
+
             }
 
             if (expSq != 0) {
-                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << "\n";
             }
             else {
                 oss << PvalM[i] << "\n";
             }
             AF[i] = 0.0;
         }
+
+
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;
-
         delete[] betaM;
         delete[] VarbetaM;
 
-        if (expSq != 0) {
+        if (expSq != 0 ) {
             for (int i = 0; i < stream_snps; i++) {
                 delete[] betaAll[i];
                 delete[] VarBetaAll[i];
             }
+            if (robust == 1) {
+                for (int i = 0; i < stream_snps; i++) {
+                    delete[] invZGStZGS[i];
+                }
+            }
         }
+
         delete[] betaAll;
         delete[] VarBetaAll;
+        delete[] invZGStZGS;
         delete[] PvalInt;
         delete[] PvalJoint;
         delete[] PvalM;

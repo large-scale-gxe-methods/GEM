@@ -35,11 +35,12 @@
 
 #include "declars.h"
 
-int checkBinary(vector<double>data_in);
+int  checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID);
+void checkBinaryCovariates(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol, std::vector<string>* binE_in, std::vector<int>* binE_idx_in, std::unordered_map<long int, vector<int>>* map_ret);
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2);
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, std::vector<string> binE, vector<int> binE_idx);
 
 int main(int argc, char* argv[]) {
 
@@ -168,16 +169,9 @@ int main(int argc, char* argv[]) {
     cout << "Size of the selected covariate matrix (including first column for intercept values) is: " << samSize << " X " << numSelCol + 1 << '\n';
 
 
-
-    // Initialize data matrix
-    vector <double> phenodata(samSize);
-    vector <string> sampleIds(samSize);
-    vector <double> covdata(samSize * (numSelCol + 1));
-
     // A Hashmap phenodata for IDMatching process.
     // key is smapleID in phenotype file,
-    // values are pheno-data, and the selected variables values
-    // read and store data
+    // value is a vector of pheno data as string for the sampleID
     unordered_map<string, vector<string>> phenomap;
     for (int r = 0; r < samSize; r++) {
         getline(finph, line);
@@ -191,15 +185,10 @@ int main(int argc, char* argv[]) {
             cerr << "Expected " << phenoncols << " fields; parsed " << values.size() << '\n';
             exit(1);
         }
-        sscanf(values[phenoCol].c_str(), "%lf", &phenodata[r]);
-        sampleIds[r] = values[samIDCol];
-        covdata[r * (numSelCol + 1)] = 1.0;
-        for (int c = 0; c < numSelCol; c++)
-            sscanf(values[colSelVec[c]].c_str(), "%lf", &covdata[r * (numSelCol + 1) + c + 1]);
-
         phenomap[values[samIDCol]] = { values[phenoCol] };
-        for (int c = 0; c < numSelCol; c++)
+        for (int c = 0; c < numSelCol; c++) {
             phenomap[values[samIDCol]].push_back(values[colSelVec[c]]);
+        }
     }
     finph.close();
     if (nrows != samSize) {
@@ -211,20 +200,28 @@ int main(int argc, char* argv[]) {
     cout << "End of reading phenotype and covariate data. \n";
     cout << "*********************************************************\n";
 
-    int phenoType = checkBinary(phenodata);
-    cout << phenoType << endl;
+
     double sigma2;
+    std::vector<int> binE_idx;
+    std::vector<string> binE;
+    std::unordered_map<long int, vector<int>> map_ret;
     if (cmd.usePgenFile) {
         Pgen pgen;
 
         pgen.processPgenHeader(cmd.pgenFile);
         pgen.processPvar(pgen, cmd.pvarFile);
-        pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
-        sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
+        pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, numSelCol, samSize);
 
         samSize = pgen.new_samSize;
-        center(cmd.center, cmd.scale, samSize, numSelCol, pgen.new_covdata, &pgen.new_covdata);
+        
+        int phenoType = checkBinary(phenomap, pgen.sampleID);
+        checkBinaryCovariates(phenomap, pgen.sampleID, pgen.include_idx, numExpSelCol, numSelCol, &binE, &binE_idx, &map_ret);
+        phenomap.clear();
 
+        if ((cmd.center == 1) || (cmd.scale == 1)) {
+            center(cmd.center, cmd.scale, samSize, numSelCol, pgen.new_covdata, &pgen.new_covdata);
+        }
+        
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
@@ -238,14 +235,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 		    for (uint i = 0; i < pgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemPGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, boost::ref(pgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemPGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, boost::ref(pgen), boost::ref(cmd)));
 			}
-            thread_grp.join_all();
             cout << "Joining threads... \n";
+            thread_grp.join_all();
         }
         else {
             cout << "Running with single thread...\n";
-            gemPGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &pgen.new_covdata[0], miuvec, pgen, cmd);
+            gemPGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, pgen, cmd);
 
         }
         cmd.threads = pgen.threads;
@@ -257,12 +254,18 @@ int main(int argc, char* argv[]) {
     if (cmd.useBedFile) {
         Bed bed;
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
-        bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
-        sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
+        bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, numSelCol, samSize);
 
         samSize = bed.new_samSize;
-        center(cmd.center, cmd.scale, samSize, numSelCol, bed.new_covdata, &bed.new_covdata);
 
+        int phenoType = checkBinary(phenomap, bed.sampleID);
+        checkBinaryCovariates(phenomap, bed.sampleID, bed.include_idx, numExpSelCol, numSelCol, &binE, &binE_idx, &map_ret);
+        phenomap.clear();
+
+        if ((cmd.center == 1) || (cmd.scale == 1)) {
+            center(cmd.center, cmd.scale, samSize, numSelCol, bed.new_covdata, &bed.new_covdata);
+        }
+        
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol + 1));
@@ -276,14 +279,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bed.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBED, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, boost::ref(bed), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBED, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, boost::ref(bed), boost::ref(cmd)));
 			}
+            cout << "Joining threads... \n";
 			thread_grp.join_all();
-			cout << "Joining threads... \n";
         }
         else {
             auto start_time = std::chrono::high_resolution_clock::now();
-            gemBED(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bed.new_covdata[0], miuvec, bed, cmd);
+            gemBED(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, bed, cmd);
         }
         cmd.threads = bed.threads;
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -294,11 +297,16 @@ int main(int argc, char* argv[]) {
     if (cmd.useBgenFile) {
         Bgen bgen;
         bgen.processBgenHeaderBlock(cmd.bgenFile);
-        bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, phenodata, covdata, numSelCol, samSize, cmd.center, cmd.scale);
-        sampleIds.clear(); phenomap.clear(); phenodata.clear(); covdata.clear();
+        bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, numSelCol, samSize);
 
         samSize = bgen.new_samSize;
-        center(cmd.center, cmd.scale, samSize, numSelCol, bgen.new_covdata, &bgen.new_covdata);
+        int phenoType = checkBinary(phenomap, bgen.sampleID);
+        checkBinaryCovariates(phenomap, bgen.sampleID, bgen.include_idx, numExpSelCol, numSelCol, &binE, &binE_idx, &map_ret);
+        phenomap.clear();
+
+        if ((cmd.center == 1) || (cmd.scale == 1)) {
+            center(cmd.center, cmd.scale, samSize, numSelCol, bgen.new_covdata, &bgen.new_covdata);
+        }
         
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
@@ -318,14 +326,14 @@ int main(int argc, char* argv[]) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
 			for (uint i = 0; i < bgen.threads; i++) {
-				thread_grp.create_thread(boost::bind(&gemBGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, boost::ref(bgen), boost::ref(cmd)));
+				thread_grp.create_thread(boost::bind(&gemBGEN, i, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, boost::ref(bgen), boost::ref(cmd)));
 			}
+            cout << "Joining threads... \n";
 			thread_grp.join_all();
-			cout << "Joining threads... \n";
         }
         else {
             cout << "Running with single thread...\n";
-            gemBGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], &bgen.new_covdata[0], miuvec, bgen, cmd);
+            gemBGEN(0, phenoType, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, map_ret, bgen, cmd);
         }
         cmd.threads = bgen.threads;
         end_time = std::chrono::high_resolution_clock::now();
@@ -336,7 +344,7 @@ int main(int argc, char* argv[]) {
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
     auto start_time = std::chrono::high_resolution_clock::now();
-    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle, cmd.robust, sigma2);
+    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle, cmd.robust, sigma2, binE, binE_idx);
     std::ofstream results(output, std::ios_base::app);
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
@@ -345,7 +353,6 @@ int main(int argc, char* argv[]) {
 
          thread_output.close();
          boost::filesystem::remove(threadOutputFile.c_str());
-
     }
     results.close();
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -356,7 +363,7 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
     double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
     cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-    cout << "Total CPU Time = " << cpuduration << "  Seconds\n";
+    cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
     cout << "*********************************************************\n";
     
     
@@ -364,25 +371,77 @@ int main(int argc, char* argv[]) {
 }
 
 
-int checkBinary(vector<double>data_in) {
+int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID) {
 
     int is_bin = 1;
-    std::unordered_map<double, int> map;
+    std::unordered_map<string, int> map;
+    for (size_t i = 0; i < sampleID.size(); i++) {
+        auto tmp = phenoMap[sampleID[i]];
 
-    for (size_t i = 0; i < data_in.size(); i++) {
-        if (!map.count(data_in[i])) {
-            map[data_in[i]] = 1;
-            if (map.size() > 2) {
-                is_bin = 0;
-                break;
+        if (!map.count(tmp[0])) {
+            map[tmp[0]] = 1;
+        }
+        if (map.size() > 2) {
+            is_bin = 0;
+            break;
+        }
+    }
+    if (map.size() < 2) {
+        is_bin = 0;
+    }
+    
+    return is_bin;
+}
+
+void checkBinaryCovariates(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol, std::vector<string>* binE_in, std::vector<int>* binE_idx_in, std::unordered_map<long int, vector<int>>* map_ret) {
+    
+    std::vector<int> binE_idx;
+    std::vector<string> binE;
+    std::unordered_map<string, int> map;
+    std::unordered_map<long int, vector<int>> map2;
+
+    int numBinE = 0;
+    for (int i = 0; i < numExpSelCol; i++) {
+         for (int j = 0; j < sampleID.size(); j++ ) {
+              auto tmp = phenoMap[sampleID[j]];
+              if (!map.count(tmp[1 + i])) {
+                  map[tmp[1 + i]] = 1;
+              }
+              if (map.size() > 2) {
+                  break;
+              }
+         }
+         if (map.size() == 2) {
+            binE_idx.push_back(i + 1);
+            for(auto kv : map) {
+                binE.push_back(kv.first);
+            } 
+            numBinE++;
+         }
+         map.clear();
+    }
+
+
+    if (numBinE > 0) {
+        for (int i = 0; i < numBinE; i++) {
+            int tmp1 = i*2;
+            for (int j = 0; j < sampleID.size(); j++ ) {
+                auto tmp = phenoMap[sampleID[j]];
+                
+                if (binE[tmp1].compare(tmp[binE_idx[i]]) == 0) {
+                    map2[include_idx[j]].push_back(1);
+                } else {
+                    map2[include_idx[j]].push_back(0);
+                }
+                
             }
         }
     }
-    return is_bin;
 
+    *map_ret = map2;
+    *binE_in = binE;
+    *binE_idx_in = binE_idx;
 }
-
-
 
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret) {
 
@@ -625,33 +684,45 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 }
 
 
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2) {
+void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, vector<string> binE, vector<int> binE_idx) {
 
     std::ofstream results(output, std::ofstream::binary);
 
-    if (outStyle.compare("full") == 0) {
+    bool printFull = false;
+    int printStart = 1; 
+    int printEnd   = numExpSelCol+1; 
+    if (outStyle.compare("meta") == 0) {
+        printStart = 0; 
+        printEnd   = Sq1;
+    } else if (outStyle.compare("full") == 0) {
+        printStart = 0; 
+        printEnd   = Sq1; 
+        printFull  = true;
         results << "#dispersion: " << sigma2 << "\n";
     }
 
-    if (useBgen) {
-        results << "SNPID" << "\t" << "RSID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-    }
-    else {
-        results << "SNPID" << "\t" << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
-    }
-
-   
     for (int i = 0; i < Sq1-1; i++) {
         covNames[i] = "G-" + covNames[i];
     }
     covNames.insert(covNames.begin(), "G");
 
-    bool printFull = false;
-    int printStart = 1; int printEnd = numExpSelCol+1; 
-    if (outStyle.compare("meta") == 0) {
-        printStart = 0; printEnd = Sq1;
-    } else if (outStyle.compare("full") == 0) {
-        printStart = 0; printEnd = Sq1; printFull = true;
+
+    results << "SNPID" << "\t" << ((useBgen) ? "RSID \t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
+    if (binE_idx.size() > 0) {
+        for (size_t i = 0; i < binE_idx.size(); i++) {
+            results << "N_" << covNames[binE_idx[i]] << "_" << binE[i*2] << "\t" << "AF_" << covNames[binE_idx[i]] << "_" << binE[i*2] << "\t";
+            results << "N_" << covNames[binE_idx[i]] << "_" << binE[i*2 + 1] << "\t" << "AF_" << covNames[binE_idx[i]] << "_" << binE[i*2 + 1] << "\t";
+        }
+    }
+    results << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
+
+
+
+    string seHeader  = "SE_Beta_";
+    string covHeader = "Cov_Beta_";
+    if (robust == 1) {
+        seHeader  = "robust_" + seHeader;
+        covHeader = "robust_" + covHeader;
     }
 
     if (numExpSelCol != 0) {
@@ -659,20 +730,27 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
             results << "Beta_" << covNames[i] << "\t";
         }
         for (int i = printStart; i < printEnd; i++) {
-             results << "Var_Beta_" << covNames[i] << "\t";  
+             results << seHeader << covNames[i] << "\t";  
         }
         for (int i = printStart; i < printEnd; i++) {
             for (int j = printStart; j < printEnd; j++) {
                 if (i < j) {
-                   results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t";  
+                   results << covHeader << covNames[i] << "_" << covNames[j] << "\t";  
                 } 
             }
         }
         if ((robust == 1) && printFull) {
             for (int i = printStart; i < printEnd; i++) {
                 for (int j = printStart; j < printEnd; j++) {
-                    if (i <= j) {
-                        results << "V_" << covNames[i] << "_" << covNames[j] << "\t"; 
+                    if (i == j) {
+                        results << "SE_Beta_" << covNames[j] << "\t"; 
+                    }
+                }
+            }
+            for (int i = printStart; i < printEnd; i++) {
+                for (int j = printStart; j < printEnd; j++) {
+                    if (i < j) {
+                        results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t"; 
                     }
                 }
             }

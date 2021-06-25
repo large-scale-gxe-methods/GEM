@@ -698,7 +698,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int variant_index = 0;
     int keepIndex = 0;
     vector<double> buf(file_sample_ct);
-    while (snploop <= 1) {
+    while (snploop <= end) {
 
         int stream_i = 0;
         while (stream_i < stream_snps) {

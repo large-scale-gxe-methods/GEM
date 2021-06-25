@@ -62,3 +62,4 @@ typedef unsigned short ushort;
 #include "ReadBGEN.h"
 #include "ReadPGEN.h"
 #include "ReadBed.h"
+#include "BinaryEUtils.h"

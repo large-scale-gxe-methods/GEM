@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 void print_help();
 

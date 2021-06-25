@@ -9,8 +9,8 @@
 
 
 
-void Pgen::processPgenHeader(string pgenFile) {
-
+void Pgen::processPgenHeader(string pgenFile) 
+{
     cout << "General information of PGEN file. \n";
 
     const char* geno_filename = pgenFile.c_str();
@@ -92,8 +92,8 @@ void Pgen::processPgenHeader(string pgenFile) {
 
 
 // This functions reads the .psam file
-void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
-
+void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) 
+{
      unordered_set<int> genoUnMatchID;
      new_phenodata.resize(samSize);
      new_covdata.resize(samSize * (numSelCol+1));
@@ -251,9 +251,8 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 }
 
 
-void Pgen::processPvar(Pgen pgen, string pvarFile) {
-
-
+void Pgen::processPvar(Pgen pgen, string pvarFile) 
+{
     std::ifstream fIDMat;
     fIDMat.open(pvarFile);
 
@@ -370,8 +369,8 @@ void Pgen::processPvar(Pgen pgen, string pvarFile) {
 
 
 
-void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
-
+void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) 
+{
     uint32_t nSNPS = pgen.raw_variant_ct;
     int count = 0;
     std::set<std::string> includeVariant;
@@ -518,393 +517,394 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd) {
 
 
 
-void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Pgen pgen, CommandLine cmd) {
+void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Pgen pgen, CommandLine cmd) 
+{
+    auto start_time = std::chrono::high_resolution_clock::now();
+    std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
+    std::ofstream results(output, std::ofstream::binary);
+    std::ostringstream oss;
 
-        auto start_time = std::chrono::high_resolution_clock::now();
-        std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
-        std::ofstream results(output, std::ofstream::binary);
-        std::ostringstream oss;
+
+    bool filterVariants = pgen.filterVariants;
+    string outStyle = cmd.outStyle;
+    int phenoType   = pgen.phenoType;
+    int stream_snps = cmd.stream_snps;
+    int samSize     = pgen.new_samSize;
+    int robust      = cmd.robust;
+    int intSq1      = cmd.numIntSelCol + 1;
+    int expSq       = cmd.numExpSelCol;
+    int expSq1      = expSq+1;
+    int Sq1         = intSq1 + expSq;
+    int Sq          = Sq1-1;
+    int numSelCol1  = cmd.numSelCol + Sq1;
+    double MAF      = cmd.MAF;
+    double maxMAF   = 1 - MAF;
+    double missGenoCutoff = cmd.missGenoRate;
+    vector<long int> include_idx = pgen.include_idx;
 
 
-        bool filterVariants = pgen.filterVariants;
-        string outStyle = cmd.outStyle;
-        int stream_snps = cmd.stream_snps;
-        int samSize     = pgen.new_samSize;
-        int robust      = cmd.robust;
-        int intSq1      = cmd.numIntSelCol + 1;
-        int expSq       = cmd.numExpSelCol;
-        int expSq1      = expSq+1;
-        int Sq1         = intSq1 + expSq;
-        int Sq          = Sq1-1;
-        int numSelCol1  = cmd.numSelCol + Sq1;
-        double MAF      = cmd.MAF;
-        double maxMAF   = 1 - MAF;
-        double missGenoCutoff = cmd.missGenoRate;
-        vector<long int> include_idx = pgen.include_idx;
+    size_t numBinE = binE.numBinE;
+    size_t numSubStrata = binE.numSubStrata;
+    vector<int> sub_stratum_idx = binE.sub_stratum_idx;
+    vector<int> stratum_idx = binE.stratum_idx;
+    vector<int> sub_stratum_size = binE.sub_stratum_size;
+    bool strata = (numBinE > 0 ) ? true : false;
+    int strataLen = pow(2, numBinE);
+    size_t subStrataLen = sub_stratum_idx.size();
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+    vector<double> sub_binE_AF(stream_snps * numSubStrata, 0.0), sub_binE_N(stream_snps * numSubStrata, 0.0);
 
-        size_t numBinE;
-        bool strata = (binMap.size() > 0 ) ? true : false;
-        vector<vector<double>> binE_AF_0(stream_snps), binE_AF_1(stream_snps), binE_N_0(stream_snps), binE_N_1(stream_snps);
-        if (strata) {
-            numBinE = binMap[include_idx[0]].size();
-            for (int ss = 0; ss < stream_snps; ss++) {
-                binE_AF_0[ss].resize(numBinE, 0.0);
-                binE_AF_1[ss].resize(numBinE, 0.0);
-                binE_N_0[ss].resize(numBinE,  0.0);
-                binE_N_1[ss].resize(numBinE,  0.0);
-            }
+
+    int pvarLast = pgen.pvarLast;
+    vector<int> pvarIndex = pgen.pvarIndex;
+    uint32_t snploop = pgen.begin[thread_num], end = pgen.end[thread_num];
+    std::vector<long long unsigned int> pgenPos = pgen.pgenVariantPos;
+
+    int ZGS_col = Sq1 * stream_snps;
+    vector <uint>   missingIndex;
+    vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
+    vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
+    vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
+    vector <double> AF(stream_snps);
+    vector <string> geno_snpid(stream_snps);
+    double* WZGS = &WZGSvec[0];
+    double* covX = &pgen.new_covdata[0];   
+
+    int pvarLength = pgen.pvarIndex.size();
+    std::ifstream fIDMat;
+    fIDMat.open(cmd.pvarFile);
+    string IDline;
+    string tmpvalue;
+    vector <string> tmpvalues;
+    int prev = fIDMat.tellg();
+    while (getline(fIDMat, IDline)) {
+        std::istringstream iss(IDline);
+        while (getline(iss, tmpvalue, '\t')) {
+            tmpvalue.erase(std::remove(tmpvalue.begin(), tmpvalue.end(), '\r'), tmpvalue.end());
+            tmpvalues.push_back(tmpvalue);
         }
+        if (tmpvalues[0].rfind("##", 0) != 0) {
+            break;
+        }
+        prev = fIDMat.tellg();
+        tmpvalues.clear();
+    }
+    if (tmpvalues[0].compare("#CHROM") != 0) {
+        fIDMat.seekg(prev);
+    }
 
-        int pvarLast = pgen.pvarLast;
-        vector<int> pvarIndex = pgen.pvarIndex;
-        uint32_t snploop = pgen.begin[thread_num], end = pgen.end[thread_num];
-        std::vector<long long unsigned int> pgenPos = pgen.pgenVariantPos;
+    uint32_t skipIndex = 0;
+    if (!filterVariants) {
+        while (skipIndex != snploop) {
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+    }
+    else {
+        while (skipIndex != pgenPos[snploop]) {
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+    }
 
-        int ZGS_col = Sq1 * stream_snps;
-        vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
-        vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
-        vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
-        vector <double> AF(stream_snps);
-        vector<uint> missingIndex;
-        vector <string> geno_snpid(stream_snps);
-        double* WZGS = &WZGSvec[0];
-        double* covX = &pgen.new_covdata[0];   
+    const char* geno_filename = cmd.pgenFile.c_str();
+
+    plink2::PgenFileInfo _info_ptr;
+    plink2::PreinitPgfi(&_info_ptr);
+    plink2::PgenHeaderCtrl header_ctrl;
+
+    uintptr_t pgfi_alloc_cacheline_ct;
+    char errstr_buf[plink2::kPglErrstrBufBlen];
+    if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
+        throw std::runtime_error(errstr_buf);
+    }
+
+    const uint32_t raw_variant_ct = _info_ptr.raw_variant_ct;
+    const uint32_t file_sample_ct = _info_ptr.raw_sample_ct;
+
+    unsigned char* pgfi_alloc = nullptr;
+    if (plink2::cachealigned_malloc(pgfi_alloc_cacheline_ct * plink2::kCacheline, &pgfi_alloc)) {
+        cerr << "Out of memory" << endl;
+    }
+
+    uint32_t max_vrec_width;
+    uintptr_t pgr_alloc_cacheline_ct;
+    if (PgfiInitPhase2(header_ctrl, 1, 0, 0, 0, raw_variant_ct, &max_vrec_width, &_info_ptr, pgfi_alloc, &pgr_alloc_cacheline_ct, errstr_buf)) {
+        if (pgfi_alloc && (!_info_ptr.vrtypes)) {
+            plink2::aligned_free(pgfi_alloc);
+        }
+        throw std::runtime_error(errstr_buf);
+    }
+    
+    plink2::PgenVariant _pgv;
+    plink2::PgenReader _state_ptr;
+    plink2::PreinitPgr(&_state_ptr);
+    plink2::PgrSetFreadBuf(nullptr, &_state_ptr);
+    const uintptr_t pgr_alloc_main_byte_ct = pgr_alloc_cacheline_ct * plink2::kCacheline;
+    const uintptr_t sample_subset_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerVec) * plink2::kBytesPerVec;
+    const uintptr_t cumulative_popcounts_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerWord * plink2::kInt32PerVec) * plink2::kBytesPerVec;
+    const uintptr_t genovec_byte_ct = plink2::DivUp(file_sample_ct, plink2::kNypsPerVec) * plink2::kBytesPerVec;
+    const uintptr_t dosage_main_byte_ct = plink2::DivUp(file_sample_ct, (2 * plink2::kInt32PerVec)) * plink2::kBytesPerVec;
+    uintptr_t multiallelic_hc_byte_ct = 0;
+
+    unsigned char* pgr_alloc;
+    if (plink2::cachealigned_malloc(pgr_alloc_main_byte_ct + (2 * plink2::kPglNypTransposeBatch + 5) * sample_subset_byte_ct + cumulative_popcounts_byte_ct + (1 + plink2::kPglNypTransposeBatch) * genovec_byte_ct + multiallelic_hc_byte_ct + dosage_main_byte_ct + plink2::kPglBitTransposeBufbytes + 4 * (plink2::kPglNypTransposeBatch * plink2::kPglNypTransposeBatch / 8), &pgr_alloc)) {
+        cerr << "Out of memory" << endl;
+    }
+
+    plink2::PglErr reterr = PgrInit(geno_filename, max_vrec_width, &_info_ptr, &_state_ptr, pgr_alloc);
+    if (reterr) {
+        throw std::runtime_error("Out of memory.");
+    }
+
+    unsigned char* pgr_alloc_iter = &(pgr_alloc[pgr_alloc_main_byte_ct]);
+    uintptr_t* _subset_include_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    uintptr_t* _subset_include_interleaved_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _subset_include_interleaved_vec[-1] = 0;
+
+    pgr_alloc_iter = &(pgr_alloc_iter[cumulative_popcounts_byte_ct]);
+    _pgv.genovec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[genovec_byte_ct]);
+
+    _pgv.phasepresent = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.phaseinfo = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.dosage_present = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.dosage_main = reinterpret_cast<uint16_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[dosage_main_byte_ct]);
+
+    uint32_t _subset_size = file_sample_ct;
+    plink2::PgrSampleSubsetIndex _subset_index;
+    pgr_alloc_iter = &(pgr_alloc_iter[plink2::kPglBitTransposeBufbytes]);
 
 
-        int pvarLength = pgen.pvarIndex.size();
-        std::ifstream fIDMat;
-        fIDMat.open(cmd.pvarFile);
-        string IDline;
-        string tmpvalue;
-        vector <string> tmpvalues;
-        int prev = fIDMat.tellg();
-        while (getline(fIDMat, IDline)) {
-            std::istringstream iss(IDline);
-            while (getline(iss, tmpvalue, '\t')) {
-                tmpvalue.erase(std::remove(tmpvalue.begin(), tmpvalue.end(), '\r'), tmpvalue.end());
-                tmpvalues.push_back(tmpvalue);
-            }
-            if (tmpvalues[0].rfind("##", 0) != 0) {
+    int printStart = 1; int printEnd = expSq1;
+    bool printFull = false;
+    if (expSq == 0) {
+        printStart = 0; printEnd = 0;
+    }
+    else if (cmd.outStyle.compare("meta") == 0) {
+        printStart = 0; printEnd = Sq1;
+    } else if (cmd.outStyle.compare("full") == 0) {
+        printStart = 0; printEnd = Sq1; printFull = true;
+    }
+        
+    boost::math::chi_squared chisq_dist_M(1);
+
+    int variant_index = 0;
+    int keepIndex = 0;
+    vector<double> buf(file_sample_ct);
+    while (snploop <= 1) {
+
+        int stream_i = 0;
+        while (stream_i < stream_snps) {
+
+            if ((snploop == (end + 1)) && stream_i == 0) {
                 break;
             }
-            prev = fIDMat.tellg();
-            tmpvalues.clear();
-        }
-        if (tmpvalues[0].compare("#CHROM") != 0) {
-            fIDMat.seekg(prev);
-        }
+            if (snploop == end + 1 && stream_i != 0) {
+                stream_snps = stream_i;
+                ZGS_col = Sq1 * stream_snps;
+                break;
+            }
 
+            if (snploop >= _info_ptr.raw_variant_ct) {
+                char errstr_buf[256];
+                sprintf(errstr_buf, "variant_num out of range (%d; must be 1..%u)", snploop + 1, _info_ptr.raw_variant_ct);
+                cerr << errstr_buf << "\n";
+            }
 
-        uint32_t skipIndex = 0;
-        if (!filterVariants) {
-            while (skipIndex != snploop) {
+            uint32_t dosage_ct;
+            string value;
+            vector <string> values;
+            if (!filterVariants) {
+                reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, snploop, 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
                 getline(fIDMat, IDline);
-                skipIndex++;
+                std::istringstream iss(IDline);
+                while (getline(iss, value, '\t')) {
+                    values.push_back(value);
+                }
             }
-        }
-        else {
-            while (skipIndex != pgenPos[snploop]) {
-                getline(fIDMat, IDline);
-                skipIndex++;
-            }
-        }
-
-        const char* geno_filename = cmd.pgenFile.c_str();
-
-        plink2::PgenFileInfo _info_ptr;
-        plink2::PreinitPgfi(&_info_ptr);
-        plink2::PgenHeaderCtrl header_ctrl;
-
-        uintptr_t pgfi_alloc_cacheline_ct;
-        char errstr_buf[plink2::kPglErrstrBufBlen];
-        if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
-            throw std::runtime_error(errstr_buf);
-        }
-
-        const uint32_t raw_variant_ct = _info_ptr.raw_variant_ct;
-        const uint32_t file_sample_ct = _info_ptr.raw_sample_ct;
-
-        unsigned char* pgfi_alloc = nullptr;
-        if (plink2::cachealigned_malloc(pgfi_alloc_cacheline_ct * plink2::kCacheline, &pgfi_alloc)) {
-            cerr << "Out of memory" << endl;
-        }
-
-        uint32_t max_vrec_width;
-        uintptr_t pgr_alloc_cacheline_ct;
-        if (PgfiInitPhase2(header_ctrl, 1, 0, 0, 0, raw_variant_ct, &max_vrec_width, &_info_ptr, pgfi_alloc, &pgr_alloc_cacheline_ct, errstr_buf)) {
-            if (pgfi_alloc && (!_info_ptr.vrtypes)) {
-                plink2::aligned_free(pgfi_alloc);
-            }
-            throw std::runtime_error(errstr_buf);
-        }
-    
-        plink2::PgenVariant _pgv;
-        plink2::PgenReader _state_ptr;
-        plink2::PreinitPgr(&_state_ptr);
-        plink2::PgrSetFreadBuf(nullptr, &_state_ptr);
-        const uintptr_t pgr_alloc_main_byte_ct = pgr_alloc_cacheline_ct * plink2::kCacheline;
-        const uintptr_t sample_subset_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerVec) * plink2::kBytesPerVec;
-        const uintptr_t cumulative_popcounts_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerWord * plink2::kInt32PerVec) * plink2::kBytesPerVec;
-        const uintptr_t genovec_byte_ct = plink2::DivUp(file_sample_ct, plink2::kNypsPerVec) * plink2::kBytesPerVec;
-        const uintptr_t dosage_main_byte_ct = plink2::DivUp(file_sample_ct, (2 * plink2::kInt32PerVec)) * plink2::kBytesPerVec;
-        uintptr_t multiallelic_hc_byte_ct = 0;
-
-        unsigned char* pgr_alloc;
-        if (plink2::cachealigned_malloc(pgr_alloc_main_byte_ct + (2 * plink2::kPglNypTransposeBatch + 5) * sample_subset_byte_ct + cumulative_popcounts_byte_ct + (1 + plink2::kPglNypTransposeBatch) * genovec_byte_ct + multiallelic_hc_byte_ct + dosage_main_byte_ct + plink2::kPglBitTransposeBufbytes + 4 * (plink2::kPglNypTransposeBatch * plink2::kPglNypTransposeBatch / 8), &pgr_alloc)) {
-            cerr << "Out of memory" << endl;
-        }
-
-        plink2::PglErr reterr = PgrInit(geno_filename, max_vrec_width, &_info_ptr, &_state_ptr, pgr_alloc);
-        if (reterr) {
-            throw std::runtime_error("Out of memory.");
-        }
-
-        unsigned char* pgr_alloc_iter = &(pgr_alloc[pgr_alloc_main_byte_ct]);
-        uintptr_t* _subset_include_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
-        uintptr_t* _subset_include_interleaved_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
-        _subset_include_interleaved_vec[-1] = 0;
-
-        pgr_alloc_iter = &(pgr_alloc_iter[cumulative_popcounts_byte_ct]);
-        _pgv.genovec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[genovec_byte_ct]);
-
-        _pgv.phasepresent = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
-        _pgv.phaseinfo = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
-        _pgv.dosage_present = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
-        _pgv.dosage_main = reinterpret_cast<uint16_t*>(pgr_alloc_iter);
-        pgr_alloc_iter = &(pgr_alloc_iter[dosage_main_byte_ct]);
-
-        uint32_t _subset_size = file_sample_ct;
-        plink2::PgrSampleSubsetIndex _subset_index;
-        pgr_alloc_iter = &(pgr_alloc_iter[plink2::kPglBitTransposeBufbytes]);
-
-
-        int printStart = 1; int printEnd = expSq1;
-        bool printFull = false;
-        if (expSq == 0) {
-            printStart = 0; printEnd = 0;
-        }
-        else if (cmd.outStyle.compare("meta") == 0) {
-            printStart = 0; printEnd = Sq1;
-        } else if (cmd.outStyle.compare("full") == 0) {
-            printStart = 0; printEnd = Sq1; printFull = true;
-        }
-        
-        boost::math::chi_squared chisq_dist_M(1);
-
-        int variant_index = 0;
-        int keepIndex = 0;
-        vector<double> buf(file_sample_ct);
-        while (snploop <= end) {
-
-            int stream_i = 0;
-            while (stream_i < stream_snps) {
-
-                if ((snploop == (end + 1)) && stream_i == 0) {
-                    break;
-                }
-                if (snploop == end + 1 && stream_i != 0) {
-                    stream_snps = stream_i;
-                    ZGS_col = Sq1 * stream_snps;
-                    break;
-                }
-
-                if (snploop >= _info_ptr.raw_variant_ct) {
-                    char errstr_buf[256];
-                    sprintf(errstr_buf, "variant_num out of range (%d; must be 1..%u)", snploop + 1, _info_ptr.raw_variant_ct);
-                    cerr << errstr_buf << "\n";
-                }
-
-                uint32_t dosage_ct;
-                string value;
-                vector <string> values;
-                if (!filterVariants) {
-                    reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, snploop, 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
-                    getline(fIDMat, IDline);
-                    std::istringstream iss(IDline);
-                    while (getline(iss, value, '\t')) {
-                        values.push_back(value);
-                    }
-                }
-                else {
-                    while (skipIndex != pgenPos[snploop]) {
-                        getline(fIDMat, IDline);
-                        skipIndex++;
-                    }
+            else {
+                while (skipIndex != pgenPos[snploop]) {
                     getline(fIDMat, IDline);
                     skipIndex++;
-                    std::istringstream iss(IDline);
-                    while (getline(iss, value, '\t')) {
-                        values.push_back(value);
-                    }
-                    reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, pgenPos[snploop], 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
                 }
-                plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
-                snploop++;
-
-                int tmp1 = stream_i * Sq1 * samSize;
-                int idx_k = 0;
-                int nMissing = 0;
-                for (uint32_t n = 0; n < file_sample_ct; n++) {
-                    if (buf[n] == -9.0) {
-                        if (include_idx[idx_k] == n) {
-                            nMissing++;
-                            missingIndex.push_back(idx_k);
-                            idx_k++;
-                        }
-                        continue;
-                     }
-
-                     if (include_idx[idx_k] == n) {
-                         int tmp2 = idx_k + tmp1;
-                         AF[stream_i] += buf[n];
-
-                         if (phenoType == 1) {
-                              ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * buf[n];
-                         }
-                         else {
-                             ZGSvec[tmp2] = buf[n];
-                         }
-
-                         if (strata) {
-                             for (size_t e = 0; e < numBinE; e++) {
-                                 if (binMap[include_idx[idx_k]][e]) {
-                                     binE_AF_0[stream_i][e]+=buf[n];
-                                     binE_N_0[stream_i][e]+=1.0;
-                                 } else {
-                                     binE_AF_1[stream_i][e]+=buf[n];
-                                     binE_N_1[stream_i][e]+=1.0;;
-                                 }
-                             }
-                         }
-                         idx_k++;
-                     }
-
+                getline(fIDMat, IDline);
+                skipIndex++;
+                std::istringstream iss(IDline);
+                while (getline(iss, value, '\t')) {
+                    values.push_back(value);
                 }
+                reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, pgenPos[snploop], 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
+            }
+            plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
+            snploop++;
 
-                double gmean = AF[stream_i] / double(samSize - nMissing);
-                double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
-                double percMissing = nMissing / (samSize * 1.0);
-                
-                if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                    AF[stream_i] = 0.0;
-                    if (strata) {
-                        for (size_t e = 0; e < numBinE; e++) {
-                            binE_N_0[stream_i][e] = 0.0;
-                            binE_N_1[stream_i][e] = 0.0;
-                            binE_AF_0[stream_i][e] = 0.0;
-                            binE_AF_1[stream_i][e] = 0.0;
-                        }
+            int tmp1 = stream_i * Sq1 * samSize;
+            int strata_tmp = stream_i * strataLen;
+            int idx_k = 0;
+            int nMissing = 0;
+            for (uint32_t n = 0; n < file_sample_ct; n++) {
+                if (buf[n] == -9.0) {
+                    if (include_idx[idx_k] == n) {
+                        nMissing++;
+                        missingIndex.push_back(idx_k);
+                        idx_k++;
                     }
                     continue;
                 }
-                else {
-                    AF[stream_i] = cur_AF;
-                }
 
+                if (include_idx[idx_k] == n) {
+                    int tmp2 = idx_k + tmp1;
+                    AF[stream_i] += buf[n];
 
-                if (strata) {
-                    for (size_t e = 0; e < numBinE; e++) {
-                        binE_AF_0[stream_i][e] = (binE_N_0[stream_i][e] >= 1.0) ? binE_AF_0[stream_i][e] / binE_N_0[stream_i][e] / 2.0 : NAN;
-                        binE_AF_1[stream_i][e] = (binE_N_1[stream_i][e] >= 1.0) ? binE_AF_1[stream_i][e] / binE_N_1[stream_i][e] / 2.0 : NAN;
-                    }
-                }
-
-                if (nMissing > 0) {
-                    if (phenoType == 0) {
-                        for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = gmean;
-                        }
+                    if (phenoType == 1) {
+                        ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * buf[n];
                     }
                     else {
-                        for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+                        ZGSvec[tmp2] = buf[n];
+                    }
+                        
+                    if (strata) {
+                        binE_N[strata_tmp + stratum_idx[idx_k]]+=1.0;
+                        binE_AF[strata_tmp + stratum_idx[idx_k]]+=buf[n];
+                    }
+
+                    idx_k++;
+                }
+            }
+
+            double gmean = AF[stream_i] / double(samSize - nMissing);
+            double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
+            double percMissing = nMissing / (samSize * 1.0);
+
+            if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
+                AF[stream_i] = 0.0;
+                if (strata) {
+                    for (int i = 0; i < strataLen; i++) {
+                        binE_N[strata_tmp + i] = 0.0;
+                        binE_AF[strata_tmp + i] = 0.0;
+                    }
+                }
+                continue;
+            }
+            else {
+                AF[stream_i] = cur_AF;
+            }
+
+            if (strata) {
+                int sub_strata_tmp = stream_i * numSubStrata;
+                if (numBinE > 1) {
+                    size_t ss = 0;
+                    size_t k = 0;
+                    while (ss < subStrataLen) {
+                        for (int j = 0; j < sub_stratum_size[k]; j++) {
+                            sub_binE_N[k] = sub_binE_N[k] + binE_N[sub_strata_tmp + sub_stratum_idx[ss]];
+                            sub_binE_AF[k] = sub_binE_AF[k] + binE_AF[sub_strata_tmp +sub_stratum_idx[ss]];
+                            ss++;
                         }
+                        sub_binE_AF[k] = sub_binE_AF[k] / sub_binE_N[k] / 2.0;
+                        k++;
                     }
-                    missingIndex.clear();
-                }
+      
+                } 
 
-                string tmpString = "";
-                values[pvarLast].erase(std::remove(values[pvarLast].begin(), values[pvarLast].end(), '\r'), values[pvarLast].end());
-                for (int p = 0; p < pvarLength; p++) {
-                    tmpString = tmpString + values[pvarIndex[p]] + "\t";
+                for (int i = 0; i < strataLen; i++) {
+                    binE_AF[i] = binE_AF[i] / binE_N[i] / 2.0;
                 }
-                geno_snpid[stream_i] = tmpString + std::to_string(samSize - nMissing);
-
-                for (int j = 0; j < Sq; j++) {
-                    int tmp3 = samSize * (j + 1) + tmp1;
-                    for (int i = 0; i < samSize; i++) {
-                        int tmp4 = i * numSelCol1;
-                        ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
-                    }
-                }
-                variant_index++;
-                stream_i++;
-                keepIndex++;
             }
 
-            if ((snploop == (end + 1)) & (stream_i == 0)) {
-                break;
-            }
-
-            /***************************************************************/
-            //	genodata and envirment data
-            double* ZGS = &ZGSvec[0];
-            double* ZGSR2 = &ZGSR2vec[0];
-            // transpose(X) * ZGS
-            // it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
-            // important!!!!
-            double* XtransZGS = new double[numSelCol1 * ZGS_col];
-            matNmatNprod(covX, ZGS, XtransZGS, numSelCol1, samSize, ZGS_col);
-
-            if (phenoType == 0) {
-                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
-                matAdd(ZGS, ZGSR2, samSize * ZGS_col, -1);
-                if (robust == 1) {
-                    for (int j = 0; j < ZGS_col; j++) {
-                        for (int i = 0; i < samSize; i++) {
-                            ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
-                        }
+            if (nMissing > 0) {
+                if (phenoType == 0) {
+                    for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = gmean;
                     }
                 }
+                else {
+                    for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+                    }
+                }
+                missingIndex.clear();
             }
-            else if (phenoType == 1) {
-                WZGSvec = ZGSvec;
-                matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
-                matAdd(WZGS, ZGSR2, samSize * ZGS_col, -1);
 
+            string tmpString = "";
+            values[pvarLast].erase(std::remove(values[pvarLast].begin(), values[pvarLast].end(), '\r'), values[pvarLast].end());
+            for (int p = 0; p < pvarLength; p++) {
+                tmpString = tmpString + values[pvarIndex[p]] + "\t";
+            }
+            geno_snpid[stream_i] = tmpString + std::to_string(samSize - nMissing);
+
+            for (int j = 0; j < Sq; j++) {
+                int tmp3 = samSize * (j + 1) + tmp1;
+                for (int i = 0; i < samSize; i++) {
+                    int tmp4 = i * numSelCol1;
+                    ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
+                }
+            }
+            variant_index++;
+            stream_i++;
+            keepIndex++;
+        }
+
+        if ((snploop == (end + 1)) & (stream_i == 0)) { break; }
+
+        /***************************************************************/
+        double* ZGS = &ZGSvec[0];
+        double* ZGSR2 = &ZGSR2vec[0];
+
+        // transpose(X) * ZGS
+        // it is non-squred matrix, attention that continuous memory is column-major due to Fortran in BLAS.
+        // important!!!!
+        double* XtransZGS = new double[numSelCol1 * ZGS_col];
+        matNmatNprod(covX, ZGS, XtransZGS, numSelCol1, samSize, ZGS_col);
+
+        if (phenoType == 0) {
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
+            matAdd(ZGS, ZGSR2, samSize * ZGS_col, -1);
+            if (robust == 1) {
                 for (int j = 0; j < ZGS_col; j++) {
                     for (int i = 0; i < samSize; i++) {
-                        ZGS[j * samSize + i] = WZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]);
-                        if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
+                        ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
                     }
                 }
             }
-            delete[] XtransZGS;
+        }
+        else if (phenoType == 1) {
+            WZGSvec = ZGSvec;
+            matNmatNprod(XinvXTX, XtransZGS, ZGSR2, samSize, numSelCol1, ZGS_col);
+            matAdd(WZGS, ZGSR2, samSize * ZGS_col, -1);
 
-
-            // transpose(ZGS) * resid
-            double* ZGStR = new double[ZGS_col];
-            matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
-            // transpose(ZGS) * ZGS
-            double* ZGStZGS = new double[ZGS_col * ZGS_col];
-            if (phenoType == 0) {
-                matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
+            for (int j = 0; j < ZGS_col; j++) {
+                for (int i = 0; i < samSize; i++) {
+                    ZGS[j * samSize + i] = WZGS[j * samSize + i] / miu[i] / (1.0 - miu[i]);
+                    if (robust == 1) ZGSR2vec[j * samSize + i] = ZGS[j * samSize + i] * resid[i] * resid[i];
+                }
             }
-            if (phenoType == 1) {
-                matmatTprod(ZGS, WZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
-            }
+        }
+        delete[] XtransZGS;
 
-            // transpose(ZGSR2) * ZGS
-            double* ZGSR2tZGS = new double[ZGS_col * ZGS_col];
-            if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
+        // transpose(ZGS) * resid
+        double* ZGStR = new double[ZGS_col];
+        matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
+        // transpose(ZGS) * ZGS
+        double* ZGStZGS = new double[ZGS_col * ZGS_col];
+        if (phenoType == 0) {
+            matmatTprod(ZGS, ZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
+        }
+        if (phenoType == 1) {
+            matmatTprod(ZGS, WZGS, ZGStZGS, ZGS_col, samSize, ZGS_col);
+        }
+        // transpose(ZGSR2) * ZGS
+        double* ZGSR2tZGS = new double[ZGS_col * ZGS_col];
+        if (robust == 1) matmatTprod(ZGSR2, ZGS, ZGSR2tZGS, ZGS_col, samSize, ZGS_col);
 
 
         double*  betaM      = new double[stream_snps];
@@ -1106,14 +1106,14 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
         for (int i = 0; i < stream_snps; i++) {
             oss << geno_snpid[i] << "\t" << AF[i] << "\t";
-            if (strata) {
-                for (size_t k = 0; k < numBinE; k++) {
-                    oss << binE_N_0[i][k] << "\t" << binE_AF_0[i][k] << "\t" << binE_N_1[i][k] << "\t" << binE_AF_1[i][k] << "\t";
-                    binE_N_0[i][k] = 0.0;
-                    binE_N_1[i][k] = 0.0;
-                    binE_AF_0[i][k] = 0.0;
-                    binE_AF_1[i][k] = 0.0;
-                }
+
+            int tmp_sub_strata = i * numSubStrata;
+            int tmp_strata = i * strataLen;
+            for (int k = 0; k < numSubStrata; k++) {
+                oss << sub_binE_N[tmp_sub_strata + k] << "\t" << sub_binE_AF[tmp_sub_strata + k] << "\t";
+            }
+            for (int k = 0; k < strataLen; k++) {
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
             }
             oss << betaM[i] << "\t" << VarbetaM[i] << "\t";
 
@@ -1159,7 +1159,12 @@ void gemPGEN(int thread_num, int phenoType, double sigma2, double* resid, double
             AF[i] = 0.0;
         }
 
-
+        if (strata) {       
+            std::fill(binE_N.begin(), binE_N.end(), 0.0);
+            std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+            std::fill(sub_binE_N.begin(), sub_binE_N.end(), 0.0);
+            std::fill(sub_binE_AF.begin(), sub_binE_AF.end(), 0.0);
+        }
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;

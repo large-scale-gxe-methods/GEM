@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ReadParameters.h"
+#include "BinaryEUtils.h"
 #include "TimeUtils.h"
 #ifndef READBGEN_H
 #define READBGEN_H
@@ -36,6 +37,7 @@ class Bgen {
         std::vector<unsigned int> includeVariantIndex;
 
         // For multithreading BGEN file
+        int phenoType;
         uint threads;
         bool filterVariants;
         std::vector<uint> Mbgen_begin;
@@ -49,5 +51,5 @@ class Bgen {
         void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Bgen bgen, CommandLine cmd);
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Bgen bgen, CommandLine cmd);
 #endif

@@ -701,7 +701,7 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu,  std::unordered_map<long int, vector<int>> binMap, Bgen bgen, CommandLine cmd) {
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu,  BinE binE, Bgen bgen, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -737,6 +737,7 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
     bool filterVariants = bgen.filterVariants;
     string outStyle = cmd.outStyle;
+    int phenoType   = bgen.phenoType;
     int stream_snps = cmd.stream_snps;
     int samSize     = bgen.new_samSize;
     int robust      = cmd.robust;
@@ -754,19 +755,16 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
     vector<uint> keepVariants = bgen.keepVariants[thread_num];
     uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
 
-    size_t numBinE;
-    bool strata = (binMap.size() > 0 ) ? true : false;
-    vector<vector<double>> binE_AF_0(stream_snps), binE_AF_1(stream_snps), binE_N_0(stream_snps), binE_N_1(stream_snps);
-    if (strata) {
-        numBinE = binMap[include_idx[0]].size();
-
-        for (int ss = 0; ss < stream_snps; ss++) {
-            binE_AF_0[ss].resize(numBinE, 0.0);
-            binE_AF_1[ss].resize(numBinE, 0.0);
-            binE_N_0[ss].resize(numBinE,  0.0);
-            binE_N_1[ss].resize(numBinE,  0.0);
-        }
-    }
+    size_t numBinE = binE.numBinE;
+    size_t numSubStrata = binE.numSubStrata;
+    vector<int> sub_stratum_idx = binE.sub_stratum_idx;
+    vector<int> stratum_idx = binE.stratum_idx;
+    vector<int> sub_stratum_size = binE.sub_stratum_size;
+    bool strata = (numBinE > 0 ) ? true : false;
+    int strataLen = pow(2, numBinE);
+    size_t subStrataLen = sub_stratum_idx.size();
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+    vector<double> sub_binE_AF(stream_snps * numSubStrata, 0.0), sub_binE_N(stream_snps * numSubStrata, 0.0);
 
     int ZGS_col  = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
@@ -867,6 +865,7 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
             uint nMissing = 0;
             int tmp1 = stream_i * Sq1 * samSize;
+            int strata_tmp = stream_i * strataLen;
             if (Layout == 1) {
                 uint16_t* probs_start;
                 if (CompressedSNPBlocks == 1) {
@@ -913,15 +912,8 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                             }
 
                             if (strata) {
-                                for (size_t e = 0; e < numBinE; e++) {
-                                    if (binMap[include_idx[idx_k]][e]) {
-                                        binE_AF_0[stream_i][e]+=dosage;
-                                        binE_N_0[stream_i][e]+=1.0;
-                                    } else {
-                                        binE_AF_1[stream_i][e]+=dosage;
-                                        binE_N_1[stream_i][e]+=1.0;;
-                                    }
-                                }
+                                binE_N[strata_tmp + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_tmp + stratum_idx[idx_k]]+=dosage;
                             }
                         }
 
@@ -1061,15 +1053,8 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                             }
 
                             if (strata) {
-                                for (size_t e = 0; e < numBinE; e++) {
-                                    if (binMap[include_idx[idx_k]][e]) {
-                                        binE_AF_0[stream_i][e]+=dosage;
-                                        binE_N_0[stream_i][e]+=1.0;
-                                    } else {
-                                        binE_AF_1[stream_i][e]+=dosage;
-                                        binE_N_1[stream_i][e]+=1.0;;
-                                    }
-                                }
+                                binE_N[strata_tmp + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_tmp + stratum_idx[idx_k]]+=dosage;
                             }
                             idx_k++;
                         }
@@ -1115,15 +1100,8 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
                             }
 
                             if (strata) {
-                                for (size_t e = 0; e < numBinE; e++) {
-                                    if (binMap[include_idx[idx_k]][e]) {
-                                        binE_AF_0[stream_i][e]+=dosage;
-                                        binE_N_0[stream_i][e]+=1.0;
-                                    } else {
-                                        binE_AF_1[stream_i][e]+=dosage;
-                                        binE_N_1[stream_i][e]+=1.0;;
-                                    }
-                                }
+                                binE_N[strata_tmp + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_tmp + stratum_idx[idx_k]]+=dosage;
                             }
 
                             idx_k++;
@@ -1138,11 +1116,9 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0.0;
                 if (strata) {
-                    for (size_t k = 0; k < numBinE; k++) {
-                        binE_N_0[stream_i][k] = 0.0;
-                        binE_N_1[stream_i][k] = 0.0;
-                        binE_AF_0[stream_i][k] = 0.0;
-                        binE_AF_1[stream_i][k] = 0.0;
+                    for (int i = 0; i < strataLen; i++) {
+                        binE_N[strata_tmp + i] = 0.0;
+                        binE_AF[strata_tmp + i] = 0.0;
                     }
                 }
                 continue;
@@ -1152,9 +1128,22 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
             }
 
             if (strata) {
-                for (size_t e = 0; e < numBinE; e++) {
-                    binE_AF_0[stream_i][e] = (binE_N_0[stream_i][e] >= 1.0) ? binE_AF_0[stream_i][e] / binE_N_0[stream_i][e] / 2.0 : NAN;
-                    binE_AF_1[stream_i][e] = (binE_N_1[stream_i][e] >= 1.0) ? binE_AF_1[stream_i][e] / binE_N_1[stream_i][e] / 2.0 : NAN;
+                int sub_strata_tmp = stream_i * numSubStrata;
+                if (numBinE > 1) {
+                    size_t i = 0, k = 0;
+                    while (i < subStrataLen) {
+                        for (int j = 0; j < sub_stratum_size[k]; j++) {
+                            sub_binE_N[k] = sub_binE_N[k] + binE_N[sub_strata_tmp + sub_stratum_idx[i]];
+                            sub_binE_AF[k] = sub_binE_AF[k] + binE_AF[sub_strata_tmp +sub_stratum_idx[i]];
+                            i++;
+                        }
+                        sub_binE_AF[k] = sub_binE_AF[k] / sub_binE_N[k] / 2.0;
+                        k++;
+                    }
+                } 
+
+                for (int i = 0; i < strataLen; i++) {
+                    binE_AF[i] = binE_AF[i] / binE_N[i] / 2.0;
                 }
             }
             if (nMissing > 0) {
@@ -1445,16 +1434,17 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t";      
-            if (strata) {
-                for (size_t k = 0; k < numBinE; k++) {
-                    oss << binE_N_0[i][k] << "\t" << binE_AF_0[i][k] << "\t" << binE_N_1[i][k] << "\t" << binE_AF_1[i][k] << "\t";
-                    binE_N_0[i][k] = 0.0;
-                    binE_N_1[i][k] = 0.0;
-                    binE_AF_0[i][k] = 0.0;
-                    binE_AF_1[i][k] = 0.0;
-                }
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+
+            int tmp_sub_strata = i * numSubStrata;
+            int tmp_strata = i * strataLen;
+            for (int k = 0; k < numSubStrata; k++) {
+                oss << sub_binE_N[tmp_sub_strata + k] << "\t" << sub_binE_AF[tmp_sub_strata + k] << "\t";
             }
+            for (int k = 0; k < strataLen; k++) {
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
+            }
+
             oss << betaM[i] << "\t" << VarbetaM[i] << "\t";
 
             for (int ii = printStart; ii < printEnd; ii++) {
@@ -1498,7 +1488,12 @@ void gemBGEN(int thread_num, int phenoType, double sigma2, double* resid, double
             AF[i] = 0.0;
         }
 
-
+        if (strata) {       
+            std::fill(binE_N.begin(), binE_N.end(), 0.0);
+            std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+            std::fill(sub_binE_N.begin(), sub_binE_N.end(), 0.0);
+            std::fill(sub_binE_AF.begin(), sub_binE_AF.end(), 0.0);
+        }
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;

@@ -24,6 +24,7 @@ public:
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
 
+    int phenoType;
     vector<uint32_t> begin;
     vector<uint32_t> end;
     uint32_t threads;
@@ -36,6 +37,6 @@ public:
     void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 
-void gemBED(int thread_num, int phenoType, double sigma2, double* resid, double* XinvXTX, vector<double> miu, std::unordered_map<long int, vector<int>> binMap, Bed bed, CommandLine cmd);
+void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE,  Bed bed, CommandLine cmd);
 
 #endif

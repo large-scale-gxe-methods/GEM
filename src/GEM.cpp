@@ -39,7 +39,7 @@
 int  checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID);
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
-void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta);
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta, int phenoType, int samSize);
 void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, BinE binE);
 
 int main(int argc, char* argv[]) {
@@ -54,7 +54,6 @@ int main(int argc, char* argv[]) {
     int phenoCol;
     int samIDCol;
     int robust      = cmd.robust;
-    int stream_snps = cmd.stream_snps;
     char delim      = cmd.pheno_delim;
     double epsilon  = cmd.tol;
     string phenoHeaderName = cmd.phenoName;
@@ -213,7 +212,7 @@ int main(int argc, char* argv[]) {
         samSize = pgen.new_samSize;
         
         pgen.phenoType = checkBinary(phenomap, pgen.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, pgen.sampleID, pgen.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, samSize, phenomap, pgen.sampleID, pgen.include_idx, numExpSelCol, numSelCol);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -257,7 +256,7 @@ int main(int argc, char* argv[]) {
         samSize = bed.new_samSize;
 
         bed.phenoType = checkBinary(phenomap, bed.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, bed.sampleID, bed.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, samSize, phenomap, bed.sampleID, bed.include_idx, numExpSelCol, numSelCol);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -283,7 +282,7 @@ int main(int argc, char* argv[]) {
 			thread_grp.join_all();
         }
         else {
-            auto start_time = std::chrono::high_resolution_clock::now();
+            cout << "Running with single thread...\n";
             gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, bed, cmd);
         }
         cmd.threads = bed.threads;
@@ -300,7 +299,7 @@ int main(int argc, char* argv[]) {
         samSize = bgen.new_samSize;
 
         bgen.phenoType = checkBinary(phenomap, bgen.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, bgen.sampleID, bgen.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, samSize, phenomap, bgen.sampleID, bgen.include_idx, numExpSelCol, numSelCol);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -573,7 +572,7 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
             XTransX[i] = XTransX[i] * sigma2;
         }
-        printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta);
+        printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta, phenoType, samSize);
     }
     else {
         vector<double> XR2vec = covdata;
@@ -591,7 +590,7 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         double* XTransXR2 = new double[(numSelCol + 1) * (numSelCol + 1)];
         matmatTprod(XTransX, XTransXtXR2tX, XTransXR2, numSelCol + 1, numSelCol + 1, numSelCol + 1);
 
-        printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta);
+        printCovVarMat(numSelCol + 1, covSelHeadersName, XTransXR2, beta, phenoType, samSize);
         delete[] XR2tX;
         delete[] XTransXtXR2tX;
         delete[] XTransXR2;
@@ -612,26 +611,31 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
 
 
 
-void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta) 
+void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta, int phenoType, int samSize) 
 {
     covNames.insert(covNames.begin(), "Intercept");
     boost::math::chi_squared chisq_dist_M(1);
 
     cout << "\nCoefficients: \n";
-    cout << boost::format("%-20s %-14s %-16s %-16s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value";
+    cout << boost::format("%-26s %-17s %-22s %-19s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value";
     for (int i = 0; i < numCovs; i++) 
     {
         double stdError = sqrt(covVarMat[i * numCovs + i]);
         double zvalue = beta[i] / stdError;
         double pr = (isnan(zvalue)) ? NAN : boost::math::cdf(complement(chisq_dist_M, (beta[i] * beta[i]) / covVarMat[i * numCovs + i]));
-        cout << boost::format("%+15s %15.10f %15.10f %15.10f %15.10f\n") % covNames[i] % beta[i] % stdError % zvalue % pr;
+        cout << boost::format("%+15s %19.6e %19.6e %19.6e %19.6e\n") % covNames[i] % beta[i] % stdError % zvalue % pr;
     }
 
     cout << "\nVariance-Covariance Matrix: \n";
+    cout << boost::format("%+35s") % covNames[0];
+    for (int i = 1; i < numCovs; i++) {
+        cout << boost::format("%+20s") % covNames[i];
+    }
+    cout << "\n";
     for (int i = 0; i < numCovs; i++) {
         cout << boost::format("%+15s") % covNames[i];
         for (int j = 0; j < numCovs; j++) {
-            cout << boost::format("%15.10f") % covVarMat[j * numCovs + i];
+            cout << boost::format("%20.6e") % covVarMat[j * numCovs + i];
         }
         cout << "\n";
     }
@@ -644,11 +648,13 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     std::ofstream results(output, std::ofstream::binary);
 
     bool printFull = false;
+    bool printMeta = false;
     int printStart = 1; 
     int printEnd   = numExpSelCol+1; 
     if (outStyle.compare("meta") == 0) {
         printStart = 0; 
         printEnd   = Sq1;
+        printMeta  = true;
     } else if (outStyle.compare("full") == 0) {
         printStart = 0; 
         printEnd   = Sq1; 
@@ -656,13 +662,13 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
         results << "#dispersion: " << sigma2 << "\n";
     }
 
-    results << "SNPID" << "\t" << ((useBgen) ? "RSID \t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
+    results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
     if (binE.numBinE > 0) {
         string tmp = "";
-        size_t numBinE = binE.numBinE;
+        int numBinE = binE.numBinE;
         vector<string> binE_names(numBinE);
         vector<string> strata_names = binE.strata_names;
-        for (int i = 0; i < binE.binE_idx.size(); i++) {
+        for (int i = 0; i < numBinE; i++) {
             binE_names[i] = covNames[binE.binE_idx[i] - 1];
             tmp+=std::to_string(i+1);
         }
@@ -696,20 +702,26 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
         }
 
     }
-    results << "Beta_Marginal" << "\t" << "Var_Beta_Marginal" << "\t";
 
     for (int i = 0; i < Sq1-1; i++) {
         covNames[i] = "G-" + covNames[i];
     }
     covNames.insert(covNames.begin(), "G");
 
+
+    string seMHeader = "SE_Beta_Marginal";
     string seHeader  = "SE_Beta_";
     string covHeader = "Cov_Beta_";
     if (robust == 1) {
+        seMHeader = "robust_" + seMHeader;
         seHeader  = "robust_" + seHeader;
         covHeader = "robust_" + covHeader;
     }
 
+    results << "Beta_Marginal" << "\t" << seMHeader << "\t";
+    if ((robust == 1) && (printMeta || printFull)) {
+        results << "SE_Beta_Marginal" << "\t";
+    }
     if (numExpSelCol != 0) {
         for (int i = printStart; i < printEnd; i++) {
             results << "Beta_" << covNames[i] << "\t";
@@ -724,23 +736,31 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
                 } 
             }
         }
-        if ((robust == 1) && printFull) {
-            for (int i = printStart; i < printEnd; i++) {
-                for (int j = printStart; j < printEnd; j++) {
-                    if (i == j) {
-                        results << "SE_Beta_" << covNames[j] << "\t"; 
+        if (robust == 1) {
+            if (printMeta || printFull) {
+                for (int i = printStart; i < printEnd; i++) {
+                    for (int j = printStart; j < printEnd; j++) {
+                        if (i == j) {
+                            results << "SE_Beta_" << covNames[j] << "\t"; 
+                        }
                     }
                 }
-            }
-            for (int i = printStart; i < printEnd; i++) {
-                for (int j = printStart; j < printEnd; j++) {
-                    if (i < j) {
-                        results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t"; 
+                for (int i = printStart; i < printEnd; i++) {
+                    for (int j = printStart; j < printEnd; j++) {
+                        if (i < j) {
+                            results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t"; 
+                        }
                     }
                 }
+
+                results << "robust_P_Value_Marginal" << "\t" << "robust_P_Value_Interaction" << "\t" << "robust_P_Value_Joint" << "\t";
+                results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
+            } else {
+                results << "robust_P_Value_Marginal" << "\t" << "robust_P_Value_Interaction" << "\t" << "robust_P_Value_Joint\n";
             }
+        } else {
+                results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
         }
-        results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
     }
     else {
         results << "P_Value_Marginal\n";

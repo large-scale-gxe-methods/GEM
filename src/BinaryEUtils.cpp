@@ -71,7 +71,7 @@ std::vector<std::string> vector_binstrings(int width)
 }
 
 
-void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol) 
+void BinE::checkBinaryCovariates(BinE binE, int samSize, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol) 
 {
 
     stratum_idx.resize(include_idx.size());
@@ -79,7 +79,7 @@ void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>
 
     for (int i = 0; i < numExpSelCol; i++) 
     {
-        for (int j = 0; j < sampleID.size(); j++ ) {
+        for (int j = 0; j < samSize; j++ ) {
             auto tmp = phenoMap[sampleID[j]];
             if (!map.count(tmp[1 + i])) { map[tmp[1 + i]] = 1; }
             if (map.size() > 2) { break; }
@@ -99,7 +99,7 @@ void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>
     if (numBinE > 0) 
     {
         std::unordered_map<std::string, unsigned int> stratum_map = map_binstrings(numBinE);
-        for (int j = 0; j < sampleID.size(); j++ ) {
+        for (int j = 0; j < samSize; j++ ) {
             auto tmp = phenoMap[sampleID[j]];
             string stratum = "";
             for (int i = 0; i < numBinE; i++) {

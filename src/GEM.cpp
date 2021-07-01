@@ -212,7 +212,7 @@ int main(int argc, char* argv[]) {
         samSize = pgen.new_samSize;
         
         pgen.phenoType = checkBinary(phenomap, pgen.sampleID);
-        binE.checkBinaryCovariates(binE, samSize, phenomap, pgen.sampleID, pgen.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, phenomap, pgen.sampleID, pgen.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
         samSize = bed.new_samSize;
 
         bed.phenoType = checkBinary(phenomap, bed.sampleID);
-        binE.checkBinaryCovariates(binE, samSize, phenomap, bed.sampleID, bed.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, phenomap, bed.sampleID, bed.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -299,7 +299,7 @@ int main(int argc, char* argv[]) {
         samSize = bgen.new_samSize;
 
         bgen.phenoType = checkBinary(phenomap, bgen.sampleID);
-        binE.checkBinaryCovariates(binE, samSize, phenomap, bgen.sampleID, bgen.include_idx, numExpSelCol, numSelCol);
+        binE.checkBinaryCovariates(binE, phenomap, bgen.sampleID, bgen.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -372,13 +372,14 @@ int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> s
 
     int is_bin = 1;
     std::unordered_map<string, int> map;
-    for (size_t i = 0; i < sampleID.size(); i++) {
+    size_t sampleSize = sampleID.size();
+    for (size_t i = 0; i < sampleSize; i++) {
         auto tmp = phenoMap[sampleID[i]];
 
         if (!map.count(tmp[0])) {
             map[tmp[0]] = 1;
         }
-        if (map.size() > 2) {
+        if ((map.size()/sampleSize) > 0.05) {
             is_bin = 0;
             break;
         }
@@ -663,44 +664,14 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     }
 
     results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
-    if (binE.numBinE > 0) {
-        string tmp = "";
-        int numBinE = binE.numBinE;
-        vector<string> binE_names(numBinE);
-        vector<string> strata_names = binE.strata_names;
-        for (int i = 0; i < numBinE; i++) {
-            binE_names[i] = covNames[binE.binE_idx[i] - 1];
-            tmp+=std::to_string(i+1);
+    int nBinE = binE.nBinE;
+    if (nBinE > 0) {
+        cout << "Here" << endl;
+        vector<string> bn = binE.bn_header;
+        for (size_t i = 0; i < bn.size(); i++) {
+            results << "N_" << bn[i] << "\t";
+            results << "AF_" << bn[i] << "\t";
         }
-
-        std::unordered_map<int, vector<int>> map_combo = GetPowerSet(tmp);
-        for (size_t i = 0; i < map_combo.size(); i++) {
-            auto vec = map_combo[i];
-            string binE_set = "";
-            for (size_t j = 0; j < vec.size(); j++) {
-                binE_set += binE_names[vec[j]] + "_";
-            }
-            
-            std::vector<std::string> vec_combo = vector_binstrings(vec.size());
-            for (size_t j = 0; j < vec_combo.size(); j++) {
-                string tmp = vec_combo[j];
-                string N_headr = "N_" + binE_set;
-                string AF_headr = "AF_" + binE_set;
-                for (size_t k = 0; k < tmp.size(); k++) {
-                    if (tmp[k] == '0') {
-                        N_headr += strata_names[vec[k] * 2] + "_";
-                        AF_headr += strata_names[vec[k] * 2] + "_";
-                    } else {
-                        N_headr += strata_names[vec[k] * 2 + 1] + "_";
-                        AF_headr += strata_names[vec[k] * 2 + 1] + "_";
-                    }
-                }
-                N_headr.resize (N_headr.size () - 1);
-                AF_headr.resize (AF_headr.size () - 1);
-                results << N_headr << "\t" << AF_headr << "\t";
-            }
-        }
-
     }
 
     for (int i = 0; i < Sq1-1; i++) {

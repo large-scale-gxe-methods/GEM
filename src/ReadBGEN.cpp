@@ -755,13 +755,16 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     vector<uint> keepVariants = bgen.keepVariants[thread_num];
     uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
 
-    int numBinE = binE.numBinE;
-    int numSubStrata = binE.numSubStrata;
+    int numBinE = binE.nBinE;
+    int numSubStrata = binE.nss;
     vector<int> sub_stratum_idx = binE.sub_stratum_idx;
     vector<int> stratum_idx = binE.stratum_idx;
     vector<int> sub_stratum_size = binE.sub_stratum_size;
     bool strata = (numBinE > 0 ) ? true : false;
-    int strataLen = pow(2, numBinE);
+    int strataLen = 0;
+    if (strata) {
+        strataLen = pow(2, numBinE);
+    }
     size_t subStrataLen = sub_stratum_idx.size();
     vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
     vector<double> sub_binE_AF(stream_snps * numSubStrata, 0.0), sub_binE_N(stream_snps * numSubStrata, 0.0);

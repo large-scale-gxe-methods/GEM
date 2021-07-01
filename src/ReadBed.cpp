@@ -359,13 +359,16 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     uint32_t n_samples = bed.n_samples, snploop = bed.begin[thread_num], end = bed.end[thread_num];
     std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
 
-    int numBinE = binE.numBinE;
-    int numSubStrata = binE.numSubStrata;
+    int numBinE = binE.nBinE;
+    int numSubStrata = binE.nss;
     vector<int> sub_stratum_idx = binE.sub_stratum_idx;
     vector<int> stratum_idx = binE.stratum_idx;
     vector<int> sub_stratum_size = binE.sub_stratum_size;
     bool strata = (numBinE > 0 ) ? true : false;
-    int strataLen = pow(2, numBinE);
+    int strataLen = 0;
+    if (strata) {
+        strataLen = pow(2, numBinE);
+    }
     size_t subStrataLen = sub_stratum_idx.size();
     vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
     vector<double> sub_binE_AF(stream_snps * numSubStrata, 0.0), sub_binE_N(stream_snps * numSubStrata, 0.0);

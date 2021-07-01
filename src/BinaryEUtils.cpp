@@ -70,74 +70,175 @@ std::vector<std::string> vector_binstrings(int width)
     return bins;
 }
 
+std::unordered_map<std::string, unsigned int> cartesian_map( vector<vector<string> >& v ) {
+  auto product = []( long long a, vector<string>& b ) { return a*b.size(); };
+  const long long N = accumulate( v.begin(), v.end(), 1LL, product );
+  vector<string> u(v.size());
+  std::unordered_map<std::string, unsigned int> map;
+  for( long long n=0 ; n<N ; ++n ) {
+    lldiv_t q { n, 0 };
+    for( long long i=v.size()-1 ; 0<=i ; --i ) {
+      q = div( q.quot, v[i].size() );
+      u[i] = v[i][q.rem];
+    }
 
-void BinE::checkBinaryCovariates(BinE binE, int samSize, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol) 
+    string tmp = "";
+    for( size_t i = 0; i < u.size(); i++) { 
+        tmp+=u[i]; 
+    }
+    map[tmp] = n;
+  }
+  return map;
+}
+
+std::vector<std::string> cartesian_vec( vector<vector<string> >& v ) {
+  auto product = []( long long a, vector<string>& b ) { return a*b.size(); };
+  const long long N = accumulate( v.begin(), v.end(), 1LL, product );
+  vector<string> u(v.size());
+  std::vector<std::string> vec(N);
+  for( long long n=0 ; n<N ; ++n ) {
+    lldiv_t q { n, 0 };
+    for( long long i=v.size()-1 ; 0<=i ; --i ) {
+      q = div( q.quot, v[i].size() );
+      u[i] = v[i][q.rem];
+    }
+
+    string tmp = "";
+    for( size_t i = 0; i < u.size(); i++) { 
+        tmp+=u[i]; 
+    }
+    vec[n] = tmp;
+  }
+  return vec;
+}
+
+std::vector<std::string> cartesian_vec_sep( vector<vector<string> >& v) {
+  auto product = []( long long a, vector<string>& b ) { return a*b.size(); };
+  const long long N = accumulate( v.begin(), v.end(), 1LL, product );
+  vector<string> u(v.size());
+  std::vector<std::string> vec(N);
+  for( long long n=0 ; n<N ; ++n ) {
+    lldiv_t q { n, 0 };
+    for( long long i=v.size()-1 ; 0<=i ; --i ) {
+      q = div( q.quot, v[i].size() );
+      u[i] = v[i][q.rem];
+    }
+
+    string tmp = "";
+    for( size_t i = 0; i < u.size(); i++) { 
+        tmp = (i == 0) ? u[i] : tmp + "_" + u[i]; 
+    }
+    vec[n] = tmp;
+  }
+  return vec;
+}
+
+void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, int numExpSelCol, int numSelCol, std::vector<string> covNames) 
 {
 
-    stratum_idx.resize(include_idx.size());
+    size_t t_sampleSize = include_idx.size(); 
+    stratum_idx.resize(t_sampleSize);
     std::unordered_map<string, int> map;
+    std::vector<std::vector<std::string>> stratum_names;
 
-    for (int i = 0; i < numExpSelCol; i++) 
-    {
+    for (int i = 0; i < numExpSelCol; i++) {
         for (int j = 0; j < samSize; j++ ) {
             auto tmp = phenoMap[sampleID[j]];
             if (!map.count(tmp[1 + i])) { map[tmp[1 + i]] = 1; }
-            if (map.size() > 2) { break; }
+            if ((map.size()/t_sampleSize) > 0.05) { break; }
         }
 
         if (map.size() < 2) { cerr << "\nERROR: All values of covariate columns are the same.\n\n"; }
 
-        if (map.size() == 2) {
+        if ((map.size()/t_sampleSize) < 0.05) {
             binE_idx.push_back(i + 1);
-            for (auto kv : map) { strata_names.push_back(kv.first); }
-            numBinE++;
+            vector<string> v;
+            for (auto kv : map) {  
+                v.push_back(kv.first); 
+            }
+            stratum_names.push_back(v);
+            nBinE++;
         }
         map.clear();
     }
 
 
-    if (numBinE > 0) 
+    if (nBinE > 0) 
     {
-        std::unordered_map<std::string, unsigned int> stratum_map = map_binstrings(numBinE);
+        //Assign each sample an index from stratum_map
+        std::unordered_map<string, unsigned int> stratum_map = cartesian_map(stratum_names);
         for (int j = 0; j < samSize; j++ ) {
-            auto tmp = phenoMap[sampleID[j]];
-            string stratum = "";
-            for (int i = 0; i < numBinE; i++) {
-                int tmp1 = i*2;
-                (strata_names[tmp1].compare(tmp[binE_idx[i]])) ? stratum+="1" : stratum+="0";
+            auto sv = phenoMap[sampleID[j]];
+            std::string stratum = "";
+            for (int i = 0; i < nBinE; i++) {
+                stratum += sv[binE_idx[i]];
             }
-            stratum_idx[j] = stratum_map[stratum];          
+            stratum_idx[j] = stratum_map[stratum]; 
         }
         
-        if (numBinE > 1) { 
-                       
-            std::string tmp = "";
-            for(int i = 1; i <= numBinE; i++) {
-                tmp+=std::to_string(i);
+        std::vector<string> bn;
+        for(int i = 0; i < nBinE; i++) {
+            bn.push_back(covNames[binE_idx[i] - 1]);
+        }
+
+        if (nBinE > 1) {     
+            std::string powerString = "";
+            for(int i = 1; i <= nBinE; i++) {
+                powerString+=std::to_string(i);
             }
-
-            std::unordered_map<int, vector<int>> map_combo = GetPowerSet(tmp);
-
-            std::vector<std::string> stratum_vector = vector_binstrings(numBinE);
-            for (size_t i = 0; i < (map_combo.size()-1); i++) {
-                vector<int> vec = map_combo[i];
-                std::vector<std::string> vec_combo = vector_binstrings(vec.size());
-                numSubStrata+=vec_combo.size();
-                for (size_t j = 0; j < vec_combo.size(); j++) {
+            std::unordered_map<int, vector<int>> powerSet = GetPowerSet(powerString);
+            
+            std::vector<string> stratum_vec = cartesian_vec(stratum_names);
+            vector<vector<string>> sn;
+            for (size_t i = 0; i < (powerSet.size()-1); i++) {
+                vector<int> ps = powerSet[i];
+                string bns = "";
+                for (size_t j = 0; j < ps.size(); j++) {
+                    sn.push_back(stratum_names[ps[j]]);
+                    bns = bns + bn[ps[j]] + "_";
+                }
+                cout << bns << endl;
+                std::vector<string> cart = cartesian_vec(sn);
+                std::vector<string> cart_sep = cartesian_vec_sep(sn);
+                for (size_t k = 0; k < cart.size(); k++) {
                     int cnt = 0;
-                    for (size_t k = 0; k < stratum_vector.size(); k++) {
-                        string tmp_main = stratum_vector[k];
-                        string tmp_s = "";
-                        for (size_t l = 0; l < vec.size(); l++) {
-                            tmp_s += tmp_main[vec[l]];
+                    for (size_t l = 0; l < stratum_vec.size(); l++) {
+                        string svs = "";
+                        for (size_t j = 0; j < ps.size(); j++) {
+                            svs += stratum_vec[l][ps[j]];
                         }
-                        if (tmp_s.compare(vec_combo[j]) == 0) {
-                            sub_stratum_idx.push_back(k);
+                        if (svs.compare(cart[k]) == 0) {
+                            sub_stratum_idx.push_back(l);
                             cnt++;
                         }
                     }
+                    bn_header.push_back(bns + cart_sep[k]);
                     sub_stratum_size.push_back(cnt);
+                    nss++;
                 }
+                sn.clear();
+            }
+
+            // Final combination for header output
+            string bns = "";
+            for (int i = 0; i < nBinE; i++) {
+                bns = bns + bn[i] + "_";
+            }
+            std::vector<string> cart_sep = cartesian_vec_sep(stratum_names);
+            for (size_t j = 0; j < cart_sep.size(); j++) {
+                bn_header.push_back(bns + cart_sep[j]);
+            }
+
+        } else {
+            vector<vector<string>> sn;
+            for (int i = 0; i < nBinE; i++) {
+                string bns = bn[i] + "_";
+                sn.push_back(stratum_names[i]);
+                std::vector<string> cart_sep = cartesian_vec_sep(sn);
+                for (size_t j = 0; j < cart_sep.size(); j++) {
+                    bn_header.push_back(bns+cart_sep[j]);
+                }
+                sn.clear();
             }
         }
     }

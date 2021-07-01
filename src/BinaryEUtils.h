@@ -8,17 +8,18 @@
 class BinE {
 
     public:
-        int numBinE = 0;
-        int numSubStrata = 0;
+        int nBinE = 0;
+        int nss = 0;
         std::vector<int> binE_idx;
 
         std::vector<int> stratum_idx;
         std::vector<int> sub_stratum_idx;
         std::vector<int> sub_stratum_size;
         
-        std::vector<std::string> strata_names;
+        std::vector<string> bn_header;
+        std::vector<std::vector<std::string>> stratum_names;
 
-        void checkBinaryCovariates(BinE binE, int samSize, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int numExpSelCol, int numSelCol);
+        void checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, int numExpSelCol, int numSelCol, std::vector<string> covSelHeadersName);
 };
 
 std::unordered_map <int, vector<int>> GetPowerSet(std::string v);

@@ -162,7 +162,6 @@ void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>
         map.clear();
     }
 
-
     if (nBinE > 0) 
     {
         //Assign each sample an index from stratum_map
@@ -175,7 +174,9 @@ void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>
             }
             stratum_idx[j] = stratum_map[stratum]; 
         }
-        
+        for (auto kv : stratum_map) { 
+            strataLen++;
+        }
         std::vector<string> bn;
         for(int i = 0; i < nBinE; i++) {
             bn.push_back(covNames[binE_idx[i] - 1]);
@@ -197,7 +198,7 @@ void BinE::checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>
                     sn.push_back(stratum_names[ps[j]]);
                     bns = bns + bn[ps[j]] + "_";
                 }
-                cout << bns << endl;
+ 
                 std::vector<string> cart = cartesian_vec(sn);
                 std::vector<string> cart_sep = cartesian_vec_sep(sn);
                 for (size_t k = 0; k < cart.size(); k++) {

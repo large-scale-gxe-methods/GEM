@@ -666,7 +666,6 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
     int nBinE = binE.nBinE;
     if (nBinE > 0) {
-        cout << "Here" << endl;
         vector<string> bn = binE.bn_header;
         for (size_t i = 0; i < bn.size(); i++) {
             results << "N_" << bn[i] << "\t";

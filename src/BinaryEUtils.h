@@ -10,6 +10,7 @@ class BinE {
     public:
         int nBinE = 0;
         int nss = 0;
+        int strataLen = 0;
         std::vector<int> binE_idx;
 
         std::vector<int> stratum_idx;
@@ -17,7 +18,6 @@ class BinE {
         std::vector<int> sub_stratum_size;
         
         std::vector<string> bn_header;
-        std::vector<std::vector<std::string>> stratum_names;
 
         void checkBinaryCovariates(BinE binE, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, int numExpSelCol, int numSelCol, std::vector<string> covSelHeadersName);
 };

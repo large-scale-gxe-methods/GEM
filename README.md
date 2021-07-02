@@ -222,7 +222,7 @@ Performance Options:
 
 * #### Genotype Files  
 
-  [**BGEN**](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
+  [**BGEN**](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html)  
 Variants that are non-biallelic should be filtered from the BGEN file. Note that since there are no indication of a REF/ALT allele in the BGEN file, the second allele is the effect allele counted in association testing.   
 
   A [.sample file](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html) is required as input when the .bgen file does not contain a sample identifier block. <br /><br /> 
@@ -237,7 +237,8 @@ GEM will use the IID column for sample identifier matching with the phenotype fi
   [**.bed**](https://www.cog-genomics.org/plink/2.0/formats#bed) - A bed file must be stored in variant-major form. The ALT allele specified in the .bim file is the effect allele counted in association testing. <br /><br />  
 
   [**Plink 2.0 PGEN**](https://www.cog-genomics.org/plink/2.0/)  
-  [***.psam***](https://www.cog-genomics.org/plink/2.0/formats#psam) - The .psam file is a tab-delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name #IID (if the first column is not #FID) or IID (if the first column is #FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with #IID or #FID is present, then the columns are assumed to be in .fam file order.  
+  
+  [**.psam**](https://www.cog-genomics.org/plink/2.0/formats#psam) - The .psam file is a tab-delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name #IID (if the first column is not #FID) or IID (if the first column is #FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with #IID or #FID is present, then the columns are assumed to be in .fam file order.  
 
   [**.pvar**](https://www.cog-genomics.org/plink/2.0/formats#pvar) - The .pvar file is a tab-delimited text file containing the variant information. If header lines are present, the last header line should start with #CHROM. If #CHROM is present, then the columns POS, ID, REF, and ALT must also be present. All previous header lines will be ignored. If the .pvar file contain no header lines beginning with #CHROM, it is assumed that the columns are in .bim file order.  
 
@@ -246,6 +247,7 @@ GEM will use the IID column for sample identifier matching with the phenotype fi
 
     
 <br /> 
+<br />
 
 ### Output File Format  
 
@@ -288,16 +290,16 @@ robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of 
 ```
 
 <br />
-The --output-style flag can be used to specify which columns should be included in the output file.  
+The --output-style flag can be used to specify which columns should be included in the output file:  
 
 #### minimum:  
-The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
+Includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
 
 #### meta:  
 Includes each of the possible outputs listed above when applicable. For a model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
 
 #### full:  
-The "full" option provides, in addition to "meta", an initial header line with the residual variance estimate necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).”
+Includes, in addition to "meta", an initial header line with the residual variance estimate necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
 
 <br />
 <br />

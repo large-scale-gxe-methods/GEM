@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ReadParameters.h"
+#include "BinaryEUtils.h"
 #include "TimeUtils.h"
 #ifndef READBGEN_H
 #define READBGEN_H
@@ -28,6 +29,7 @@ class Bgen {
 
         // For ID matching
         int new_samSize;
+        std::vector<string>   sampleID;
         std::vector<double>   new_covdata;
         std::vector<double>   new_phenodata;
         std::vector<long int> include_idx;
@@ -35,6 +37,7 @@ class Bgen {
         std::vector<unsigned int> includeVariantIndex;
 
         // For multithreading BGEN file
+        int phenoType;
         uint threads;
         bool filterVariants;
         std::vector<uint> Mbgen_begin;
@@ -44,9 +47,9 @@ class Bgen {
 
 
         void processBgenHeaderBlock(string bgenfile);
-        void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale);
+        void processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
         void getPositionOfBgenVariant(Bgen bgen, CommandLine cmd);
 };
 
-void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd);
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Bgen bgen, CommandLine cmd);
 #endif

@@ -1,3 +1,4 @@
+
 #include "declars.h"
 #include "ReadBGEN.h"
 #include "ReadParameters.h"
@@ -127,12 +128,14 @@ This function is revised based on the Parse function in BOLT-LMM v2.3 source cod
 ***********************************************************************************/
 
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
-void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
+void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     int k = 0;
     unordered_set<int> genoUnMatchID;
     std::vector<string> tempID;
+    new_phenodata.resize(samSize);
+    new_covdata.resize(samSize * (numSelCol+1));
     if ((bgen.SampleIdentifiers == 0) || useSample) {
 
         if (bgen.SampleIdentifiers == 0 && !useSample) {
@@ -141,12 +144,10 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             exit(1);
         }
 
-
         std::ifstream fIDMat;
         fIDMat.open(samplefile);
-
         if (!fIDMat.is_open()) {
-            cerr << "\nERROR: Sample file could not be opened." << endl << endl;
+            cerr << "\nERROR: Sample file could not be opened.\n\n";
             exit(1);
         }
 
@@ -179,16 +180,14 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
                 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
-                    // covdata[k*(numSelCol+1) + 0] = 1.0;
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
                     }
+                    sampleID.push_back(strtmp);
                     k++;
                 }
-
-                // erase the used element in phenomap
-                phenomap.erase(strtmp);
             }
 
             // save the index with unmatched ID into genoUnMatchID.
@@ -241,13 +240,14 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
                 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
                     }
+                    sampleID.push_back(strtmp);
                     k++;
                 }
-                phenomap.erase(strtmp);
             }
 
             if (itmp == k) {
@@ -260,8 +260,8 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
-    phenodata.resize(k);
-    covdata.resize(k * (numSelCol + 1));
+    new_phenodata.resize(k);
+    new_covdata.resize(k * (numSelCol + 1));
     samSize = k;
 
 
@@ -307,10 +307,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     cout << "****************************************************************************\n";
 
 
-
     new_samSize = samSize;
-    new_covdata = covdata;
-    new_phenodata = phenodata;
 }
 
 
@@ -704,7 +701,7 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
-void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bgen bgen, CommandLine cmd) {
+void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu,  BinE binE, Bgen bgen, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -740,8 +737,8 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
 
     bool filterVariants = bgen.filterVariants;
     string outStyle = cmd.outStyle;
+    int phenoType   = bgen.phenoType;
     int stream_snps = cmd.stream_snps;
-    int phenoType   = cmd.phenoType;
     int samSize     = bgen.new_samSize;
     int robust      = cmd.robust;
     int intSq1      = cmd.numIntSelCol + 1;
@@ -753,11 +750,18 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
     double MAF      = cmd.MAF;
     double maxMAF   = 1 - MAF;
     double missGenoCutoff = cmd.missGenoRate;
+
     vector<long int> include_idx = bgen.include_idx;
     vector<uint> keepVariants = bgen.keepVariants[thread_num];
     uint snploop = bgen.Mbgen_begin[thread_num], end = bgen.Mbgen_end[thread_num];
-    
-    int ZGS_col = Sq1 * stream_snps;
+   
+    int numBinE   = binE.nBinE;
+    int strataLen = binE.strataLen;
+    bool strata   = (numBinE > 0 ) ? true : false;
+    vector<int> stratum_idx = binE.stratum_idx;
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+   
+    int ZGS_col  = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
@@ -765,21 +769,24 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
     vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
-    
+    double* covX = &bgen.new_covdata[0];
     boost::math::chi_squared chisq_dist_M(1);
 
     struct libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
-    int printStart = 1; int printEnd = expSq1;
+    int printStart = 1; 
+    int printEnd   = expSq1;
+    bool printMeta = false;
     bool printFull = false;
     if (expSq == 0) {
         printStart = 0; printEnd = 0;
     }
     else if (outStyle.compare("meta") == 0) {
-        printStart = 0; printEnd = Sq1;
+        printStart = 0; printEnd = Sq1; printMeta = true;
     } else if (outStyle.compare("full") == 0) {
         printStart = 0; printEnd = Sq1; printFull = true;
     }
+
 
     FILE* fin3;
     fin3 = fopen(cmd.bgenFile.c_str(), "rb");
@@ -852,7 +859,9 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
             ret = fread(allele0, 1, LB, fin3); 
             allele0[LB] = '\0';
 
-
+            uint nMissing = 0;
+            int tmp1 = stream_i * Sq1 * samSize;
+            int strata_i = stream_i * strataLen;
             if (Layout == 1) {
                 uint16_t* probs_start;
                 if (CompressedSNPBlocks == 1) {
@@ -874,10 +883,8 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
 
                 // read genotype probabilities
                 const double scale = 1.0 / 32768;
-                int tmp1 = stream_i * Sq1 * samSize;
 
                 int idx_k = 0;
-                uint nMissing = 0;
                 for (uint i = 0; i < Nbgen; i++) {
                     if (include_idx[idx_k] == i) {
                         double p11 = probs_start[3 * i] * scale;
@@ -899,47 +906,15 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                             else {
                                 ZGSvec[tmp2] = dosage;
                             }
+
+                            if (strata) {
+                                binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
+                            }
                         }
+
                         idx_k++;
                     }
-                }
-
-                double gmean  = AF[stream_i] / double(samSize - nMissing);
-                double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
-                double percMissing = nMissing / (samSize * 1.0);
-                if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                    AF[stream_i] = 0.0;
-                    continue;
-                }
-                else {
-                    AF[stream_i] = cur_AF;
-                }
-
-                if (nMissing > 0) {
-                    if (phenoType == 0) {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = gmean;
-                        }
-                    }
-                    else {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
-                        }
-                    }
-                    missingIndex.clear();
-                }
-
-                geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
-                
-                for (int j = 0; j < Sq; j++) {
-                     int tmp3 = samSize * (j + 1) + tmp1;
-
-                     for (int i = 0; i < samSize; i++) {
-                          int tmp4 = i * numSelCol1;
-                          ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
-                     }
                 }
 
             } // end of reading genotype data when Layout = 1
@@ -1033,10 +1008,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                 const uintptr_t probs_offset = bit_precision / 8;
 
 
-
-                int tmp1 = stream_i * Sq1 * samSize;
                 int idx_k = 0;
-                uint nMissing = 0;
                 if (!is_phased) {
                     for (uint32_t i = 0; i < N; i++) {
                         const uint32_t missing_and_ploidy = missing_and_ploidy_info[i];
@@ -1074,6 +1046,11 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                             }
                             else {
                                 ZGSvec[tmp2] = dosage;
+                            }
+
+                            if (strata) {
+                                binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
                             }
                             idx_k++;
                         }
@@ -1118,50 +1095,66 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                                 ZGSvec[tmp2] = dosage;
                             }
 
+                            if (strata) {
+                                binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
+                                binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
+                            }
+
                             idx_k++;
                         }
                     }
                 }
-
-
-                double gmean = AF[stream_i] / double(samSize - nMissing);
-                double cur_AF = gmean / 2.0;
-                double percMissing = nMissing / (samSize * 1.0);
-                if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
-                    AF[stream_i] = 0.0;
-                    continue;
-                }
-                else {
-                    AF[stream_i] = cur_AF;
-                }
-                
-                if (nMissing > 0) {
-                    if (phenoType == 0) {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = gmean;
-                        }
-                    }
-                    else {
-                        for (size_t nm = 0; nm < missingIndex.size(); nm++) {
-                            int tmp5 = tmp1 + missingIndex[nm];
-                            ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
-                        }
-                    }
-                    missingIndex.clear();
-                }
-                geno_snpid[stream_i] = string(snpID) + "\t" + string(rsID) + "\t" + string(chrStr) + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize-nMissing);
-
-                for (int j = 0; j < Sq; j++) {
-                     int tmp3 = samSize * (j + 1) + tmp1;
-                     for (int i = 0; i < samSize; i++) {
-                        int tmp4 = i * numSelCol1;
-                        ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
-                     }
-                }
-
             } // end of layout 2
     
+            double gmean  = AF[stream_i] / double(samSize - nMissing);
+            double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
+            double percMissing = nMissing / (samSize * 1.0);
+            if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
+                AF[stream_i] = 0.0;
+                if (strata) {
+                    for (int i = 0; i < strataLen; i++) {
+                        binE_N[strata_i + i] = 0.0;
+                        binE_AF[strata_i + i] = 0.0;
+                    }
+                }
+                continue;
+            }
+            else {
+                AF[stream_i] = cur_AF;
+            }
+
+           if (strata) { 
+                for (int i = 0; i < strataLen; i++) {
+                    binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
+                }
+            }
+
+            if (nMissing > 0) {
+                if (phenoType == 0) {
+                    for (size_t nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = gmean;
+                    }
+                }
+                else {
+                    for (size_t nm = 0; nm < missingIndex.size(); nm++) {
+                        int tmp5 = tmp1 + missingIndex[nm];
+                        ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+                    }
+                }
+                missingIndex.clear();
+            }
+
+            geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
+                
+            for (int j = 0; j < Sq; j++) {
+                int tmp3 = samSize * (j + 1) + tmp1;
+
+                for (int i = 0; i < samSize; i++) {
+                    int tmp4 = i * numSelCol1;
+                    ZGSvec[tmp3 + i] = covX[tmp4 + j + 1] * ZGSvec[tmp1 + i]; // here we save ZGS in column wise
+                }
+            }
             variant_index++;
             stream_i++;
             keepIndex++;
@@ -1233,6 +1226,20 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
         double*  PvalJoint  = new double[stream_snps];
         double** betaAll    = new double* [stream_snps];
         double** VarBetaAll = new double* [stream_snps];
+        double*  mbVarbetaM   = nullptr;
+        double*  mbPvalM      = nullptr;
+        double*  mbPvalInt    = nullptr;
+        double*  mbPvalJoint  = nullptr;
+        double** invZGStZGS   = nullptr;
+        if (robust == 1) {
+            invZGStZGS =  new double* [stream_snps];
+        }
+        if (printMeta || printFull) {
+            mbVarbetaM  = new double[stream_snps];          
+            mbPvalM     = new double[stream_snps];            
+            mbPvalInt   = new double[stream_snps];
+            mbPvalJoint = new double[stream_snps] ;
+        }
 
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
@@ -1244,12 +1251,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
 
                 //calculating Marginal P values
                 double statM = betaM[i] * betaM[i] / VarbetaM[i];
-                if (isnan(statM) || statM <= 0.0) {
-                    PvalM[i] = NAN;
-                } 
-                else {
-                    PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
-                }
+                PvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));
 
                 if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
@@ -1284,12 +1286,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     }
                     
                     //calculating Interaction P values
-                    if (isnan(statInt) || statInt <= 0.0) {
-                        PvalInt[i] = NAN;
-                    }
-                    else {
-                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                    }
+                    PvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
 
                     double* invA = new double[expSq1 * expSq1];
                     subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
@@ -1303,12 +1300,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                         statJoint += betaAll[i][k] * Stemp4[k];
                     }
 
-                    if (isnan(statJoint) || statJoint <= 0.0) {
-                        PvalJoint[i] = NAN;
-                    }
-                    else {
-                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-                    }
+                    PvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 
                     delete[] subZGStR;
                     delete[] invVarbetaint;
@@ -1348,23 +1340,22 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
+                    invZGStZGS[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);   
+                    matInv(invZGStZGS[i], Sq1);
 
-
-                    betaAll[i]= new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
+                    betaAll[i]= new double[Sq1];
+                    matvecprod(invZGStZGS[i], subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-                    matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
                     VarBetaAll[i] = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
 
                     // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
-
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
@@ -1375,12 +1366,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                     }
             
                     //calculating Interaction P values
-                    if (isnan(statInt) || statInt <= 0.0) {
-                        PvalInt[i] = NAN;
-                    }
-                    else {
-                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                    }
+                    PvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
 
                     double* invA = new double[expSq1 * expSq1];
                     subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
@@ -1394,16 +1380,50 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                         statJoint += betaAll[i][k] * Stemp4[k];
                     }
 
-                    if (isnan(statJoint) || statJoint <= 0.0) {
-                        PvalJoint[i] = NAN;
-                    }
-                    else {
-                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+                    PvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+
+                    if (printMeta || printFull) {
+
+                        mbVarbetaM[i] = sigma2 / ZGStZGS[tmp1];
+
+                        //calculating model-based Marginal P values
+                        double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
+                        mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));
+
+                        for (int k = 0; k < Sq1 * Sq1; k++) {
+                            invZGStZGS[i][k] *= sigma2;
+                        }
+      
+                        double* mbInvVarbetaint = new double[expSq * expSq];
+                        subMatrix(invZGStZGS[i], mbInvVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
+                        matInv(mbInvVarbetaint, expSq);
+
+                        double* Stemp3 = new double[expSq];
+                        matvecSprod(mbInvVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
+
+                        double statInt = 0.0;
+                        for (int j = 1; j < expSq1; j++) {
+                            statInt += betaAll[i][j] * Stemp3[j-1];
+                        }
+                    
+                        //calculating model-based interaction P values
+                        mbPvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
+ 
+                        subMatrix(invZGStZGS[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                        matInv(invA, expSq1);
+                        matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+                    
+                        double statJoint = 0.0;
+                        for (int k = 0; k < expSq1; k++) {
+                            statJoint += betaAll[i][k] * Stemp4[k];
+                        }
+                        
+                        //calculating model-based joint P values
+                        mbPvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
                     }
 
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
-                    delete[] invZGStZGS;
                     delete[] ZGSR2tZGSxinvZGStZGS;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
@@ -1416,40 +1436,73 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+
+            int tmp_strata = i * strataLen;
+            for (int k = 0; k < strataLen; k++) {
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
+            }
+            
+            oss << betaM[i] << "\t" << sqrt(VarbetaM[i]) << "\t";
+
+            if ((robust == 1) && (printFull || printMeta)) {
+                oss << sqrt(mbVarbetaM[i]) << "\t";
+            }
+
             for (int ii = printStart; ii < printEnd; ii++) {
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
-                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+                oss << sqrt(VarBetaAll[i][ii * Sq1 + ii]) << "\t";
             }
+
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    if (ii != jj) {
+                    if (ii < jj) {
                         oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                     }
                 }
             }
-            if (printFull) {
+
+            if ((robust == 1) && (printFull || printMeta)) {
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                        if (ii == jj) {
+                            oss << sqrt(invZGStZGS[i][ii*Sq1 + jj]) << "\t";
+                        }
                     }
                 }
+
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        if (ii < jj) {
+                            oss << invZGStZGS[i][ii*Sq1 + jj] << "\t";
+                        }
+                    }
+                }
+
             }
 
             if (expSq != 0) {
-                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i];
+                if ((robust == 1) && (printMeta || printFull)) {
+                    oss << "\t" << mbPvalM[i] << "\t" << mbPvalInt[i] << "\t" << mbPvalJoint[i];
+                }
+                oss << "\n";
             }
             else {
                 oss << PvalM[i] << "\n";
             }
             AF[i] = 0.0;
         }
+
+        if (strata) {       
+            std::fill(binE_N.begin(), binE_N.end(), 0.0);
+            std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+        }
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;
-
         delete[] betaM;
         delete[] VarbetaM;
 
@@ -1458,9 +1511,22 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, doub
                 delete[] betaAll[i];
                 delete[] VarBetaAll[i];
             }
+            if (robust == 1) {
+                for (int i = 0; i < stream_snps; i++) {
+                    delete[] invZGStZGS[i];
+                }
+                if (printMeta || printFull) {
+                    delete[] mbVarbetaM;
+                    delete[] mbPvalM;
+                    delete[] mbPvalInt;
+                    delete[] mbPvalJoint;
+                }
+            }
         }
+
         delete[] betaAll;
         delete[] VarBetaAll;
+        delete[] invZGStZGS;
         delete[] PvalInt;
         delete[] PvalJoint;
         delete[] PvalM;

@@ -125,10 +125,12 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
 
 
-void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, vector<double> phenodata, vector<double> covdata, int numSelCol, int samSize, double center, double scale) {
+void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     unordered_set<int> genoUnMatchID;
+    new_phenodata.resize(samSize);
+    new_covdata.resize(samSize * (numSelCol+1));
 
     std::ifstream fIDMat;
     string IDline, FID, strtmp;
@@ -154,13 +156,15 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
         if (phenomap.find(strtmp) != phenomap.end()) {
             auto tmp_valvec = phenomap[strtmp];
             if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
-                sscanf(tmp_valvec[0].c_str(), "%lf", &phenodata[k]);
+                sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                new_covdata[k * (numSelCol+1)] = 1.0;
                 for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &covdata[k * (numSelCol + 1) + c + 1]);
+                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
                 }
+
+                sampleID.push_back(strtmp);
                 k++;
             }
-            phenomap.erase(strtmp);
         }
 
         if (itmp == k) genoUnMatchID.insert(m);
@@ -168,8 +172,8 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
     fIDMat.close();
 
     //After IDMatching, resizing phenodata and covdata, and updating samSize;
-    phenodata.resize(k);
-    covdata.resize(k * (numSelCol + 1));
+    new_phenodata.resize(k);
+    new_covdata.resize(k * (numSelCol + 1));
     samSize = k;
 
     if (samSize == 0) {
@@ -204,9 +208,6 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 
     new_samSize = samSize;
-    new_covdata = covdata;
-    new_phenodata = phenodata;
-
 }
 
 
@@ -329,7 +330,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 }
 
 
-void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, double* covX, vector<double> miu, Bed bed, CommandLine cmd) {
+void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Bed bed, CommandLine cmd) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
@@ -338,8 +339,8 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
 
     bool filterVariants = bed.filterVariants;
     string outStyle = cmd.outStyle;
+    int phenoType   = bed.phenoType;
     int stream_snps = cmd.stream_snps;
-    int phenoType   = cmd.phenoType;
     int samSize     = bed.new_samSize;
     int robust      = cmd.robust;
     int intSq1      = cmd.numIntSelCol + 1;
@@ -355,9 +356,14 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
     char bimDelim = bed.bimDelim;
     int bimLast = bed.bimLast;
     vector<long int> include_idx = bed.include_idx;
-    uint32_t n_samples = bed.n_samples;
-    uint32_t snploop = bed.begin[thread_num], end = bed.end[thread_num];
+    uint32_t n_samples = bed.n_samples, snploop = bed.begin[thread_num], end = bed.end[thread_num];
     std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
+
+    int numBinE   = binE.nBinE;
+    bool strata   = (numBinE > 0 ) ? true : false;
+    int strataLen = binE.strataLen;
+    vector<int> stratum_idx = binE.stratum_idx;
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
 
     int ZGS_col = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
@@ -367,7 +373,8 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
     vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
-
+    double* covX = &bed.new_covdata[0];
+    
     std::ifstream fIDMat;
     fIDMat.open(cmd.bimFile);
     string IDline;
@@ -387,12 +394,13 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
     }
 
     int printStart = 1; int printEnd = expSq1;
+    bool printMeta = false;
     bool printFull = false;
     if (expSq == 0) {
         printStart = 0; printEnd = 0;
     }
     else if (cmd.outStyle.compare("meta") == 0) {
-        printStart = 0; printEnd = Sq1;
+        printStart = 0; printEnd = Sq1; printMeta = true;
     } else if (cmd.outStyle.compare("full") == 0) {
         printStart = 0; printEnd = Sq1; printFull = true;
     }
@@ -451,6 +459,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
 
 
             int tmp1 = stream_i * Sq1 * samSize;
+            int strata_i = stream_i * strataLen;
             int idx_k = 0;
             int nMissing = 0;
             uint ncount = 0;
@@ -500,6 +509,12 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                     else {
                         ZGSvec[tmp2] = geno;
                     }
+
+                    if (strata) {
+                        binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
+                        binE_AF[strata_i + stratum_idx[idx_k]]+=geno;
+                    }
+
                     idx_k++;
                 }
             }
@@ -511,10 +526,22 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
 
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0;
+                if (strata) {
+                    for (int i = 0; i < strataLen; i++) {
+                        binE_N[strata_i + i] = 0.0;
+                        binE_AF[strata_i + i] = 0.0;
+                    }
+                }
                 continue;
             }
             else {
                 AF[stream_i] = cur_AF;
+            }
+
+            if (strata) { 
+                for (int i = 0; i < strataLen; i++) {
+                    binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
+                }
             }
 
             if (nMissing > 0) {
@@ -615,6 +642,20 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
         double*  PvalJoint  = new double[stream_snps];
         double** betaAll    = new double* [stream_snps];
         double** VarBetaAll = new double* [stream_snps];
+        double*  mbVarbetaM   = nullptr;
+        double*  mbPvalM      = nullptr;
+        double*  mbPvalInt    = nullptr;
+        double*  mbPvalJoint  = nullptr;
+        double** invZGStZGS   = nullptr;
+        if (robust == 1) {
+            invZGStZGS =  new double* [stream_snps];
+        }
+        if (printMeta || printFull) {
+            mbVarbetaM  = new double[stream_snps];          
+            mbPvalM     = new double[stream_snps];            
+            mbPvalInt   = new double[stream_snps];
+            mbPvalJoint = new double[stream_snps] ;
+        }
 
         if (robust == 0) {
             for (int i = 0; i < stream_snps; i++) {
@@ -626,12 +667,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
 
                 //calculating Marginal P values
                 double statM = betaM[i] * betaM[i] / VarbetaM[i];
-                if (isnan(statM) || statM <= 0.0) {
-                    PvalM[i] = NAN;
-                } 
-                else {
-                    PvalM[i] = boost::math::cdf(complement(chisq_dist_M, statM));
-                }
+                PvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));
 
                 if (expSq != 0) {
                     boost::math::chi_squared chisq_dist_Int(expSq);
@@ -651,12 +687,11 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                     for (int k = 0; k < Sq1 * Sq1; k++) {
                         VarBetaAll[i][k] *= sigma2;
                     }
-
                     //invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, Sq1+1);
                     matInv(invVarbetaint, expSq);
-
+                    
                     // StatInt
                     double* Stemp3 = new double[expSq];
                     matvecSprod(invVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
@@ -667,12 +702,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                     }
                     
                     //calculating Interaction P values
-                    if (isnan(statInt) || statInt <= 0.0) {
-                        PvalInt[i] = NAN;
-                    }
-                    else {
-                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                    }
+                    PvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
 
                     double* invA = new double[expSq1 * expSq1];
                     subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
@@ -686,12 +716,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                         statJoint += betaAll[i][k] * Stemp4[k];
                     }
 
-                    if (isnan(statJoint) || statJoint <= 0.0) {
-                        PvalJoint[i] = NAN;
-                    }
-                    else {
-                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
-                    }
+                    PvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
 
                     delete[] subZGStR;
                     delete[] invVarbetaint;
@@ -731,23 +756,22 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                     subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
 
                     // inv(ZGStZGS)
-                    double* invZGStZGS = new double[Sq1 * Sq1];
-                    subMatrix(ZGStZGS, invZGStZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
-                    matInv(invZGStZGS, Sq1);
+                    invZGStZGS[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);   
+                    matInv(invZGStZGS[i], Sq1);
 
-
-                    betaAll[i]= new double[Sq1 * 1];
-                    matvecprod(invZGStZGS, subZGStR, betaAll[i], Sq1, Sq1);
+                    betaAll[i]= new double[Sq1];
+                    matvecprod(invZGStZGS[i], subZGStR, betaAll[i], Sq1, Sq1);
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
-                    matNmatNprod(subZGSR2tZGS, invZGStZGS, ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
                     VarBetaAll[i] = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS, ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
 
                     // invVarBetaInt
                     double* invVarbetaint = new double[expSq * expSq];
                     subMatrix(VarBetaAll[i], invVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
                     matInv(invVarbetaint, expSq);
-
 
                     // StatInt
                     double* Stemp3 = new double[expSq];
@@ -756,14 +780,9 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                     for (int j = 1; j < expSq1; j++) {
                         statInt += betaAll[i][j] * Stemp3[j-1];
                     }
-
+            
                     //calculating Interaction P values
-                    if (isnan(statInt) || statInt <= 0.0) {
-                        PvalInt[i] = NAN;
-                    }
-                    else {
-                        PvalInt[i] = boost::math::cdf(complement(chisq_dist_Int, statInt));
-                    }
+                    PvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
 
                     double* invA = new double[expSq1 * expSq1];
                     subMatrix(VarBetaAll[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
@@ -777,16 +796,50 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
                         statJoint += betaAll[i][k] * Stemp4[k];
                     }
 
-                    if (isnan(statJoint) || statJoint <= 0.0) {
-                        PvalJoint[i] = NAN;
-                    }
-                    else {
-                        PvalJoint[i] = boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+                    PvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
+
+                    if (printMeta || printFull) {
+
+                        mbVarbetaM[i] = sigma2 / ZGStZGS[tmp1];
+
+                        //calculating model-based Marginal P values
+                        double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
+                        mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));
+
+                        for (int k = 0; k < Sq1 * Sq1; k++) {
+                            invZGStZGS[i][k] *= sigma2;
+                        }
+      
+                        double* mbInvVarbetaint = new double[expSq * expSq];
+                        subMatrix(invZGStZGS[i], mbInvVarbetaint, expSq, expSq, Sq1, expSq, 1+Sq1);
+                        matInv(mbInvVarbetaint, expSq);
+
+                        double* Stemp3 = new double[expSq];
+                        matvecSprod(mbInvVarbetaint, betaAll[i], Stemp3, expSq, expSq, 1);
+
+                        double statInt = 0.0;
+                        for (int j = 1; j < expSq1; j++) {
+                            statInt += betaAll[i][j] * Stemp3[j-1];
+                        }
+                    
+                        //calculating model-based interaction P values
+                        mbPvalInt[i] = (isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int, statInt));
+ 
+                        subMatrix(invZGStZGS[i], invA, expSq1, expSq1, Sq1, expSq1, 0);
+                        matInv(invA, expSq1);
+                        matvecprod(invA, betaAll[i], Stemp4, expSq1, expSq1);
+                    
+                        double statJoint = 0.0;
+                        for (int k = 0; k < expSq1; k++) {
+                            statJoint += betaAll[i][k] * Stemp4[k];
+                        }
+                        
+                        //calculating model-based joint P values
+                        mbPvalJoint[i] = (isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, statJoint));
                     }
 
                     delete[] subZGStR;
                     delete[] subZGSR2tZGS;
-                    delete[] invZGStZGS;
                     delete[] ZGSR2tZGSxinvZGStZGS;
                     delete[] invVarbetaint;
                     delete[] Stemp3;
@@ -799,51 +852,97 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, doubl
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << betaM[i] << "\t" << VarbetaM[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+
+            int tmp_strata = i * strataLen;
+            for (int k = 0; k < strataLen; k++) {
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
+            }
+            
+            oss << betaM[i] << "\t" << sqrt(VarbetaM[i]) << "\t";
+
+            if ((robust == 1) && (printFull || printMeta)) {
+                oss << sqrt(mbVarbetaM[i]) << "\t";
+            }
+
             for (int ii = printStart; ii < printEnd; ii++) {
                  oss << betaAll[i][ii] << "\t";
             }
             for (int ii = printStart; ii < printEnd; ii++) {
-                oss << VarBetaAll[i][ii * Sq1 + ii] << "\t";
+                oss << sqrt(VarBetaAll[i][ii * Sq1 + ii]) << "\t";
             }
+
             for (int ii = printStart; ii < printEnd; ii++) {
                 for (int jj = printStart; jj < printEnd; jj++) {
-                    if (ii != jj) {
+                    if (ii < jj) {
                         oss << VarBetaAll[i][ii * Sq1 + jj] << "\t";
                     }
                 }
             }
-            if (printFull) {
+
+            if ((robust == 1) && (printFull || printMeta)) {
                 for (int ii = printStart; ii < printEnd; ii++) {
                     for (int jj = printStart; jj < printEnd; jj++) {
-                        oss << ZGStZGS[ii*Sq1 + jj + (Sq1*i)] << "\t";
+                        if (ii == jj) {
+                            oss << sqrt(invZGStZGS[i][ii*Sq1 + jj]) << "\t";
+                        }
                     }
                 }
+
+                for (int ii = printStart; ii < printEnd; ii++) {
+                    for (int jj = printStart; jj < printEnd; jj++) {
+                        if (ii < jj) {
+                            oss << invZGStZGS[i][ii*Sq1 + jj] << "\t";
+                        }
+                    }
+                }
+
             }
 
             if (expSq != 0) {
-                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i] << '\n';
+                oss << PvalM[i] << "\t" << PvalInt[i] << "\t" << PvalJoint[i];
+                if ((robust == 1) && (printMeta || printFull)) {
+                    oss << "\t" << mbPvalM[i] << "\t" << mbPvalInt[i] << "\t" << mbPvalJoint[i];
+                }
+                oss << "\n";
             }
             else {
                 oss << PvalM[i] << "\n";
             }
             AF[i] = 0.0;
         }
+
+        if (strata) {       
+            std::fill(binE_N.begin(), binE_N.end(), 0.0);
+            std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+        }
         delete[] ZGStR;
         delete[] ZGStZGS;
         delete[] ZGSR2tZGS;
-
         delete[] betaM;
         delete[] VarbetaM;
 
-        if (expSq != 0) {
+        if (expSq != 0 ) {
             for (int i = 0; i < stream_snps; i++) {
                 delete[] betaAll[i];
                 delete[] VarBetaAll[i];
             }
+            if (robust == 1) {
+                for (int i = 0; i < stream_snps; i++) {
+                    delete[] invZGStZGS[i];
+                }
+                if (printMeta || printFull) {
+                    delete[] mbVarbetaM;
+                    delete[] mbPvalM;
+                    delete[] mbPvalInt;
+                    delete[] mbPvalJoint;
+                }
+            }
         }
+
         delete[] betaAll;
         delete[] VarBetaAll;
+        delete[] invZGStZGS;
         delete[] PvalInt;
         delete[] PvalJoint;
         delete[] PvalM;

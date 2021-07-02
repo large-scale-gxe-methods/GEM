@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 void print_help();
 
@@ -49,7 +49,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     po::options_description phenofile("Phenotype file options");
     phenofile.add_options()
         ("sampleid-name", po::value<std::string>(), "")
-        ("pheno-type", po::value<int>(), "")
         ("pheno-name", po::value<std::string>(), "")
         ("covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("int-covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
@@ -59,7 +58,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("robust", po::value<int>()->default_value(0), "")
         ("tol", po::value<double>()->default_value(.000001))
         ("center", po::value<int>()->default_value(1))
-        ("scale", po::value<int>()->default_value(0));
+        ("scale", po::value<int>()->default_value(0))
+        ("categorical-names", po::value<std::vector<std::string>>()->multitoken(), "")
+        ("cat-threshold", po::value<int>()->default_value(20));
 
     // Filtering options
     po::options_description filter("Filtering options");
@@ -267,20 +268,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         exit(1);
 
     }
-    if (out.count("pheno-type")) {
-        phenoType = out["pheno-type"].as<int>();
-
-        if (phenoType != 0 && phenoType != 1) {
-            cerr << "\nERROR: --pheno-type must be 0 (continuous) or 1 (binary). \n\n";
-            exit(1);
-        }
-
-    }
-    else {
-        cerr << "\nERROR: --pheno-type is not specified. Must be 0 (continuous) or 1 (binary). \n\n";
-        exit(1);
-
-    }
 
 
     if (out.count("exposure-names")) {
@@ -401,7 +388,31 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: Please specify --scale with a value equal to 0 (false) or 1 (true).\n\n";
             exit(1);
         }
+    }
+    if (out.count("categorical-names")) {
+        cat_names = out["categorical-names"].as<std::vector<std::string>>();
+        if (cat_names.size() > 0) {
+            for (size_t i = 0; i < cat_names.size(); i++) {
+                if (expHM.find(cat_names[i]) != expHM.end()) {
+                    continue;
+                }
+                else if (intHM.find(cat_names[i]) != intHM.end()) {
+                    continue;
+                } 
+                else {
+                    cerr << "\nERROR: " << cat_names[i] << " is not an exposure or interaction exposure.\n\n";
+                    exit(1);
+                }
+            }
+        }
+    }
+    if (out.count("cat-threshold")) {
+        cat_threshold = out["cat-threshold"].as<int>();
 
+        if (cat_threshold <= 1) {
+            cerr << "\nERROR: Please specify --cat-threshold with a value greater than 1.\n\n";
+            exit(1);
+        }
     }
 
 
@@ -453,12 +464,17 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     }
 
 
-
-    
     // Print parameter info
     cout << "The Phenotype File is: " << phenoFile << "\n";
-    cout << "The Phenotype is: " << phenoName << '\n';
-    cout << "Continuous or Binary: "; phenoType == 0 ? cout << "Continuous \n" : cout << "Binary \n";
+    cout << "The Genotype File is: ";
+    if (useBgenFile) {
+        cout << bgenFile << "\n";
+    } else if (usePgenFile) {
+        cout << pgenFile << "\n";
+    } else {
+        cout << bedFile << "\n";
+    }
+
     cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
 
     if (numSelCol == 0) {
@@ -497,15 +513,12 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         cout << "\n\n";
     }
 
-    if (phenoType == 1) {
-        cout << "Logistic Convergence Threshold: " << tol << "\n";
-    }
+    cout << "Categorical Threshold: " << cat_threshold << "\n";
     cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
     cout << "Number of SNPS in batch: " << stream_snps << "\n";
     cout << "Number of Threads: " << threads << "\n";
     cout << "Output File: " << outFile << "\n";
     cout << "*********************************************************\n";
-
 }
 
 
@@ -535,30 +548,31 @@ void print_help() {
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
         << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
-        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta'meta output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
+        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t\t  For a robust analysis, additional columns for the model-based summary statistics will be included.  \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
     cout << endl << endl;
 
 
     cout << "Phenotype File Options: " << endl
         << "   --sampleid-name \t Column name in the phenotype file that contains sample identifiers." << endl
-        << "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest." << endl
+        << "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest.\n \t\t\t   If the number of levels (unique observations) is 2, the phenotype is treated as binary;\n \t\t\t   otherwise it is assumed to be continuous." << endl
         << "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
         << "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
         << "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
-        << "   --pheno-type \t 0 indicates a continuous phenotype and 1 indicates a binary phenotype." << endl
         << "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
-        << "   --delim \t\t Delimiter separating values in the phenotype file. Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
+        << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
         << "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
         << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates. \n \t\t\t    Default: 1" << endl
-        << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl;
+        << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl
+        << "   --categorical-names \t Names of the exposure or interaction covariate that should be treated as categorical. \n \t\t\t    Default: None" << endl
+        << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate not specified using --categorical-names\n \t\t\t    should be automatically treated as categorical based on the number of levels (unique observations). \n \t\t\t    Default: 20" << endl;
     cout << endl << endl;
 
 
     cout << "Filtering Options: " << endl
         << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.001" << endl
         << "   --miss-geno-cutoff \t Threshold to filter variants based on the missing genotype rate.\n \t\t\t    Default: 0.05" << endl
-        << "   --include-snp-file \t Path to file containing a subset of variants in the specified genotype file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the genotype file is used for ID\n \t\t\t   matching. This must be 'snpid' or 'rsid' (BGEN only). There should be one variant identifier per line after the header.\n \t\t\t   Variants not listed in this file will be excluded from analysis." << endl;
+        << "   --include-snp-file \t Path to file containing a subset of variants in the specified genotype file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the genotype file is used for ID\n \t\t\t   matching. This must be 'snpid' (PLINK or BGEN) or 'rsid' (BGEN only).\n \t\t\t   There should be one variant identifier per line after the header." << endl;
     cout << endl << endl;
 
 

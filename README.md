@@ -116,7 +116,7 @@ Input/Output File Options:
 	minimum: Output the summary statistics for only the GxE and marginal G terms.
         meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms.
               For robust runs, additional columns for the model-based summary statistics will be included.
-        full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions
+        full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions.
 	Default: minimum   
 
 
@@ -171,7 +171,8 @@ Phenotype File Options:
         Default: None
 
 --cat-threshold
-     A cut-off to determine which exposure or interaction covariate not specified using --categorical-names should be automatically treated as categorical based on the number of levels (unique observations).
+     A cut-off to determine which exposure or interaction covariate not specified using --categorical-names 
+     should be automatically treated as categorical based on the number of levels (unique observations).
         Default: 20
    
 
@@ -250,7 +251,7 @@ Effect_Allele      - The allele that is counted in association testing.
 N_samples          - The number of samples without missing genotypes.
 AF                 - The allele frequency of the effect allele.
 N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
-AF_catE_*          - The allele frequency of the effect allele for each stratum in each of the catgorical exposure or interaction covariate.
+AF_catE_*          - The allele frequency of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
 
 Beta_Marginal      - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
 SE_Beta_Marginal   - The SE associated with the marginal genetic effect estimate.
@@ -294,7 +295,7 @@ The "full" option provides, in addition to "meta", intermediate quantities neces
 
 To run GEM using the example data, execute GEM with the following code.
 ```unix
-./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --pheno-type 1 --robust 1 --missing-value NaN --out my_example.out
+./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov2 cov3 --exposure-names cov1 --robust 1 --missing-value NaN --out my_example.out
 ```
 The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
 

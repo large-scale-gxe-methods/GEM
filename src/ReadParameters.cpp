@@ -548,31 +548,31 @@ void print_help() {
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
         << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
-        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
+        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t\t  For a robust analysis, additional columns for the model-based summary statistics will be included.  \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
     cout << endl << endl;
 
 
     cout << "Phenotype File Options: " << endl
         << "   --sampleid-name \t Column name in the phenotype file that contains sample identifiers." << endl
-        << "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest." << endl
+        << "   --pheno-name \t Column name in the phenotype file that contains the phenotype of interest.\n \t\t\t   If the number of levels (unique observations) is 2, the phenotype is treated as binary;\n \t\t\t   otherwise it is assumed to be continuous." << endl
         << "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
         << "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
         << "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
         << "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
-        << "   --delim \t\t Delimiter separating values in the phenotype file. Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
+        << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
         << "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
         << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates. \n \t\t\t    Default: 1" << endl
         << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl
         << "   --categorical-names \t Names of the exposure or interaction covariate that should be treated as categorical. \n \t\t\t    Default: None" << endl
-        << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate is categorical based on the number of unique elements. \n \t\t\t    Default: 20" << endl;
+        << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate not specified using --categorical-names\n \t\t\t    should be automatically treated as categorical based on the number of levels (unique observations). \n \t\t\t    Default: 20" << endl;
     cout << endl << endl;
 
 
     cout << "Filtering Options: " << endl
         << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.001" << endl
         << "   --miss-geno-cutoff \t Threshold to filter variants based on the missing genotype rate.\n \t\t\t    Default: 0.05" << endl
-        << "   --include-snp-file \t Path to file containing a subset of variants in the specified genotype file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the genotype file is used for ID\n \t\t\t   matching. This must be 'snpid' or 'rsid' (BGEN only). There should be one variant identifier per line after the header.\n \t\t\t   Variants not listed in this file will be excluded from analysis." << endl;
+        << "   --include-snp-file \t Path to file containing a subset of variants in the specified genotype file to be used for analysis. The first\n \t\t\t   line in this file is the header that specifies which variant identifier in the genotype file is used for ID\n \t\t\t   matching. This must be 'snpid' (PLINK or BGEN) or 'rsid' (BGEN only).\n \t\t\t   There should be one variant identifier per line after the header." << endl;
     cout << endl << endl;
 
 

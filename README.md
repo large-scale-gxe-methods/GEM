@@ -56,7 +56,7 @@ Once GEM is installed, the executable ```./GEM``` can be used to run the program
 For a list of options, use ```./GEM --help```.  
 
 <details>
-     <summary> #### Command Line Options </summary>
+     <summary> <b>Command Line Options</b> </summary>
 
 ```
 
@@ -208,7 +208,7 @@ Performance Options:
         Default: 1
 
 ```
-<details>
+</details>
 
 <br /> 
 

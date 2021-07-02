@@ -22,6 +22,7 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 
 ## Installation  
 Library Dependencies:  
+* C++11 compiler.  
 * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
 * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
 
@@ -54,7 +55,8 @@ To install GEM, run the following lines of code.
 Once GEM is installed, the executable ```./GEM``` can be used to run the program.  
 For a list of options, use ```./GEM --help```.  
 
-#### Command Line Options
+<details>
+     <summary> #### Command Line Options </summary>
 
 ```
 
@@ -115,7 +117,7 @@ Input/Output File Options:
      Modifies the output of GEM. Must be one of the following:
 	minimum: Output the summary statistics for only the GxE and marginal G terms.
         meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms.
-              For robust runs, additional columns for the model-based summary statistics will be included.
+               For a robust analysis, additional columns for the model-based summary statistics will be included.
         full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions.
 	Default: minimum   
 
@@ -206,6 +208,7 @@ Performance Options:
         Default: 1
 
 ```
+<details>
 
 <br /> 
 
@@ -253,8 +256,9 @@ AF                 - The allele frequency of the effect allele.
 N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
 AF_catE_*          - The allele frequency of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
 
-Beta_Marginal      - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
-SE_Beta_Marginal   - The SE associated with the marginal genetic effect estimate.
+Beta_Marginal           - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
+SE_Beta_Marginal        - The model-based SE associated with the marginal genetic effect estimate.
+robust_SE_Beta_Marginal - The robust SE associated with the marginal genetic effect estimate.
 
 Beta_G             - The coefficient estimate for the genetic main effect (G).
 Beta_G-*           - The coefficient estimate for the interaction or interaction covariate terms.
@@ -276,7 +280,7 @@ robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of 
 ```
 
 <br />
-The --output-style flag can be used to determine which columns should be included in the output file.  
+The --output-style flag can be used to specify which columns should be included in the output file.  
 
 ##### minimum:  
 The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
@@ -285,7 +289,7 @@ The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marg
 Includes each of the possible outputs listed above when applicable. For a model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
 
 ##### full:  
-The "full" option provides, in addition to "meta", intermediate quantities necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
+The "full" option provides, in addition to "meta", an initial header line with the residual variance estimate necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).”
 
 <br />
 <br />

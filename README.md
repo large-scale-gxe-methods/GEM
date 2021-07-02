@@ -59,19 +59,17 @@ For a list of options, use ```./GEM --help```.
      <summary> <b>Command Line Options</b> </summary>
 
 ```
-
-General Options:
+<b>General Options</b>:
 
 --help
     Prints the available options of GEM and exits.  
-   
    
 --version
     Prints the version of GEM and exits.
   
   
   
-Input/Output File Options:  
+<b>Input/Output File Options</b>:  
 
 --pheno-file  
      Path to the phenotype file.  
@@ -123,7 +121,7 @@ Input/Output File Options:
 
 
 
-Phenotype File Options:
+<b>Phenotype File Options</b>:
 
 --sampleid-name  
      Column name in the phenotype file that contains sample identifiers.  
@@ -179,7 +177,7 @@ Phenotype File Options:
    
 
 
-Filtering Options:  
+<b>Filtering Options</b>:  
 
 --maf
      Minimum threshold value [0, 0.5] to exclude variants based on the minor allele frequency.
@@ -197,7 +195,7 @@ Filtering Options:
   
   
 
-Performance Options:  
+<b>Performance Options</b>:  
 
 --threads
      Set number of compute threads.

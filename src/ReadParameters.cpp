@@ -391,7 +391,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     }
     if (out.count("categorical-names")) {
         cat_names = out["categorical-names"].as<std::vector<std::string>>();
-        if (cat_names.size() > 1) {
+        if (cat_names.size() > 0) {
             for (size_t i = 0; i < cat_names.size(); i++) {
                 if (expHM.find(cat_names[i]) != expHM.end()) {
                     continue;
@@ -401,6 +401,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
                 } 
                 else {
                     cerr << "\nERROR: " << cat_names[i] << " is not an exposure or interaction exposure.\n\n";
+                    exit(1);
                 }
             }
         }

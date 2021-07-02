@@ -83,7 +83,7 @@ Input/Output File Options:
   
 --pfile  
      Path and prefix to the .pgen, .pvar, and .psam files.  
-     If this flag is used, then --pgen/--pvar/--psam don�t need to be specified.
+     If this flag is used, then --pgen/--pvar/--psam don't need to be specified.
   
 --pgen  
      Path to the pgen file.  
@@ -96,7 +96,7 @@ Input/Output File Options:
   
 --bfile  
      Path and prefix to the .bed, .bim and .fam files.  
-     If this flag is used, then --bed/--bim/--fam don�t need to be specified.
+     If this flag is used, then --bed/--bim/--fam don't need to be specified.
   
 --bed  
      Path to the bed file.  
@@ -127,7 +127,8 @@ Phenotype File Options:
      Column name in the phenotype file that contains sample identifiers.  
 
 --pheno-name  
-     Column name in the phenotype file that contains the phenotype of interest.  
+     Column name in the phenotype file that contains the phenotype of interest. 
+     If the number of levels (unique observations) is 2, the phenotype is treated as binary; otherwise it is assumed to be continuous.
 
 --exposure-names  
      One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests.  
@@ -140,9 +141,6 @@ Phenotype File Options:
 --covar-names  
      Any column names in the phenotype file naming the covariates for which only main effects should be included
      for adjustment (do not include with --exposure-names or --int-covar-names).  
-
---pheno-type
-     0 indicates a continuous phenotype and 1 indicates a binary phenotype.  
 
 --robust
      0 for model-based standard errors and 1 for robust standard errors.
@@ -173,7 +171,7 @@ Phenotype File Options:
         Default: None
 
 --cat-threshold
-     A cut-off to determine which exposure or interaction covariate is categorical based on the number of unique elements.
+     A cut-off to determine which exposure or interaction covariate not specified using --categorical-names should be automatically treated as categorical based on the number of levels (unique observations).
         Default: 20
    
 
@@ -251,10 +249,10 @@ Non_Effect_Allele  - The allele not counted in association testing.
 Effect_Allele      - The allele that is counted in association testing.  
 N_samples          - The number of samples without missing genotypes.
 AF                 - The allele frequency of the effect allele.
-N_catE_*           - The number of non-missing samples in each stratum for each of the catgerical exposure or interaction covariate.
-AF_catE_*          - The allele frequency of the effect allele for each stratum in each of the catgerical exposure or interaction covariate.
+N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
+AF_catE_*          - The allele frequency of the effect allele for each stratum in each of the catgorical exposure or interaction covariate.
 
-Beta_Marginal      - The coefficient estimate for the marginal genetic effect.
+Beta_Marginal      - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
 SE_Beta_Marginal   - The SE associated with the marginal genetic effect estimate.
 
 Beta_G             - The coefficient estimate for the genetic main effect (G).
@@ -270,21 +268,22 @@ robust_Cov_Beta_G-*_G-* - Robust covariance between any GxE or interaction covar
 
 P_Value_Marginal           - Marginal genetic effect p-value from model-based SE.
 P_Value_Interaction        - Interaction effect p-value from model-based SE.
-P_Value_Joint              - Joint test p-value (K+1 degrees of freedom test of genetic effect) from model-based SE.
+P_Value_Joint              - Joint test p-value (K+1 degrees of freedom test of genetic and interaction effect) from model-based SE.
 robust_P_Value_Marginal    - Marginal genetic effect p-value from robust SE.
 robust_P_Value_Interaction - Interaction effect p-value from robust SE.
-robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect) from robust SE.
+robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic and interaction effect) from robust SE.
 ```
 
-The --output-style flag can be used to determine columns should be included in the output file.  
+<br />
+The --output-style flag can be used to determine which columns should be included in the output file.  
 
-minimum:  
+##### minimum:  
 The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
 
-meta:  
-For robust analysis (--robust 1), the meta option includes each of the possible outputs listed above when applicable. For model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
+##### meta:  
+Includes each of the possible outputs listed above when applicable. For a model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
 
-full:  
+##### full:  
 The "full" option provides, in addition to "meta", intermediate quantities necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
 
 <br />

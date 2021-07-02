@@ -382,7 +382,7 @@ int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> s
         if (!map.count(tmp[0])) {
             map[tmp[0]] = 1;
         }
-        if ((map.size()/sampleSize) > 0.05) {
+        if (map.size() > 2) {
             is_bin = 0;
             break;
         }

@@ -67,7 +67,10 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
             }
         }
 
-        if (cnt == 1) { cerr << "\nERROR: All values of " << covNames[i] << " column are the same.\n\n"; }
+        if (cnt == 1) { 
+            cerr << "\nERROR: All values of " << covNames[i] << " column are the same.\n\n"; 
+            exit(1);	
+	    }
 
         if ((cnt <= cat_threshold) || (std::find(cat_names.begin(), cat_names.end(), covNames[i]) != cat_names.end())) {
             binE_idx.push_back(i + 1);

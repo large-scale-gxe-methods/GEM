@@ -52,11 +52,13 @@ To install GEM, run the following lines of code.
 <br /> 
 <br />
 
+### Command Line Options
+
 Once GEM is installed, the executable ```./GEM``` can be used to run the program.  
 For a list of options, use ```./GEM --help```.  
 
 <details>
-     <summary> <b>Command Line Options</b> </summary>
+     <summary> <b>List of Options</b> </summary>
 
 ```
 General Options:
@@ -210,13 +212,13 @@ Performance Options:
 
 <br /> 
 
-#### Input Files
+### Input Files
 
-* ##### Phenotype File
+* #### Phenotype File
     A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter.
     All binary phenotypes, exposures, and covariates should be coded numerically (e.g., males/females as 0/1)
 
-* ##### Genotype Files
+* #### Genotype Files
     * [BGEN genotype file](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html).  
     Variants that are non-biallelic should be filtered from the BGEN file. Note that since there are no indication of a REF/ALT allele in the BGEN file, the second allele is the effect allele counted in association testing.   
     A [.sample file](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html) is required as input when the .bgen file does not contain a sample identifier block.
@@ -237,7 +239,7 @@ Performance Options:
     
 <br /> 
 
-#### Output File Format  
+### Output File Format  
 
 GEM will write results to the output file specified with the --out parameter (or 'gem.out' if no output file is specified).  
 Below are details of the possible column headers in the output file.  
@@ -280,13 +282,13 @@ robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of 
 <br />
 The --output-style flag can be used to specify which columns should be included in the output file.  
 
-##### minimum:  
+#### minimum:  
 The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
 
-##### meta:  
+#### meta:  
 Includes each of the possible outputs listed above when applicable. For a model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
 
-##### full:  
+#### full:  
 The "full" option provides, in addition to "meta", an initial header line with the residual variance estimate necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).”
 
 <br />

@@ -359,16 +359,11 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     uint32_t n_samples = bed.n_samples, snploop = bed.begin[thread_num], end = bed.end[thread_num];
     std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
 
-    int numBinE = binE.nBinE;
-    int numSubStrata = binE.nss;
-    vector<int> sub_stratum_idx = binE.sub_stratum_idx;
-    vector<int> stratum_idx = binE.stratum_idx;
-    vector<int> sub_stratum_size = binE.sub_stratum_size;
-    bool strata = (numBinE > 0 ) ? true : false;
+    int numBinE   = binE.nBinE;
+    bool strata   = (numBinE > 0 ) ? true : false;
     int strataLen = binE.strataLen;
-    size_t subStrataLen = sub_stratum_idx.size();
+    vector<int> stratum_idx = binE.stratum_idx;
     vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
-    vector<double> sub_binE_AF(stream_snps * numSubStrata, 0.0), sub_binE_N(stream_snps * numSubStrata, 0.0);
 
     int ZGS_col = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
@@ -464,7 +459,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
 
 
             int tmp1 = stream_i * Sq1 * samSize;
-            int strata_tmp = stream_i * strataLen;
+            int strata_i = stream_i * strataLen;
             int idx_k = 0;
             int nMissing = 0;
             uint ncount = 0;
@@ -516,8 +511,8 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                     }
 
                     if (strata) {
-                        binE_N[strata_tmp + stratum_idx[idx_k]]+=1.0;
-                        binE_AF[strata_tmp + stratum_idx[idx_k]]+=geno;
+                        binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
+                        binE_AF[strata_i + stratum_idx[idx_k]]+=geno;
                     }
 
                     idx_k++;
@@ -533,8 +528,8 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                 AF[stream_i] = 0;
                 if (strata) {
                     for (int i = 0; i < strataLen; i++) {
-                        binE_N[strata_tmp + i] = 0.0;
-                        binE_AF[strata_tmp + i] = 0.0;
+                        binE_N[strata_i + i] = 0.0;
+                        binE_AF[strata_i + i] = 0.0;
                     }
                 }
                 continue;
@@ -544,24 +539,8 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             }
 
             if (strata) { 
-                int sub_strata_tmp = stream_i * numSubStrata;
- 
-                if (numBinE > 1) {
-                    size_t ss = 0;
-                    size_t k = 0;
-                    while (ss < subStrataLen) {
-                        for (int j = 0; j < sub_stratum_size[k]; j++) {
-                            sub_binE_N[sub_strata_tmp + k] = sub_binE_N[sub_strata_tmp + k] + binE_N[strata_tmp + sub_stratum_idx[ss]];
-                            sub_binE_AF[sub_strata_tmp + k] = sub_binE_AF[sub_strata_tmp + k] + binE_AF[strata_tmp +sub_stratum_idx[ss]];
-                            ss++;
-                        }
-                        sub_binE_AF[sub_strata_tmp + k] = sub_binE_AF[sub_strata_tmp + k] / sub_binE_N[sub_strata_tmp + k] / 2.0;
-                        k++;
-                    }
-                } 
-   
                 for (int i = 0; i < strataLen; i++) {
-                    binE_AF[strata_tmp + i] = binE_AF[strata_tmp + i] / binE_N[strata_tmp + i] / 2.0;
+                    binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
                 }
             }
 
@@ -875,11 +854,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
         for (int i = 0; i < stream_snps; i++) {
             oss << geno_snpid[i] << "\t" << AF[i] << "\t";
 
-            int tmp_sub_strata = i * numSubStrata;
             int tmp_strata = i * strataLen;
-            for (int k = 0; k < numSubStrata; k++) {
-                oss << sub_binE_N[tmp_sub_strata + k] << "\t" << sub_binE_AF[tmp_sub_strata + k] << "\t";
-            }
             for (int k = 0; k < strataLen; k++) {
                 oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
             }
@@ -940,8 +915,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
         if (strata) {       
             std::fill(binE_N.begin(), binE_N.end(), 0.0);
             std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
-            std::fill(sub_binE_N.begin(), sub_binE_N.end(), 0.0);
-            std::fill(sub_binE_AF.begin(), sub_binE_AF.end(), 0.0);
         }
         delete[] ZGStR;
         delete[] ZGStZGS;

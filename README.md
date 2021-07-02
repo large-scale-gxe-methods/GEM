@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.3  
+Current version: 1.4   
 
 <br />
 Additional documentation:  
@@ -24,8 +24,6 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 Library Dependencies:  
 * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
 * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
-
-These dependencies will need to be installed prior to executing make.  
 
 <br />
 
@@ -85,7 +83,7 @@ Input/Output File Options:
   
 --pfile  
      Path and prefix to the .pgen, .pvar, and .psam files.  
-     If this flag is used, then --pgen/--pvar/--psam don’t need to be specified.
+     If this flag is used, then --pgen/--pvar/--psam donï¿½t need to be specified.
   
 --pgen  
      Path to the pgen file.  
@@ -98,7 +96,7 @@ Input/Output File Options:
   
 --bfile  
      Path and prefix to the .bed, .bim and .fam files.  
-     If this flag is used, then --bed/--bim/--fam don’t need to be specified.
+     If this flag is used, then --bed/--bim/--fam donï¿½t need to be specified.
   
 --bed  
      Path to the bed file.  
@@ -116,7 +114,8 @@ Input/Output File Options:
 --output-style  
      Modifies the output of GEM. Must be one of the following:
 	minimum: Output the summary statistics for only the GxE and marginal G terms.
-        meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms
+        meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms.
+              For robust runs, additional columns for the model-based summary statistics will be included.
         full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions
 	Default: minimum   
 
@@ -168,6 +167,14 @@ Phenotype File Options:
 --scale
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
         Default: 0
+
+--categorical-names
+     Names of the exposure or interaction covariate that should be treated as categorical.
+        Default: None
+
+--cat-threshold
+     A cut-off to determine which exposure or interaction covariate is categorical based on the number of unique elements.
+        Default: 20
    
 
 
@@ -185,7 +192,7 @@ Filtering Options:
      Path to file containing a subset of variants in the specified genotype file to be used for analysis. 
      The first line in this file is the header that specifies which variant identifier in the genotype file  
      is used for ID matching. This must be 'snpid' (PLINK or BGEN) or 'rsid' (BGEN only). There should be one variant 
-     identifier per line after the header. Variants not listed in this file will be excluded from analysis.
+     identifier per line after the header.
   
   
 
@@ -232,42 +239,52 @@ Performance Options:
 #### Output File Format  
 
 GEM will write results to the output file specified with the --out parameter (or 'gem.out' if no output file is specified).  
-Below are details of the column header in the output file depending on the --output-style (minimum/meta/full).  
+Below are details of the possible column headers in the output file.  
 
-minimum:
 ```diff 
-SNPID             - The SNP identifier as retrieved from the genotype file.
-RSID              - The reference SNP ID number. (BGEN only)
-CHR               - The chromosome of the SNP.
-POS               - The physical position of the SNP.
-Non_Effect_Allele - The allele not counted in association testing.  
-Effect_Allele     - The allele that is counted in association testing.  
-N_samples         - The number of samples without missing genotypes.
-AF                - The allele frequency of the effect allele.
+SNPID              - The SNP identifier as retrieved from the genotype file.
+RSID               - The reference SNP ID number. (BGEN only)
+CHR                - The chromosome of the SNP.
+POS                - The physical position of the SNP.
+Non_Effect_Allele  - The allele not counted in association testing.  
+Effect_Allele      - The allele that is counted in association testing.  
+N_samples          - The number of samples without missing genotypes.
+AF                 - The allele frequency of the effect allele.
+N_catE_*           - The number of non-missing samples in each stratum for each of the catgerical exposure or interaction covariate.
+AF_catE_*          - The allele frequency of the effect allele for each stratum in each of the catgerical exposure or interaction covariate.
 
 Beta_Marginal      - The coefficient estimate for the marginal genetic effect.
-Var_Beta_Marginal  - The variance associated with the marginal genetic effect estimate.
-Beta_G-E           - The coefficient estimate for the interaction terms.
-Var_Beta_G-E       - The variance associated with the interaction terms.
-Cov_Beta_G-*_G-*   - The covariance for all GxE terms.
+SE_Beta_Marginal   - The SE associated with the marginal genetic effect estimate.
 
-P_Value_Marginal    - Marginal genetic effect p-value.
-P_Value_Interaction - Interaction effect p-value.
-P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect).
+Beta_G             - The coefficient estimate for the genetic main effect (G).
+Beta_G-*           - The coefficient estimate for the interaction or interaction covariate terms.
+SE_Beta_G          - Model-based SE associated with the the genetic main effect (G).  
+SE_Beta_G-*        - Model-based SE associated with any GxE or interaction covariate terms.
+robust_SE_Beta_G   - Robust SE associated with the the genetic main effect (G).  
+robust_SE_Beta_G-* - Robust SE associated with any GxE or interaction covariate terms.
+Cov_Beta_G_G-*          - Model-based covariance between the genetic main effect (G) and any GxE or interaction covariate terms
+Cov_Beta_G-*_G-*        - Model-based covariance between any GxE or interaction covariate terms
+robust_Cov_Beta_G_G-*   - Robust covariance between the genetic main effect (G) and any GxE or interaction covariate terms.
+robust_Cov_Beta_G-*_G-* - Robust covariance between any GxE or interaction covariate terms.
+
+P_Value_Marginal           - Marginal genetic effect p-value from model-based SE.
+P_Value_Interaction        - Interaction effect p-value from model-based SE.
+P_Value_Joint              - Joint test p-value (K+1 degrees of freedom test of genetic effect) from model-based SE.
+robust_P_Value_Marginal    - Marginal genetic effect p-value from robust SE.
+robust_P_Value_Interaction - Interaction effect p-value  from robust SE.
+robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of genetic effect) from robust SE.
 ```
+
+The --output-style flag can be used to determine columns should be included in the output file.  
+
+minimum:  
+The minimum option includes the variant information, Beta_Marginal, SE_Beta_Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.
 
 meta:  
-In addition to the "minimum" output, the "meta" option will also output the following columns:
-```diff 
-Beta_G           - The coefficient estimate for the genetic main effect.
-Beta_G-C         - The coefficient estimate for any interaction covariate terms.
-Var_Beta_G       - The variance associated with the genetic main effect.
-Var_Beta_G-C     - The variance associated with any interaction covariate terms.
-Cov_Beta_G-*_G-* - The set of covariance terms (genetic main effect, GxE, and any interaction covariate term) defining the full covariance matrix. 
-```
+For robust analysis (--robust 1), the meta option includes each of the possible outputs listed above when applicable. For model-based analysis (--robust 0), the columns containing the "robust" prefix (robust_*) are excluded in the output file.
 
 full:  
-The "full" option provides, in addition to "meta", output columns storing intermediate quantities necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
+The "full" option provides, in addition to "meta", intermediate quantities necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
 
 <br />
 <br />

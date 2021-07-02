@@ -36,7 +36,7 @@
 #include "declars.h"
 
 
-int  checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID);
+int  checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, double epsilon);
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta, int phenoType, int samSize);
@@ -211,8 +211,9 @@ int main(int argc, char* argv[]) {
 
         samSize = pgen.new_samSize;
         
-        pgen.phenoType = checkBinary(phenomap, pgen.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, pgen.sampleID, pgen.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
+        pgen.phenoType = checkBinary(phenomap, pgen.sampleID, epsilon);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize, covSelHeadersName);
+        cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -255,8 +256,9 @@ int main(int argc, char* argv[]) {
 
         samSize = bed.new_samSize;
 
-        bed.phenoType = checkBinary(phenomap, bed.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, bed.sampleID, bed.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
+        bed.phenoType = checkBinary(phenomap, bed.sampleID, epsilon);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, covSelHeadersName);
+        cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -298,8 +300,9 @@ int main(int argc, char* argv[]) {
 
         samSize = bgen.new_samSize;
 
-        bgen.phenoType = checkBinary(phenomap, bgen.sampleID);
-        binE.checkBinaryCovariates(binE, phenomap, bgen.sampleID, bgen.include_idx, samSize, numExpSelCol, numSelCol, covSelHeadersName);
+        bgen.phenoType = checkBinary(phenomap, bgen.sampleID, epsilon);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bgen.sampleID, bgen.include_idx, samSize, covSelHeadersName);
+        cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
@@ -368,7 +371,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID) {
+int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, double epsilon) {
 
     int is_bin = 1;
     std::unordered_map<string, int> map;
@@ -387,7 +390,10 @@ int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> s
     if (map.size() < 2) {
         cerr << "ERROR: All values of the phenotype are the same. \n\n";
     }
-    
+    cout << "Phenotype detected: "; ((is_bin) ? cout << "Binary\n" : cout << "Continuous\n");
+    if (is_bin) {
+        cout << "Logistic convergence threshold: " << epsilon << "\n";
+    }
     return is_bin;
 }
 
@@ -666,10 +672,10 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
     int nBinE = binE.nBinE;
     if (nBinE > 0) {
-        vector<string> bn = binE.bn_header;
-        for (size_t i = 0; i < bn.size(); i++) {
-            results << "N_" << bn[i] << "\t";
-            results << "AF_" << bn[i] << "\t";
+        vector<string> bin_headers = binE.bin_headers;
+        for (size_t i = 0; i < bin_headers.size(); i++) {
+            results << "N_" << bin_headers[i] << "\t";
+            results << "AF_" << bin_headers[i] << "\t";
         }
     }
 

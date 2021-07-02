@@ -30,6 +30,10 @@ public:
 	std::string missing;
 	char pheno_delim;
 
+	// Categorical exposures
+	int cat_threshold;
+	std::vector<std::string> cat_names;
+
 	// Out file
 	std::string outFile;
 	std::string outStyle;

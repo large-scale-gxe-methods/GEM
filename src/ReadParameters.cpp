@@ -58,7 +58,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("robust", po::value<int>()->default_value(0), "")
         ("tol", po::value<double>()->default_value(.000001))
         ("center", po::value<int>()->default_value(1))
-        ("scale", po::value<int>()->default_value(0));
+        ("scale", po::value<int>()->default_value(0))
+        ("categorical-names", po::value<std::vector<std::string>>()->multitoken(), "")
+        ("cat-threshold", po::value<int>()->default_value(20));
 
     // Filtering options
     po::options_description filter("Filtering options");
@@ -386,7 +388,30 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: Please specify --scale with a value equal to 0 (false) or 1 (true).\n\n";
             exit(1);
         }
+    }
+    if (out.count("categorical-names")) {
+        cat_names = out["categorical-names"].as<std::vector<std::string>>();
+        if (cat_names.size() > 1) {
+            for (size_t i = 0; i < cat_names.size(); i++) {
+                if (expHM.find(cat_names[i]) != expHM.end()) {
+                    continue;
+                }
+                else if (intHM.find(cat_names[i]) != intHM.end()) {
+                    continue;
+                } 
+                else {
+                    cerr << "\nERROR: " << cat_names[i] << " is not an exposure or interaction exposure.\n\n";
+                }
+            }
+        }
+    }
+    if (out.count("cat-threshold")) {
+        cat_threshold = out["cat-threshold"].as<int>();
 
+        if (cat_threshold <= 1) {
+            cerr << "\nERROR: Please specify --cat-threshold with a value greater than 1.\n\n";
+            exit(1);
+        }
     }
 
 
@@ -438,58 +463,61 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     }
 
 
+    // Print parameter info
+    cout << "The Phenotype File is: " << phenoFile << "\n";
+    cout << "The Genotype File is: ";
+    if (useBgenFile) {
+        cout << bgenFile << "\n";
+    } else if (usePgenFile) {
+        cout << pgenFile << "\n";
+    } else {
+        cout << bedFile << "\n";
+    }
 
-    
-    // // Print parameter info
-    // cout << "The Phenotype File is: " << phenoFile << "\n";
-    // cout << "The Phenotype is: " << phenoName << '\n';
-    // cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
+    cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
 
-    // if (numSelCol == 0) {
-    //     cout << "No Covariates Selected" << "\n";
-    // }
-    // else {
-    //     cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
-    //     cout << "The Selected Covariates are:  ";
-    //     for (int i = 0; i < numSelCol; i++) {
-    //         cout << cov[i] << "   ";
-    //     }
-    //     cout << "\n";
-    // }
+    if (numSelCol == 0) {
+        cout << "No Covariates Selected" << "\n";
+    }
+    else {
+        cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
+        cout << "The Selected Covariates are:  ";
+        for (int i = 0; i < numSelCol; i++) {
+            cout << cov[i] << "   ";
+        }
+        cout << "\n";
+    }
 
-    // if (numIntSelCol == 0) {
-    //     cout << "No Interaction Covariates Selected" << "\n";
-    // }
-    // else {
-    //     cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
-    //     cout << "The Selected Interaction Covariates are:  ";
-    //     for (int i = 0; i < numIntSelCol; i++) {
-    //         cout << icov[i] << "   ";
-    //     }
-    //     cout << "\n";
-    // }
+    if (numIntSelCol == 0) {
+        cout << "No Interaction Covariates Selected" << "\n";
+    }
+    else {
+        cout << "The Total Number of Selected Interaction Covariates is: " << numIntSelCol << "\n";
+        cout << "The Selected Interaction Covariates are:  ";
+        for (int i = 0; i < numIntSelCol; i++) {
+            cout << icov[i] << "   ";
+        }
+        cout << "\n";
+    }
 
-    // if (numExpSelCol == 0) {
-    //     cout << "No Exposures Selected" << "\n";
-    // }
-    // else {
-    //     cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
-    //     cout << "The Selected Exposures are:  ";
-    //     for (int i = 0; i < numExpSelCol; i++) {
-    //         cout << exp[i] << "   ";
-    //     }
-    //     cout << "\n\n";
-    // }
+    if (numExpSelCol == 0) {
+        cout << "No Exposures Selected" << "\n";
+    }
+    else {
+        cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
+        cout << "The Selected Exposures are:  ";
+        for (int i = 0; i < numExpSelCol; i++) {
+            cout << exp[i] << "   ";
+        }
+        cout << "\n\n";
+    }
 
-    // if (phenoType == 1) {
-    //     cout << "Logistic Convergence Threshold: " << tol << "\n";
-    // }
-    // cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
-    // cout << "Number of SNPS in batch: " << stream_snps << "\n";
-    // cout << "Number of Threads: " << threads << "\n";
-    // cout << "Output File: " << outFile << "\n";
-    // cout << "*********************************************************\n";
-
+    cout << "Categorical Threshold: " << cat_threshold << "\n";
+    cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
+    cout << "Number of SNPS in batch: " << stream_snps << "\n";
+    cout << "Number of Threads: " << threads << "\n";
+    cout << "Output File: " << outFile << "\n";
+    cout << "*********************************************************\n";
 }
 
 
@@ -519,7 +547,7 @@ void print_help() {
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
         << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
-        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta'meta output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
+        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
     cout << endl << endl;
 
 
@@ -534,7 +562,9 @@ void print_help() {
         << "   --delim \t\t Delimiter separating values in the phenotype file. Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
         << "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
         << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates. \n \t\t\t    Default: 1" << endl
-        << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl;
+        << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl
+        << "   --categorical-names \t Names of the exposure or interaction covariate that should be treated as categorical. \n \t\t\t    Default: None" << endl
+        << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate is categorical based on the number of unique elements. \n \t\t\t    Default: 20" << endl;
     cout << endl << endl;
 
 

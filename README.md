@@ -13,14 +13,15 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 <br />
 
 ## Contents
-- [Installation](#installation)
+- [Quick Installation](#installation)
+- [Dependencies](#dependencies)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)
 
 <br />
 
-## Installation  
+## Quick Installation  
 Library Dependencies:  
 * C++11 compiler.  
 * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
@@ -39,6 +40,32 @@ To install GEM, run the following lines of code.
 <br />
 <br />
 <br />
+
+## Dependencies
+C/C++ Compiler
+ * A compiler with C++11 support is required.
+ 
+LAPACK and BLAS
+ * The LAPACK(Linear Algebra PACKage) and BLAS(Basic Linear Algebra Subprograms) libraries are used to optimize matrix operations in GEM.
+
+
+Intel processors:
+ * We recommend linking LAPACK/BLAS through the Math Kernal Library (MKL) for a greater performance boost. This can be done by replacing -llapack and -lblas in the makefile with
+-lmkl_gf_lp64 -lmkl_sequential -lmkl_core and re-compiling the software.
+  * It is important to compile with -lmkl_sequential since GEM already does multithreading across SNPs.
+
+
+AMD processors:
+ * For AMD processors, OpenBLAS (-lopenblas) may be a better alternative.
+ 
+Boost C++ Libraries
+ * The Boost C++ libraries are used for command-line, file management and multithreading purposes.
+
+The following Boost libraries are required :
+      1. libboost_system
+      2. libboost_program_options
+      3. libboost_filesystem
+      4. libboost_thread
 
 ## Usage
 

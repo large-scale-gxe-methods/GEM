@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.4   
+Current version: 1.4.1   
 
 <br />
 Additional documentation:  
@@ -345,7 +345,7 @@ The results should look like the following output file [my_example.out](https://
 
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu), or Duy Pham (Duy.T.Pham@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu), Duy Pham (Duy.T.Pham@uth.tmc.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 <br />
 <br />
@@ -354,7 +354,7 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2021  Liang Hong, Han Chen, Duy Pham
+ Copyright (C) 2018-2021  Liang Hong, Han Chen, Duy Pham, Cong Pan
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

@@ -174,6 +174,7 @@ int main(int argc, char* argv[]) {
     unordered_map<string, vector<string>> phenomap;
     for (int r = 0; r < samSize; r++) {
         getline(finph, line);
+	line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
         std::istringstream iss(line);
         string value;
         string temvalue;

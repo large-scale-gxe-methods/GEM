@@ -10,7 +10,7 @@ std::unordered_map<std::string, unsigned int> cartesian_map( vector<vector<strin
   for( long long n=0 ; n<N ; ++n ) {
     lldiv_t q { n, 0 };
     for( long long i=v.size()-1 ; 0<=i ; --i ) {
-      q = div( q.quot, v[i].size() );
+      q = lldiv( q.quot, v[i].size() );
       u[i] = v[i][q.rem];
     }
 
@@ -32,7 +32,7 @@ std::vector<std::string> cartesian_vec_sep( vector<vector<string> >& v)
   for( long long n=0 ; n<N ; ++n ) {
     lldiv_t q { n, 0 };
     for( long long i=v.size()-1 ; 0<=i ; --i ) {
-      q = div( q.quot, v[i].size() );
+      q = lldiv( q.quot, v[i].size() );
       u[i] = v[i][q.rem];
     }
 

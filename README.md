@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.4.1   
+Current version: 1.4.2   
 
 <br />
 Additional documentation:  

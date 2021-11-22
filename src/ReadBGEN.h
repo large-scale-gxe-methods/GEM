@@ -2,6 +2,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "ReadParameters.h"
 #include "BinaryEUtils.h"
 #include "TimeUtils.h"

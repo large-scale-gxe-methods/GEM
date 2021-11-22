@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.4.1"
+#define VERSION "1.4.2"
 
 void print_help();
 
@@ -15,7 +15,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     cout << "\n*********************************************************\n";
     cout << "Welcome to GEM v" << VERSION << "\n";
-    cout << "(C) 2018-2021 Liang Hong, Han Chen, Duy Pham \n";
+    cout << "(C) 2018-2021 Liang Hong, Han Chen, Duy Pham, Cong Pan \n";
     cout << "GNU General Public License v3\n";
     cout << "*********************************************************\n";
 

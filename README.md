@@ -21,11 +21,17 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 
 <br />
 
-## Quick Installation  
-Library Dependencies:  
-* C++11 compiler.  
-* BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
-* Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
+## Quick Installation 
+
+Option 1: use the binary executable file for Linux
+* Download the binary file from:
+* Change the permission: chmod a+x GEM_1.4.2_static
+
+Option 2: Build GEM Library Dependencies:
+   Library Dependencies:  
+   * C++11 compiler.  
+   * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
+   * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
 
 <br />
 

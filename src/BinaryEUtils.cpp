@@ -88,15 +88,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
     {
         //Assign each sample an index from stratum_map
         std::unordered_map<string, unsigned int> stratum_map = cartesian_map(stratum_names);
-        for (int j = 0; j < samSize; j++ ) {
-            auto sv = phenoMap[sampleID[j]];
-            std::string stratum = "";
-            for (int i = 0; i < nBinE; i++) {
-                stratum += sv[binE_idx[i]];
-            }
-            stratum_idx[j] = stratum_map[stratum]; 
-        }
-
+        
         for (auto kv : stratum_map) { 
             strataLen++;
         }
@@ -110,7 +102,44 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
         std::vector<string> cart_sep = cartesian_vec_sep(stratum_names);
         for (size_t i = 0; i < cart_sep.size(); i++) {
             bin_headers.push_back(bin_names+cart_sep[i]);
-        }       
+        }  
+	    
+	std::vector<string> bin_headers_tmp=bin_headers;  
+        vector<int> headerMap(cart_sep.size(), 0);
+	    
+        for (int i = 0 ; i < cart_sep.size() ; i++) {
+         headerMap[i] = i;
+        }
+	    
+        sort(headerMap.begin(), headerMap.end(),
+       [&](const int& a, const int& b) {
+         return (bin_headers[a] < bin_headers[b]);
+        }
+            );
+
+
+        sort(bin_headers.begin(),bin_headers.end());
+ 
+        for (int i = 0 ; i < cart_sep.size() ; i++){
+          auto it=find(bin_headers.begin(),bin_headers.end(),bin_headers_tmp[i]);
+          if (it != bin_headers.end()){
+             headerMap[i] = it- bin_headers.begin();
+            
+          }
+        }
+
+
+        for (int j = 0; j < samSize; j++ ) {
+            auto sv = phenoMap[sampleID[j]];
+            std::string stratum = "";
+            for (int i = 0; i < nBinE; i++) {
+                stratum += sv[binE_idx[i]];
+
+            }
+
+            stratum_idx[j] = headerMap[stratum_map[stratum]];
+    
+        }
     }
 
     cout << "Number of categorical variables: " << nBinE << endl;

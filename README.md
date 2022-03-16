@@ -315,7 +315,7 @@ robust_Cov_Beta_G_G-*   - Robust covariance between the genetic main effect (G) 
 robust_Cov_Beta_G-*_G-* - Robust covariance between any GxE or interaction covariate terms.
 
 P_Value_Marginal           - Marginal genetic effect p-value from model-based SE.
-P_Value_Interaction        - Interaction effect p-value from model-based SE.
+P_Value_Interaction        - Interaction effect p-value (K degrees of freedom test of interaction effect) from model-based SE. (K is number of major exposures)
 P_Value_Joint              - Joint test p-value (K+1 degrees of freedom test of genetic and interaction effect) from model-based SE.
 robust_P_Value_Marginal    - Marginal genetic effect p-value from robust SE.
 robust_P_Value_Interaction - Interaction effect p-value from robust SE.

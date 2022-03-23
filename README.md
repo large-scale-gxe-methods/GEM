@@ -24,8 +24,8 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 ## Quick Installation 
 
 Option 1: use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.2/GEM_1.4.2_static
-* Change the permission: chmod a+x GEM_1.4.2_static
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.3/GEM_1.4.3_static
+* Change the permission: chmod a+x GEM_1.4.3_static
 
 Option 2: Build GEM Library Dependencies:
    Library Dependencies:  

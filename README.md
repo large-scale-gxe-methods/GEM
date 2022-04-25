@@ -294,7 +294,7 @@ CHR                - The chromosome of the SNP.
 POS                - The physical position of the SNP.
 Non_Effect_Allele  - The allele not counted in association testing.  
 Effect_Allele      - The allele that is counted in association testing.  
-N_samples          - The number of samples without missing genotypes.
+N_Samples          - The number of samples without missing genotypes.
 AF                 - The allele frequency of the effect allele.
 N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
 AF_catE_*          - The allele frequency of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.

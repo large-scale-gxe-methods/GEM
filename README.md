@@ -13,13 +13,17 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 <br />
 
 ## Contents
-- [Quick Installation](#installation)
+- [Recent Updates](#recent-updates)
+- [Quick Installation](#quick-installation)
 - [Dependencies](#dependencies)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)
 
 <br />
+
+## Recent Updates 
+
 
 ## Quick Installation 
 

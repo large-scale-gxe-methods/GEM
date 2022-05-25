@@ -25,19 +25,18 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 
 ## Quick Installation 
 
-Option 1: use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.3/GEM_1.4.3_static
+Option 1: Use the binary executable file for Linux
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.3/GEM_1.4.3_static.
 * Change the permission: chmod a+x GEM_1.4.3_static
 
-Option 2: Build GEM Library Dependencies:
-   Library Dependencies:  
-   * C++11 compiler.  
-   * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.  
-   * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```.  
+Option 2: Build GEM Library Dependencies  
+   * C++11 compiler 
+   * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.
+   * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
 
 <br />
 
-To install GEM, run the following lines of code.
+To install GEM, run the following lines of code:
  ```
  git clone https://github.com/large-scale-gxe-methods/GEM
  cd GEM/

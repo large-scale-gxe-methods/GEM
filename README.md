@@ -13,65 +13,14 @@ https://large-scale-gxe-methods.github.io/GEM-website/index.html
 <br />
 
 ## Contents
-- [Recent Updates](#recent-updates)
 - [Quick Installation](#quick-installation)
 - [Dependencies](#dependencies)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)
+- [Recent Updates](#recent-updates)
 
 <br />
-
-## Recent Updates 
-
-[Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.2) - November 22, 2021:
-
-* Add math.h library to install GEM through Docker desktop
-* Added a binary executable file
-
-[Version 1.4.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.1) - September 14, 2021:
-
-* Added to read phenotype files created from the Windows system
-
-[Version 1.4](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4) - July 2, 2021:
-
-* Remove --pheno-type flag. If the number of levels (unique observations) is 2, the phenotype is treated as binary; otherwise it is assumed to be continuous
-* Check for categorical exposures and interaction covariates
-* Output number of non-missing samples (N) and allele frequency (AF) for effect allele for each combination of strata for all
-  exposures and interaction covariates
-* Add two additional flags --categorical-names and --cat-threshold for user definition of categorical variables
-* Output the SE instead of variance for the coefficient estimates
-* Output only the lower triangle of the covariance matrix instead of the full matrix
-* For robust analysis and "meta"/"full" output style, include model-based summary statistics in the output file
-* Column names for the robust summary statistics will include the prefix "robust_"
-* For "full" output style, an initial header line with the dispersion is included in the output file
-* The V matrix no longer included in the output file for "full" output style
-
-[Version 1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.3) - April 7, 2021:
-
-* 03/18/2021 - Add a new flag (--output-style) to modify which summary statistics should be included in the the output file
-         Column names now include the exposure and interaction covariate names instead of numbers.
-* 02/02/2021 - The --exposure-names flag is now optional. If no exposures are specified, GEM will run a G-only model.
-         Covariates (not of interest) can still be adjusted for using --covar-names flag.
-
-[Version 1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.2) - January 22, 2021:
-
-* 12/15/2020 - Fix issue to allow for space and tab delimited phenotype files.
-* 12/09/2020 - Allow for centering and scaling of exposures and covariates.
-* 12/02/2020 - Update calculations for model-based joint test
-* 11/23/2020 - Update calculations for robust joint test
-* 11/17/2020 - Output covariance, coefficients and standard errors to the log.
-* 10/13/2020 - Change Allele1 and Allele2 in outfile file to Non_Effect_Allele and Effect_Allele.
-* 10/13/2020 - Fix bug when phenotype is binary and there are missing genotypes.
-* 09/22/2020 - Support PGEN/BED files.
-
-[Version 1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.1) - July 21, 2020:
-
-* 05/18/2020 - Allow GEM to subset the BGEN file based on a list of variants to include for analysis. --include-snp-file
-* 06/26/2020 - Use matrix operation to adjust for covariates instead of for-loop. Use the libdeflate package for faster zlib decompression of BGEN genotype blocks. Compile GEM with -O2 (optimizer flag). Prioritize BGEN sample file over the BGEN sample identifier block. Error if phenotype (--pheno-name) is also included as an exposoure or covariate
-* 06/30/2020 - Support BGEN v1.1, v1.2 and v1.3 uncompressed genotype blocks.
-* 07/15/2020 - Fix major printing bug.
-* 07/21/2020 - Handle missing genotypes in BGEN files.
 
 
 ## Quick Installation 
@@ -400,8 +349,60 @@ To run GEM using the example data, execute GEM with the following code.
 The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
 
 <br />
-<br />
 
+## Recent Updates 
+
+[Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.2) - November 22, 2021:
+
+* Add math.h library to install GEM through Docker desktop
+* Added a binary executable file
+
+[Version 1.4.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.1) - September 14, 2021:
+
+* Added to read phenotype files created from the Windows system
+
+[Version 1.4](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4) - July 2, 2021:
+
+* Remove --pheno-type flag. If the number of levels (unique observations) is 2, the phenotype is treated as binary; otherwise it is assumed to be continuous
+* Check for categorical exposures and interaction covariates
+* Output number of non-missing samples (N) and allele frequency (AF) for effect allele for each combination of strata for all
+  exposures and interaction covariates
+* Add two additional flags --categorical-names and --cat-threshold for user definition of categorical variables
+* Output the SE instead of variance for the coefficient estimates
+* Output only the lower triangle of the covariance matrix instead of the full matrix
+* For robust analysis and "meta"/"full" output style, include model-based summary statistics in the output file
+* Column names for the robust summary statistics will include the prefix "robust_"
+* For "full" output style, an initial header line with the dispersion is included in the output file
+* The V matrix no longer included in the output file for "full" output style
+
+[Version 1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.3) - April 7, 2021:
+
+* Add a new flag (--output-style) to modify which summary statistics should be included in the the output file
+         Column names now include the exposure and interaction covariate names instead of numbers.
+* The --exposure-names flag is now optional. If no exposures are specified, GEM will run a G-only model.
+         Covariates (not of interest) can still be adjusted for using --covar-names flag.
+
+[Version 1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.2) - January 22, 2021:
+
+* Fix issue to allow for space and tab delimited phenotype files.
+* Allow for centering and scaling of exposures and covariates.
+* Update calculations for model-based joint test
+* Update calculations for robust joint test
+* Output covariance, coefficients and standard errors to the log.
+* Change Allele1 and Allele2 in outfile file to Non_Effect_Allele and Effect_Allele.
+* Fix bug when phenotype is binary and there are missing genotypes.
+* Support PGEN/BED files.
+
+[Version 1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.1) - July 21, 2020:
+
+* Allow GEM to subset the BGEN file based on a list of variants to include for analysis. --include-snp-file
+* Use matrix operation to adjust for covariates instead of for-loop. Use the libdeflate package for faster zlib decompression of BGEN genotype blocks. Compile GEM with -O2 (optimizer flag). Prioritize BGEN sample file over the BGEN sample identifier block. Error if phenotype (--pheno-name) is also included as an exposoure or covariate
+* Support BGEN v1.1, v1.2 and v1.3 uncompressed genotype blocks.
+* Fix major printing bug.
+* Handle missing genotypes in BGEN files.
+
+<br />
+<br />
 
 ## Contact 
 For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.

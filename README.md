@@ -8,7 +8,7 @@ Current version: 1.4.3
 
 <br />
 Additional documentation:  
-https://large-scale-gxe-methods.github.io/GEM-website/index.html  
+https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 
 <br />
 

@@ -766,7 +766,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
     vector <double> AF(stream_snps);
-    vector<uint> missingIndex;
+    //vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
     double* covX = &bgen.new_covdata[0];
@@ -860,6 +860,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             allele0[LB] = '\0';
 
             uint nMissing = 0;
+            vector<uint> missingIndex;
             int tmp1 = stream_i * Sq1 * samSize;
             int strata_i = stream_i * strataLen;
             if (Layout == 1) {
@@ -885,6 +886,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                 const double scale = 1.0 / 32768;
 
                 int idx_k = 0;
+                
                 for (uint i = 0; i < Nbgen; i++) {
                     if (include_idx[idx_k] == i) {
                         double p11 = probs_start[3 * i] * scale;
@@ -1117,6 +1119,9 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                         binE_AF[strata_i + i] = 0.0;
                     }
                 }
+                variant_index++;
+                //stream_i++;
+                keepIndex++;
                 continue;
             }
             else {

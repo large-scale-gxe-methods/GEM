@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2022  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ *  Copyright (C) 2018-2021  Liang Hong, Han Chen, Duy Pham, Cong Pan
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -351,7 +351,10 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
          std::ifstream thread_output(threadOutputFile);
-         results << thread_output.rdbuf();
+         if ( thread_output.peek() != std::ifstream::traits_type::eof() ){
+            results<<thread_output.rdbuf();
+         }
+
 
          thread_output.close();
          boost::filesystem::remove(threadOutputFile.c_str());

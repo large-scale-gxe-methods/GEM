@@ -558,10 +558,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             double gmean = AF[stream_i] / double(samSize - nMissing);
             double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
             double percMissing = nMissing / (samSize * 1.0);
-            if (snploop<20){cout<<"line 540 snploop is "<<snploop<<endl;  
-                cout<<"nmissing is "<<nMissing<<endl;
-                cout<<"gmean is"<<gmean<<endl;
-                }
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0;
                 if (strata) {
@@ -590,7 +586,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
 
             if (nMissing > 0) {
                 if (phenoType == 0) {
-                     if (snploop<20){cout<<"snploop"<<snploop<<" "<<"missingIndex is "<<missingIndex.size()<<endl;  }
                     for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
                         int tmp5 = tmp1 + missingIndex[nm];
                         ZGSvec[tmp5] = gmean;
@@ -711,12 +706,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                 // betamain
                 int tmp1 = i * ZGS_col * Sq1 + i * Sq1;
                 betaM[i] = ZGStR[i * Sq1] / ZGStZGS[tmp1];
-                if (snploop<20) {
-                    cout<<"snploop"<<snploop<<endl;
-                    cout<<"ZGStR[i * Sq1]"<<ZGStR[i * Sq1]<<endl;
-                    cout<<"betaM[i]"<<betaM[i]<<endl;
-                    }
-                
                 VarbetaM[i] = sigma2 / ZGStZGS[tmp1];
 
                 //calculating Marginal P values

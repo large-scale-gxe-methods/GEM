@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.4.3   
+Current version: 1.4.4   
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.3/GEM_1.4.3_static.
-* Change the permission: chmod a+x GEM_1.4.3_static
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.4/GEM_1.4.4_static.
+* Change the permission: chmod a+x GEM_1.4.4_static
 
 Option 2: Build GEM Library Dependencies  
    * C++11 compiler 
@@ -196,7 +196,6 @@ Phenotype File Options:
   
 --center 
      0 for no centering to be done and 1 to center ALL exposures and covariates.
-        Default: 1
 
 --scale
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
@@ -350,6 +349,10 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.4) - October 5, 2022:
+
+* Fixed the bugs of include-snp-file
+* Removed the default value of flag "--center" 
 
 [Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.2) - November 22, 2021:
 

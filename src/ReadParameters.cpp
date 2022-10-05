@@ -382,7 +382,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     }
     else {
-        cerr << "\nERROR: center is not specified.\n\n";
+        cerr << "\nERROR: flag --center is required, whether to center ALL exposures and covariates? 1 for yes, and 0 for no.\n\n";
         exit(1);
 
     }

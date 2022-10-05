@@ -349,10 +349,14 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
-[Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.4) - October 5, 2022:
+[Version 1.4.4](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.4) - October 5, 2022:
 
 * Fixed the bugs of include-snp-file
 * Removed the default value of flag "--center" 
+
+[Version 1.4.4](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.3) - March 23, 2022:
+
+* Sorted the output headers of categorical variables
 
 [Version 1.4.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.2) - November 22, 2021:
 

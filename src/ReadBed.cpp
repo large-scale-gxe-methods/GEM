@@ -193,7 +193,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
         }
     }
-
+    
     cout << "****************************************************************************\n";
     if (genoUnMatchID.empty()) {
         cout << "After processes of sample IDMatching and checking missing values, the sample size does not change.\n\n";
@@ -246,6 +246,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
             }
 
             while (fInclude >> vars) {
+                
                 if (includeVariant.find(vars) != includeVariant.end()) {
                     cout << "\nERROR: " << vars << " is a duplicate variant in " << cmd.includeVariantFile << ".\n\n";
                     exit(1);
@@ -300,7 +301,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
             }
             pvalIndex++;
         }
-
         if (k != nSNPS) {
             cerr << "\nERROR: There are one or more SNPs in second column of .bim file not in " << cmd.includeVariantFile << ".\n\n";
             exit(1);
@@ -358,6 +358,18 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     vector<long int> include_idx = bed.include_idx;
     uint32_t n_samples = bed.n_samples, snploop = bed.begin[thread_num], end = bed.end[thread_num];
     std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
+    /*for (uint i=0; i<bed.begin.size(); i++){
+        cout<<"bed.begin i is "<<bed.begin[i]<<endl;
+    }
+        for (uint i=0; i<bed.end.size(); i++){
+        cout<<"bed.end i is "<<bed.end[i]<<endl;
+    }
+    cout<<"size of bed begin is "<<bed.begin.size()<<endl;
+    cout<<"size of bed end is "<<bed.end.size()<<endl;
+    cout<<"thread_num is "<<thread_num<<endl;
+    cout<<"snploop is "<<snploop<<endl;
+    cout<<"end is "<<end<<endl;*/
+    
 
     int numBinE   = binE.nBinE;
     bool strata   = (numBinE > 0 ) ? true : false;
@@ -370,7 +382,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
     vector <double> AF(stream_snps);
-    vector<uint> missingIndex;
+    //vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
     double* covX = &bed.new_covdata[0];
@@ -379,7 +391,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     fIDMat.open(cmd.bimFile);
     string IDline;
     uint32_t skipIndex = 0;
-
+    
     if (!filterVariants) {
         while (skipIndex != snploop) {
             getline(fIDMat, IDline);
@@ -387,10 +399,12 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
         }
     }
     else {
+
         while (skipIndex != bedPos[snploop]) {
             getline(fIDMat, IDline);
             skipIndex++;
         }
+        
     }
 
     int printStart = 1; int printEnd = expSq1;
@@ -436,24 +450,27 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             vector <string> values;
             if (!filterVariants) {
                 readbedfile.seekg((std::streamoff)snploop * nblocks + 3, readbedfile.beg);
-                getline(fIDMat, IDline);
+                getline(fIDMat, IDline);             
                 std::istringstream iss(IDline);
                 while (getline(iss, value, bimDelim)) {
-                    values.push_back(value);
+                    values.push_back(value);    
                 }
+                
             }
             else {
+                
                 while (skipIndex != bedPos[snploop]) {
                     getline(fIDMat, IDline);
                     skipIndex++;
                 }
-                readbedfile.seekg((std::streamoff)bedPos[snploop] * nblocks + 3, readbedfile.beg);
+                readbedfile.seekg((std::streamoff)bedPos[snploop] * nblocks + 3, readbedfile.beg);                
                 getline(fIDMat, IDline);
                 skipIndex++;
                 std::istringstream iss(IDline);
                 while (getline(iss, value, bimDelim)) {
                     values.push_back(value);
                 }
+                
             }
             snploop++;
 
@@ -464,8 +481,10 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             int nMissing = 0;
             uint ncount = 0;
             readbedfile.read((char*)buffer, nblocks);
+            vector<uint> missingIndex;
             for (size_t n = 0; n < nblocks; n++) {
                 pos = 0;
+                
                 for (int i = 0; i < 4; i++) {
                     if ((ncount == n_samples) && (n == nblocks - 1)) {
                         break;
@@ -475,13 +494,12 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                         temp[l] = (buffer[n] >> pos) & 1;
                         pos++;
                     }
-
+                    
                     if (include_idx[idx_k] != ncount) {
                         ncount++;
                         continue;
                     }
-
-
+               
                     if (temp[0] == 0 && temp[1] == 0) {
                         geno = 2.0;
                     }
@@ -498,7 +516,24 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                         ncount++;
                         continue;
                     }
+                    /*else {
+                        if (!filterVariants) {
+                            missingIndex.push_back(idx_k);
+                            nMissing++;
+                            idx_k++;
+                            ncount++;
+                            continue;
+                        }
+                        else{
+                            missingIndex.push_back(bedPos[idx_k]);
+                            nMissing++;
+                            idx_k++;
+                            ncount++;
+                            continue;
+                        }
 
+                    }*/
+                    
                     ncount++;
                     int tmp2 = idx_k + tmp1;
                     AF[stream_i] += geno;
@@ -519,11 +554,10 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                 }
             }
 
-    
+           
             double gmean = AF[stream_i] / double(samSize - nMissing);
             double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
             double percMissing = nMissing / (samSize * 1.0);
-
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0;
                 if (strata) {
@@ -532,8 +566,14 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                         binE_AF[strata_i + i] = 0.0;
                     }
                 }
+                
+                variant_index++;
+                keepIndex++;
                 continue;
+                           
             }
+
+             
             else {
                 AF[stream_i] = cur_AF;
             }
@@ -555,9 +595,11 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                     for (long unsigned int nm = 0; nm < missingIndex.size(); nm++) {
                         int tmp5 = tmp1 + missingIndex[nm];
                         ZGSvec[tmp5] = miu[missingIndex[nm]] * (1 - miu[missingIndex[nm]]) * gmean;
+                                   
                     }
                 }
                 missingIndex.clear();
+     
             }
 
 
@@ -619,7 +661,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
         // transpose(ZGS) * resid
         double* ZGStR = new double[ZGS_col];
         matvecprod(ZGS, resid, ZGStR, ZGS_col, samSize);
-
+        
         // transpose(ZGS) * ZGS
         double* ZGStZGS = new double[ZGS_col * ZGS_col];
 
@@ -656,8 +698,9 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             mbPvalInt   = new double[stream_snps];
             mbPvalJoint = new double[stream_snps] ;
         }
-
+        
         if (robust == 0) {
+           
             for (int i = 0; i < stream_snps; i++) {
 
                 // betamain
@@ -850,7 +893,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             }
         } // end of if robust == 1
 
-
+        
         for (int i = 0; i < stream_snps; i++) {
             oss << geno_snpid[i] << "\t" << AF[i] << "\t";
 

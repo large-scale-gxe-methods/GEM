@@ -555,7 +555,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     std::vector<long long unsigned int> pgenPos = pgen.pgenVariantPos;
 
     int ZGS_col = Sq1 * stream_snps;
-    vector <uint>   missingIndex;
+    //vector <uint>   missingIndex;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
@@ -744,6 +744,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             int strata_i = stream_i * strataLen;
             int idx_k = 0;
             int nMissing = 0;
+            vector <uint>   missingIndex;
             for (uint32_t n = 0; n < file_sample_ct; n++) {
                 if (buf[n] == -9.0) {
                     if (include_idx[idx_k] == n) {
@@ -777,7 +778,6 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             double gmean = AF[stream_i] / double(samSize - nMissing);
             double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
             double percMissing = nMissing / (samSize * 1.0);
-
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0.0;
                 if (strata) {
@@ -786,6 +786,8 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                         binE_AF[strata_i + i] = 0.0;
                     }
                 }
+                variant_index++;
+                keepIndex++;
                 continue;
             }
             else {

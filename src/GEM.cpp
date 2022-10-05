@@ -351,7 +351,10 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
          std::ifstream thread_output(threadOutputFile);
-         results << thread_output.rdbuf();
+         if ( thread_output.peek() != std::ifstream::traits_type::eof() ){
+            results<<thread_output.rdbuf();
+         }
+
 
          thread_output.close();
          boost::filesystem::remove(threadOutputFile.c_str());

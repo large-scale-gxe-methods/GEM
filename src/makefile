@@ -3,7 +3,7 @@ CXX=g++
 CXXFLAGS = -std=c++11 -O2 -g
 
 
-Eigen_INC=../eigen
+Eigen_INC=../eigen*
 
 BOOST_INC=../boost
 

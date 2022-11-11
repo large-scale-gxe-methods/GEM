@@ -16,7 +16,7 @@ class BinE {
         
         std::vector<string> bin_headers;
 
-        void checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, std::vector<string> covSelHeadersName);
+        void checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, std::vector<string> covSelHeadersName, std::vector<string> covSelHeadersName_new, int Sq_new);
 };
 
 std::unordered_map <int, vector<int>> GetPowerSet(std::string v);

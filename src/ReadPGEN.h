@@ -20,7 +20,8 @@ public:
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
-    
+
+    int NumExcludeCol;
     int phenoType;
     vector<uint32_t> begin;
     vector<uint32_t> end;
@@ -30,7 +31,13 @@ public:
     vector<int> pvarIndex;
     int pvarLast;
     vector<int> binE_idx;
+// For check of co-linear relations between covX;
+    int numIntSelCol_new;
+    int numExpSelCol_new;
+    int numSelCol_new;
+    std::vector<int> excludeCol;
 
+    
     void processPgenHeader(string pgenFile);
     void processPvar(Pgen pgen, string pvarFile);
     void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);

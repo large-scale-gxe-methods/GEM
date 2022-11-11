@@ -97,6 +97,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
      unordered_set<int> genoUnMatchID;
      new_phenodata.resize(samSize);
      new_covdata.resize(samSize * (numSelCol+1));
+     vector<double> new_covdata_orig(samSize * (numSelCol+1));
      std::ifstream fIDMat;
      fIDMat.open(psamFile);
      if (!fIDMat.is_open()) {
@@ -197,9 +198,9 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
              auto tmp_valvec = phenomap[strtmp];
              if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
                  sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                 new_covdata[k * (numSelCol+1)] = 1.0;
+                 new_covdata_orig[k * (numSelCol+1)] = 1.0;
                 for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
+                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
                 }
                 sampleID.push_back(strtmp);
                 k++;
@@ -213,7 +214,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
     new_phenodata.resize(k);
-    new_covdata.resize(k * (numSelCol+1));
+    new_covdata_orig.resize(k * (numSelCol+1));
     samSize = k;
 
     if (samSize == 0) {
@@ -244,10 +245,62 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
     cout << "Sample IDMatching and checking missing values processes have been completed.\n";
     cout << "New pheno and covariate data vectors with the same order of sample ID sequence of geno data are updated.\n";
     cout << "****************************************************************************\n";
-
+     
 
     new_samSize = samSize;
 
+    MatrixXd matcovX (samSize,(numSelCol+1));
+    for (int i=0; i<samSize; i++){    
+        for (int j=0; j<(numSelCol+1); j++) {
+          matcovX(i,j) =new_covdata_orig [i * (numSelCol+1) +j];
+        }
+    }
+    Eigen::HouseholderQR<MatrixXd> qr;
+    qr.compute(matcovX);
+    Eigen::MatrixXd R = qr.matrixQR();
+    int colR=R.cols();
+    VectorXd diagR (colR);
+    for (int i=0; i<colR; i++){
+        diagR(i)=R(i,i);
+    }
+    double sqrtEps =sqrt(std::numeric_limits<double>::epsilon());
+    double maxdiag = *std::max_element( diagR.begin(), diagR.end() ) ;
+    double colinear_cut = abs(maxdiag * sqrtEps);
+    for (int i=0; i<colR; i++){
+        if (abs(diagR(i)) < colinear_cut){
+            excludeCol.push_back(i);
+        }
+    }
+    matcovX.resize(0,0);
+    R.resize(0,0);
+
+    int NumExcludeCol = excludeCol.size();
+
+    if (excludeCol.size()>0){    
+        vector <int> remove_colinear;
+        for (int i=0; i<excludeCol.size(); i++){
+            for (int j=0; j<samSize; j++) {
+                remove_colinear.push_back(j * (numSelCol+1) + excludeCol[i]);
+            }
+        }
+        numSelCol=numSelCol- excludeCol.size();
+        new_covdata.resize(samSize * (numSelCol+1));
+        vector<double> temp;
+        for (int i=0; i<new_covdata_orig.size(); i++)
+        {
+            if (std::find(remove_colinear.begin(), remove_colinear.end(), i) == remove_colinear.end())
+            {
+                new_covdata.push_back(new_covdata_orig[i]);
+                temp.push_back(new_covdata_orig[i]);
+                
+            }
+        }
+        new_covdata = temp;
+    } 
+    else {
+            new_covdata.resize(samSize * (numSelCol+1));
+            new_covdata = new_covdata_orig;
+    }
 }
 
 
@@ -531,12 +584,12 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int stream_snps = cmd.stream_snps;
     int samSize     = pgen.new_samSize;
     int robust      = cmd.robust;
-    int intSq1      = cmd.numIntSelCol + 1;
-    int expSq       = cmd.numExpSelCol;
+    int intSq1      = pgen.numIntSelCol_new + 1;
+    int expSq       = pgen.numExpSelCol_new;
     int expSq1      = expSq+1;
     int Sq1         = intSq1 + expSq;
     int Sq          = Sq1-1;
-    int numSelCol1  = cmd.numSelCol + Sq1;
+    int numSelCol1  = pgen.numSelCol_new + Sq1; 
     double MAF      = cmd.MAF;
     double maxMAF   = 1 - MAF;
     double missGenoCutoff = cmd.missGenoRate;

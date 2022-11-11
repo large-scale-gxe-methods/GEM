@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.4.4   
+Current version: 1.4.5   
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.4/GEM_1.4.4_static.
-* Change the permission: chmod a+x GEM_1.4.4_static
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.5/GEM_1.4.5_static.
+* Change the permission: chmod a+x GEM_1.4.5_static
 
 Option 2: Build GEM Library Dependencies  
    * C++11 compiler 
@@ -55,24 +55,26 @@ C/C++ Compiler
 LAPACK and BLAS
  * The LAPACK(Linear Algebra PACKage) and BLAS(Basic Linear Algebra Subprograms) libraries are used to optimize matrix operations in GEM.
 
-
 Intel processors:
  * We recommend linking LAPACK/BLAS through the Math Kernal Library (MKL) for a greater performance boost. This can be done by replacing -llapack and -lblas in the makefile with
 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core and re-compiling the software.
   * It is important to compile with -lmkl_sequential since GEM already does multithreading across SNPs.
-
 
 AMD processors:
  * For AMD processors, OpenBLAS (-lopenblas) may be a better alternative.
  
 Boost C++ Libraries
  * The Boost C++ libraries are used for command-line, file management and multithreading purposes.
-
-The following Boost libraries are required :
+ * The following Boost libraries are required :
       1. libboost_system
       2. libboost_program_options
       3. libboost_filesystem
       4. libboost_thread
+
+Eigen Library
+* The Eigen library is used for linear algebra of dense and sparse matrices.
+* Download the source code from https://eigen.tuxfamily.org/index.php?title=Main_Page and add the directory of Eigen header files in the include path when compiling.
+ 
 
 ## Usage
 
@@ -349,6 +351,10 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.4.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.5) - November 11, 2022:
+
+* Added collinearity check of the covariates before fitting the null model
+
 [Version 1.4.4](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.4) - October 5, 2022:
 
 * Fixed the bugs of include-snp-file

@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.4.4"
+#define VERSION "1.4.5"
 
 void print_help();
 
@@ -483,14 +483,14 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     cout << "Model-based or Robust: "; robust == 0 ? cout << "Model-based \n\n" : cout << "Robust \n\n";
 
-    if (numSelCol == 0) {
-        cout << "No Covariates Selected" << "\n";
+    if (numExpSelCol == 0) {
+        cout << "No Exposures Selected" << "\n";
     }
     else {
-        cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
-        cout << "The Selected Covariates are:  ";
-        for (int i = 0; i < numSelCol; i++) {
-            cout << cov[i] << "   ";
+        cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
+        cout << "The Selected Exposures are:  ";
+        for (int i = 0; i < numExpSelCol; i++) {
+            cout << exp[i] << "   ";
         }
         cout << "\n";
     }
@@ -507,16 +507,16 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         cout << "\n";
     }
 
-    if (numExpSelCol == 0) {
-        cout << "No Exposures Selected" << "\n";
+    if (numSelCol == 0) {
+        cout << "No Covariates Selected" << "\n";
     }
     else {
-        cout << "The Total Number of Exposures is: " << numExpSelCol << '\n';
-        cout << "The Selected Exposures are:  ";
-        for (int i = 0; i < numExpSelCol; i++) {
-            cout << exp[i] << "   ";
+        cout << "The Total Number of Selected Covariates is: " << numSelCol << '\n';
+        cout << "The Selected Covariates are:  ";
+        for (int i = 0; i < numSelCol; i++) {
+            cout << cov[i] << "   ";
         }
-        cout << "\n\n";
+        cout << "\n";
     }
 
     cout << "Categorical Threshold: " << cat_threshold << "\n";
@@ -526,10 +526,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     cout << "Output File: " << outFile << "\n";
     cout << "*********************************************************\n";
 }
-
-
-
-
 
 
 void print_help() {

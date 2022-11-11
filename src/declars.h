@@ -1,5 +1,6 @@
 #include <vector>
 #include <cstring>
+#include <string>
 #include <set>
 #include <iostream>
 #include <fstream>
@@ -7,6 +8,7 @@
 #include <numeric>
 #include <utility>
 #include <cctype>
+#include <typeinfo>
 #include <sstream>
 #include <cstdlib>
 #include <cassert>
@@ -17,6 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <exception>
+#include <limits>
 
 
 #include <boost/thread.hpp>
@@ -37,6 +40,14 @@
 #include <boost/format.hpp>
 #include "zlib.h"
 
+#include <Eigen/Sparse>
+#include <Eigen/SparseLU>
+#include <Eigen/SparseCholesky>
+#include <Eigen/SparseCore>
+#include <Eigen/IterativeLinearSolvers>	
+#include <Eigen/SparseQR>
+#include <Eigen/Dense>
+#include <Eigen/Core>
 
 using std::string;
 using std::vector;
@@ -48,6 +59,9 @@ using std::getline;
 using std::find;
 using std::unordered_map;
 using std::unordered_set;
+using Eigen::MatrixXd;
+using Eigen::MatrixXi;
+using Eigen::VectorXd;
 namespace po = boost::program_options;
 
 

@@ -5,7 +5,9 @@ CXXFLAGS = -std=c++11 -O2 -g
 #Change the directory to Eigen's source code was located
 Eigen_INC=/path/to/eigen/
 
-BOOST_INC=/usr/local/include
+#Change the directory to the folder boost was located
+BOOST_INC=path/to/boost
+
 BOOST_LIB=-lboost_thread -lboost_program_options -lboost_system -lboost_filesystem
 
 DYN_LIBS=-lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -larmadillo

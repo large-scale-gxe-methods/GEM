@@ -2,11 +2,10 @@ CC=gcc  # Do not change this for libdeflate package.
 CXX=g++
 CXXFLAGS = -std=c++11 -O2 -g
 
-#Change the directory to Eigen's source code was located
-Eigen_INC=/path/to/eigen/
 
-#Change the directory to the folder boost was located
-BOOST_INC=path/to/boost
+Eigen_INC=../eigen
+
+BOOST_INC=../boost
 
 BOOST_LIB=-lboost_thread -lboost_program_options -lboost_system -lboost_filesystem
 

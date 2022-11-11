@@ -2,12 +2,11 @@ CC=gcc  # Do not change this for libdeflate package.
 CXX=g++
 CXXFLAGS = -std=c++11 -O2 -g
 
-BOOST_INC=/usr/local/include 
-Eigen_INC=/home/cpan/eigen/eigen-3.4.0
-BOOST_LIB_TD=/usr/local/lib/libboost_thread.a
-BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
-BOOST_LIB_SY=/usr/local/lib/libboost_system.a
-BOOST_LIB_FS=/usr/local/lib/libboost_filesystem.a
+#Change the directory to Eigen's source code was located
+Eigen_INC=/path/to/eigen/
+
+BOOST_INC=/usr/local/include
+BOOST_LIB=-lboost_thread -lboost_program_options -lboost_system -lboost_filesystem
 
 DYN_LIBS=-lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -larmadillo
 
@@ -27,7 +26,7 @@ OBJS= $(CXX_OBJECTS) $(C_OBJECTS)
 all: GEM
 
 GEM: $(CXX_OBJECTS) $(C_OBJECTS)
-	$(CXX) $^ $(CXXFLAGS) $(BOOST_LIB_TD) $(BOOST_LIB_PO) $(BOOST_LIB_SY) $(BOOST_LIB_FS) -o $@ $(DYN_LIBS)
+	$(CXX) $^ $(CXXFLAGS) $(BOOST_LIB) -o $@ $(DYN_LIBS)
 
 %.o: %.c
 	$(CC) -O2 -g -c $< -o $@

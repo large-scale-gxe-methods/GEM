@@ -131,7 +131,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
     unordered_set<int> genoUnMatchID;
     new_phenodata.resize(samSize);
     new_covdata.resize(samSize * (numSelCol+1));
-
+    vector<double> new_covdata_orig(samSize * (numSelCol+1));
     std::ifstream fIDMat;
     string IDline, FID, strtmp;
     fIDMat.open(famFile);
@@ -157,9 +157,9 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
             auto tmp_valvec = phenomap[strtmp];
             if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
                 sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                new_covdata[k * (numSelCol+1)] = 1.0;
+                new_covdata_orig[k * (numSelCol+1)] = 1.0;
                 for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata[k * (numSelCol + 1) + c + 1]);
+                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
                 }
 
                 sampleID.push_back(strtmp);
@@ -173,7 +173,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
     //After IDMatching, resizing phenodata and covdata, and updating samSize;
     new_phenodata.resize(k);
-    new_covdata.resize(k * (numSelCol + 1));
+    new_covdata_orig.resize(k * (numSelCol + 1));
     samSize = k;
 
     if (samSize == 0) {
@@ -208,6 +208,61 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 
     new_samSize = samSize;
+
+    MatrixXd matcovX (samSize,(numSelCol+1));
+    for (int i=0; i<samSize; i++){    
+        for (int j=0; j<(numSelCol+1); j++) {
+          matcovX(i,j) =new_covdata_orig [i * (numSelCol+1) +j];
+        }
+    }
+    Eigen::HouseholderQR<MatrixXd> qr;
+    qr.compute(matcovX);
+    Eigen::MatrixXd R = qr.matrixQR();
+    Eigen::MatrixXd R2 = qr.matrixQR().triangularView<Eigen::Upper>();
+    int colR=R.cols();
+    VectorXd diagR (colR);
+    for (int i=0; i<colR; i++){
+        diagR(i)=R(i,i);
+    }
+    double sqrtEps =sqrt(std::numeric_limits<double>::epsilon());
+    double maxdiag = *std::max_element( diagR.begin(), diagR.end() ) ;
+    double colinear_cut = abs(maxdiag * sqrtEps);
+    for (int i=0; i<colR; i++){
+        if (abs(diagR(i)) < colinear_cut){
+            excludeCol.push_back(i);
+        }
+    }
+    
+    matcovX.resize(0,0);
+    R.resize(0,0);
+    
+    int NumExcludeCol = excludeCol.size();
+    if (excludeCol.size()>0){    
+        vector <int> remove_colinear;
+        for (int i=0; i<excludeCol.size(); i++){
+            for (int j=0; j<samSize; j++) {
+                remove_colinear.push_back(j * (numSelCol+1) + excludeCol[i]);
+            }
+        }
+        numSelCol=numSelCol- excludeCol.size();
+        new_covdata.resize(samSize * (numSelCol+1));
+        vector<double> temp;
+        for (int i=0; i<new_covdata_orig.size(); i++)
+        {
+            if (std::find(remove_colinear.begin(), remove_colinear.end(), i) == remove_colinear.end())
+            {
+                new_covdata.push_back(new_covdata_orig[i]);
+                temp.push_back(new_covdata_orig[i]);
+                
+            }
+        }
+        new_covdata = temp;
+    } 
+    else {
+            new_covdata.resize(samSize * (numSelCol+1));
+            new_covdata = new_covdata_orig;
+    }
+
 }
 
 
@@ -343,12 +398,12 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     int stream_snps = cmd.stream_snps;
     int samSize     = bed.new_samSize;
     int robust      = cmd.robust;
-    int intSq1      = cmd.numIntSelCol + 1;
-    int expSq       = cmd.numExpSelCol;
+    int intSq1      = bed.numIntSelCol_new + 1;
+    int expSq       = bed.numExpSelCol_new;
     int expSq1      = expSq+1;
     int Sq1         = intSq1 + expSq;
     int Sq          = Sq1-1;
-    int numSelCol1  = cmd.numSelCol + Sq1;
+    int numSelCol1  = bed.numSelCol_new + Sq1; 
     double MAF      = cmd.MAF;
     double maxMAF   = 1 - MAF;
     double missGenoCutoff = cmd.missGenoRate;
@@ -358,18 +413,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     vector<long int> include_idx = bed.include_idx;
     uint32_t n_samples = bed.n_samples, snploop = bed.begin[thread_num], end = bed.end[thread_num];
     std::vector<long long unsigned int> bedPos = bed.bedVariantPos;
-    /*for (uint i=0; i<bed.begin.size(); i++){
-        cout<<"bed.begin i is "<<bed.begin[i]<<endl;
-    }
-        for (uint i=0; i<bed.end.size(); i++){
-        cout<<"bed.end i is "<<bed.end[i]<<endl;
-    }
-    cout<<"size of bed begin is "<<bed.begin.size()<<endl;
-    cout<<"size of bed end is "<<bed.end.size()<<endl;
-    cout<<"thread_num is "<<thread_num<<endl;
-    cout<<"snploop is "<<snploop<<endl;
-    cout<<"end is "<<end<<endl;*/
-    
 
     int numBinE   = binE.nBinE;
     bool strata   = (numBinE > 0 ) ? true : false;
@@ -516,23 +559,6 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                         ncount++;
                         continue;
                     }
-                    /*else {
-                        if (!filterVariants) {
-                            missingIndex.push_back(idx_k);
-                            nMissing++;
-                            idx_k++;
-                            ncount++;
-                            continue;
-                        }
-                        else{
-                            missingIndex.push_back(bedPos[idx_k]);
-                            nMissing++;
-                            idx_k++;
-                            ncount++;
-                            continue;
-                        }
-
-                    }*/
                     
                     ncount++;
                     int tmp2 = idx_k + tmp1;

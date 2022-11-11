@@ -23,7 +23,11 @@ public:
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
-
+    // For check of co-linear relations between covX;
+    int numIntSelCol_new;
+    int numExpSelCol_new;
+    int numSelCol_new;
+    std::vector<int> excludeCol;
     int phenoType;
     vector<uint32_t> begin;
     vector<uint32_t> end;

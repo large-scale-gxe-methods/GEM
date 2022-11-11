@@ -45,34 +45,46 @@ std::vector<std::string> cartesian_vec_sep( vector<vector<string> >& v)
   return vec;
 }
 
-void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, std::vector<string> covNames) 
+void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, std::vector<string> covNames, std::vector<string> covNames_new, int Sq_new) 
 {
 
     stratum_idx.resize(samSize);
 
     std::vector<int> binE_idx;
     std::unordered_map<string, int> map;
+    std::unordered_map<string, vector<string>> phenoMap_new;
     std::vector<std::vector<std::string>> stratum_names;
 
     int Sq = cmd.numExpSelCol + cmd.numIntSelCol;
     int cat_threshold = cmd.cat_threshold;
     std::vector<std::string> cat_names = cmd.cat_names;
-    for (int i = 0; i < Sq; i++) {
+   // vector <string> tmp;
+    for (size_t i = 0; i < samSize; i++) {
+        auto tmp = phenoMap[sampleID[i]];
+        phenoMap_new[sampleID[i]].push_back(tmp[0]);
+        for (int j = 0; j < covNames.size(); j++) {
+            if (std::find(covNames_new.begin(), covNames_new.end(), covNames[j]) != covNames_new.end())
+            {   
+                phenoMap_new[sampleID[i]].push_back(tmp[j+1]);   
+            }
+        }   
+    }
+
+    for (int i = 0; i < Sq_new; i++) {
         int cnt = 0;
         for (int j = 0; j < samSize; j++ ) {
-            auto tmp = phenoMap[sampleID[j]];
+            auto tmp = phenoMap_new[sampleID[j]];
             if (!map.count(tmp[1 + i])) { 
                 map[tmp[1 + i]] = 1;
                 cnt++;
             }
         }
-
-        if (cnt == 1) { 
-            cerr << "\nERROR: All values of " << covNames[i] << " column are the same.\n\n"; 
+     /*  if (cnt == 1) { 
+            cerr << "\nERROR: All values of " << covNames_new[i] << " column are the same.\n\n"; 
             exit(1);	
-	    }
+	    }*/
 
-        if ((cnt <= cat_threshold) || (std::find(cat_names.begin(), cat_names.end(), covNames[i]) != cat_names.end())) {
+        if ((cnt <= cat_threshold) || (std::find(cat_names.begin(), cat_names.end(), covNames_new[i]) != cat_names.end())) {
             binE_idx.push_back(i + 1);
             vector<string> v;
             for (auto kv : map) {  
@@ -96,7 +108,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
         // Output header prefix
         string bin_names = "";
         for(int i = 0; i < nBinE; i++) {
-            bin_names = bin_names + covNames[binE_idx[i] - 1] + "_";
+            bin_names = bin_names + covNames_new[binE_idx[i] - 1] + "_";
         }
   
         std::vector<string> cart_sep = cartesian_vec_sep(stratum_names);
@@ -104,7 +116,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
             bin_headers.push_back(bin_names+cart_sep[i]);
         }  
 	    
-	std::vector<string> bin_headers_tmp=bin_headers;  
+	    std::vector<string> bin_headers_tmp=bin_headers;  
         vector<int> headerMap(cart_sep.size(), 0);
 	    
         for (int i = 0 ; i < cart_sep.size() ; i++) {
@@ -130,7 +142,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
 
 
         for (int j = 0; j < samSize; j++ ) {
-            auto sv = phenoMap[sampleID[j]];
+            auto sv = phenoMap_new[sampleID[j]];
             std::string stratum = "";
             for (int i = 0; i < nBinE; i++) {
                 stratum += sv[binE_idx[i]];
@@ -141,6 +153,6 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
     
         }
     }
-
+    phenoMap_new.clear();
     cout << "Number of categorical variables: " << nBinE << endl;
 }

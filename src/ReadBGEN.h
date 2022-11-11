@@ -36,7 +36,11 @@ class Bgen {
         std::vector<long int> include_idx;
         vector <long int> variant_pos;
         std::vector<unsigned int> includeVariantIndex;
-
+        // For check of co-linear relations between covX;
+        int numIntSelCol_new;
+        int numExpSelCol_new;
+        int numSelCol_new;
+        std::vector<int> excludeCol;
         // For multithreading BGEN file
         int phenoType;
         uint threads;

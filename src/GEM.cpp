@@ -40,7 +40,7 @@ int  checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> 
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, vector<double>* resid_ret, double* sigma2_ret);
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta, int phenoType, int samSize);
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, BinE binE);
+void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, BinE binE);
 
 int main(int argc, char* argv[]) {
 
@@ -64,10 +64,15 @@ int main(int argc, char* argv[]) {
     int numSelCol    = cmd.numSelCol;
     int numExpSelCol = cmd.numExpSelCol;
     int numIntSelCol = cmd.numIntSelCol;
+    int numExpSelCol_new;
     int Sq = numExpSelCol + numIntSelCol;
+    int Sq_new;
     vector<string> covSelHeadersName    = cmd.cov;
     vector<string> expCovSelHeadersName = cmd.exp;
     vector<string> intCovSelHeadersName = cmd.icov;
+    vector <string> covSelHeadersName_new;
+    vector <string> expCovSelHeadersName_new;
+    vector <string> intCovSelHeadersName_new;
 
 
     // Rearranging exposures, interaction covariates, and covariates for matrix operations
@@ -77,7 +82,6 @@ int main(int argc, char* argv[]) {
         for (int i = numIntSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), intCovSelHeadersName[i]); }
     }
     for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
-
 
     // Start clock
     auto wall0 = std::chrono::system_clock::now();
@@ -174,7 +178,7 @@ int main(int argc, char* argv[]) {
     unordered_map<string, vector<string>> phenomap;
     for (int r = 0; r < samSize; r++) {
         getline(finph, line);
-	line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
+	    line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
         std::istringstream iss(line);
         string value;
         string temvalue;
@@ -210,21 +214,82 @@ int main(int argc, char* argv[]) {
         pgen.processPvar(pgen, cmd.pvarFile);
         pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, numSelCol, samSize);
 
+        for (int i=0; i<covSelHeadersName.size(); i++){
+                if (std::find(pgen.excludeCol.begin(), pgen.excludeCol.end(), (i+1)) == pgen.excludeCol.end()){
+                    
+                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
+                    
+                }
+                    
+        }
+
+        for (int i=0; i<expCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
+            }
+        }
+
+        for (int i=0; i<intCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
+            }
+        }
+
+        Sq_new = expCovSelHeadersName_new.size() + intCovSelHeadersName_new.size();
+        numExpSelCol_new = expCovSelHeadersName_new.size();
+        samSize = pgen.new_samSize;
+        pgen.numIntSelCol_new=intCovSelHeadersName_new.size();
+        pgen.numExpSelCol_new=expCovSelHeadersName_new.size();
+        pgen.numSelCol_new=covSelHeadersName_new.size() - pgen.numIntSelCol_new - pgen.numExpSelCol_new;
+        
+
+        if (pgen.excludeCol.size()==1){
+            cout<<"Warning:"<<endl;
+            cout<<"Variable "<<covSelHeadersName[pgen.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
+            cout << "*********************************************************\n";
+            cout<<endl;
+        }
+        if (pgen.excludeCol.size() > 1) {
+            string excluded_cols;
+            for (int i=0; i<pgen.excludeCol.size(); i++){
+                excluded_cols = excluded_cols+ covSelHeadersName[pgen.excludeCol[i]-1];
+                if (i!=(pgen.excludeCol.size()-1))
+                excluded_cols = excluded_cols + ",";
+            }
+           cout<<"Warning:"<<endl;
+           cout<<"Variable " <<excluded_cols<<" are collinear with previous predictor(s) and dropped from the null model"<<endl;
+           cout << "*********************************************************\n";
+           cout<<endl;
+        } 
+        
+        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0){
+            cout<<"Warning:"<<endl;
+            cout<<"There are no environmental exposures remaining after the collinearity check. Interaction covariates should not be included when there are no exposures."<<endl;
+            exit(1);
+        }
+
+        if (Sq_new == 0){
+            cout<<"Warning:"<<endl;
+            cout<<"TThere are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis."<<endl;
+            cout << "*********************************************************\n";
+        }
+
         samSize = pgen.new_samSize;
         
         pgen.phenoType = checkBinary(phenomap, pgen.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize, covSelHeadersName);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize, covSelHeadersName, covSelHeadersName_new,Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
-            center(cmd.center, cmd.scale, samSize, numSelCol, pgen.new_covdata, &pgen.new_covdata);
+            center(cmd.center, cmd.scale, samSize, (numSelCol-pgen.excludeCol.size()), pgen.new_covdata, &pgen.new_covdata);
         }
-        
+       
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
-        vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, pgen.phenoType, epsilon, robust, covSelHeadersName, pgen.new_phenodata, pgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        vector <double> XinvXTXvec(samSize* (numSelCol -pgen.excludeCol.size() + 1));
+
+        fitNullModel(samSize, (numSelCol-pgen.excludeCol.size()), pgen.phenoType, epsilon, robust, covSelHeadersName_new, pgen.new_phenodata, pgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
         pgen.new_phenodata.clear();
         
         pgen.getPgenVariantPos(pgen, cmd);
@@ -254,22 +319,82 @@ int main(int argc, char* argv[]) {
         Bed bed;
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
         bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, numSelCol, samSize);
+        
+        for (int i=0; i<covSelHeadersName.size(); i++){
+                if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end()){
+                    
+                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
+                    
+                }
+                    
+        }
+
+        for (int i=0; i<expCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
+            }
+        }
+
+        for (int i=0; i<intCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
+            }
+        }
+
+        Sq_new = expCovSelHeadersName_new.size() + intCovSelHeadersName_new.size();
+        numExpSelCol_new = expCovSelHeadersName_new.size();
+        if (bed.excludeCol.size()==1){
+            cout<<"Warning:"<<endl;
+            cout<<"Variable "<<covSelHeadersName[bed.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
+            cout << "*********************************************************\n";
+            cout<<endl;
+        }
+        if (bed.excludeCol.size() > 1) {
+            string excluded_cols;
+            for (int i=0; i<bed.excludeCol.size(); i++){
+                excluded_cols = excluded_cols+ covSelHeadersName[bed.excludeCol[i]-1];
+                if (i!=(bed.excludeCol.size()-1))
+                excluded_cols = excluded_cols + ",";
+            }
+           cout<<"Warning:"<<endl;
+           cout<<"Variable " <<excluded_cols<<" are collinear with previous predictor(s) and dropped from the null model"<<endl;
+           cout << "*********************************************************\n";
+           cout<<endl;
+        }
+
+        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0){
+            cout<<"Warning:"<<endl;
+            cout<<"There are no environmental exposures remaining after the collinearity check. Interaction covariates should not be included when there are no exposures."<<endl;
+            exit(1);
+        }
+
+        if (Sq_new == 0){
+            cout<<"Warning:"<<endl;
+            cout<<"There are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis."<<endl;
+            cout << "*********************************************************\n";
+        }
+
 
         samSize = bed.new_samSize;
+        bed.numIntSelCol_new=intCovSelHeadersName_new.size();
+        bed.numExpSelCol_new=expCovSelHeadersName_new.size();
+        bed.numSelCol_new=covSelHeadersName_new.size() - bed.numIntSelCol_new - bed.numExpSelCol_new;
 
         bed.phenoType = checkBinary(phenomap, bed.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, covSelHeadersName);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, covSelHeadersName, covSelHeadersName_new, Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
-            center(cmd.center, cmd.scale, samSize, numSelCol, bed.new_covdata, &bed.new_covdata);
+            center(cmd.center, cmd.scale, samSize, (numSelCol-bed.excludeCol.size()), bed.new_covdata, &bed.new_covdata);
         }
         
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
-        vector <double> XinvXTXvec(samSize* (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, bed.phenoType, epsilon, robust, covSelHeadersName, bed.new_phenodata, bed.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        vector <double> XinvXTXvec(samSize* (numSelCol -bed.excludeCol.size() + 1));
+
+        fitNullModel(samSize, (numSelCol-bed.excludeCol.size()), bed.phenoType, epsilon, robust, covSelHeadersName_new, bed.new_phenodata, bed.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+
         bed.new_phenodata.clear();
 
         bed.getBedVariantPos(bed, cmd);
@@ -298,22 +423,81 @@ int main(int argc, char* argv[]) {
         Bgen bgen;
         bgen.processBgenHeaderBlock(cmd.bgenFile);
         bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, numSelCol, samSize);
+        for (int i=0; i<covSelHeadersName.size(); i++){
+                if (std::find(bgen.excludeCol.begin(), bgen.excludeCol.end(), (i+1)) == bgen.excludeCol.end()){
+                    
+                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
+                    
+                }
+                    
+        }
+
+        for (int i=0; i<expCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
+            }
+        }
+
+        for (int i=0; i<intCovSelHeadersName.size(); i++){
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+                intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
+            }
+        }
+
+            Sq_new = expCovSelHeadersName_new.size() + intCovSelHeadersName_new.size();
+            numExpSelCol_new = expCovSelHeadersName_new.size();
+        
+        if (bgen.excludeCol.size()==1){
+            cout<<"Warning:"<<endl;
+            cout<<"Variable "<<covSelHeadersName[bgen.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
+            cout << "*********************************************************"<<endl;
+            cout<<endl;
+        }
+        if (bgen.excludeCol.size() > 1) {
+            string excluded_cols;
+            for (int i=0; i<bgen.excludeCol.size(); i++){
+                excluded_cols = excluded_cols+ covSelHeadersName[bgen.excludeCol[i]-1];
+                if (i!=(bgen.excludeCol.size()-1))
+                excluded_cols = excluded_cols + ",";
+            }
+           cout<<"Warning:"<<endl;
+           cout<<"Variable " <<excluded_cols<<" are collinear with previous predictor(s) and dropped from the null model"<<endl;
+           cout << "*********************************************************"<<endl;
+           cout<<endl;
+        }
+
+        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0){
+            cout<<"Warning:"<<endl;
+            cout<<"There are no environmental exposures remaining after the collinearity check. Interaction covariates should not be included when there are no exposures."<<endl;
+            exit(1);
+        }
+
+        if ( Sq_new == 0){
+            cout<<"Warning:"<<endl;
+            cout<<"There are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis. "<<endl;
+            cout << "*********************************************************\n";
+        }
 
         samSize = bgen.new_samSize;
-
+        bgen.numIntSelCol_new=intCovSelHeadersName_new.size();
+        bgen.numExpSelCol_new=expCovSelHeadersName_new.size();
+        bgen.numSelCol_new=covSelHeadersName_new.size() - bgen.numIntSelCol_new - bgen.numExpSelCol_new;
         bgen.phenoType = checkBinary(phenomap, bgen.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, bgen.sampleID, bgen.include_idx, samSize, covSelHeadersName);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bgen.sampleID, bgen.include_idx, samSize, covSelHeadersName, covSelHeadersName_new, Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 
         if ((cmd.center == 1) || (cmd.scale == 1)) {
-            center(cmd.center, cmd.scale, samSize, numSelCol, bgen.new_covdata, &bgen.new_covdata);
+                center(cmd.center, cmd.scale, samSize, (numSelCol-bgen.excludeCol.size()), bgen.new_covdata, &bgen.new_covdata);
         }
+
         
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
-        vector <double> XinvXTXvec(samSize * (numSelCol + 1));
-        fitNullModel(samSize, numSelCol, bgen.phenoType, epsilon, robust, covSelHeadersName, bgen.new_phenodata, bgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+        vector <double> XinvXTXvec(samSize * (numSelCol -bgen.excludeCol.size() + 1)); 
+  
+        fitNullModel(samSize, (numSelCol-bgen.excludeCol.size()), bgen.phenoType, epsilon, robust, covSelHeadersName_new, bgen.new_phenodata, bgen.new_covdata, &XinvXTXvec, &miuvec, &residvec, &sigma2);
+
         bgen.new_phenodata.clear();
 
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -346,7 +530,7 @@ int main(int argc, char* argv[]) {
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
     auto start_time = std::chrono::high_resolution_clock::now();
-    printOutputHeader(cmd.useBgenFile, numExpSelCol, Sq+1, covSelHeadersName, output, cmd.outStyle, cmd.robust, sigma2, binE);
+    printOutputHeader(cmd.useBgenFile, numExpSelCol_new, Sq_new+1, covSelHeadersName_new, output, cmd.outStyle, cmd.robust, sigma2, binE);
     std::ofstream results(output, std::ios_base::app);
     for (int i = 0; i < cmd.threads; i++) {
          std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
@@ -382,7 +566,6 @@ int checkBinary(unordered_map<string, vector<string>> phenoMap, vector<string> s
     size_t sampleSize = sampleID.size();
     for (size_t i = 0; i < sampleSize; i++) {
         auto tmp = phenoMap[sampleID[i]];
-
         if (!map.count(tmp[0])) {
             map[tmp[0]] = 1;
         }
@@ -654,14 +837,14 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 }
 
 
-void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, BinE binE) 
+void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<string> covNames, string output, string outStyle, int robust, double sigma2, BinE binE) 
 {
     std::ofstream results(output, std::ofstream::binary);
 
     bool printFull = false;
     bool printMeta = false;
     int printStart = 1; 
-    int printEnd   = numExpSelCol+1; 
+    int printEnd   = numExpSelCol_new+1; 
     if (outStyle.compare("meta") == 0) {
         printStart = 0; 
         printEnd   = Sq1;
@@ -702,7 +885,7 @@ void printOutputHeader(bool useBgen, int numExpSelCol, int Sq1, vector<string> c
     if ((robust == 1) && (printMeta || printFull)) {
         results << "SE_Beta_Marginal" << "\t";
     }
-    if (numExpSelCol != 0) {
+    if (numExpSelCol_new != 0) {
         for (int i = printStart; i < printEnd; i++) {
             results << "Beta_" << covNames[i] << "\t";
         }

@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.4.5"
+#define VERSION "1.5"
 
 void print_help();
 
@@ -15,7 +15,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     cout << "\n*********************************************************\n";
     cout << "Welcome to GEM v" << VERSION << "\n";
-    cout << "(C) 2018-2022 Liang Hong, Han Chen, Duy Pham, Cong Pan \n";
+    cout << "(C) 2018-2023 Liang Hong, Han Chen, Duy Pham, Cong Pan \n";
     cout << "GNU General Public License v3\n";
     cout << "*********************************************************\n";
 
@@ -57,7 +57,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("missing-value", po::value<std::string>()->default_value("NA"), "")
         ("robust", po::value<int>()->default_value(0), "")
         ("tol", po::value<double>()->default_value(.000001))
-        ("center", po::value<int>(), "")
+        ("center", po::value<int>()->default_value(2))
         ("scale", po::value<int>()->default_value(0))
         ("categorical-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("cat-threshold", po::value<int>()->default_value(20));
@@ -375,17 +375,20 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     if (out.count("center")) {
         center = out["center"].as<int>();
 
-        if (center != 0 && center != 1) {
-            cerr << "\nERROR: Please specify --center with a value equal to 0 (false) or 1 (true).\n\n";
-            exit(1);
+        if (center != 2){
+            if (center != 0 && center != 1) {
+                cerr << "\nERROR: Please specify --center with a value equal to 0 (false) or 1 (true).\n\n";
+                exit(1);
+            }
         }
 
+
     }
-    else {
+    /*else {
         cerr << "\nERROR: flag --center is required, whether to center ALL exposures and covariates? 1 for yes, and 0 for no.\n\n";
         exit(1);
 
-    }
+    }*/
 
     if (out.count("scale")) {
         scale = out["scale"].as<int>();
@@ -564,7 +567,7 @@ void print_help() {
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
         << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
         << "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
-        << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates. " << endl
+        << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates, 2 for only center interaction covariates. \n \t\t\t    Default: 2 " << endl
         << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl
         << "   --categorical-names \t Names of the exposure or interaction covariate that should be treated as categorical. \n \t\t\t    Default: None" << endl
         << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate not specified using --categorical-names\n \t\t\t    should be automatically treated as categorical based on the number of levels (unique observations). \n \t\t\t    Default: 20" << endl;

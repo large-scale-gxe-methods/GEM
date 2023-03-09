@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2022  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ *  Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
         if ((cmd.center == 1) || (cmd.scale == 1)) {
             center(cmd.center, cmd.scale, samSize, (numSelCol-pgen.excludeCol.size()), pgen.new_covdata, &pgen.new_covdata);
             cout<<"Warning:"<<endl;
-            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analyzing was not recommended"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
             cout << "*********************************************************\n";
         }
 
@@ -478,7 +478,7 @@ int main(int argc, char* argv[]) {
         if ((cmd.center == 1) || (cmd.scale == 1)) {
             center(cmd.center, cmd.scale, samSize, (numSelCol-bed.excludeCol.size()), bed.new_covdata, &bed.new_covdata);
             cout<<"Warning:"<<endl;
-            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analyzing was not recommended"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
             cout << "*********************************************************\n";
         }
 
@@ -632,7 +632,7 @@ int main(int argc, char* argv[]) {
         if ((cmd.center == 1) || (cmd.scale == 1)) {
             center(cmd.center, cmd.scale, samSize, (numSelCol-bgen.excludeCol.size()), bgen.new_covdata, &bgen.new_covdata);
             cout<<"Warning:"<<endl;
-            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analyzing was not recommended"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
             cout << "*********************************************************\n";
         }
 
@@ -750,14 +750,14 @@ void center(int center, int scale, int samSize, int numSelCol, vector<double> co
     {
         matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
         if (!scale) {
-            cout << "Centering covariates..." << endl;
+            cout << "Centering without rescaling..." << endl;
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
                 tmpSD[i] = 1.0;
             }
         }
         else {
-            cout << "Centering and scaling covariates..." << endl;
+            cout << "Centering and rescaling..." << endl;
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
             }

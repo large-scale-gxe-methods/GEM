@@ -377,7 +377,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
         if (center != 2){
             if (center != 0 && center != 1) {
-                cerr << "\nERROR: Please specify --center with a value equal to 0 (false) or 1 (true).\n\n";
+                cerr << "\nERROR: Please specify --center with a value equal to 0 (no centering) or 1 (centering ALL exposures and covariates) or 2 (centering interaction covariates only).\n\n";
                 exit(1);
             }
         }
@@ -567,7 +567,7 @@ void print_help() {
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
         << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
         << "   --missing-value \t Indicates how missing values in the phenotype file are stored. \n \t\t\t    Default: NA" << endl
-        << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates, 2 for only center interaction covariates. \n \t\t\t    Default: 2 " << endl
+        << "   --center \t\t 0 for no centering to be done and 1 to center ALL exposures and covariates, 2 to center interaction covariates only. \n \t\t\t    Default: 2 " << endl
         << "   --scale \t\t 0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation. \n \t\t\t    Default: 0" << endl
         << "   --categorical-names \t Names of the exposure or interaction covariate that should be treated as categorical. \n \t\t\t    Default: None" << endl
         << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate not specified using --categorical-names\n \t\t\t    should be automatically treated as categorical based on the number of levels (unique observations). \n \t\t\t    Default: 20" << endl;

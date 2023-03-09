@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.4.5   
+Current version: 1.5   
 
 <br />
 Additional documentation:  
@@ -197,7 +197,8 @@ Phenotype File Options:
         Default: NA
   
 --center 
-     0 for no centering to be done and 1 to center ALL exposures and covariates.
+     0 for no centering to be done, 1 to center ALL exposures and covariates, and 2 to center all the interaction covariates only.
+     	Default: 2
 
 --scale
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
@@ -351,6 +352,9 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5) - March 9, 2023:
+* Changed the default of the --center flag to 2 to center all the interaction covariates only
+
 [Version 1.4.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.5) - November 11, 2022:
 
 * Added collinearity check of the covariates before fitting the null model
@@ -426,7 +430,7 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2021  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

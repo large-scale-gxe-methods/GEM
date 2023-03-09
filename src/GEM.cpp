@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2022  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ *  Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
     vector <string> covSelHeadersName_new;
     vector <string> expCovSelHeadersName_new;
     vector <string> intCovSelHeadersName_new;
+
 
 
     // Rearranging exposures, interaction covariates, and covariates for matrix operations
@@ -281,10 +282,61 @@ int main(int argc, char* argv[]) {
         cout << "*********************************************************\n";
         phenomap.clear();
 
+
+        vector<double> tmp1(samSize, 1);
+        double* tmpMean = new double[covSelHeadersName_new.size() + 1];
+        matmatprod(&tmp1[0], &pgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
+        cout << "\nMean Values for covariate(s): \n";
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+            cout << boost::format("%+20s") % covSelHeadersName_new[i];
+        }
+        cout << "\n";
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+            tmpMean[i] /= double(samSize * 1.0);
+            cout << boost::format("%+20s") % tmpMean[i];
+        }
+        cout << "\n";
+        if (cmd.center == 2){            
+            vector<double> newIntcov_center;
+            int numtotal_col = covSelHeadersName_new.size() +1;
+            for (int i=0; i < samSize ; i++) {
+                newIntcov_center.push_back(1);
+                for (int j=0; j < pgen.numIntSelCol_new; j++) {
+                    newIntcov_center.push_back (pgen.new_covdata[i* numtotal_col + j+ pgen.numExpSelCol_new+1]);
+                }            
+            }
+            center(1, cmd.scale, samSize, pgen.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
+            string Intname;
+            for (int i=0; i<pgen.numIntSelCol_new; i++){
+                Intname = Intname + intCovSelHeadersName_new[i];
+                if (i!=(pgen.numIntSelCol_new-1))
+                Intname = Intname + ",";        
+            }
+            cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
+            for (int i=0; i < samSize ; i++) {
+                for (int j=0; j < pgen.numIntSelCol_new; j++) {
+                    pgen.new_covdata[i* numtotal_col + j+ pgen.numExpSelCol_new+1] = newIntcov_center [i * (pgen.numIntSelCol_new +1) + j+1];
+                }
+            
+            }
+        }
+
         if ((cmd.center == 1) || (cmd.scale == 1)) {
             center(cmd.center, cmd.scale, samSize, (numSelCol-pgen.excludeCol.size()), pgen.new_covdata, &pgen.new_covdata);
+            cout<<"Warning:"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
+            cout << "*********************************************************\n";
         }
-       
+
+        if (cmd.center == 0){
+            cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
+            if ( pgen.numIntSelCol_new > 0){
+                cout<<"Warning:"<<endl;
+                cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
+                cout << "*********************************************************\n";
+            }
+        }
+
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
         vector <double> XinvXTXvec(samSize* (numSelCol -pgen.excludeCol.size() + 1));
@@ -385,9 +437,61 @@ int main(int argc, char* argv[]) {
         cout << "*********************************************************\n";
         phenomap.clear();
 
+        vector<double> tmp1(samSize, 1);
+        double* tmpMean = new double[covSelHeadersName_new.size() + 1];
+        matmatprod(&tmp1[0], &bed.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
+        cout << "\nMean Values for covariate(s): \n";
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+            cout << boost::format("%+20s") % covSelHeadersName_new[i];
+        }
+        cout << "\n";
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+            tmpMean[i] /= double(samSize * 1.0);
+            cout << boost::format("%+20s") % tmpMean[i];
+        }
+        cout << "\n";
+        if (cmd.center == 2){            
+            vector<double> newIntcov_center;
+            int numtotal_col = covSelHeadersName_new.size() +1;
+            for (int i=0; i < samSize ; i++) {
+                newIntcov_center.push_back(1);
+                for (int j=0; j < bed.numIntSelCol_new; j++) {
+                    newIntcov_center.push_back (bed.new_covdata[i* numtotal_col + j+ bed.numExpSelCol_new+1]);
+                }            
+            }
+            center(1, cmd.scale, samSize, bed.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
+            string Intname;
+            for (int i=0; i<bed.numIntSelCol_new; i++){
+                Intname = Intname + intCovSelHeadersName_new[i];
+                if (i!=(bed.numIntSelCol_new-1))
+                Intname = Intname + ",";        
+            }
+            cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
+            for (int i=0; i < samSize ; i++) {
+                for (int j=0; j < bed.numIntSelCol_new; j++) {
+                    bed.new_covdata[i* numtotal_col + j+ bed.numExpSelCol_new+1] = newIntcov_center [i * (bed.numIntSelCol_new +1) + j+1];
+                }
+            
+            }
+        }
+
         if ((cmd.center == 1) || (cmd.scale == 1)) {
             center(cmd.center, cmd.scale, samSize, (numSelCol-bed.excludeCol.size()), bed.new_covdata, &bed.new_covdata);
+            cout<<"Warning:"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
+            cout << "*********************************************************\n";
         }
+
+        if (cmd.center == 0){
+            cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
+            if (bed.numIntSelCol_new > 0){
+                cout<<"Warning:"<<endl;
+                cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
+                cout << "*********************************************************\n";
+            }
+        }
+
+
         
         cout << "Starting GWAS... \n\n";
         vector <double> miuvec(samSize), residvec(samSize);
@@ -487,9 +591,60 @@ int main(int argc, char* argv[]) {
         cout << "*********************************************************\n";
         phenomap.clear();
 
-        if ((cmd.center == 1) || (cmd.scale == 1)) {
-                center(cmd.center, cmd.scale, samSize, (numSelCol-bgen.excludeCol.size()), bgen.new_covdata, &bgen.new_covdata);
+        vector<double> tmp1(samSize, 1);
+        double* tmpMean = new double[covSelHeadersName_new.size() + 1];
+        matmatprod(&tmp1[0], &bgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
+        cout << "\nMean Values for covariate(s): \n";
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+            cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
+        cout << "\n";
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+            tmpMean[i] /= double(samSize * 1.0);
+            cout << boost::format("%+20s") % tmpMean[i];
+        }
+        cout << "\n";
+        if (cmd.center == 2){            
+            vector<double> newIntcov_center;
+            int numtotal_col = covSelHeadersName_new.size() +1;
+            for (int i=0; i < samSize ; i++) {
+                newIntcov_center.push_back(1);
+                for (int j=0; j < bgen.numIntSelCol_new; j++) {
+                    newIntcov_center.push_back (bgen.new_covdata[i* numtotal_col + j+ bgen.numExpSelCol_new+1]);
+                }            
+            }
+            center(1, cmd.scale, samSize, bgen.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
+            string Intname;
+            for (int i=0; i<bgen.numIntSelCol_new; i++){
+                Intname = Intname + intCovSelHeadersName_new[i];
+                if (i!=(bgen.numIntSelCol_new-1))
+                Intname = Intname + ",";        
+            }
+            cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
+            for (int i=0; i < samSize ; i++) {
+                for (int j=0; j < bgen.numIntSelCol_new; j++) {
+                    bgen.new_covdata[i* numtotal_col + j+ bgen.numExpSelCol_new+1] = newIntcov_center [i * (bgen.numIntSelCol_new +1) + j+1];
+                }
+            
+            }
+        }
+
+        if ((cmd.center == 1) || (cmd.scale == 1)) {
+            center(cmd.center, cmd.scale, samSize, (numSelCol-bgen.excludeCol.size()), bgen.new_covdata, &bgen.new_covdata);
+            cout<<"Warning:"<<endl;
+            cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
+            cout << "*********************************************************\n";
+        }
+
+        if (cmd.center == 0){
+            cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
+            if (bgen.numIntSelCol_new > 0){
+                cout<<"Warning:"<<endl;
+                cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
+                cout << "*********************************************************\n";
+            }
+        }
+
 
         
         cout << "Starting GWAS... \n\n";
@@ -595,14 +750,14 @@ void center(int center, int scale, int samSize, int numSelCol, vector<double> co
     {
         matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
         if (!scale) {
-            cout << "Centering ALL exposures and covariates..." << endl;
+            cout << "Centering without rescaling..." << endl;
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
                 tmpSD[i] = 1.0;
             }
         }
         else {
-            cout << "Centering and scaling ALL exposures and covariates..." << endl;
+            cout << "Centering and rescaling..." << endl;
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
             }

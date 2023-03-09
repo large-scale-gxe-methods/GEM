@@ -353,7 +353,7 @@ The results should look like the following output file [my_example.out](https://
 
 ## Recent Updates 
 [Version 1.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5) - March 9, 2023:
-* Changed the default option of Center function to center all the interaction covariates only
+* Changed the default of the --center flag to 2 to center all the interaction covariates only
 
 [Version 1.4.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.5) - November 11, 2022:
 

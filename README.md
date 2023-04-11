@@ -428,7 +428,7 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 
 ## References
 If you use GEM in your analysis, please cite
-* Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed [**.PMID**](https://pubmed.ncbi.nlm.nih.gov/34695175/): 34695175. [**.PMCID**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/)PMCID: PMC8545347. [**.DOI**](https://academic.oup.com/bioinformatics/article/37/20/3514/6284130?login=false)DOI: 10.1093/bioinformatics/btab223.
+* Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed [**PMID**](https://pubmed.ncbi.nlm.nih.gov/34695175/): 34695175. [**PMCID**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/): PMC8545347. [**DOI**](https://academic.oup.com/bioinformatics/article/37/20/3514/6284130?login=false): 10.1093/bioinformatics/btab223.
 
 <br />
 <br />

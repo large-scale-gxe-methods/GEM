@@ -445,3 +445,8 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ```
+ 
+ # References
+If you use GEM in your analysis, please cite
+* Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed PMID: 34695175. PMCID: PMC8545347. DOI: 10.1093/bioinformatics/btab223.
+

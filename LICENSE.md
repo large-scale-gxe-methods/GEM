@@ -1,19 +1,15 @@
 # GEM
 ## Table of contents
-<!--ts-->
-   * [A. License-for-GEM](#License-for-GEM)
-   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
-      * [B.1. Libdeflate1.18](#Libdeflate1.18)
-      * [B.2. Plink2.0](#Plink2.0)
-      * [B.3. Zstandard1.5.5](#Zstandard1.5.5)
-   * [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
+- [A. License-for-GEM](#License-for-GEM)
+- [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+- [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)
      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
      * [C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
-<!--te-->
 
-## License for GEM
+
+## A.License for GEM
 
 GEM : Gene-Environment interaction analysis for Millions of samples
 Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
@@ -32,9 +28,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 
-## Third-Party Licenses for Source Codes Bundled in GEM
-
-### Libdeflate1.18
+## B. Third-Party Licenses for Source Codes Bundled in GEM
+- [B.1. Libdeflate1.18](#B.1. Libdeflate1.18)
+- [B.2. Plink2.0](#B.2. Plink2.0)
+- [B.3. Zstandard1.5.5](#B.3. Zstandard1.5.5)
+### B.1. Libdeflate1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 
@@ -62,7 +60,7 @@ SOFTWARE.
 <br />
 
 
-### Plink2.0
+### B.2. Plink2.0
 
 Plink is LGPLv3+-licensed (<https://github.com/chrchang/plink-ng/blob/master/2.0/>).
 
@@ -744,7 +742,7 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 <\br>
 
-### Zstandard1.5.5
+### B.3. Zstandard1.5.5
 Zstd is under BSD license (<https://github.com/facebook/zstd/blob/dev/LICENSE>).
 
 BSD License

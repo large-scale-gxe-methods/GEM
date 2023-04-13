@@ -1,9 +1,9 @@
 # GEM
 ## Table of contents
 <!--ts-->
-   * [A. License-for-GEM](#A.License-for-GEM)
-   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#B.Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
-   * [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
+   * [A.License-for-GEM](#A.License-for-GEM)
+   * [B.Third-Party Licenses for Source Codes Bundled in GEM](#B.Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+   * [C.Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)
      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
@@ -30,10 +30,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 
 ## B.Third-Party Licenses for Source Codes Bundled in GEM
-- [B.1. Libdeflate1.18](#B.1.-Libdeflate1.18)
-- [B.2. Plink2.0](#B.2.-Plink2.0)
-- [B.3. Zstandard1.5.5](#B.3.-Zstandard1.5.5)
-### B.1. Libdeflate1.18
+- [B.1.Libdeflate1.18](#B.1.-Libdeflate1.18)
+- [B.2.Plink2.0](#B.2.-Plink2.0)
+- [B.3.Zstandard1.5.5](#B.3.-Zstandard1.5.5)
+### B.1.Libdeflate1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 
@@ -61,7 +61,7 @@ SOFTWARE.
 <br />
 
 
-### B.2. Plink2.0
+### B.2.Plink2.0
 
 Plink is LGPLv3+-licensed (<https://github.com/chrchang/plink-ng/blob/master/2.0/>).
 

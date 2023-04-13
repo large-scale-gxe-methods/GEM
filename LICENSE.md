@@ -14,7 +14,9 @@
 <!--te-->
 <br />
 
-## License for GEM
+License for GEM
+===============
+
 GEM : Gene-Environment interaction analysis for Millions of samples
 Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
 
@@ -33,8 +35,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 <br />
 
-## Third-Party Licenses for Source Codes Bundled in GEM
-### Libdeflate1.18
+Third-Party Licenses for Source Codes Bundled in GEM
+====================================================
+
+Libdeflate1.18
+--------------
+
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 
 Copyright 2016 Eric Biggers
@@ -60,7 +66,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 <br />
 
-### Plink2.0
+Plink2.0
+--------
+
 Plink is LGPLv3+-licensed (<https://github.com/chrchang/plink-ng/blob/master/2.0/>).
 
 Copyright (C) 2005-2023 Shaun Purcell, Christopher Chang

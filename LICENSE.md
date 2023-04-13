@@ -3,6 +3,7 @@
 ## Contents
 - [License for GEM](#license-for-gem)
 - [Third-Party Licenses for Source Codes Bundled in GEM](#third-party-licenses-for-source-codes-bundled-in-gem)
+    -[Libdeflate1.18](#libdeflate118)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)
@@ -33,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - [B.1.Libdeflate1.18](#B.1.-Libdeflate1.18)
 - [B.2.Plink2.0](#B.2.-Plink2.0)
 - [B.3.Zstandard1.5.5](#B.3.-Zstandard1.5.5)
-### B.1.Libdeflate1.18
+### Libdeflate1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 

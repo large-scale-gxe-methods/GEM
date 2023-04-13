@@ -783,6 +783,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </br>
 
 ## Third-Party Licenses for Binary Linked Libraries
+The software programs in the section are not included in the source code release, but they are linked in the binary release.
 
 ### Boost
 The following is copyright of Boost C++ library.

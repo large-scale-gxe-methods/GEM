@@ -7,10 +7,10 @@
       * [B.2. Plink2.0](#Plink2.0)
       * [B.3. Zstandard1.5.5](#Zstandard1.5.5)
    * [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
-      * [C.1. Boost](#Boost)
-      * [C.2. Eigen](#Eigen)
-      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
-      * [C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
+     * [C.1. Boost](#Boost)
+     * [C.2. Eigen](#Eigen)
+     * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
+     * [C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
 <!--te-->
 <br />
 

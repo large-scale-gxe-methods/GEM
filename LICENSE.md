@@ -1,13 +1,14 @@
 # GEM
 ## Table of contents
-- [A. License-for-GEM](#License-for-GEM)
-- [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
-- [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
+<!--ts-->
+* [A. License-for-GEM](#License-for-GEM)
+* [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+* [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)
      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
      * [C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
-
+<!--te-->
 
 ## A.License for GEM
 

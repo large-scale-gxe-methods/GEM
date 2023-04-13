@@ -813,15 +813,22 @@ a source language processor.
 
 ### Eigen
 The following are Eigen copyrights from https://github.com/bolderflight/eigen/tree/main/src. 
+
 The following copyrights are from file Householder.h
+
 Copyright (C) 2010 Benoit Jacob jacob.benoit.1@gmail.com
 Copyright (C) 2009 Gael Guennebaud gael.guennebaud@inria.fr
+
 The following copyrights are from file TriangularMatrix.h
+
 Copyright (C) 2008 Benoit Jacob <jacob.benoit.1@gmail.com>
 Copyright (C) 2008-2009 Gael Guennebaud gael.guennebaud@inria.fr
+
 The following copyrights are from file Matrix.h
+
 Copyright (C) 2006-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
 Copyright (C) 2008-2009 Gael Guennebaud <gael.guennebaud@inria.fr>
+
 
 Mozilla Public License Version 2.0
 

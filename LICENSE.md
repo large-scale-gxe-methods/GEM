@@ -1,15 +1,15 @@
 # GEM
 ## Table of contents
-- [A. License for GEM](#License for GEM)  
-- [B. Third-Party Lincenses for Source Codes Bundled in GEM](#Third-Party Lincenses for Source Codes Bundled in GEM)
+- [A. License-for-GEM](#License-for-GEM)  
+- [B. Third-Party Lincenses for Source Codes Bundled in GEM](#Third-Party-License-for-Source-Codes-Bundled-in-GEM)
   -[B.1. Libdeflate1.18](#Libdeflate1.18)
   -[B.2. Plink2.0](#Plink2.0)
   -[B.3. Zstandard1.5.5](#Zstandard1.5.5)
-- [C. Third-Party Lincenses for Binary Linked Libraries](#Third-Party Lincenses for Binary Linked Libraries)
+- [C. Third-Party Lincenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
   -[C.1. Boost](#Boost)
   -[C.2. Eigen](#Eigen)
-  -[C.3. LAPACK and BLAS](#LAPACK and BLAS)
-  -[C.4. Intel oneAPI Math Kernel Library](#Intel oneAPI Math Kernel Library)
+  -[C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
+  -[C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
 <br />
 
 ## License for GEM
@@ -30,11 +30,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 
-## Third-Party Lincenses for Source Codes Bundled in GEM
+## Third-Party Licenses for Source Codes Bundled in GEM
 ### Libdeflate1.18
 ### Plink2.0
 ### Zstandard1.5.5
-## Third-Party Lincenses for Binary Linked Libraries
+## Third-Party Licenses for Binary Linked Libraries
 ### Boost
 ### Eigen
 ### LAPACK and BLAS

@@ -1188,6 +1188,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 ### LAPACK
 LAPACK is under a modified BSD license (https://netlib.org/lapack/LICENSE.txt).
+
 Copyright (c) 1992-2013 The University of Tennessee and The University
                         of Tennessee Research Foundation.  All rights
                         reserved.
@@ -1196,11 +1197,11 @@ Copyright (c) 2000-2013 The University of California Berkeley. All
 Copyright (c) 2006-2013 The University of Colorado Denver.  All rights
                         reserved.
 
-$COPYRIGHT$
+COPYRIGHT
 
 Additional copyrights may follow
 
-$HEADER$
+HEADER
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are

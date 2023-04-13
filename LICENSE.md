@@ -1,8 +1,8 @@
 # GEM
 
 ## Contents
-- [License for GEM](#license)
-- [Third-Party Licenses for Source Codes Bundled in GEM](#third-Party-Licenses-for-Source)
+- [License for GEM](#license-for-gem)
+- [Third-Party Licenses for Source Codes Bundled in GEM](#third-party-licenses-for-source-codes-bundled-in-gem)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)
@@ -778,7 +778,6 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </br>
 
-## Usage
 ## C.Third-Party Licenses for Binary Linked Libraries
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)

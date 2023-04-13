@@ -8,7 +8,8 @@
 - [License](#license)
 
 
-## A.License for GEM
+
+## License for GEM
 
 GEM : Gene-Environment interaction analysis for Millions of samples
 Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
@@ -27,7 +28,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 
-## B.Third-Party Licenses for Source Codes Bundled in GEM
+
+## Third-Party Licenses for Source Codes Bundled in GEM
 - [B.1.Libdeflate1.18](#B.1.-Libdeflate1.18)
 - [B.2.Plink2.0](#B.2.-Plink2.0)
 - [B.3.Zstandard1.5.5](#B.3.-Zstandard1.5.5)

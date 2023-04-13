@@ -1,8 +1,8 @@
 # GEM
 
 ## Contents
-- [License for GEM](#license-for-GEM)
-- [Third-Party Licenses for Source Codes Bundled in GEM](#third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+- [License for GEM](#license)
+- [Third-Party Licenses for Source Codes Bundled in GEM](#third-Party-Licenses-for-Source)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)

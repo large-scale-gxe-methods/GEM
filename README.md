@@ -458,4 +458,4 @@ If you use GEM in your analysis, please cite
 * Plink: LGPLv3+
 * Zstandard (zstd): BSD_3_clause | GPL-2
 
-Full copies of license agreements for GEM, third-party source code, linked libraries can be found here [https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE.md]
+Full copies of license agreements for GEM, third-party source code, linked libraries can be found here  <https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE.md>

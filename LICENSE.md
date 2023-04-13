@@ -2,7 +2,7 @@
 ## Table of contents
 <!--ts-->
    * [A. License-for-GEM](#License-for-GEM)
-   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-License-for-Source-Codes-Bundled-in-GEMe)
+   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
       * [B.1. Libdeflate1.18](#Libdeflate1.18)
       * [B.2. Plink2.0](#Plink2.0)
       * [B.3. Zstandard1.5.5](#Zstandard1.5.5)

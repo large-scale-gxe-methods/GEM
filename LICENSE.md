@@ -1,7 +1,9 @@
 # GEM
 ## Table of contents
-=================
 <!--ts-->
+   * [A. License-for-GEM](#License-for-GEM)
+   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-License-for-Source-Codes-Bundled-in-GEMe)
+      * [B.1. Libdeflate1.18](#Libdeflate1.18)
    *[A. License-for-GEM](#License-for-GEM)  
    *[B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-License-for-Source-Codes-Bundled-in-GEM)
       *[B.1. Libdeflate1.18](#Libdeflate1.18)
@@ -36,7 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Third-Party Licenses for Source Codes Bundled in GEM
 ### Libdeflate1.18
+<br />
+
 ### Plink2.0
+<br />
+
 ### Zstandard1.5.5
 ## Third-Party Licenses for Binary Linked Libraries
 ### Boost

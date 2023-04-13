@@ -1,14 +1,8 @@
 # GEM
-## Table of contents
-<!--ts-->
-   * [A.License-for-GEM](#A.License-for-GEM)
-   * [B.Third-Party Licenses for Source Codes Bundled in GEM](#B.Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
-   * [C.Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
-<!--te-->
 
 ## Contents
-- [A.License-for-GEM](#quick-installation)
-- [B.Third-Party Licenses for Source Codes Bundled in GEM](#dependencies)
+- [A.License for GEM](#license-for-GEM)
+- [B.Third-Party Licenses for Source Codes Bundled in GEM](#third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
 - [Usage](#usage)
 - [Contact](#contact)
 - [License](#license)

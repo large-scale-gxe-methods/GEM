@@ -12,10 +12,8 @@
      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)
      * [C.4. Intel oneAPI Math Kernel Library](#Intel-oneAPI-Math-Kernel-Library)
 <!--te-->
-<br />
 
-License for GEM
-===============
+## License for GEM
 
 GEM : Gene-Environment interaction analysis for Millions of samples
 Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
@@ -33,13 +31,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
-<br />
 
-Third-Party Licenses for Source Codes Bundled in GEM
-====================================================
+## Third-Party Licenses for Source Codes Bundled in GEM
 
-Libdeflate1.18
---------------
+### Libdeflate1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 
@@ -66,8 +61,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 <br />
 
-Plink2.0
---------
+
+### Plink2.0
 
 Plink is LGPLv3+-licensed (<https://github.com/chrchang/plink-ng/blob/master/2.0/>).
 

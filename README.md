@@ -452,3 +452,10 @@ If you use GEM in your analysis, please cite
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ```
+ The GEM package is distributed under GPL (>= 3). It includes components from other open source software. Here is a list of these components:
+
+* libdeflate: MIT
+* Plink: LGPLv3+
+* Zstandard (zstd): BSD_3_clause | GPL-2
+
+Full copies of license agreements for GEM, third-party source code, linked libraries can be found here [https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE.md]

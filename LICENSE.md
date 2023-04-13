@@ -1,8 +1,8 @@
 # GEM
 ## Table of contents
 <!--ts-->
-   * [A. License-for-GEM](#A.-License-for-GEM)
-   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#B.-Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+   * [A. License-for-GEM](#A.License-for-GEM)
+   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#B.Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
    * [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)
@@ -29,10 +29,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 
-## B. Third-Party Licenses for Source Codes Bundled in GEM
-- [B.1. Libdeflate1.18](#B.1. Libdeflate1.18)
-- [B.2. Plink2.0](#B.2. Plink2.0)
-- [B.3. Zstandard1.5.5](#B.3. Zstandard1.5.5)
+## B.Third-Party Licenses for Source Codes Bundled in GEM
+- [B.1. Libdeflate1.18](#B.1.-Libdeflate1.18)
+- [B.2. Plink2.0](#B.2.-Plink2.0)
+- [B.3. Zstandard1.5.5](#B.3.-Zstandard1.5.5)
 ### B.1. Libdeflate1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).

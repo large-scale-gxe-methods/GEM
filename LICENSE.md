@@ -1,6 +1,17 @@
 # GEM
 
 ## Contents
+<!--ts-->
+   * [License for GEM](#license-for-gem)
+   * [Third-Party Licenses for Source Codes Bundled in GEM](#third-party-licenses-for-source-codes-bundled-in-gem)
+      * [Libdeflate1.18](#libdeflate118)
+      * [Local files](#local-files)
+      * [Remote files](#remote-files)
+   * [Installation](#installation)
+      * [STDIN](#stdin)
+      * [Local files](#local-files)
+      * [Remote files](#remote-files)
+<!--te-->
 - [License for GEM](#license-for-gem)
 - [Third-Party Licenses for Source Codes Bundled in GEM](#third-party-licenses-for-source-codes-bundled-in-gem)
     -[Libdeflate1.18](#libdeflate118)

@@ -1,9 +1,9 @@
 # GEM
 ## Table of contents
 <!--ts-->
-* [A. License-for-GEM](#License-for-GEM)
-* [B. Third-Party Licenses for Source Codes Bundled in GEM](#Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
-* [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
+   * [A. License-for-GEM](#A.License-for-GEM)
+   * [B. Third-Party Licenses for Source Codes Bundled in GEM](#B.Third-Party-Licenses-for-Source-Codes-Bundled-in-GEM)
+   * [C. Third-Party Licenses for Binary Linked Libraries](#Third-Party-Licenses-for-Binary-Linked-Libraries)
      * [C.1. Boost](#Boost)
      * [C.2. Eigen](#Eigen)
      * [C.3. LAPACK and BLAS](#LAPACK-and-BLAS)

@@ -839,8 +839,8 @@ Mozilla Public License Version 2.0
 1. Definitions
 
 1.1. "Contributor"
-    means each individual or legal entity that creates, contributes to
-    the creation of, or owns Covered Software.
+means each individual or legal entity that creates, contributes to
+the creation of, or owns Covered Software.
 
 1.2. "Contributor Version"
     means the combination of the Contributions of others (if any) used
@@ -883,11 +883,11 @@ Mozilla Public License Version 2.0
 1.10. "Modifications"
     means any of the following:
 
-    (a) any file in Source Code Form that results from an addition to,
+(a) any file in Source Code Form that results from an addition to,
         deletion from, or modification of the contents of Covered
         Software; or
 
-    (b) any new file in Source Code Form that contains any Covered
+(b) any new file in Source Code Form that contains any Covered
         Software.
 
 1.11. "Patent Claims" of a Contributor

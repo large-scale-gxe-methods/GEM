@@ -858,12 +858,12 @@ the creation of, or owns Covered Software.
 1.5. "Incompatible With Secondary Licenses"
     means
 
-    (a) that the initial Contributor has attached the notice described
-        in Exhibit B to the Covered Software; or
+(a) that the initial Contributor has attached the notice described
+    in Exhibit B to the Covered Software; or
 
-    (b) that the Covered Software was made available under the terms of
-        version 1.1 or earlier of the License, but not also under the
-        terms of a Secondary License.
+(b) that the Covered Software was made available under the terms of
+    version 1.1 or earlier of the License, but not also under the
+    terms of a Secondary License.
 
 1.6. "Executable Form"
     means any form of the work other than Source Code Form.

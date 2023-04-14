@@ -185,6 +185,9 @@ int main(int argc, char* argv[]) {
         string temvalue;
         vector <string> values;
         while (getline(iss, value, delim)) values.push_back(value);
+        if (values.size() == (phenoncols -1)){
+            values.push_back("");
+        }
         if (values.size() != phenoncols) {
             cerr << "ERROR: Wrong number of entries in " << r  << " row.";
             cerr << "Expected " << phenoncols << " fields; parsed " << values.size() << '\n';
@@ -293,7 +296,7 @@ int main(int argc, char* argv[]) {
         cout << "\n";
         for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
             tmpMean[i] /= double(samSize * 1.0);
-            cout << boost::format("%+20s") % tmpMean[i];
+            cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
         if (cmd.center == 2){            
@@ -447,7 +450,7 @@ int main(int argc, char* argv[]) {
         cout << "\n";
         for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
             tmpMean[i] /= double(samSize * 1.0);
-            cout << boost::format("%+20s") % tmpMean[i];
+            cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
         if (cmd.center == 2){            
@@ -601,7 +604,7 @@ int main(int argc, char* argv[]) {
         cout << "\n";
         for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
             tmpMean[i] /= double(samSize * 1.0);
-            cout << boost::format("%+20s") % tmpMean[i];
+            cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
         if (cmd.center == 2){            

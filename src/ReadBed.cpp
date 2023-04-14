@@ -155,7 +155,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
         int itmp = k;
         if (phenomap.find(strtmp) != phenomap.end()) {
             auto tmp_valvec = phenomap[strtmp];
-            if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
+            if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
                 sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
                 new_covdata_orig[k * (numSelCol+1)] = 1.0;
                 for (int c = 0; c < numSelCol; c++) {
@@ -208,6 +208,10 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
 
 
     new_samSize = samSize;
+    if (new_samSize<(numSelCol+1) || new_samSize == (numSelCol+1)){
+        cout << "\nERROR: The sample size should be greater than the number of predictors!" <<endl;
+        exit(1);
+    }
 
     MatrixXd matcovX (samSize,(numSelCol+1));
     for (int i=0; i<samSize; i++){    

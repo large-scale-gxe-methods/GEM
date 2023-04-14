@@ -137,7 +137,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     new_phenodata.resize(samSize);
     vector<double> new_covdata_orig(samSize * (numSelCol+1));
     if ((bgen.SampleIdentifiers == 0) || useSample) {
-
+        cout<<"sampleidentifiy 0000000"<<endl;
         if (bgen.SampleIdentifiers == 0 && !useSample) {
             cerr << "\nERROR: BGEN file does not contain sample identifiers. A .sample file is required. \n"
                 << "       See https://www.well.ox.ac.uk/~gav/qctool/documentation/sample_file_formats.html for .sample file format. \n\n";
@@ -179,7 +179,8 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             int itmp = k;
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
-                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
+                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
+        
                     sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
                     new_covdata_orig[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
@@ -239,7 +240,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
-                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
+                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
                     sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
                     new_covdata_orig[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
@@ -263,7 +264,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     new_phenodata.resize(k);
     new_covdata_orig.resize(k * (numSelCol + 1));
     samSize = k;
-
     if (samSize == 0) {
         cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
         if (bgen.SampleIdentifiers == 1 && !useSample) {
@@ -307,6 +307,11 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 
     new_samSize = samSize;
+    if (new_samSize<(numSelCol+1) || new_samSize == (numSelCol+1)){
+        cout << "\nERROR: The sample size should be greater than the number of predictors!" <<endl;
+        exit(1);
+    }
+
     //the first column of matcovX is Y
     MatrixXd matcovX (samSize,(numSelCol+1));
     for (int i=0; i<samSize; i++){    

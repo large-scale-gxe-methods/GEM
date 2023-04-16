@@ -3,16 +3,14 @@
 ## Contents
 <!--ts-->
    * [License for GEM](#license-for-gem)
-   * [Third-Party Licenses for Source Codes Bundled in GEM](#third-party-licenses-for-source-codes-bundled-in-gem)
-      * [Libdeflate1.18](#libdeflate118)
-      * [Plink2.0](#plink2.0)
-      * [Zstandard1.5.5](#zstandard1.5.5)
-   * [Third-Party Licenses for Binary Linked Libraries](#third-party-licenses-for-binary-linked-libraries)
+   * [Third-Party Licenses for Source Code Bundled in GEM](#third-party-licenses-for-source-code-bundled-in-gem)
+      * [Libdeflate 1.18](#libdeflate1.18)
+      * [Plink 2.0](#plink2.0)
+      * [Zstandard (zstd) 1.5.5](#zstandard1.5.5)
+   * [Third-Party Licenses for Libraries Linked in the Binary Release of GEM](#third-party-licenses-for-libraries-linked-in-the-binary-release-of-gem)
       * [Boost](#boost)
       * [Eigen](#eigen)
-      * [LAPACK](#lapack)
-      * [BLAS](#blas)  
-      * [Intel oneAPI Math Kernel Library](#intel-oneapi-math-kernel-library)  
+      * [Intel oneAPI Math Kernel Library (oneMKL)](#intel-oneapi-math-kernel-library)  
 <!--te-->
 
 ## License for GEM
@@ -35,9 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <br />
 <br />
 
-## Third-Party Licenses for Source Codes Bundled in GEM
+## Third-Party Licenses for Source Code Bundled in GEM
 
-### Libdeflate1.18
+### Libdeflate 1.18
 
 Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
 
@@ -65,7 +63,7 @@ SOFTWARE.
 <br />
 
 
-### Plink2.0
+### Plink 2.0
 
 Plink is LGPLv3+-licensed (<https://github.com/chrchang/plink-ng/blob/master/2.0/>).
 
@@ -747,8 +745,8 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 <\br>
 
-### Zstandard1.5.5
-Zstd is under BSD license (<https://github.com/facebook/zstd/blob/dev/LICENSE>).
+### Zstandard (zstd) 1.5.5
+Zstandard (zstd) is under the 3-Clause BSD License (<https://github.com/facebook/zstd/blob/dev/LICENSE>).
 
 BSD License
 
@@ -782,18 +780,17 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </br>
 
-## Third-Party Licenses for Binary Linked Libraries
-The software programs in the section are not included in the source code release, but they are linked in the binary release.
+## Third-Party Licenses for Libraries Linked in the Binary Release of GEM
+  
+Libraries in the section are not bundled in GEM, but they are linked in the binary release.
 
 ### Boost
-The following is copyright of Boost C++ library.
+The following is the copyright information of Boost C++ library.
 
 Copyright Joe Coder 2004 - 2006.
 Distributed under the Boost Software License, Version 1.0.
 (See accompanying file LICENSE_1_0.txt or copy at
 https://www.boost.org/LICENSE_1_0.txt)
-
-The following is license of Boost C++ library.
 
 Boost Software License - Version 1.0 - August 17th, 2003
 
@@ -813,21 +810,21 @@ a source language processor.
 </br>
 
 ### Eigen
-The following are Eigen copyrights from https://github.com/bolderflight/eigen/tree/main/src. 
+The following is the copyright information of Eigen from https://github.com/bolderflight/eigen/tree/main/src. 
 
-The following copyrights are from file Householder.h
+The following is the copyright information from file Householder.h
 
 Copyright (C) 2010 Benoit Jacob jacob.benoit.1@gmail.com
 
 Copyright (C) 2009 Gael Guennebaud gael.guennebaud@inria.fr
 
-The following copyrights are from file TriangularMatrix.h
+The following is the copyright information from file TriangularMatrix.h
 
 Copyright (C) 2008 Benoit Jacob <jacob.benoit.1@gmail.com>
 
 Copyright (C) 2008-2009 Gael Guennebaud gael.guennebaud@inria.fr
 
-The following copyrights are from file Matrix.h
+The following is the copyright information from file Matrix.h
 
 Copyright (C) 2006-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
 
@@ -1176,69 +1173,9 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-### LAPACK
-LAPACK is under a modified BSD license (https://netlib.org/lapack/LICENSE.txt).
-
-Copyright (c) 1992-2013 The University of Tennessee and The University
-                        of Tennessee Research Foundation.  All rights
-                        reserved.
-
-Copyright (c) 2000-2013 The University of California Berkeley. All
-                        rights reserved.
-
-Copyright (c) 2006-2013 The University of Colorado Denver.  All rights
-                        reserved.
-
-COPYRIGHT
-
-Additional copyrights may follow
-
-HEADER
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-- Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-- Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer listed
-  in this license in the documentation and/or other materials
-  provided with the distribution.
-
-- Neither the name of the copyright holders nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-The copyright holders provide no reassurances that the source code
-provided does not infringe any patent, copyright, or any other
-intellectual property rights of third parties.  The copyright holders
-disclaim any liability to any recipient for claims brought against
-recipient by any third party for infringement of that parties
-intellectual property rights.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-### BLAS
-The following licensing information is from (https://netlib.org/blas/#_licensing).
-The reference BLAS is a freely-available software package. It is available from netlib via anonymous ftp and the World Wide Web. Thus, it can be included in commercial software packages (and has been). We only ask that proper credit be given to the authors.
-Like all software, it is copyrighted. It is not trademarked, but we do ask the following:
-*	If you modify the source for these routines we ask that you change the name of the routine and comment the changes made to the original.
-*	We will gladly answer any questions regarding the software. If a modification is done, however, it is the responsibility of the person who modified the routine to provide support.
-
 ### Intel oneAPI Math Kernel Library
-The following licensing information is from Intel Simplified Software License (Version October 2022)
+The Intel oneAPI Math Kernel Library (oneMKL) is licensed under the Intel Simplified Software License (Version October 2022 or later)
+  
 Use and Redistribution.  You may use and redistribute the software, which is provided in binary form only, (the “Software”), without modification, provided the following conditions are met:
 
 Redistributions must reproduce the above copyright notice and these terms of use in the Software and in the documentation and/or other materials provided with the distribution.

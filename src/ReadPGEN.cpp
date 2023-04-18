@@ -21,7 +21,7 @@ void Pgen::processPgenHeader(string pgenFile)
 
     uintptr_t pgfi_alloc_cacheline_ct;
     char errstr_buf[plink2::kPglErrstrBufBlen];
-    if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
+    if (PgfiInitPhase1(geno_filename, geno_filename, UINT32_MAX, UINT32_MAX, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
         throw std::runtime_error(errstr_buf);
     }
     assert((header_ctrl & 0x30) == 0); // no alt allele counts
@@ -673,7 +673,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
     uintptr_t pgfi_alloc_cacheline_ct;
     char errstr_buf[plink2::kPglErrstrBufBlen];
-    if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
+    if (PgfiInitPhase1(geno_filename, geno_filename, UINT32_MAX, UINT32_MAX, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
         throw std::runtime_error(errstr_buf);
     }
 

@@ -289,7 +289,7 @@ int main(int argc, char* argv[]) {
         vector<double> tmp1(samSize, 1);
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &pgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
-        cout << "\nMean Values for covariate(s): \n";
+        cout << "\nMean raw values for exposure(s) and covariate(s): \n";
         for (int i = 0; i < covSelHeadersName_new.size(); i++) {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
@@ -443,7 +443,7 @@ int main(int argc, char* argv[]) {
         vector<double> tmp1(samSize, 1);
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &bed.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
-        cout << "\nMean Values for covariate(s): \n";
+        cout << "\nMean raw values for exposure(s) and covariate(s): \n";
         for (int i = 0; i < covSelHeadersName_new.size(); i++) {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
@@ -597,7 +597,7 @@ int main(int argc, char* argv[]) {
         vector<double> tmp1(samSize, 1);
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &bgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
-        cout << "\nMean Values for covariate(s): \n";
+        cout << "\nMean raw values for exposure(s) and covariate(s): \n";
         for (int i = 0; i < covSelHeadersName_new.size(); i++) {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }

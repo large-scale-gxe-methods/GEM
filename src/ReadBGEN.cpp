@@ -2,8 +2,8 @@
 #include "declars.h"
 #include "ReadBGEN.h"
 #include "ReadParameters.h"
-#include "../thirdparty/zstd-1.4.5/lib/zstd.h"
-#include "../thirdparty/libdeflate-1.6/libdeflate.h"
+#include "../thirdparty/zstd-1.5.5/lib/zstd.h"
+#include "../thirdparty/libdeflate-1.18/libdeflate.h"
 
 /**************************************
 This function is revised based on the Parse function in BOLT-LMM v2.3 source code
@@ -180,7 +180,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) {
                 auto tmp_valvec = phenomap[strtmp];
                 if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-        
+                    
                     sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
                     new_covdata_orig[k * (numSelCol+1)] = 1.0;
                     for (int c = 0; c < numSelCol; c++) {
@@ -261,9 +261,11 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
 
 
     // After IDMatching, resizing phenodata and covdata, and updating samSize;
+
     new_phenodata.resize(k);
     new_covdata_orig.resize(k * (numSelCol + 1));
     samSize = k;
+
     if (samSize == 0) {
         cerr << "\nERROR: Sample size changed from " << samSize + genoUnMatchID.size() << " to " << samSize << ".\n\n";
         if (bgen.SampleIdentifiers == 1 && !useSample) {

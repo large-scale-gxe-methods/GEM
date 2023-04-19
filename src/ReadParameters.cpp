@@ -523,13 +523,21 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         cout << "\n";
     }
     if (center == 2){
-        cout<<"Centering strategy is: centering INTERACTION covariates only."<<endl;
+
+        cout<<"Centering strategy: centering interaction covariates only."<<endl;
+
         }
+
     if (center == 1){
-        cout<<"Centering strategy is: centering ALL exposures or covariates."<<endl;
+
+        cout<<"Centering strategy: centering ALL exposures and covariates."<<endl;
+
         }
+
     if (center == 0){
-        cout<<"Centering strategy is: No centering exposures or covariates."<<endl;
+
+        cout<<"Centering strategy: centering NO exposures or covariates."<<endl;
+
         }
     cout << "Categorical Threshold: " << cat_threshold << "\n";
     cout << "Minor Allele Frequency Threshold: " << MAF << "\n";

@@ -4,13 +4,13 @@
 <!--ts-->
    * [License for GEM](#license-for-gem)
    * [Third-Party Licenses for Source Code Bundled in GEM](#third-party-licenses-for-source-code-bundled-in-gem)
-      * [Libdeflate 1.18](#libdeflate1.18)
-      * [Plink 2.0](#plink2.0)
-      * [Zstandard (zstd) 1.5.5](#zstandard1.5.5)
+      * [Libdeflate 1.18](#libdeflate-118)
+      * [Plink 2.0](#plink-20)
+      * [Zstandard (zstd) 1.5.5](#zstandard-zstd-155)
    * [Third-Party Licenses for Libraries Linked in the Binary Release of GEM](#third-party-licenses-for-libraries-linked-in-the-binary-release-of-gem)
       * [Boost](#boost)
       * [Eigen](#eigen)
-      * [Intel oneAPI Math Kernel Library (oneMKL)](#intel-oneapi-math-kernel-library)  
+      * [Intel oneAPI Math Kernel Library (oneMKL)](#intel-oneapi-math-kernel-library-onemkl)  
 <!--te-->
 
 ## License for GEM
@@ -69,19 +69,19 @@ Plink is LGPLv3+-licensed (https://www.cog-genomics.org/plink/2.0/dev).
 
 Copyright (C) 2005-2023 Shaun Purcell, Christopher Chang
               
-                   GNU LESSER GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
+GNU LESSER GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
 
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
 
 
   This version of the GNU Lesser General Public License incorporates
 the terms and conditions of version 3 of the GNU General Public
 License, supplemented by the additional permissions listed below.
 
-  0. Additional Definitions.
+ 0. Additional Definitions.
 
   As used herein, "this License" refers to version 3 of the GNU Lesser
 General Public License, and the "GNU GPL" refers to version 3 of the GNU
@@ -110,12 +110,12 @@ object code and/or source code for the Application, including any data
 and utility programs needed for reproducing the Combined Work from the
 Application, but excluding the System Libraries of the Combined Work.
 
-  1. Exception to Section 3 of the GNU GPL.
+ 1. Exception to Section 3 of the GNU GPL.
 
   You may convey a covered work under sections 3 and 4 of this License
 without being bound by section 3 of the GNU GPL.
 
-  2. Conveying Modified Versions.
+ 2. Conveying Modified Versions.
 
   If you modify a copy of the Library, and, in your modifications, a
 facility refers to a function or data to be supplied by an Application
@@ -123,15 +123,15 @@ that uses the facility (other than as an argument passed when the
 facility is invoked), then you may convey a copy of the modified
 version:
 
-   a) under this License, provided that you make a good faith effort to
+  a) under this License, provided that you make a good faith effort to
    ensure that, in the event an Application does not supply the
    function or data, the facility still operates, and performs
    whatever part of its purpose remains meaningful, or
 
-   b) under the GNU GPL, with none of the additional permissions of
+  b) under the GNU GPL, with none of the additional permissions of
    this License applicable to that copy.
 
-  3. Object Code Incorporating Material from Library Header Files.
+ 3. Object Code Incorporating Material from Library Header Files.
 
   The object code form of an Application may incorporate material from
 a header file that is part of the Library.  You may convey such object
@@ -147,7 +147,7 @@ layouts and accessors, or small macros, inline functions and templates
    b) Accompany the object code with a copy of the GNU GPL and this license
    document.
 
-  4. Combined Works.
+ 4. Combined Works.
 
   You may convey a Combined Work under terms of your choice that,
 taken together, effectively do not restrict modification of the
@@ -169,7 +169,7 @@ the following:
 
    d) Do one of the following:
 
-       0) Convey the Minimal Corresponding Source under the terms of this
+   0) Convey the Minimal Corresponding Source under the terms of this
        License, and the Corresponding Application Code in a form
        suitable for, and under terms that permit, the user to
        recombine or relink the Application with a modified version of
@@ -177,7 +177,7 @@ the following:
        manner specified by section 6 of the GNU GPL for conveying
        Corresponding Source.
 
-       1) Use a suitable shared library mechanism for linking with the
+   1) Use a suitable shared library mechanism for linking with the
        Library.  A suitable mechanism is one that (a) uses at run time
        a copy of the Library already present on the user's computer
        system, and (b) will operate properly with a modified version
@@ -196,7 +196,7 @@ the following:
    Information in the manner specified by section 6 of the GNU GPL
    for conveying Corresponding Source.)
 
-  5. Combined Libraries.
+ 5. Combined Libraries.
 
   You may place library facilities that are a work based on the
 Library side by side in a single library together with other library
@@ -204,15 +204,15 @@ facilities that are not Applications and are not covered by this
 License, and convey such a combined library under terms of your
 choice, if you do both of the following:
 
-   a) Accompany the combined library with a copy of the same work based
+  a) Accompany the combined library with a copy of the same work based
    on the Library, uncombined with any other library facilities,
    conveyed under the terms of this License.
 
-   b) Give prominent notice with the combined library that part of it
+  b) Give prominent notice with the combined library that part of it
    is a work based on the Library, and explaining where to find the
    accompanying uncombined form of the same work.
 
-  6. Revised Versions of the GNU Lesser General Public License.
+ 6. Revised Versions of the GNU Lesser General Public License.
 
   The Free Software Foundation may publish revised and/or new versions
 of the GNU Lesser General Public License from time to time. Such new
@@ -356,10 +356,10 @@ Mozilla Public License Version 2.0
 1.5. "Incompatible With Secondary Licenses"
     means
 
-    (a) that the initial Contributor has attached the notice described
+(a) that the initial Contributor has attached the notice described
         in Exhibit B to the Covered Software; or
 
-    (b) that the Covered Software was made available under the terms of
+(b) that the Covered Software was made available under the terms of
         version 1.1 or earlier of the License, but not also under the
         terms of a Secondary License.
 
@@ -381,11 +381,11 @@ Mozilla Public License Version 2.0
 1.10. "Modifications"
     means any of the following:
 
-    (a) any file in Source Code Form that results from an addition to,
+ (a) any file in Source Code Form that results from an addition to,
         deletion from, or modification of the contents of Covered
         Software; or
 
-    (b) any new file in Source Code Form that contains any Covered
+ (b) any new file in Source Code Form that contains any Covered
         Software.
 
 1.11. "Patent Claims" of a Contributor
@@ -702,7 +702,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 
 
-### Intel oneAPI Math Kernel Library
+### Intel oneAPI Math Kernel Library (oneMKL)
 The Intel oneAPI Math Kernel Library (oneMKL) is licensed under the Intel Simplified Software License (Version October 2022 or later)
   
 Use and Redistribution.  You may use and redistribute the software, which is provided in binary form only, (the “Software”), without modification, provided the following conditions are met:

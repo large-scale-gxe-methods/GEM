@@ -352,11 +352,12 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
-[Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1) - April 17, 2023:
-* Added empty string as default missing values
-* Fixed the bug that empty string is at the end of a file
-* Edited the format style for output numbers
-* Added error massage when GEM deminates due to the number of preditors greater than sample size 
+[Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1) - April 20, 2023:
+* Treated empty strings as missing values 
+* Fixed a bug for empty strings at the end of each line
+* Minor changes to messages printed to stdout
+* Error out if the sample size is not greater than the number of predictors (intercept, exposures, interaction covariates, and covariates) in the null model fitting
+
 
 [Version 1.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5) - March 9, 2023:
 

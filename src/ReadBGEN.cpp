@@ -137,7 +137,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     new_phenodata.resize(samSize);
     vector<double> new_covdata_orig(samSize * (numSelCol+1));
     if ((bgen.SampleIdentifiers == 0) || useSample) {
-        cout<<"sampleidentifiy 0000000"<<endl;
         if (bgen.SampleIdentifiers == 0 && !useSample) {
             cerr << "\nERROR: BGEN file does not contain sample identifiers. A .sample file is required. \n"
                 << "       See https://www.well.ox.ac.uk/~gav/qctool/documentation/sample_file_formats.html for .sample file format. \n\n";

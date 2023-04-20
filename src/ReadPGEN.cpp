@@ -21,7 +21,7 @@ void Pgen::processPgenHeader(string pgenFile)
 
     uintptr_t pgfi_alloc_cacheline_ct;
     char errstr_buf[plink2::kPglErrstrBufBlen];
-    if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
+    if (PgfiInitPhase1(geno_filename, geno_filename, UINT32_MAX, UINT32_MAX, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
         throw std::runtime_error(errstr_buf);
     }
     assert((header_ctrl & 0x30) == 0); // no alt allele counts
@@ -196,7 +196,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
          int itmp = k;
          if (phenomap.find(strtmp) != phenomap.end()) {
              auto tmp_valvec = phenomap[strtmp];
-             if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end()) {
+             if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
                  sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
                  new_covdata_orig[k * (numSelCol+1)] = 1.0;
                 for (int c = 0; c < numSelCol; c++) {
@@ -248,7 +248,10 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
      
 
     new_samSize = samSize;
-
+    if (new_samSize<(numSelCol+1) || new_samSize == (numSelCol+1)){
+        cout << "\nERROR: The sample size should be greater than the number of predictors!" <<endl;
+        exit(1);
+    }
     MatrixXd matcovX (samSize,(numSelCol+1));
     for (int i=0; i<samSize; i++){    
         for (int j=0; j<(numSelCol+1); j++) {
@@ -259,14 +262,22 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
     qr.compute(matcovX);
     Eigen::MatrixXd R = qr.matrixQR();
     int colR=R.cols();
-    VectorXd diagR (colR);
-    for (int i=0; i<colR; i++){
+    int rowR=R.rows();
+    int diagR_size;
+    if (colR > rowR){
+        diagR_size = rowR;
+    }
+    else{
+        diagR_size = colR;
+    }
+    VectorXd diagR (diagR_size);
+    for (int i=0; i<diagR_size; i++){
         diagR(i)=R(i,i);
     }
     double sqrtEps =sqrt(std::numeric_limits<double>::epsilon());
     double maxdiag = *std::max_element( diagR.begin(), diagR.end() ) ;
     double colinear_cut = abs(maxdiag * sqrtEps);
-    for (int i=0; i<colR; i++){
+    for (int i=0; i<diagR_size; i++){
         if (abs(diagR(i)) < colinear_cut){
             excludeCol.push_back(i);
         }
@@ -662,7 +673,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
     uintptr_t pgfi_alloc_cacheline_ct;
     char errstr_buf[plink2::kPglErrstrBufBlen];
-    if (PgfiInitPhase1(geno_filename, UINT32_MAX, UINT32_MAX, 0, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
+    if (PgfiInitPhase1(geno_filename, geno_filename, UINT32_MAX, UINT32_MAX, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) {
         throw std::runtime_error(errstr_buf);
     }
 

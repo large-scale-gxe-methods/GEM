@@ -4,7 +4,7 @@
 
 
 #include "declars.h"
-#define VERSION "1.5"
+#define VERSION "1.5.1"
 
 void print_help();
 
@@ -475,6 +475,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     // Print parameter info
     cout << "The Phenotype File is: " << phenoFile << "\n";
+    cout << "The Phenotype is: " << phenoName << "\n";
     cout << "The Genotype File is: ";
     if (useBgenFile) {
         cout << bgenFile << "\n";
@@ -521,7 +522,23 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
         cout << "\n";
     }
+    if (center == 2){
 
+        cout<<"Centering strategy: centering interaction covariates only."<<endl;
+
+        }
+
+    if (center == 1){
+
+        cout<<"Centering strategy: centering ALL exposures and covariates."<<endl;
+
+        }
+
+    if (center == 0){
+
+        cout<<"Centering strategy: centering NO exposures or covariates."<<endl;
+
+        }
     cout << "Categorical Threshold: " << cat_threshold << "\n";
     cout << "Minor Allele Frequency Threshold: " << MAF << "\n";
     cout << "Number of SNPS in batch: " << stream_snps << "\n";

@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.5   
+Current version: 1.5.1   
 
 <br />
 Additional documentation:  
@@ -26,13 +26,14 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.4.5/GEM_1.4.5_static.
-* Change the permission: chmod a+x GEM_1.4.5_static
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.1/GEM_1.5.1_Intel.
+* Change the permission: chmod a+x GEM_1.5.1_Intel
 
 Option 2: Build GEM Library Dependencies  
-   * C++11 compiler 
-   * BLAS/LAPACK. For Intel processors, we recommend that GEM is compiled with an optimized math routine library such as the Math Kernal Library for top performance.
-   * Boost C++ libraries. GEM links the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
+   * C++11 compiler or later 
+   * BLAS/LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel oneAPI Math Kernal Library to replace BLAS/LAPACK for optimal performance.
+   * Boost C++ libraries. GEM links to the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
+   * Eigen Library. GEM links to the header files of Eigen. 
 
 <br />
 
@@ -50,21 +51,20 @@ To install GEM, run the following lines of code:
 
 ## Dependencies
 C/C++ Compiler
- * A compiler with C++11 support is required.
+ * A compiler with C++11 (or later) support is required.
  
 LAPACK and BLAS
- * The LAPACK(Linear Algebra PACKage) and BLAS(Basic Linear Algebra Subprograms) libraries are used to optimize matrix operations in GEM.
+ * The LAPACK (Linear Algebra PACKage) and BLAS (Basic Linear Algebra Subprograms) libraries are used for matrix operations in GEM.
 
 Intel processors:
- * We recommend linking LAPACK/BLAS through the Math Kernal Library (MKL) for a greater performance boost. This can be done by replacing -llapack and -lblas in the makefile with
--lmkl_gf_lp64 -lmkl_sequential -lmkl_core and re-compiling the software.
-  * It is important to compile with -lmkl_sequential since GEM already does multithreading across SNPs.
+ * We recommend linking GEM to the Intel oneAPI Math Kernal Library (oneMKL), instead of classical BLAS/LAPACK, for a greater performance boost. This can be done by replacing -llapack and -lblas in the makefile with -lmkl_gf_lp64 -lmkl_sequential -lmkl_core before compiling.
+  * It is important to compile with -lmkl_sequential since GEM already does multi-threading across SNPs.
 
 AMD processors:
  * For AMD processors, OpenBLAS (-lopenblas) may be a better alternative.
  
 Boost C++ Libraries
- * The Boost C++ libraries are used for command-line, file management and multithreading purposes.
+ * The Boost C++ libraries are used for command-line, file management and multi-threading purposes.
  * The following Boost libraries are required :
       1. libboost_system
       2. libboost_program_options
@@ -352,7 +352,15 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1) - April 20, 2023:
+* Treated empty strings as missing values 
+* Fixed a bug for empty strings at the end of each line
+* Minor changes to messages printed to stdout
+* Error out if the sample size is not greater than the number of predictors (intercept, exposures, interaction covariates, and covariates) in the null model fitting
+
+
 [Version 1.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5) - March 9, 2023:
+
 * Changed the default of the --center flag to 2 to center all the interaction covariates only
 
 [Version 1.4.5](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.5) - November 11, 2022:
@@ -428,7 +436,8 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 
 ## References
 If you use GEM in your analysis, please cite
-* Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed PMID: [**34695175**](https://pubmed.ncbi.nlm.nih.gov/34695175/). PMCID: [**PMC8545347**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/). DOI: [**10.1093/bioinformatics/btab223**](https://academic.oup.com/bioinformatics/article/37/20/3514/6284130?login=false). 
+* Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed PMID: [**34695175**](https://www.ncbi.nlm.nih.gov/pubmed/34695175). PMCID: [**PMC8545347**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/). DOI: [**10.1093/bioinformatics/btab223**](https://doi.org/10.1093/bioinformatics/btab223). 
+ 
 
 <br />
 <br />
@@ -452,3 +461,16 @@ If you use GEM in your analysis, please cite
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ```
+ The GEM package is distributed under GPL (>= 3). It includes source code from open source third-party software:
+
+* libdeflate: MIT
+* Plink: LGPLv3+
+* Zstandard (zstd): BSD_3_clause | GPL-2
+
+ The binary release of GEM also links to third-party libraries:
+ 
+* Boost: Boost Software License, Version 1.0
+* Eigen: Mozilla Public License, Version 2.0
+* Intel oneAPI Math Kernel Library (oneMKL): Intel Simplified Software License (Version October 2022 or later)
+
+ Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE.md">here</a>.

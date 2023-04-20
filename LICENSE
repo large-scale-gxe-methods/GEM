@@ -1,20 +1,19 @@
-# GEM
+*****************************************************************************
+* Contents                                                                  *    
+*   License for GEM                                                         *
+*   Third-Party Licenses for Source Code Bundled in GEM                     * 
+*      Libdeflate 1.18                                                      * 
+*      Plink 2.0                                                            *
+*      Zstandard (zstd) 1.5.5                                               *
+*   Third-Party Licenses for Libraries Linked in the Binary Release of GEM  *
+*      Boost                                                                *
+*      Eigen                                                                *
+*      Intel oneAPI Math Kernel Library (oneMKL)                            *
+*****************************************************************************
 
-## Contents
-<!--ts-->
-   * [License for GEM](#license-for-gem)
-   * [Third-Party Licenses for Source Code Bundled in GEM](#third-party-licenses-for-source-code-bundled-in-gem)
-      * [Libdeflate 1.18](#libdeflate-118)
-      * [Plink 2.0](#plink-20)
-      * [Zstandard (zstd) 1.5.5](#zstandard-zstd-155)
-   * [Third-Party Licenses for Libraries Linked in the Binary Release of GEM](#third-party-licenses-for-libraries-linked-in-the-binary-release-of-gem)
-      * [Boost](#boost)
-      * [Eigen](#eigen)
-      * [Intel oneAPI Math Kernel Library (oneMKL)](#intel-oneapi-math-kernel-library-onemkl)  
-<!--te-->
-
-## License for GEM
-
+*******************
+*License for GEM  *
+*******************
 GEM : Gene-Environment interaction analysis for Millions of samples
 Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
 
@@ -30,14 +29,18 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-<br />
-<br />
 
-## Third-Party Licenses for Source Code Bundled in GEM
 
-### Libdeflate 1.18
+*******************************************************
+*Third-Party Licenses for Source Code Bundled in GEM  *
+*******************************************************
 
-Libdeflate is MIT-licensed (<https://github.com/ebiggers/libdeflate/blob/master/COPYING>).
+*****************************************************************
+Libdeflate 1.18
+
+Libdeflate is MIT-licensed 
+(<https://github.com/ebiggers/libdeflate/blob/master/COPYING>)
+*****************************************************************
 
 Copyright 2016 Eric Biggers
 
@@ -60,28 +63,30 @@ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
 ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-<br />
 
 
-### Plink 2.0
+**************************************************************
+Plink 2.0
 
-Plink is LGPLv3+-licensed (https://www.cog-genomics.org/plink/2.0/dev).
+Plink is LGPLv3+-licensed 
+(https://www.cog-genomics.org/plink/2.0/dev)
 
 Copyright (C) 2005-2023 Shaun Purcell, Christopher Chang
-              
-GNU LESSER GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007
+**************************************************************
 
-Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
+                   GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
 
 
   This version of the GNU Lesser General Public License incorporates
 the terms and conditions of version 3 of the GNU General Public
 License, supplemented by the additional permissions listed below.
 
- 0. Additional Definitions.
+  0. Additional Definitions.
 
   As used herein, "this License" refers to version 3 of the GNU Lesser
 General Public License, and the "GNU GPL" refers to version 3 of the GNU
@@ -110,12 +115,12 @@ object code and/or source code for the Application, including any data
 and utility programs needed for reproducing the Combined Work from the
 Application, but excluding the System Libraries of the Combined Work.
 
- 1. Exception to Section 3 of the GNU GPL.
+  1. Exception to Section 3 of the GNU GPL.
 
   You may convey a covered work under sections 3 and 4 of this License
 without being bound by section 3 of the GNU GPL.
 
- 2. Conveying Modified Versions.
+  2. Conveying Modified Versions.
 
   If you modify a copy of the Library, and, in your modifications, a
 facility refers to a function or data to be supplied by an Application
@@ -123,15 +128,15 @@ that uses the facility (other than as an argument passed when the
 facility is invoked), then you may convey a copy of the modified
 version:
 
-  a) under this License, provided that you make a good faith effort to
+   a) under this License, provided that you make a good faith effort to
    ensure that, in the event an Application does not supply the
    function or data, the facility still operates, and performs
    whatever part of its purpose remains meaningful, or
 
-  b) under the GNU GPL, with none of the additional permissions of
+   b) under the GNU GPL, with none of the additional permissions of
    this License applicable to that copy.
 
- 3. Object Code Incorporating Material from Library Header Files.
+  3. Object Code Incorporating Material from Library Header Files.
 
   The object code form of an Application may incorporate material from
 a header file that is part of the Library.  You may convey such object
@@ -147,7 +152,7 @@ layouts and accessors, or small macros, inline functions and templates
    b) Accompany the object code with a copy of the GNU GPL and this license
    document.
 
- 4. Combined Works.
+  4. Combined Works.
 
   You may convey a Combined Work under terms of your choice that,
 taken together, effectively do not restrict modification of the
@@ -169,7 +174,7 @@ the following:
 
    d) Do one of the following:
 
-   0) Convey the Minimal Corresponding Source under the terms of this
+       0) Convey the Minimal Corresponding Source under the terms of this
        License, and the Corresponding Application Code in a form
        suitable for, and under terms that permit, the user to
        recombine or relink the Application with a modified version of
@@ -177,7 +182,7 @@ the following:
        manner specified by section 6 of the GNU GPL for conveying
        Corresponding Source.
 
-   1) Use a suitable shared library mechanism for linking with the
+       1) Use a suitable shared library mechanism for linking with the
        Library.  A suitable mechanism is one that (a) uses at run time
        a copy of the Library already present on the user's computer
        system, and (b) will operate properly with a modified version
@@ -196,7 +201,7 @@ the following:
    Information in the manner specified by section 6 of the GNU GPL
    for conveying Corresponding Source.)
 
- 5. Combined Libraries.
+  5. Combined Libraries.
 
   You may place library facilities that are a work based on the
 Library side by side in a single library together with other library
@@ -204,15 +209,15 @@ facilities that are not Applications and are not covered by this
 License, and convey such a combined library under terms of your
 choice, if you do both of the following:
 
-  a) Accompany the combined library with a copy of the same work based
+   a) Accompany the combined library with a copy of the same work based
    on the Library, uncombined with any other library facilities,
    conveyed under the terms of this License.
 
-  b) Give prominent notice with the combined library that part of it
+   b) Give prominent notice with the combined library that part of it
    is a work based on the Library, and explaining where to find the
    accompanying uncombined form of the same work.
 
- 6. Revised Versions of the GNU Lesser General Public License.
+  6. Revised Versions of the GNU Lesser General Public License.
 
   The Free Software Foundation may publish revised and/or new versions
 of the GNU Lesser General Public License from time to time. Such new
@@ -234,10 +239,14 @@ whether future versions of the GNU Lesser General Public License shall
 apply, that proxy's public statement of acceptance of any version is
 permanent authorization for you to choose that version for the
 Library.
-<\br>
 
-### Zstandard (zstd) 1.5.5
-Zstandard (zstd) is under the 3-Clause BSD License (<https://github.com/facebook/zstd/blob/dev/LICENSE>).
+
+**************************************************************
+Zstandard (zstd) 1.5.5
+
+Zstandard (zstd) is under the 3-Clause BSD License 
+(<https://github.com/facebook/zstd/blob/dev/LICENSE>)
+**************************************************************
 
 BSD License
 
@@ -269,19 +278,22 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-</br>
 
-## Third-Party Licenses for Libraries Linked in the Binary Release of GEM
-  
-Libraries in the section are not bundled in GEM, but they are linked in the binary release.
 
-### Boost
-The following is the copyright information of Boost C++ library.
+************************************************************************************************
+*Third-Party Licenses for Libraries Linked in the Binary Release of GEM                        *
+*                                                                                              *  
+*Libraries in the section are not bundled in GEM, but they are linked in the binary release.   * 
+************************************************************************************************
+
+***********************************************************************
+Boost
 
 Copyright Joe Coder 2004 - 2006.
 Distributed under the Boost Software License, Version 1.0.
 (See accompanying file LICENSE_1_0.txt or copy at
 https://www.boost.org/LICENSE_1_0.txt)
+***********************************************************************
 
 Boost Software License - Version 1.0 - August 17th, 2003
 
@@ -306,10 +318,12 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-</br>
 
-### Eigen
-The following is the copyright information of Eigen from https://github.com/bolderflight/eigen/tree/main/src. 
+
+****************************************************************************
+Eigen
+The following is the copyright information of Eigen from 
+https://github.com/bolderflight/eigen/tree/main/src. 
 
 The following is the copyright information from file Householder.h
 
@@ -328,13 +342,13 @@ The following is the copyright information from file Matrix.h
 Copyright (C) 2006-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
 
 Copyright (C) 2008-2009 Gael Guennebaud <gael.guennebaud@inria.fr>
-
-
+****************************************************************************
 
 Mozilla Public License Version 2.0
-
+==================================
 
 1. Definitions
+--------------
 
 1.1. "Contributor"
     means each individual or legal entity that creates, contributes to
@@ -356,10 +370,10 @@ Mozilla Public License Version 2.0
 1.5. "Incompatible With Secondary Licenses"
     means
 
-(a) that the initial Contributor has attached the notice described
+    (a) that the initial Contributor has attached the notice described
         in Exhibit B to the Covered Software; or
 
-(b) that the Covered Software was made available under the terms of
+    (b) that the Covered Software was made available under the terms of
         version 1.1 or earlier of the License, but not also under the
         terms of a Secondary License.
 
@@ -381,11 +395,11 @@ Mozilla Public License Version 2.0
 1.10. "Modifications"
     means any of the following:
 
- (a) any file in Source Code Form that results from an addition to,
+    (a) any file in Source Code Form that results from an addition to,
         deletion from, or modification of the contents of Covered
         Software; or
 
- (b) any new file in Source Code Form that contains any Covered
+    (b) any new file in Source Code Form that contains any Covered
         Software.
 
 1.11. "Patent Claims" of a Contributor
@@ -416,6 +430,7 @@ Mozilla Public License Version 2.0
     ownership of such entity.
 
 2. License Grants and Conditions
+--------------------------------
 
 2.1. Grants
 
@@ -486,6 +501,7 @@ Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted
 in Section 2.1.
 
 3. Responsibilities
+-------------------
 
 3.1. Distribution of Source Form
 
@@ -547,6 +563,7 @@ disclaimers of warranty and limitations of liability specific to any
 jurisdiction.
 
 4. Inability to Comply Due to Statute or Regulation
+---------------------------------------------------
 
 If it is impossible for You to comply with any of the terms of this
 License with respect to some or all of the Covered Software due to
@@ -559,6 +576,7 @@ or regulation, such description must be sufficiently detailed for a
 recipient of ordinary skill to be able to understand it.
 
 5. Termination
+--------------
 
 5.1. The rights granted under this License will terminate automatically
 if You fail to comply with any of its terms. However, if You become
@@ -586,51 +604,50 @@ end user license agreements (excluding distributors and resellers) which
 have been validly granted by You or Your distributors under this License
 prior to termination shall survive termination.
 
+************************************************************************
+*                                                                      *
+*  6. Disclaimer of Warranty                                           *
+*  -------------------------                                           *
+*                                                                      *
+*  Covered Software is provided under this License on an "as is"       *
+*  basis, without warranty of any kind, either expressed, implied, or  *
+*  statutory, including, without limitation, warranties that the       *
+*  Covered Software is free of defects, merchantable, fit for a        *
+*  particular purpose or non-infringing. The entire risk as to the     *
+*  quality and performance of the Covered Software is with You.        *
+*  Should any Covered Software prove defective in any respect, You     *
+*  (not any Contributor) assume the cost of any necessary servicing,   *
+*  repair, or correction. This disclaimer of warranty constitutes an   *
+*  essential part of this License. No use of any Covered Software is   *
+*  authorized under this License except under this disclaimer.         *
+*                                                                      *
+************************************************************************
 
+************************************************************************
+*                                                                      *
+*  7. Limitation of Liability                                          *
+*  --------------------------                                          *
+*                                                                      *
+*  Under no circumstances and under no legal theory, whether tort      *
+*  (including negligence), contract, or otherwise, shall any           *
+*  Contributor, or anyone who distributes Covered Software as          *
+*  permitted above, be liable to You for any direct, indirect,         *
+*  special, incidental, or consequential damages of any character      *
+*  including, without limitation, damages for lost profits, loss of    *
+*  goodwill, work stoppage, computer failure or malfunction, or any    *
+*  and all other commercial damages or losses, even if such party      *
+*  shall have been informed of the possibility of such damages. This   *
+*  limitation of liability shall not apply to liability for death or   *
+*  personal injury resulting from such party's negligence to the       *
+*  extent applicable law prohibits such limitation. Some               *
+*  jurisdictions do not allow the exclusion or limitation of           *
+*  incidental or consequential damages, so this exclusion and          *
+*  limitation may not apply to You.                                    *
+*                                                                      *
+************************************************************************
 
-<p>*************************************************************************
-<p>*                             &nbsp;&nbsp;&nbsp;*
-<p>*&emsp;6. Disclaimer of Warranty                 &nbsp;&nbsp;&nbsp;*
-<p>*                             &nbsp;&nbsp;&nbsp;*
-<p>*&emsp;Covered Software is provided under this License on an "as is"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;basis, without warranty of any kind, either expressed, implied, or&nbsp;&nbsp;*
-<p>*&emsp;statutory, including, without limitation, warranties that the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;Covered Software is free of defects, merchantable, fit for a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;particular purpose or non-infringing. The entire risk as to the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;quality and performance of the Covered Software is with You.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;Should any Covered Software prove defective in any respect, You&nbsp;*
-<p>*&emsp;(not any Contributor) assume the cost of any necessary servicing,&nbsp;*
-<p>*&emsp;repair, or correction. This disclaimer of warranty constitutes an&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;essential part of this License. No use of any Covered Software is&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;authorized under this License except under this disclaimer.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*                             &nbsp;&nbsp;&nbsp;*</p>
-<p>*************************************************************************
-
-<p>*************************************************************************
-<p>*                             &nbsp;&nbsp;&nbsp;*
-<p>*&emsp;7. Limitation of Liability                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*                             &nbsp;&nbsp;&nbsp;*
-<p>*&emsp;Under no circumstances and under no legal theory, whether tort&nbsp;&nbsp;*
-<p>*&emsp;(including negligence), contract, or otherwise, shall any&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;Contributor, or anyone who distributes Covered Software as&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;permitted above, be liable to You for any direct, indirect,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;special, incidental, or consequential damages of any character&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;including, without limitation, damages for lost profits, loss of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;goodwill, work stoppage, computer failure or malfunction, or any&nbsp;*
-<p>*&emsp;and all other commercial damages or losses, even if such party&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;shall have been informed of the possibility of such damages. This&nbsp;*
-<p>*&emsp;limitation of liability shall not apply to liability for death or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;personal injury resulting from such party's negligence to the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;extent applicable law prohibits such limitation. Some&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;jurisdictions do not allow the exclusion or limitation of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;incidental or consequential damages, so this exclusion and&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
-<p>*&emsp;limitation may not apply to You.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;*
-<p>*                             &nbsp;&nbsp;&nbsp;*
-<p>*************************************************************************
-
- 
 8. Litigation
-
+-------------
 
 Any litigation relating to this License may be brought only in the
 courts of a jurisdiction where the defendant maintains its principal
@@ -640,7 +657,7 @@ Nothing in this Section shall prevent a party's ability to bring
 cross-claims or counter-claims.
 
 9. Miscellaneous
-
+----------------
 
 This License represents the complete agreement concerning the subject
 matter hereof. If any provision of this License is held to be
@@ -650,7 +667,7 @@ that the language of a contract shall be construed against the drafter
 shall not be used to construe this License against a Contributor.
 
 10. Versions of the License
-
+---------------------------
 
 10.1. New Versions
 
@@ -682,7 +699,7 @@ Secondary Licenses under the terms of this version of the License, the
 notice described in Exhibit B of this License must be attached.
 
 Exhibit A - Source Code Form License Notice
-
+-------------------------------------------
 
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -696,45 +713,52 @@ for such a notice.
 You may add additional accurate notices of copyright ownership.
 
 Exhibit B - "Incompatible With Secondary Licenses" Notice
-
+---------------------------------------------------------
 
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
 
 
-### Intel oneAPI Math Kernel Library (oneMKL)
-The Intel oneAPI Math Kernel Library (oneMKL) is licensed under the Intel Simplified Software License (Version October 2022 or later)
-  
-Use and Redistribution.  You may use and redistribute the software, which is provided in binary form only, (the “Software”), without modification, provided the following conditions are met:
+*****************************************************************************
+Intel oneAPI Math Kernel Library (oneMKL)
+The Intel oneAPI Math Kernel Library (oneMKL) is licensed under 
+the Intel Simplified Software License (Version October 2022 or later)
+*****************************************************************************
+ 
+Intel Simplified Software License (Version October 2022)
 
-Redistributions must reproduce the above copyright notice and these terms of use in the Software and in the documentation and/or other materials provided with the distribution.
-Neither the name of Intel nor the names of its suppliers may be used to endorse or promote products derived from this Software without specific prior written permission.
-No reverse engineering, decompilation, or disassembly of the Software is permitted, nor any modification or alteration of the Software or its operation at any time, including during execution.
-No other licenses.  Except as provided in the preceding section, Intel grants no licenses or other rights by implication, estoppel or otherwise to, patent, copyright, trademark, trade name, service mark or other intellectual property licenses or rights of Intel.
+PIN: Copyright (C) Intel Corporation
 
-Third party software. The Software may contain Third Party Software. "Third Party Software" is open
-source software, third party software, or other Intel software that may be identified in the Software
-itself or in the files (if any) listed in the "third-party-software.txt" or similarly named text file included
-with the Software. Third Party Software, even if included with the distribution of the Software, may be
-governed by separate license terms, including without limitation, open source software license terms,
-third party software license terms, and other Intel software license terms. Those separate license terms
-solely govern your use of the Third Party Software, and nothing in this license limits any rights under, or
-grants rights that supersede, the terms of the applicable license terms.
+Use and Redistribution. You may use and redistribute the software, which is provided in binary form only, (the "Software"), without modification, provided the following conditions are met:
 
-Third party software.  “Third Party Software” means the files (if any) listed in the “third-party-software.txt” or other similarly-named text file that may be included with the Software. Third Party Software, even if included with the distribution of the Software, may be governed by separate license terms, including without limitation, third party license terms, open source software notices and terms, and/or other Intel software license terms. These separate license terms solely govern Your use of the Third Party Software.
+* 	Redistributions must reproduce the above copyright notice and these terms of use in the Software and in the documentation and/or other materials provided with the distribution.
+* 	Neither the name of Intel nor the names of its suppliers may be used to endorse or promote products derived from this Software without specific prior written permission.
+* 	No reverse engineering, decompilation, or disassembly of the Software is permitted, nor any modification or alteration of the Software or its operation at any time, including during execution.
 
-DISCLAIMER.  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT ARE DISCLAIMED. THIS SOFTWARE IS NOT INTENDED FOR USE IN SYSTEMS OR APPLICATIONS WHERE FAILURE OF THE SOFTWARE MAY CAUSE PERSONAL INJURY OR DEATH AND YOU AGREE THAT YOU ARE FULLY RESPONSIBLE FOR ANY CLAIMS, COSTS, DAMAGES, EXPENSES, AND ATTORNEYS’ FEES ARISING OUT OF ANY SUCH USE, EVEN IF ANY CLAIM ALLEGES THAT INTEL WAS NEGLIGENT REGARDING THE DESIGN OR MANUFACTURE OF THE SOFTWARE.
+No other licenses. Except as provided in the preceding section, Intel grants no licenses or other rights by implication, estoppel or otherwise to, patent, copyright, trademark, trade name, service mark 
+or other intellectual property licenses or rights of Intel.
 
-LIMITATION OF LIABILITY. IN NO EVENT WILL INTEL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Third party software.  "Third Party Software" means the files (if any) listed in the "third-party-software.txt" or other similarly-named text file that may be included with the Software. 
+Third Party Software, even if included with the distribution of the Software, may be governed by separate license terms, including without limitation, third party license terms, open source software notices and terms,
+and/or other Intel software license terms. These separate license terms solely govern Your use of the Third Party Software.
+
+DISCLAIMER. THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT ARE DISCLAIMED. 
+THIS SOFTWARE IS NOT INTENDED FOR USE IN SYSTEMS OR APPLICATIONS WHERE FAILURE OF THE SOFTWARE MAY CAUSE PERSONAL INJURY OR DEATH AND YOU AGREE THAT YOU ARE FULLY RESPONSIBLE FOR ANY CLAIMS, COSTS, DAMAGES, EXPENSES, AND ATTORNEYS FEES 
+ARISING OUT OF ANY SUCH USE, EVEN IF ANY CLAIM ALLEGES THAT INTEL WAS NEGLIGENT REGARDING THE DESIGN OR MANUFACTURE OF THE SOFTWARE.
+
+LIMITATION OF LIABILITY. IN NO EVENT WILL INTEL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 No support.  Intel may make changes to the Software, at any time without notice, and is not obligated to support, update or provide training for the Software. 
 
 Termination. Your right to use the Software is terminated in the event of your breach of this license.
 
-Feedback.  Should you provide Intel with comments, modifications, corrections, enhancements or other input (“Feedback”) related to the Software, Intel will be free to use, disclose, reproduce, license or otherwise distribute or exploit the Feedback in its sole discretion without any obligations or restrictions of any kind, including without limitation, intellectual property rights or licensing obligations.
+Feedback.  Should you provide Intel with comments, modifications, corrections, enhancements or other input ("Feedback") related to the Software, Intel will be free to use, disclose, reproduce, license or otherwise distribute or exploit the Feedback in 
+its sole discretion without any obligations or restrictions of any kind, including without limitation, intellectual property rights or licensing obligations.
 
 Compliance with laws.  You agree to comply with all relevant laws and regulations governing your use, transfer, import or export (or prohibition thereof) of the Software.
 
-Governing law.  All disputes will be governed by the laws of the United States of America and the State of Delaware without reference to conflict of law principles and subject to the exclusive jurisdiction of the state or federal courts sitting in the State of Delaware, and each party agrees that it submits to the personal jurisdiction and venue of those courts and waives any objections. THE UNITED NATIONS CONVENTION ON CONTRACTS FOR THE INTERNATIONAL SALE OF GOODS (1980) IS SPECIFICALLY EXCLUDED AND WILL NOT APPLY TO THE SOFTWARE.
-
+Governing law.  All disputes will be governed by the laws of the United States of America and the State of Delaware without reference to conflict of law principles and subject to the exclusive jurisdiction 
+of the state or federal courts sitting in the State of Delaware, and each party agrees that it submits to the personal jurisdiction and venue of those courts and waives any objections. 
+THE UNITED NATIONS CONVENTION ON CONTRACTS FOR THE INTERNATIONAL SALE OF GOODS (1980) IS SPECIFICALLY EXCLUDED AND WILL NOT APPLY TO THE SOFTWARE.

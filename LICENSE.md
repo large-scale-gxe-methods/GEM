@@ -586,47 +586,48 @@ end user license agreements (excluding distributors and resellers) which
 have been validly granted by You or Your distributors under this License
 prior to termination shall survive termination.
 
- ```
-************************************************************************
-*                                                                      *
-*  6. Disclaimer of Warranty                                           *
-*                                                                      *
-*  Covered Software is provided under this License on an "as is"       *
-*  basis, without warranty of any kind, either expressed, implied, or  *
-*  statutory, including, without limitation, warranties that the       *
-*  Covered Software is free of defects, merchantable, fit for a        *
-*  particular purpose or non-infringing. The entire risk as to the     *
-*  quality and performance of the Covered Software is with You.        *
-*  Should any Covered Software prove defective in any respect, You     *
-*  (not any Contributor) assume the cost of any necessary servicing,   *
-*  repair, or correction. This disclaimer of warranty constitutes an   *
-*  essential part of this License. No use of any Covered Software is   *
-*  authorized under this License except under this disclaimer.         *
-*                                                                      *
-************************************************************************
 
-************************************************************************
-*                                                                      *
-*  7. Limitation of Liability                                          *
-*                                                                      *
-*  Under no circumstances and under no legal theory, whether tort      *
-*  (including negligence), contract, or otherwise, shall any           *
-*  Contributor, or anyone who distributes Covered Software as          *
-*  permitted above, be liable to You for any direct, indirect,         *
-*  special, incidental, or consequential damages of any character      *
-*  including, without limitation, damages for lost profits, loss of    *
-*  goodwill, work stoppage, computer failure or malfunction, or any    *
-*  and all other commercial damages or losses, even if such party      *
-*  shall have been informed of the possibility of such damages. This   *
-*  limitation of liability shall not apply to liability for death or   *
-*  personal injury resulting from such party's negligence to the       *
-*  extent applicable law prohibits such limitation. Some               *
-*  jurisdictions do not allow the exclusion or limitation of           *
-*  incidental or consequential damages, so this exclusion and          *
-*  limitation may not apply to You.                                    *
-*                                                                      *
-************************************************************************
- ```
+
+<p>*************************************************************************
+<p>*                             &nbsp;&nbsp;&nbsp;*
+<p>*&emsp;6. Disclaimer of Warranty                 &nbsp;&nbsp;&nbsp;*
+<p>*                             &nbsp;&nbsp;&nbsp;*
+<p>*&emsp;Covered Software is provided under this License on an "as is"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;basis, without warranty of any kind, either expressed, implied, or&nbsp;&nbsp;*
+<p>*&emsp;statutory, including, without limitation, warranties that the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;Covered Software is free of defects, merchantable, fit for a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;particular purpose or non-infringing. The entire risk as to the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;quality and performance of the Covered Software is with You.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;Should any Covered Software prove defective in any respect, You&nbsp;*
+<p>*&emsp;(not any Contributor) assume the cost of any necessary servicing,&nbsp;*
+<p>*&emsp;repair, or correction. This disclaimer of warranty constitutes an&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;essential part of this License. No use of any Covered Software is&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;authorized under this License except under this disclaimer.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*                             &nbsp;&nbsp;&nbsp;*</p>
+<p>*************************************************************************
+
+<p>*************************************************************************
+<p>*                             &nbsp;&nbsp;&nbsp;*
+<p>*&emsp;7. Limitation of Liability                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*                             &nbsp;&nbsp;&nbsp;*
+<p>*&emsp;Under no circumstances and under no legal theory, whether tort&nbsp;&nbsp;*
+<p>*&emsp;(including negligence), contract, or otherwise, shall any&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;Contributor, or anyone who distributes Covered Software as&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;permitted above, be liable to You for any direct, indirect,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;special, incidental, or consequential damages of any character&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;including, without limitation, damages for lost profits, loss of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;goodwill, work stoppage, computer failure or malfunction, or any&nbsp;*
+<p>*&emsp;and all other commercial damages or losses, even if such party&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;shall have been informed of the possibility of such damages. This&nbsp;*
+<p>*&emsp;limitation of liability shall not apply to liability for death or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;personal injury resulting from such party's negligence to the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;extent applicable law prohibits such limitation. Some&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;jurisdictions do not allow the exclusion or limitation of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;incidental or consequential damages, so this exclusion and&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*
+<p>*&emsp;limitation may not apply to You.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;*
+<p>*                             &nbsp;&nbsp;&nbsp;*
+<p>*************************************************************************
+
  
 8. Litigation
 

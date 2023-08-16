@@ -457,6 +457,13 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     int printStart = 1; int printEnd = expSq1;
     bool printMeta = false;
     bool printFull = false;
+    if (outStyle.compare("meta") == 0) {
+            printMeta = true;
+    }
+    if (outStyle.compare("full") == 0) {
+            printFull = true;
+    }
+
     if (expSq == 0) {
         printStart = 0; printEnd = 0;
     }
@@ -920,6 +927,37 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                     delete[] invA;
                 }
 
+                if (expSq == 0){
+                    // ZGStR
+                    double* subZGStR = new double[Sq1];
+                    subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
+
+                    // ZGSR2tZGS
+                    double* subZGSR2tZGS = new double[Sq1 * Sq1];
+                    subMatrix(ZGSR2tZGS, subZGSR2tZGS, Sq1, Sq1, ZGS_col, Sq1, tmp1);
+
+                    // inv(ZGStZGS)
+                    invZGStZGS[i] = new double[Sq1 * Sq1];
+                    subMatrix(ZGStZGS, invZGStZGS[i], Sq1, Sq1, ZGS_col, Sq1, tmp1);   
+                    matInv(invZGStZGS[i], Sq1);
+
+                    betaAll[i]= new double[Sq1];
+                    matvecprod(invZGStZGS[i], subZGStR, betaAll[i], Sq1, Sq1);
+                    double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
+                    matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
+                    VarBetaAll[i] = new double[Sq1 * Sq1];
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+
+                    if (printMeta || printFull) {
+
+                        mbVarbetaM[i] = sigma2 / ZGStZGS[tmp1];                       
+                        //calculating model-based Marginal P values
+                        double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
+                        mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));                        
+                    }
+                    
+                }
+
             }
         } // end of if robust == 1
 
@@ -980,8 +1018,13 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                 oss << "\n";
             }
             else {
-                oss << PvalM[i] << "\n";
+                oss << PvalM[i] ;
+                if ((robust == 1) && (printMeta || printFull)) {
+                    oss << "\t" << mbPvalM[i] ;
+                }
+                oss << "\n";
             }
+                        
             AF[i] = 0.0;
         }
 

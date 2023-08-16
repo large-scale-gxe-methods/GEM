@@ -1084,7 +1084,19 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
         }
     }
     else {
-        results << "P_Value_Marginal\n";
+        if (robust == 1) {
+            if (printMeta || printFull) {
+                results << "robust_P_Value_Marginal" << "\t" << "P_Value_Marginal\n";
+            }
+            else{
+                 results << "robust_P_Value_Marginal\n";
+            }
+            
+        }
+        else {
+                results << "P_Value_Marginal\n";
+        }
+        
     }
 
     results.close();

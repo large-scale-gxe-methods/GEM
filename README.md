@@ -352,7 +352,7 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
-[Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
+[Version 1.5.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
 * Fixed the output when there is no exposure
 
 [Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1) - April 20, 2023:

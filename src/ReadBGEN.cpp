@@ -845,15 +845,22 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int printEnd   = expSq1;
     bool printMeta = false;
     bool printFull = false;
+    if (outStyle.compare("meta") == 0) {
+            printMeta = true;
+        }
+    if (outStyle.compare("full") == 0) {
+            printFull = true;
+        }
+
     if (expSq == 0) {
         printStart = 0; printEnd = 0;
+
     }
     else if (outStyle.compare("meta") == 0) {
         printStart = 0; printEnd = Sq1; printMeta = true;
     } else if (outStyle.compare("full") == 0) {
         printStart = 0; printEnd = Sq1; printFull = true;
     }
-
 
     FILE* fin3;
     fin3 = fopen(cmd.bgenFile.c_str(), "rb");
@@ -1217,8 +1224,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                 missingIndex.clear();
             }
 
-            geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing);
-                
+            geno_snpid[stream_i] = ((LS > 0) ? string(snpID) : "NA") + "\t" + ((LR > 0) ? string(rsID) : "NA") + "\t" + ((LC > 0) ? string(chrStr) : "NA") + "\t" + physpos_tmp + "\t" + string(allele1) + "\t" + string(allele0) + "\t" + std::to_string(samSize - nMissing); 
             for (int j = 0; j < Sq; j++) {
                 int tmp3 = samSize * (j + 1) + tmp1;
 
@@ -1380,6 +1386,8 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                     delete[] Stemp4;
                     delete[] invA;
                 }
+
+
             }
         }
         else if (robust == 1) {
@@ -1392,6 +1400,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
                 //calculating Marginal P values
                 double statM = betaM[i] * betaM[i] / VarbetaM[i];
+
                 if (isnan(statM) || statM <= 0.0) {
                     PvalM[i] = NAN;
                 }
@@ -1461,7 +1470,6 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                         //calculating model-based Marginal P values
                         double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
                         mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));
-
                         for (int k = 0; k < Sq1 * Sq1; k++) {
                             invZGStZGS[i][k] *= sigma2;
                         }
@@ -1503,7 +1511,17 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                     delete[] invA;
                 }
 
+                if ((expSq == 0) && (printMeta || printFull)){
+                    mbVarbetaM[i] = sigma2 / ZGStZGS[tmp1];                       
+                    //calculating model-based Marginal P values
+                    double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
+                    mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));                                            
+                }               
+
+
+                
             }
+
         } // end of if robust == 1
 
 
@@ -1563,8 +1581,13 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                 oss << "\n";
             }
             else {
-                oss << PvalM[i] << "\n";
+                oss << PvalM[i] ;
+                if ((robust == 1) && (printMeta || printFull)) {
+                    oss << "\t" << mbPvalM[i] ;
+                }
+                oss << "\n";
             }
+            
             AF[i] = 0.0;
         }
 

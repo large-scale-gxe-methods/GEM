@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.5.1   
+Current version: 1.5.2   
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.1/binary.tar.gz.
-* Change the permission: chmod a+x GEM_1.5.1_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.2/binary.tar.gz.
+* Change the permission: chmod a+x GEM_1.5.2_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++11 compiler or later 
@@ -352,6 +352,9 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
+* Fixed the output when there is no exposure
+
 [Version 1.5.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1) - April 20, 2023:
 * Treated empty strings as missing values 
 * Fixed a bug for empty strings at the end of each line

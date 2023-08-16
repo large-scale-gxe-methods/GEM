@@ -1172,6 +1172,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                 }
 
                 if (expSq == 0){
+                    /*
                     // ZGStR
                     double* subZGStR = new double[Sq1];
                     subMatrix(ZGStR, subZGStR, Sq1, 1, Sq1, Sq1, i * Sq1);
@@ -1190,7 +1191,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                     double* ZGSR2tZGSxinvZGStZGS = new double[Sq1 * Sq1];
                     matNmatNprod(subZGSR2tZGS, invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, Sq1, Sq1, Sq1);
                     VarBetaAll[i] = new double[Sq1 * Sq1];
-                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);
+                    matNmatNprod(invZGStZGS[i], ZGSR2tZGSxinvZGStZGS, VarBetaAll[i], Sq1, Sq1, Sq1);*/
 
                     if (printMeta || printFull) {
 

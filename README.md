@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.5.2   
+Current version: 1.5.3 
 
 <br />
 Additional documentation:  
@@ -27,10 +27,10 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 
 Option 1: Use the binary executable file for Linux
 * Download the binary file from: [https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.2/binary.tar.gz](https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.2/GEM_1.5.2_Intel).
-* Change the permission: chmod a+x GEM_1.5.2_Intel
+* Change the permission: chmod a+x GEM_1.5.3
 
 Option 2: Build GEM Library Dependencies  
-   * C++11 compiler or later 
+   * C++14 compiler or later 
    * BLAS/LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel oneAPI Math Kernal Library to replace BLAS/LAPACK for optimal performance.
    * Boost C++ libraries. GEM links to the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
    * Eigen Library. GEM links to the header files of Eigen. 

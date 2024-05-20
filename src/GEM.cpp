@@ -281,7 +281,7 @@ int main(int argc, char* argv[]) {
         samSize = pgen.new_samSize;
         
         pgen.phenoType = checkBinary(phenomap, pgen.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize, covSelHeadersName, covSelHeadersName_new,Sq_new);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize,  pgen.phenoType, phenoHeaderName, covSelHeadersName, covSelHeadersName_new,Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 
@@ -436,7 +436,7 @@ int main(int argc, char* argv[]) {
         bed.numSelCol_new=covSelHeadersName_new.size() - bed.numIntSelCol_new - bed.numExpSelCol_new;
 
         bed.phenoType = checkBinary(phenomap, bed.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, covSelHeadersName, covSelHeadersName_new, Sq_new);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, bed.phenoType, phenoHeaderName, covSelHeadersName, covSelHeadersName_new, Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 
@@ -590,7 +590,7 @@ int main(int argc, char* argv[]) {
         bgen.numExpSelCol_new=expCovSelHeadersName_new.size();
         bgen.numSelCol_new=covSelHeadersName_new.size() - bgen.numIntSelCol_new - bgen.numExpSelCol_new;
         bgen.phenoType = checkBinary(phenomap, bgen.sampleID, epsilon);
-        binE.checkBinaryCovariates(binE, cmd, phenomap, bgen.sampleID, bgen.include_idx, samSize, covSelHeadersName, covSelHeadersName_new, Sq_new);
+        binE.checkBinaryCovariates(binE, cmd, phenomap, bgen.sampleID, bgen.include_idx, samSize, bgen.phenoType, phenoHeaderName, covSelHeadersName, covSelHeadersName_new, Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
 

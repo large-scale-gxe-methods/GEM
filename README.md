@@ -26,7 +26,7 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.3/binary.tar.gz.
+* Download the binary file from: [v1.5.3 Release](https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.3/GEM_1.5.3_Intel).
 * Change the permission: chmod a+x GEM_1.5.3
 
 Option 2: Build GEM Library Dependencies  

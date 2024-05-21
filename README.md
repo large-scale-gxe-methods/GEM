@@ -26,11 +26,11 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: [https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.3/binary.tar.gz](https://github.com/samanehsalehi/GEM/releases/download/v1.5.3/GEM_1.5.3_Intel).
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.3/binary.tar.gz.
 * Change the permission: chmod a+x GEM_1.5.3
 
 Option 2: Build GEM Library Dependencies  
-   * C++14 compiler or later 
+   * C++11 compiler or later 
    * BLAS/LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel oneAPI Math Kernal Library to replace BLAS/LAPACK for optimal performance.
    * Boost C++ libraries. GEM links to the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
    * Eigen Library. GEM links to the header files of Eigen. 
@@ -352,6 +352,9 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 1.5.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.3) - May 20, 2024:
+* Included stratified values for binary outcomes
+
 [Version 1.5.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
 * Fixed the output when there is no exposure
 
@@ -432,7 +435,7 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 <br />
 <br />
@@ -449,7 +452,7 @@ If you use GEM in your analysis, please cite
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ Copyright (C) 2018-2024  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

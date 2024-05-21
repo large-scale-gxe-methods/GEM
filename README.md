@@ -479,4 +479,4 @@ If you use GEM in your analysis, please cite
 * Eigen: Mozilla Public License, Version 2.0
 * Intel oneAPI Math Kernel Library (oneMKL): Intel Simplified Software License (Version October 2022 or later)
 
- Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE.md">here</a>.
+ Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE">here</a>.

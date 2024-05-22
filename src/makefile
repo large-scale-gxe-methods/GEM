@@ -6,7 +6,7 @@ BOOST_INC=../boost
 Eigen_INC=../eigen
 BOOST_LIB=-lboost_thread -lboost_program_options -lboost_system -lboost_filesystem
 
-DYN_LIBS=-lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -larmadillo
+DYN_LIBS=-lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm
 
 
 # Uncomment line below for LAPACK/BLAS only and comment other lines beginning with LIBS.

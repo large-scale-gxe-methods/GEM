@@ -159,4 +159,4 @@ void matvecSprod(double* A, double* v, double* u, int Nrow, int Ncol, int start)
     u[i]= tmp[i];
   }
   delete [] tmp;
-}
+}

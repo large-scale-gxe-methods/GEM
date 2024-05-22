@@ -1,8 +1,8 @@
 * text=auto
 *.c text eol=lf
-*.cpp text eol=lf
+#*.cpp text eol=lf
 *.cs text eol=lf
-*.h text eol=lf
+#*.h text eol=lf
 *.java text eol=lf
 *.js text eol=lf
 *.jsx text eol=lf

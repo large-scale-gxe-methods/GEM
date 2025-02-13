@@ -2,9 +2,8 @@
   ReadParameters.cpp reads parameters from a file
 ****************************************************************************/
 
-
 #include "declars.h"
-#define VERSION "1.5.2"
+#define VERSION "2.0"
 
 void print_help();
 
@@ -13,11 +12,11 @@ void print_help();
 void CommandLine::processCommandLine(int argc, char* argv[]) {
 
 
-    cout << "\n*********************************************************\n";
+    cout << "\n*****************************************************************************\n";
     cout << "Welcome to GEM v" << VERSION << "\n";
-    cout << "(C) 2018-2023 Liang Hong, Han Chen, Duy Pham, Cong Pan \n";
+    cout << "(C) 2018-2024 Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab \n";
     cout << "GNU General Public License v3\n";
-    cout << "*********************************************************\n";
+    cout << "****************************************************************************\n";
 
 
     // GEM parameters. Details are printed from the print_help() function below.
@@ -42,6 +41,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("bim", po::value<std::string>(), "")
         ("fam", po::value<std::string>(), "")
         ("pheno-file", po::value<std::string>(), "")
+        ("kin-file", po::value<std::string>(), "")
         ("out", po::value<std::string>()->default_value("gem.out"), "")
         ("output-style", po::value<std::string>()->default_value("minimum"), "");
 
@@ -53,6 +53,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("int-covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("exposure-names", po::value<std::vector<std::string>>()->multitoken(), "")
+        ("random-slope", po::value<std::string>(), "")
         ("delim", po::value<std::string>()->default_value(","), "")
         ("missing-value", po::value<std::string>()->default_value("NA"), "")
         ("robust", po::value<int>()->default_value(0), "")
@@ -61,6 +62,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("scale", po::value<int>()->default_value(0))
         ("categorical-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("cat-threshold", po::value<int>()->default_value(20));
+    // Kinship file
+    po::options_description kinfile("kinship file options");
+    kinfile.add_options()
+        ("kin-delim", po::value<std::string>()->default_value(","), "")
+        ("kin-diag", po::value<double>()->default_value(1.0),"");
 
     // Filtering options
     po::options_description filter("Filtering options");
@@ -77,7 +83,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     // Combine all options together
     po::options_description all("Options");
-    all.add(general).add(files).add(phenofile).add(filter).add(performance);
+    all.add(general).add(files).add(phenofile).add(filter).add(performance).add(kinfile);
 
     po::variables_map out;
 
@@ -94,7 +100,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     }
     catch (po::error const& e) {
         std::cerr << e.what() << endl;
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     po::notify(out);
 
@@ -123,6 +129,12 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     }
 
+    if (out.count("kin-file")) 
+    {
+        kinFile = out["kin-file"].as<string>();
+        kin_flag = true;
+    }
+ 
     if (out.count("bgen")) {
         if (out.count("pgen") || out.count("pfile") || out.count("bed") || out.count("bfile")) {
             cerr << "\nERROR: Only one genotype file format can be used.\n\n";
@@ -339,6 +351,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         numSelCol = cov.size();
 
     }
+
+    if(out.count("random-slope")){
+        randomSlope = out["random-slope"].as<string>();
+    }
+
     if (out.count("delim")) {
         string s_delim = out["delim"].as<string>();
 
@@ -355,10 +372,34 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
 
     }
+
+    if (out.count("kin-delim")) {
+        string s_delim_k = out["kin-delim"].as<string>();
+
+        char delim_k[300];
+        strcpy(delim_k, s_delim_k.c_str());
+        if ((delim_k[0] == '\\' && delim_k[1] == 't') || delim_k[0] == 't') {
+            kin_delim = '\t';
+        }
+        else if ((delim_k[0] == '\\' && delim_k[1] == '0') || delim_k[0] == '0') {
+            kin_delim = ' ';
+        }
+        else {
+            kin_delim = delim_k[0];
+        }
+    }
+
+    if(out.count("kin-diag")){
+        kin_diag = out["kin-diag"].as<double>();
+        diag_flag = true;
+        }
+
+
     if (out.count("missing-value")) {
         missing = out["missing-value"].as<std::string>();
 
     }
+
     if (out.count("robust")) {
         robust = out["robust"].as<int>();
 
@@ -366,8 +407,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: Please specify --robust with a value equal to 0 (false) or 1 (true). \n\n";
             exit(1);
         }
-
     }
+
     if (out.count("tol")) {
         tol = out["tol"].as<double>();
 
@@ -475,6 +516,12 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     // Print parameter info
     cout << "The Phenotype File is: " << phenoFile << "\n";
+
+    if(kin_flag) {
+        cout << "The Kinship File is: " << kinFile << "\n";
+        cout << "The diagonal value is: " << kin_diag << "\n";
+    }
+    
     cout << "The Phenotype is: " << phenoName << "\n";
     cout << "The Genotype File is: ";
     if (useBgenFile) {
@@ -522,6 +569,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
         cout << "\n";
     }
+    if(randomSlope.size() > 0)
+    {
+        cout << "The Selected Random slope is: " << randomSlope << "\n";
+    }
+
     if (center == 2){
 
         cout<<"Centering strategy: centering interaction covariates only."<<endl;
@@ -559,6 +611,7 @@ void print_help() {
 
     cout << "Input/Output File Options: " << endl
         << "   --pheno-file \t Path to the phenotype file." << endl
+        << "   --kin-file \t\t Path to the kinship file." << endl
         << "   --bgen \t\t Path to the BGEN file." << endl
         << "   --sample \t\t Path to the sample file. Required when the BGEN file does not contain sample identifiers." << endl
         << "   --pfile \t\t Path and prefix to the .pgen, .pvar, and .psam files." << endl
@@ -580,6 +633,7 @@ void print_help() {
         << "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
         << "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
         << "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
+        << "   --random-slope \t Column name in the phenotype file that contains the random slope." << endl
         << "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
         << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
@@ -590,6 +644,10 @@ void print_help() {
         << "   --cat-threshold \t A cut-off to determine which exposure or interaction covariate not specified using --categorical-names\n \t\t\t    should be automatically treated as categorical based on the number of levels (unique observations). \n \t\t\t    Default: 20" << endl;
     cout << endl << endl;
 
+    cout << "Kinship File Options: " << endl
+        << "   --kin-delim \t\t Delimiter separating values in the kinship file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl
+        << "   --kin-diag  \t\t Diagonal value for the kinship matrix. Default: 1.0" << endl;
+    cout << endl << endl;
 
     cout << "Filtering Options: " << endl
         << "   --maf \t\t Threshold to filter variants based on the minor allele frequency.\n \t\t\t    Default: 0.001" << endl

@@ -92,7 +92,7 @@ void Pgen::processPgenHeader(string pgenFile)
 
 
 // This functions reads the .psam file
-void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) 
+void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) 
 {
      unordered_set<int> genoUnMatchID;
      new_phenodata.resize(samSize);
@@ -181,7 +181,8 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
 
     int k = 0;
-    for (uint m = 0; m < pgen.raw_sample_ct; m++) {
+    for (uint m = 0; m < pgen.raw_sample_ct; m++) 
+    {
          getline(fIDMat, IDline);
          std::istringstream iss(IDline);
 
@@ -194,20 +195,43 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
 
          string strtmp = values[iidIndex];
          int itmp = k;
-         if (phenomap.find(strtmp) != phenomap.end()) {
-             auto tmp_valvec = phenomap[strtmp];
-             if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-                 sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                 new_covdata_orig[k * (numSelCol+1)] = 1.0;
-                for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
-                }
-                sampleID.push_back(strtmp);
-                k++;
-             }
-         }
+        //  if (phenomap.find(strtmp) != phenomap.end()) {
+        //      auto tmp_valvec = phenomap[strtmp];
+        //      if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
+        //          sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+        //          new_covdata_orig[k * (numSelCol+1)] = 1.0;
+        //         for (int c = 0; c < numSelCol; c++) {
+        //             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+        //         }
+        //         sampleID.push_back(strtmp);
+        //         k++;
+        //      }
+        //  }
+        if (phenomap.find(strtmp) != phenomap.end()) 
+        {
+            auto& tmp_valvecs = phenomap[strtmp]; 
 
-         if (itmp == k) genoUnMatchID.insert(m);
+            for (const auto& tmp_valvec : tmp_valvecs) {
+                // Check for missing phenotype values in the current vector
+                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() &&
+                    find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) 
+                {     
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata_orig[k * (numSelCol + 1)] = 1.0;
+                    for (int c = 0; c < numSelCol; c++) 
+                    {
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+                    }
+                    sampleID.push_back(strtmp);
+                    k++;
+                }
+            }
+        }           
+
+        if (itmp == k) 
+        {
+            genoUnMatchID.insert(m);
+        }
     }
     fIDMat.close();
     

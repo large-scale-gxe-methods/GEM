@@ -120,15 +120,12 @@ void Bgen::processBgenHeaderBlock(string bgenfile) {
 
 
 
-
-
-
 /**********************************************************************************
 This function is revised based on the Parse function in BOLT-LMM v2.3 source code
 ***********************************************************************************/
 
 // This functions reads the sample block of BGEN v1.1, v1.2, and v1.3. Also finds which samples to remove if they have missing values in the pheno file.
-void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
+void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSample, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     int k = 0;
@@ -174,25 +171,37 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             std::istringstream iss(IDline);
             string strtmp;
             iss >> strtmp;
+            //AllsampleIDs before matching
+            sampleID_all.push_back(strtmp);
 
             int itmp = k;
-            if (phenomap.find(strtmp) != phenomap.end()) {
-                auto tmp_valvec = phenomap[strtmp];
-                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-                    
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                    new_covdata_orig[k * (numSelCol+1)] = 1.0;
-                    for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+            
+            if (phenomap.find(strtmp) != phenomap.end()) 
+            {
+                auto& tmp_valvecs = phenomap[strtmp]; 
+
+                for (const auto& tmp_valvec : tmp_valvecs) {
+                    // Check for missing phenotype values in the current vector
+                    if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() &&
+                        find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) 
+                    {     
+                        sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                        new_covdata_orig[k * (numSelCol + 1)] = 1.0;
+                        for (int c = 0; c < numSelCol; c++) 
+                        {
+                            sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+                        }
+                        sampleID.push_back(strtmp);
+                        k++;
                     }
-                    sampleID.push_back(strtmp);
-                    k++;
                 }
             }
-
             // save the index with unmatched ID into genoUnMatchID.
-            if (itmp == k) genoUnMatchID.insert(m);
-        }
+            if (itmp == k) 
+            {
+                genoUnMatchID.insert(m);
+            }
+        } 
         fIDMat.close();
     }
 
@@ -231,30 +240,39 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             samID[LSID] = '\0';
 
             string strtmp(samID);
+            sampleID_all.push_back(strtmp);
             int itmp = k;
             
             if (m < 5) {
                 tempID.push_back(strtmp);
             }
 
-            if (phenomap.find(strtmp) != phenomap.end()) {
-                auto tmp_valvec = phenomap[strtmp];
-                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                    new_covdata_orig[k * (numSelCol+1)] = 1.0;
-                    for (int c = 0; c < numSelCol; c++) {
-                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+            if (phenomap.find(strtmp) != phenomap.end()) 
+            {
+                auto& tmp_valvecs = phenomap[strtmp]; 
+
+                for (const auto& tmp_valvec : tmp_valvecs) {
+                    // Check for missing phenotype values in the current vector
+                    if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() &&
+                        find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) 
+                    {     
+                        sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                        new_covdata_orig[k * (numSelCol + 1)] = 1.0;
+                        for (int c = 0; c < numSelCol; c++) 
+                        {
+                            sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+                        }
+                        sampleID.push_back(strtmp);
+                        k++;
                     }
-                    sampleID.push_back(strtmp);
-                    k++;
                 }
             }
 
-            if (itmp == k) {
+            if (itmp == k) 
+            {
                 genoUnMatchID.insert(m);
             }
         }
-
         delete[] samID;
     } // end SampleIdentifiers == 1
 
@@ -368,12 +386,6 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
     }
 
 }
-
-
-
-
-
-
 
 /***********************************************************************************
 This function contains code that is revised based on BOLT-LMM v2.3 source code
@@ -601,7 +613,6 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
     else {
 
         filterVariants = false;
-
         cout << "Detected " << boost::thread::hardware_concurrency() << " available thread(s)...\n";
         if (Mbgen < threads) {
             threads = Mbgen;
@@ -616,15 +627,15 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
         Mbgen_begin.resize(threads);
         Mbgen_end.resize(threads);
         bgenVariantPos.resize(threads);
+        std::cout << std::flush;
         keepVariants.resize(threads);
-
+        std::cout << std::flush;
         for (uint t = 0; t < threads-1; t++) {
             Mbgen_begin[t] = floor((Mbgen / threads) * t);
             Mbgen_end[t] = floor(((Mbgen / threads) * (t + 1)) - 1);
         }
         Mbgen_begin[threads-1] = floor((Mbgen / threads) * (threads - 1));
         Mbgen_end[threads-1] = Mbgen - 1;
-
 
         uint t = 0;
         FILE* fin = bgen.fin;
@@ -684,8 +695,6 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
             ret = fread(&LB, 4, 1, fin);
             ret = fread(allele0, 1, LB, fin); 
             allele0[LB] = '\0';
-
-
             // Seeks past the uncompressed genotype.
             if (Layout == 2) {
                 if (CompressedSNPBlocks > 0) {
@@ -711,9 +720,10 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
                     ret = fseek(fin, 6 * Nbgen, SEEK_CUR);
                 }
             }
-        }
+        }        
     }
-
+    
+    std::cout << std::flush;
     (void)ret;
     delete[] snpID;
     delete[] rsID;

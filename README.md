@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 1.5.2   
+Current version: 2.0   
 
 <br />
 Additional documentation:  
@@ -26,14 +26,14 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.2/binary.tar.gz.
-* Change the permission: chmod a+x GEM_1.5.2_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.0/binary.tar.gz.
+* Change the permission: chmod a+x GEM_2.0_Intel
 
 Option 2: Build GEM Library Dependencies  
-   * C++11 compiler or later 
+   * C++17 compiler or later 
    * BLAS/LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel oneAPI Math Kernal Library to replace BLAS/LAPACK for optimal performance.
    * Boost C++ libraries. GEM links to the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
-   * Eigen Library. GEM links to the header files of Eigen. 
+   * SuiteSparse Library, download and compile it using CMake. 
 
 <br />
 
@@ -41,8 +41,8 @@ To install GEM, run the following lines of code:
  ```
  git clone https://github.com/large-scale-gxe-methods/GEM
  cd GEM/
- cd src/  
- make  
+ cmake -B build
+ cmake --build build 
  ```
 
 <br />
@@ -111,7 +111,8 @@ Input/Output File Options:
 
 --pheno-file  
      Path to the phenotype file.  
-
+--kin-file  
+     Path to the kinship file.
 --bgen  
      Path to the BGEN file.  
 
@@ -180,6 +181,9 @@ Phenotype File Options:
      Any column names in the phenotype file naming the covariates for which only main effects should be included
      for adjustment (do not include with --exposure-names or --int-covar-names).  
 
+--random-slope  
+     Column name in the phenotype file that contains random slope. 
+     
 --robust
      0 for model-based standard errors and 1 for robust standard errors.
         Default: 0  
@@ -213,6 +217,16 @@ Phenotype File Options:
      should be automatically treated as categorical based on the number of levels (unique observations).
         Default: 20
    
+
+
+Kinship File Options:
+--kin-delim
+     Delimiter separating values in the kinship file. Tab delimiter should be represented as \t and space delimiter as \0.
+        Default: , (comma-separated) 
+
+--kin-diag
+     Diagonal value of kinship matrix that not accounting for inbreeding. Default: 1.0"
+
 
 
 Filtering Options:  
@@ -253,6 +267,55 @@ Performance Options:
 * #### Phenotype File
     A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter.
     All inputs should be coded numerically (e.g., males/females as 0/1)
+
+<br />
+
+* #### Kinship File
+    A file contains nonzero values in a three-column format, where the first two columns represent sample identifiers, and the third column indicates the genetic relatedness between them.
+
+##### Example 1 of Kinship Matrix:
+```
+
+⎡ 0.5    0    0.25  0.25 ⎤
+⎢  0    0.5   0.25  0.25 ⎥
+⎢ 0.25  0.25  0.5   0.25 ⎥
+⎣ 0.25  0.25  0.25  0.5  ⎦
+
+```
+
+##### Kinship Table Coressponding to Example 1:
+```
+
+| ID1 | ID2 | Kinship|
+|-----|-----|--------|
+|  1  |  3  |  0.25  |
+|  1  |  4  |  0.25  |
+|  2  |  3  |  0.25  |
+|  2  |  4  |  0.25  |
+|  3  |  4  |  0.25  |
+
+```
+
+##### Example 2 of Kinship Matrix:
+```
+⎡  1    0    0.5   0.5  ⎤
+⎢  0    1    0.5   0.5  ⎥
+⎢ 0.5  0.5    1    0.5  ⎥
+⎣ 0.5  0.5   0.5    1   ⎦
+
+```
+
+##### Kinship Table Coressponding to Example 2:
+```
+| ID1 | ID2 | Kinship|
+|-----|-----|--------|
+|  1  |  3  |   0.5  |
+|  1  |  4  |   0.5  |
+|  2  |  3  |   0.5  |
+|  2  |  4  |   0.5  |
+|  3  |  4  |   0.5  |
+
+```
 
 <br />
 
@@ -344,14 +407,19 @@ Includes, in addition to "meta", an initial header line with the residual varian
 <br />
 
 To run GEM using the example data, execute GEM with the following code.
-```unix
-./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out my_example.out
+```
+./GEM --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1 --random-slope cov3  --covar-names cov3 --kin-file example.kinship --kin-diag 0.5 --bgen example.bgen --sample example.sample --out my_example.out --thread 72 --output-style meta
 ```
 The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
+
+
 
 <br />
 
 ## Recent Updates 
+[Version 2.0](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.0) - February 14, 2025:
+* Add association tests using generalized linear mixed model (GLMM)
+* Add gen-environment interaction (GEI) test
 [Version 1.5.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
 * Fixed the output when there is no exposure
 
@@ -432,7 +500,7 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 <br />
 <br />
@@ -449,7 +517,7 @@ If you use GEM in your analysis, please cite
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

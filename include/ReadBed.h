@@ -37,7 +37,7 @@ public:
 
 
     void processBed(string bedFile, string bimFile, string famFile);
-    void processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
+    void processFam(Bed bed, string famFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
     void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 

@@ -125,7 +125,7 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
 
 
-void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
+void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     unordered_set<int> genoUnMatchID;
@@ -153,21 +153,44 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
         }
         string strtmp = values[1];
         int itmp = k;
-        if (phenomap.find(strtmp) != phenomap.end()) {
-            auto tmp_valvec = phenomap[strtmp];
-            if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-                sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                new_covdata_orig[k * (numSelCol+1)] = 1.0;
-                for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
-                }
+        // if (phenomap.find(strtmp) != phenomap.end()) {
+        //     auto tmp_valvec = phenomap[strtmp];
+        //     if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
+        //         sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+        //         new_covdata_orig[k * (numSelCol+1)] = 1.0;
+        //         for (int c = 0; c < numSelCol; c++) {
+        //             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+        //         }
 
-                sampleID.push_back(strtmp);
-                k++;
+        //         sampleID.push_back(strtmp);
+        //         k++;
+        //     }
+        // }
+        if (phenomap.find(strtmp) != phenomap.end()) 
+        {
+            auto& tmp_valvecs = phenomap[strtmp]; 
+
+            for (const auto& tmp_valvec : tmp_valvecs) {
+                // Check for missing phenotype values in the current vector
+                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() &&
+                    find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) 
+                {     
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata_orig[k * (numSelCol + 1)] = 1.0;
+                    for (int c = 0; c < numSelCol; c++) 
+                    {
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+                    }
+                    sampleID.push_back(strtmp);
+                    k++;
+                }
             }
         }
 
-        if (itmp == k) genoUnMatchID.insert(m);
+        if (itmp == k) 
+        {
+            genoUnMatchID.insert(m);
+        }
     }
     fIDMat.close();
 

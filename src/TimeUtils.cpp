@@ -14,7 +14,7 @@ void printExecutionTime(std::chrono::high_resolution_clock::time_point start_tim
     execution_time_min  = std::chrono::duration_cast<std::chrono::minutes>(end_time - start_time).count();
     execution_time_hour = std::chrono::duration_cast<std::chrono::hours>(end_time - start_time).count();
 
-    cout << "Execution time... ";
+    cout << "Execution time = ";
     if (execution_time_hour > 0)
         cout << "" << execution_time_hour << "h, ";
     if (execution_time_min > 0)

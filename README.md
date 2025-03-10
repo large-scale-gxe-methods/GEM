@@ -51,7 +51,7 @@ To install GEM, run the following lines of code:
 
 ## Dependencies
 C/C++ Compiler
- * A compiler with C++11 (or later) support is required.
+ * A compiler with C++17 (or later) support is required.
  
 LAPACK and BLAS
  * The LAPACK (Linear Algebra PACKage) and BLAS (Basic Linear Algebra Subprograms) libraries are used for matrix operations in GEM.
@@ -276,14 +276,15 @@ Performance Options:
 ##### Example 1 of Kinship Matrix:
 ```
 
-⎡ 0.5    0    0.25  0.25 ⎤
-⎢  0    0.5   0.25  0.25 ⎥
-⎢ 0.25  0.25  0.5   0.25 ⎥
-⎣ 0.25  0.25  0.25  0.5  ⎦
+⎡ 0.5    0    0.25  0.25    0 ⎤
+⎢  0    0.5   0.25  0.25    0 ⎥
+⎢ 0.25  0.25  0.5   0.25    0 ⎥
+⎢ 0.25  0.25  0.25  0.5     0 ⎥
+⎣  0     0     0     0   0.55 ⎦
 
 ```
 
-##### Kinship Table Coressponding to Example 1:
+##### Kinship Table Coressponding to Example 1(--kin-diag = 0.5):
 ```
 
 | ID1 | ID2 | Kinship|
@@ -293,19 +294,21 @@ Performance Options:
 |  2  |  3  |  0.25  |
 |  2  |  4  |  0.25  |
 |  3  |  4  |  0.25  |
+|  5  |  5  |  0.05  |
 
 ```
 
 ##### Example 2 of Kinship Matrix:
 ```
-⎡  1    0    0.5   0.5  ⎤
-⎢  0    1    0.5   0.5  ⎥
-⎢ 0.5  0.5    1    0.5  ⎥
-⎣ 0.5  0.5   0.5    1   ⎦
+⎡  1    0    0.5   0.5  0.5 ⎤
+⎢  0    1    0.5   0.5  0.5 ⎥
+⎢ 0.5  0.5    1    0.5  0.5 ⎥
+⎢ 0.5  0.5   0.5    1   0.5 ⎥
+⎣ 0.5  0.5   0.5   0.5  1.1 ⎦
 
 ```
 
-##### Kinship Table Coressponding to Example 2:
+##### Kinship Table Coressponding to Example 2(--kin-diag = 1):
 ```
 | ID1 | ID2 | Kinship|
 |-----|-----|--------|
@@ -314,6 +317,7 @@ Performance Options:
 |  2  |  3  |   0.5  |
 |  2  |  4  |   0.5  |
 |  3  |  4  |   0.5  |
+|  5  |  5  |   0.1  |
 
 ```
 
@@ -408,7 +412,7 @@ Includes, in addition to "meta", an initial header line with the residual varian
 
 To run GEM using the example data, execute GEM with the following code.
 ```
-./GEM --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1 --random-slope cov3  --covar-names cov3 --kin-file example.kinship --kin-diag 0.5 --bgen example.bgen --sample example.sample --out my_example.out --thread 72 --output-style meta
+./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out my_example.out
 ```
 The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
 
@@ -417,9 +421,17 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Recent Updates 
+[Version 2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1) - March 10, 2025:
+* Added support for GLMM on PGEN and BED files.
+* Added support for GEI test on PGEN and BED files.
+
 [Version 2.0](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.0) - February 14, 2025:
-* Add association tests using generalized linear mixed model (GLMM)
-* Add gen-environment interaction (GEI) test
+* Added generalized linear mixed model (GLMM)
+* Added gen-environment interaction (GEI) test
+
+[Version 1.5.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.3) - May 20, 2024:
+* Included stratified values for binary outcomes
+
 [Version 1.5.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2) - August 16, 2023:
 * Fixed the output when there is no exposure
 
@@ -517,7 +529,7 @@ If you use GEM in your analysis, please cite
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2023  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
+ Copyright (C) 2018-2025  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

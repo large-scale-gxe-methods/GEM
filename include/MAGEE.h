@@ -52,8 +52,15 @@ struct Magee_Arma {
 class MAGEE
 {
     public:
+        enum class GENOTYPE {Bgen, Pgen, Bed};
         MAGEE() = default;
-        MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bgen &bgen,
+        MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bgen bgen,
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
+                int numSelCol); 
+        MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Pgen pgen,
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
+                int numSelCol); 
+        MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bed bed,
                 std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
                 int numSelCol); 
         /**
@@ -66,7 +73,9 @@ class MAGEE
         Magee_Glmmkin m_magee_glmmkin;
         Glmmkin &m_glmmkin_fitnull;  
 		CommandLine &m_cmd;
-        Bgen &m_bgen;
+        // Bgen &m_bgen;
+        std::variant<Bgen, Pgen, Bed> m_genotype;
+        GENOTYPE m_active_genotype;
         std::ext::V_string m_interaction;
         std::ext::V_string m_interaction_exp;
 		std::ext::V_string m_interaction_new;

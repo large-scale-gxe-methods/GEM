@@ -194,6 +194,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
          }
 
          string strtmp = values[iidIndex];
+         sampleID_all.push_back(strtmp);//sampleID befor match with PhenoID
          int itmp = k;
         //  if (phenomap.find(strtmp) != phenomap.end()) {
         //      auto tmp_valvec = phenomap[strtmp];
@@ -840,6 +841,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             int idx_k = 0;
             int nMissing = 0;
             vector <uint>   missingIndex;
+
             for (uint32_t n = 0; n < file_sample_ct; n++) {
                 if (buf[n] == -9.0) {
                     if (include_idx[idx_k] == n) {
@@ -865,7 +867,6 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                         binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                         binE_AF[strata_i + stratum_idx[idx_k]]+=buf[n];
                     }
-
                     idx_k++;
                 }
             }

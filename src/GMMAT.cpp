@@ -979,7 +979,7 @@ Glmmkin GMMAT::glmmkin_ai(Fit fit_null, int maxiter, double tol)
     DensVec alpha0;
     glmmkin.fit.alpha = fit_null.alpha;
     int y_size = m_y.size();
-    std::cout << "Fixed-effect coefficient (alpha):\n" << glmmkin.fit.alpha << '\n';
+    // std::cout << "Fixed-effect coefficient (alpha):\n" << glmmkin.fit.alpha << '\n';
 
     if(m_offset.size() < y_size) 
     {
@@ -1358,7 +1358,7 @@ Glmmkin GMMAT::glmmkin_final(std::ext::FitNull_f fit0, Pheno pheno,
     m_family_t = pair.first;
     m_link = pair.second;
     auto pheno_type = (m_family_t == "binomial") ? 1 : 0;
-    m_X = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs));
+    // m_X = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs));
     GEMFit gf;
     std::ext::V_double pheno_data = conv_dv2stdVd(m_y);
     m_X = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs));

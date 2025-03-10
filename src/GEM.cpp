@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2024  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
+ *  Copyright (C) 2018-2025  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -240,9 +240,53 @@ int main(int argc, char* argv[]) {
         pgen.processPvar(pgen, cmd.pvarFile);
         pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, numSelCol, samSize);
 
-        if (is_duplicated)
+        if (cmd.kin_flag || is_duplicated)
         {
-            std::cerr << "ERROR: currently duplicated IDs are not supported for PGEN file\n";
+            if (is_duplicated && !cmd.kin_flag)
+            {
+                if (cmd.diag_flag)
+                {
+                    cout << "Warning: kin-diag has been defined without specifying kinship file address\n"; 
+                }
+            }
+            phenomap.clear();
+            auto start_time_gmmat = std::chrono::high_resolution_clock::now();
+            vector <string> phenoHeaders(covSelHeadersName);
+            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
+            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+            }
+
+            std::ext::V_string pgen_sample_id; 
+            pgen_sample_id = pgen.sampleID_all;
+            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, pgen_sample_id, phenoMissingKey); 
+
+            GMMAT gmmat;
+            gmmat.m_vkins_sp = {sp};
+            auto ret_obj = gmmat.glmmkin_final(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            cout << "\nEnd of association test\n";
+            cout << "****************************************************************************\n";
+            cout << "calculating the duration of association test...\n";
+            auto end_time_gmmat = std::chrono::high_resolution_clock::now();
+            printExecutionTime(start_time_gmmat, end_time_gmmat);
+            cout << "Start gene environment interaction test...\n";
+            cout << std::flush;
+            auto start_time_magee = std::chrono::high_resolution_clock::now();
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName, intCovSelHeadersName,
+                        numSelCol); 
+            magee.fitglmm();
+            cout << "****************************************************************************\n";
+            cout << "calculating the duration of GEI test...\n";
+            auto end_time_magee = std::chrono::high_resolution_clock::now();
+            printExecutionTime(start_time_magee, end_time_magee);
+            std::chrono::duration<double> wallduration = std::chrono::system_clock::now() - wall0;
+            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
+            cout << "*********************************************************\n";
+            exit(EXIT_SUCCESS);
         }
 
         for (int i=0; i<covSelHeadersName.size(); i++){
@@ -400,10 +444,56 @@ int main(int argc, char* argv[]) {
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
         bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, numSelCol, samSize);
         
-        if (is_duplicated)
+        if (cmd.kin_flag || is_duplicated)
         {
-            std::cerr << "ERROR: currently duplicated IDs are not supported for BED file\n";
+            if (is_duplicated && !cmd.kin_flag)
+            {
+                if (cmd.diag_flag)
+                {
+                    cout << "Warning: kin-diag has been defined without specifying kinship file address\n"; 
+                }
+            }
+            phenomap.clear();
+            auto start_time_gmmat = std::chrono::high_resolution_clock::now();
+            vector <string> phenoHeaders(covSelHeadersName);
+            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
+            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+            }
+
+            std::ext::V_string bed_sample_id; 
+            bed_sample_id = bed.sampleID_all;
+            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, bed_sample_id, phenoMissingKey); 
+
+            GMMAT gmmat;
+            gmmat.m_vkins_sp = {sp};
+            auto ret_obj = gmmat.glmmkin_final(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            cout << "\nEnd of association test\n";
+            cout << "****************************************************************************\n";
+            cout << "calculating the duration of association test...\n";
+            auto end_time_gmmat = std::chrono::high_resolution_clock::now();
+            printExecutionTime(start_time_gmmat, end_time_gmmat);
+            cout << "Start gene environment interaction test...\n";
+            cout << std::flush;
+            auto start_time_magee = std::chrono::high_resolution_clock::now();
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName, intCovSelHeadersName,
+                        numSelCol); 
+            magee.fitglmm();
+            cout << "****************************************************************************\n";
+            cout << "calculating the duration of GEI test...\n";
+            auto end_time_magee = std::chrono::high_resolution_clock::now();
+            printExecutionTime(start_time_magee, end_time_magee);
+            std::chrono::duration<double> wallduration = std::chrono::system_clock::now() - wall0;
+            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
+            cout << "*********************************************************\n";
+            exit(EXIT_SUCCESS);
         }
+
         
         for (int i=0; i<covSelHeadersName.size(); i++){
                 if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end()){
@@ -574,7 +664,7 @@ int main(int argc, char* argv[]) {
             vector <string> phenoHeaders(covSelHeadersName);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
             phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            if(std::find(covSelHeadersName.begin(), covSelHeadersName.end(), randomSlopeHeaderName) == covSelHeadersName.end())
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
             {
                 phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
             }
@@ -594,7 +684,7 @@ int main(int argc, char* argv[]) {
             cout << "Start gene environment interaction test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::high_resolution_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, bgen, expCovSelHeadersName, intCovSelHeadersName,
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName, intCovSelHeadersName,
                         numSelCol); 
             magee.fitglmm();
             cout << "****************************************************************************\n";

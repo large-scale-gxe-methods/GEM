@@ -20,6 +20,7 @@ public:
     int bimLast; 
     int new_samSize;
     std::vector<string>   sampleID;
+    std::vector<string>   sampleID_all;
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;

@@ -2,8 +2,6 @@
 #include "ReadBed.h"
 
 
-
-
 void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
     cout << "General information of BED file. \n";
@@ -152,6 +150,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<vecto
             values.push_back(value);
         }
         string strtmp = values[1];
+        sampleID_all.push_back(strtmp);//IDS befor matching
         int itmp = k;
         // if (phenomap.find(strtmp) != phenomap.end()) {
         //     auto tmp_valvec = phenomap[strtmp];
@@ -301,7 +300,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
     std::set<std::string> includeVariant;
     threads = cmd.threads;
 
-
     if (cmd.doFilters) {
 
         filterVariants = true;
@@ -318,7 +316,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
             getline(fInclude, IDline);
             std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
             IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
-
             if (IDline == "snpid") {
                 cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
             }
@@ -377,6 +374,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
                 value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
                 values.push_back(value);
             }
+
             if (includeVariant.find(values[1]) != includeVariant.end()) {
                 bedVariantPos.push_back(pvalIndex);
                 k++;

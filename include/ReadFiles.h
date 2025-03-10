@@ -38,6 +38,7 @@ namespace std
         using V_size_t = std::vector<std::size_t>;
         using VV_int = std::vector<V_int>;
         using V_bool = std::vector<bool>;
+        using V_lluint = std::vector<long long unsigned int>;
         using map_str_int = std::map<std::string, int>;
         using V_opt_string = std::vector<std::optional<std::string>>;
         using Var_bool_int = std::variant<V_bool, V_int>;

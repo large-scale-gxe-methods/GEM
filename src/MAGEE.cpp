@@ -7,7 +7,19 @@ extern void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					uint begin, uint end, long long unsigned int byte, uint Nbgen,
 					uint compression, bool meta_output = false);
 
+extern void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile, std::string pvarFile,
+					string const &outfile, double minmaf, double missrate,
+					size_t npb, int ei, int qi, std::ext::Map_str_Vint const &strata_list, 
+					uint begin, uint end, std::ext::V_lluint pgenPos, bool filterVariants, int pvarLength,
+					int pvarLast, std::ext::V_int pvarIndex, bool meta_output = false);
 
+void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile, 
+					std::string bimFile, string const &outfile, double minmaf,
+					double missrate, size_t npb, int ei, int qi, 
+					std::ext::Map_str_Vint const &strata_list, 
+					uint begin, uint end, std::ext::V_lluint bedPos, 
+					bool filterVariants, char bimDelim, int bimLast,
+					uint32_t n_samples, bool meta_output = false);
 
 void conver_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) {
     // Determine the number of non-zero elements
@@ -330,14 +342,24 @@ void spa_mat_ones(arma::sp_mat &arma_mat)
 }
 // Magee_Glmmkin::Magee_Glmmkin(Glmmkin &glmmkin_ref) : Glmmkin(glmmkin) {}
 
-MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen &bgen,
+MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen bgen,
             std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
             int numSelCol) 
-            : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_bgen(bgen),
-            m_interaction_exp(interaction_exp), m_interaction_cov(interaction_cov),
-            m_numSelCol(numSelCol){}
-
-
+            : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bgen)),
+            m_active_genotype(GENOTYPE::Bgen), m_interaction_exp(interaction_exp), 
+            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Pgen pgen,
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
+            int numSelCol) 
+            : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(pgen)),
+            m_active_genotype(GENOTYPE::Pgen), m_interaction_exp(interaction_exp), 
+            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bed bed,
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
+            int numSelCol) 
+            : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bed)),
+            m_active_genotype(GENOTYPE::Bed), m_interaction_exp(interaction_exp), 
+            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
 void MAGEE::clear_m_magee_glmmkin() 
 {
     m_magee_glmmkin.J.resize(0, 0);
@@ -378,7 +400,7 @@ void MAGEE::fill_sel(std::ext::V_string& sample_id)
     std::ext::V_int missing_id= match_indices(m_glmmkin_fitnull.id_include, sample_id);
     if(any_isna(missing_id))
     {
-        std::cout << "Warnning: check your data... Some individuals of pheno file are missing in bgen sample file!\n";
+        std::cout << "Warnning: check your data... Some individuals of pheno file are missing in sample file!\n";
        m_glmmkin_fitnull.id_include =  match_id_include(m_glmmkin_fitnull.id_include, sample_id);
         std::cout << "Missing IDs were removed...\n" << "Remaind IDs are: " << m_glmmkin_fitnull.id_include.size() << "\n";
     }
@@ -649,9 +671,9 @@ void MAGEE::fitglmm()
 	{ 
 		m_interaction.insert(m_interaction.end(), m_interaction_cov[i]); 
 	}
-	std::string bgenfile = m_cmd.bgenFile;
+	// std::string bgenfile = m_cmd.bgenFile;
 	// std::string samplefile = m_cmd.samplefile;
-	bool use_samplefile = m_cmd.useSampleFile;
+	// bool use_samplefile = m_cmd.useSampleFile;
 	std::string pheno_missing_key = m_cmd.missing;//NA values
     bool meta_output = (m_cmd.outStyle == "meta") ? true : false;//output style
     double miss_cutoff = m_cmd.missGenoRate;
@@ -663,7 +685,23 @@ void MAGEE::fitglmm()
  
     std::ext::V_string sample_id; 
 	int samSize =  m_gmmat->m_vkins_sp[0].pheno.m_data_frame.m_nrows;
-    sample_id = m_bgen.sampleID_all;//sampleID; 
+    if(m_active_genotype == GENOTYPE::Bgen)
+    {
+        sample_id = std::get<Bgen>(m_genotype).sampleID_all;//sampleID; 
+        std::get<Bgen>(m_genotype).getPositionOfBgenVariant(std::get<Bgen>(m_genotype), m_cmd);
+    }
+ 
+    if(m_active_genotype == GENOTYPE::Pgen)
+    {
+        sample_id = std::get<Pgen>(m_genotype).sampleID_all;//sampleID;
+        std::get<Pgen>(m_genotype).getPgenVariantPos(std::get<Pgen>(m_genotype), m_cmd);
+    }
+    if(m_active_genotype == GENOTYPE::Bed)
+    {
+        sample_id = std::get<Bed>(m_genotype).sampleID_all;//sampleID;
+        std::get<Bed>(m_genotype).getBedVariantPos(std::get<Bed>(m_genotype), m_cmd);
+    }
+
     //fill select to be passed to glmm_gei_bgen13
     fill_sel(sample_id);
     //fill J if there are duplicated IDs
@@ -707,9 +745,7 @@ void MAGEE::fitglmm()
 	{
 		m_magee_glmmkin.EC = m_magee_glmmkin.E.middleCols(ei, qi);
 	}
-
-    m_bgen.getPositionOfBgenVariant(m_bgen, m_cmd);
-    
+  
     {
         arma::sp_mat J(m_magee_glmmkin.J.rows(), m_magee_glmmkin.J.cols());
         arma::sp_mat sigma_i;
@@ -770,32 +806,109 @@ void MAGEE::fitglmm()
             magee_arma.sigma_ixJ = sigma_ix;
         }
     }
-    
-    if (m_bgen.threads > 1) 
-	{
-        std::cout << "Running multithreading...\n";
-        std::vector<std::thread> threads;
-        for (uint i = 0; i < m_bgen.threads; i++) 
+
+    if(m_active_genotype == GENOTYPE::Bgen)
+    {
+        std::string bgenfile = m_cmd.bgenFile;
+        if (std::get<Bgen>(m_genotype).threads > 1) 
         {
-            threads.emplace_back(std::thread(&glmm_gei_bgen13, std::cref(magee_arma),
-            bgenfile, m_cmd.outFile, minmaf, miss_cutoff, nperbatch, ei, qi,
-            std::cref(m_strata_list),m_bgen.Mbgen_begin[i], m_bgen.Mbgen_end[i],
-            m_bgen.bgenVariantPos[i], m_bgen.Nbgen, m_bgen.CompressedSNPBlocks, meta_output));
-        }
-        
-        std::cout << "Continuing GEI test... joining threads...\n";
-        for (auto& thread : threads) 
-		{
-            thread.join(); 
+            std::cout << "Running multithreading...\n";
+            std::vector<std::thread> threads;
+            for (uint i = 0; i < std::get<Bgen>(m_genotype).threads; i++) 
+            {
+                threads.emplace_back(std::thread(&glmm_gei_bgen13, std::cref(magee_arma),
+                bgenfile, m_cmd.outFile, minmaf, miss_cutoff, nperbatch, ei, qi,
+                std::cref(m_strata_list),std::get<Bgen>(m_genotype).Mbgen_begin[i], std::get<Bgen>(m_genotype).Mbgen_end[i],
+                std::get<Bgen>(m_genotype).bgenVariantPos[i], std::get<Bgen>(m_genotype).Nbgen, std::get<Bgen>(m_genotype).CompressedSNPBlocks, meta_output));
+            }
+            
+            std::cout << "Continuing GEI test... joining threads...\n";
+            for (auto& thread : threads) 
+            {
+                thread.join(); 
+            } 
         } 
-    } 
-    else 
-	{
-        std::cout << "Running with single thread...\n";
-        glmm_gei_bgen13(magee_arma, bgenfile, m_cmd.outFile, minmaf, 
-        miss_cutoff, nperbatch, ei, qi, m_strata_list,  m_bgen.Mbgen_begin[0],
-        m_bgen.Mbgen_end[0], m_bgen.bgenVariantPos[0], m_bgen.Nbgen, m_bgen.CompressedSNPBlocks,
-        meta_output);
+        else 
+        {
+            std::cout << "Running with single thread...\n";
+            glmm_gei_bgen13(magee_arma, bgenfile, m_cmd.outFile, minmaf, 
+            miss_cutoff, nperbatch, ei, qi, m_strata_list,  std::get<Bgen>(m_genotype).Mbgen_begin[0],
+            std::get<Bgen>(m_genotype).Mbgen_end[0], std::get<Bgen>(m_genotype).bgenVariantPos[0], std::get<Bgen>(m_genotype).Nbgen, std::get<Bgen>(m_genotype).CompressedSNPBlocks,
+            meta_output);
+        }     
+    }
+
+    if(m_active_genotype == GENOTYPE::Pgen)
+    {
+        std::string pgenfile = m_cmd.pgenFile;
+        std::string pvarFile = m_cmd.pvarFile;
+        if (std::get<Pgen>(m_genotype).threads > 1) 
+        {
+            std::cout << "Running multithreading...\n";
+            std::vector<std::thread> threads;
+            for (uint i = 0; i < std::get<Pgen>(m_genotype).threads; i++) 
+            {
+                threads.emplace_back(std::thread(&glmm_gei_pgen13, std::cref(magee_arma),
+                pgenfile, pvarFile, m_cmd.outFile, minmaf, miss_cutoff, nperbatch, ei, qi,
+                std::cref(m_strata_list),std::get<Pgen>(m_genotype).begin[i],
+                std::get<Pgen>(m_genotype).end[i], std::get<Pgen>(m_genotype).pgenVariantPos, 
+                std::get<Pgen>(m_genotype).filterVariants, std::get<Pgen>(m_genotype).pvarIndex.size(),
+                std::get<Pgen>(m_genotype).pvarLast, std::get<Pgen>(m_genotype).pvarIndex, 
+                meta_output));
+            }
+            
+            std::cout << "Continuing GEI test... joining threads...\n";
+            for (auto& thread : threads) 
+            {
+                thread.join(); 
+            } 
+        } 
+        else 
+        {
+            std::cout << "Running with single thread...\n";
+            glmm_gei_pgen13(magee_arma, pgenfile, pvarFile, m_cmd.outFile, minmaf, 
+            miss_cutoff, nperbatch, ei, qi, m_strata_list, std::get<Pgen>(m_genotype).begin[0],
+            std::get<Pgen>(m_genotype).end[0], std::get<Pgen>(m_genotype).pgenVariantPos, 
+            std::get<Pgen>(m_genotype).filterVariants, std::get<Pgen>(m_genotype).pvarIndex.size(),
+            std::get<Pgen>(m_genotype).pvarLast, std::get<Pgen>(m_genotype).pvarIndex, 
+            meta_output);
+        }
+    }
+
+    if(m_active_genotype == GENOTYPE::Bed)
+    {
+        std::string bedfile = m_cmd.bedFile;
+        std::string bimFile = m_cmd.bimFile;
+        if (std::get<Bed>(m_genotype).threads > 1) 
+        {
+            std::cout << "Running multithreading...\n";
+            std::vector<std::thread> threads;
+            for (uint i = 0; i < std::get<Bed>(m_genotype).threads; i++) 
+            {
+                threads.emplace_back(std::thread(&glmm_gei_bed13, std::cref(magee_arma),
+                bedfile, bimFile, m_cmd.outFile, minmaf, miss_cutoff, nperbatch, ei, qi,
+                std::cref(m_strata_list),std::get<Bed>(m_genotype).begin[i],
+                std::get<Bed>(m_genotype).end[i], std::get<Bed>(m_genotype).bedVariantPos, 
+                std::get<Bed>(m_genotype).filterVariants, std::get<Bed>(m_genotype).bimDelim, 
+                std::get<Bed>(m_genotype).bimLast, std::get<Bed>(m_genotype).n_samples, meta_output));
+            }
+            
+            std::cout << "Continuing GEI test... joining threads...\n";
+            for (auto& thread : threads) 
+            {
+                thread.join(); 
+            } 
+        } 
+        else 
+        {
+            std::cout << "Running with single thread...\n";
+            glmm_gei_bed13(magee_arma, bedfile, bimFile, m_cmd.outFile, 
+            minmaf, miss_cutoff, nperbatch, ei, qi,std::cref(m_strata_list),
+            std::get<Bed>(m_genotype).begin[0], std::get<Bed>(m_genotype).end[0],
+            std::get<Bed>(m_genotype).bedVariantPos, std::get<Bed>(m_genotype).filterVariants,
+            std::get<Bed>(m_genotype).bimDelim, std::get<Bed>(m_genotype).bimLast,
+            std::get<Bed>(m_genotype).n_samples, meta_output);
+        }
     }
 
 	// Write all results from each thread to 1 file
@@ -805,14 +918,29 @@ void MAGEE::fitglmm()
 	std::ofstream results(m_cmd.outFile, std::ios::binary | std::ios_base::app);
     for (int i = 0; i < m_cmd.threads; i++) 
 	{
-         std::string threadOutputFile = m_cmd.outFile + "_bin_" + std::to_string(m_bgen.Mbgen_begin[i]) + ".tmp";
-         std::ifstream thread_output(threadOutputFile);
-         if (thread_output.peek() != std::ifstream::traits_type::eof())
-		 {
-            results<<thread_output.rdbuf();
-         }
-         thread_output.close();
-         std::remove(threadOutputFile.c_str());
+        std::string threadOutputFile;
+        if(m_active_genotype == GENOTYPE::Bgen)
+        {
+            threadOutputFile = m_cmd.outFile + "_bin_" + std::to_string(std::get<Bgen>(m_genotype).Mbgen_begin[i]) + ".tmp";
+        }
+        
+        if(m_active_genotype == GENOTYPE::Pgen)
+        {
+            threadOutputFile = m_cmd.outFile + "_bin_" + std::to_string(std::get<Pgen>(m_genotype).begin[i]) + ".tmp";
+        }
+
+        if(m_active_genotype == GENOTYPE::Bed)
+        {
+            threadOutputFile = m_cmd.outFile + "_bin_" + std::to_string(std::get<Bed>(m_genotype).begin[i]) + ".tmp";
+        }
+
+        std::ifstream thread_output(threadOutputFile);
+        if (thread_output.peek() != std::ifstream::traits_type::eof())
+	    {
+           results<<thread_output.rdbuf();
+        }
+        thread_output.close();
+        std::remove(threadOutputFile.c_str());
     }
     results.close();
 }

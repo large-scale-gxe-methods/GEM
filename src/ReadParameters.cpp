@@ -3,7 +3,7 @@
 ****************************************************************************/
 
 #include "declars.h"
-#define VERSION "2.0"
+#define VERSION "2.1"
 
 void print_help();
 
@@ -14,7 +14,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     cout << "\n*****************************************************************************\n";
     cout << "Welcome to GEM v" << VERSION << "\n";
-    cout << "(C) 2018-2024 Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab \n";
+    cout << "(C) 2018-2025 Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab \n";
     cout << "GNU General Public License v3\n";
     cout << "****************************************************************************\n";
 
@@ -389,11 +389,14 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
     }
 
-    if(out.count("kin-diag")){
+    // if(out.count("kin-diag")){
+    //     kin_diag = out["kin-diag"].as<double>();
+    //     diag_flag = true;
+    //     }
+    if (out.count("kin-diag") && out["kin-diag"].defaulted() == false) {
         kin_diag = out["kin-diag"].as<double>();
         diag_flag = true;
-        }
-
+    }
 
     if (out.count("missing-value")) {
         missing = out["missing-value"].as<std::string>();

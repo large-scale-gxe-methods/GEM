@@ -3,6 +3,11 @@
 #include "ReadBGEN.h"
 #include "../thirdparty/zstd-1.5.5/lib/zstd.h"
 #include "../thirdparty/libdeflate-1.18/libdeflate.h"
+#include "../thirdparty/plink-2.0/plink2_bits.h"
+#include "../thirdparty/plink-2.0/plink2_base.h"
+#include "../thirdparty/plink-2.0/pgenlib_misc.h"
+#include "../thirdparty/plink-2.0/pgenlib_read.h"
+#include "../thirdparty/plink-2.0/pgenlib_ffi_support.h"
 #include <stdexcept>
 #include <fstream>
 #include <cmath>
@@ -52,7 +57,7 @@ std::vector<int> filter_elements(const arma::vec &container, const arma::Col<int
     return ret;
 }
 
-double chiSquareCDF(double x, double df, bool lower_tail, bool log_p)
+double chi_square_CDF(double x, double df, bool lower_tail, bool log_p)
 {
     // Check if x is NaN or less than or equal to zero
     if (std::isnan(x) || x <= 0.0)
@@ -87,11 +92,305 @@ double chiSquareCDF(double x, double df, bool lower_tail, bool log_p)
     catch (const std::domain_error& e)
     {
         // Handle any domain errors thrown by Boost
-        std::cerr << "Domain error in chiSquareCDF: " << e.what() << std::endl;
+        std::cerr << "Domain error in chi square CDF: " << e.what() << std::endl;
         return std::numeric_limits<double>::quiet_NaN();
     }
 }
 
+void glmm_gei(arma::mat &G, arma::uvec &snp_skip, size_t &npbidx, size_t npb, size_t n, 
+                        int ei, int qi, const Magee_Arma &null_obj, std::ofstream &writefile, 
+                        bool meta_output, std::ext::V_string &tmpout, uint m, uint end) 
+{
+	if ((m == end) || (npbidx == npb))
+		{
+			if (npbidx != npb)
+			{
+				G.reshape(n, npbidx);
+				snp_skip = snp_skip.rows(0,npbidx-1);
+			}
+			arma::uvec snp_idx = find(snp_skip == 0);
+			G = G.cols(snp_idx);
+			int ng = G.n_cols;
+			arma::mat IV_U;
+			arma::mat IV_U1;
+			arma::mat IV_V_i;
+			arma::mat IV_V_i1;
+			arma::mat IV_E_i;
+			arma::mat IV_GE_i;
+			arma::mat STAT_JOINT_tmp;
+			arma::vec BETA_MAIN;
+			arma::vec STAT_INT;
+			arma::vec STAT_JOINT;
+			arma::vec SE_MAIN;
+			arma::mat BETA_INT;
+			arma::mat BETA_INT1;
+			arma::vec PVAL_MAIN(ng);
+			PVAL_MAIN.fill(arma::datum::nan);
+			arma::vec PVAL_INT(ng);
+			PVAL_INT.fill(arma::datum::nan);
+			arma::vec PVAL_JOINT(ng);
+			PVAL_JOINT.fill(arma::datum::nan);
+			size_t ngei1 = ng * (ei + 1);
+			if (G.n_cols != 0)
+			{
+				arma::sp_mat Gsp(G);
+				arma::sp_mat PG;
+				arma::vec U;
+				arma::mat GPG;
+				
+				U = G.t() * null_obj.Jres;// 1*1 if G be a vec
+				arma::sp_mat Gsigma_ixJ =  Gsp.t() * null_obj.sigma_ixJ;
+				PG = (null_obj.sigma_iJJ.t() * Gsp) - (null_obj.sigma_ixJ * (Gsigma_ixJ * null_obj.cov.t()).t());//P projection matrix
+				GPG = (G.t() * PG) % kron(arma::ones<arma::mat>(1, 1), arma::mat(ng, ng, arma::fill::eye));         
+				arma::mat GPG_i;
+				bool is_non_singular = inv(GPG_i, GPG);
+				if (!is_non_singular) 
+				{
+					GPG_i = pinv(GPG);
+				}
+				arma::mat V_i;
+				V_i = diagvec(GPG_i);           
+				arma::vec V_MAIN_adj = diagvec(GPG_i);
+				V_MAIN_adj = V_MAIN_adj.rows(0, ng-1);            
+				arma::vec BETA_MAIN_adj = GPG_i.t() * U;
+				BETA_MAIN_adj= BETA_MAIN_adj.rows(0, ng-1);
+				arma::vec STAT_MAIN_adj(ng);
+				STAT_MAIN_adj.fill(arma::datum::nan);
+
+				for (size_t s = 0; s < V_MAIN_adj.size(); s++) 
+				{
+					if (V_MAIN_adj[s] > 0) 
+					{
+						STAT_MAIN_adj[s] = (BETA_MAIN_adj[s] * BETA_MAIN_adj[s]) / V_MAIN_adj[s];
+					}
+				} 
+
+				BETA_MAIN = V_i % U.rows(0,ng-1);
+				SE_MAIN = sqrt(V_i);
+				arma::vec STAT_MAIN = BETA_MAIN % U.rows(0,ng-1);
+
+				for (size_t s = 0; s < STAT_MAIN.size(); s++) 
+				{
+					if (STAT_MAIN[s] > 0) 
+					{
+						PVAL_MAIN[s] = chi_square_CDF(STAT_MAIN[s], 1, 0, 0);
+					}
+				}
+				
+				arma::mat Hv(ei+qi+1, ei+qi+1, arma::fill::zeros);
+				arma::mat Gtblock = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t());
+				// arma::sp_mat Gtblock = kron(arma::speye<arma::sp_mat>(ei+qi+1, ei+qi+1), arma::sp_mat(G).t());
+				arma::mat GblockXi = Gtblock * null_obj.Xi;
+				// arma::sp_mat GblockXi = Gtblock * null_obj.Xi;
+				Hv = Gtblock * null_obj.Psi * Gtblock.t() - (GblockXi * null_obj.cov.t() * GblockXi.t());
+				Hv = Hv % arma::kron(arma::ones(ei+qi+1, ei+qi+1), arma::mat(ng, ng, arma::fill::eye));
+				bool is_non_singular_Hv = inv(IV_V_i1, Hv);
+				if (!is_non_singular_Hv) 
+				{
+					IV_V_i1 = arma::pinv(Hv);
+				}
+
+				arma::mat cross_Eres_G;
+				cross_Eres_G = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t()) * null_obj.JEresblock;//G.t() * cross_K1_J;
+				arma::mat IV_U_kron1 = arma::kron(arma::ones<arma::mat>(ei + qi + 1, 1), arma::mat(ng, ng, arma::fill::eye));
+				IV_U1 = IV_U_kron1.each_col() % cross_Eres_G;// V_U_kron1.each_col() % cross_K1_J_G //cross_K_res;
+				BETA_INT1 = (IV_V_i1 * IV_U1);
+				bool is_non_singular_IV_V1 = arma::inv(IV_E_i,IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1)));
+				if (!is_non_singular_IV_V1) 
+				{
+					IV_E_i = arma::pinv(IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1))); 
+				}
+
+				IV_U = IV_E_i* BETA_INT1.rows(ng,ngei1-1);
+				STAT_INT = diagvec(IV_U.t()*BETA_INT1.rows(ng,ngei1-1));
+
+				try 
+				{
+					IV_GE_i = arma::inv(IV_V_i1(arma::span(0,ngei1-1), arma::span(0,ngei1-1))); 
+					STAT_JOINT_tmp=  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
+					STAT_JOINT = diagvec(STAT_JOINT_tmp.t()*BETA_INT1.rows(0,ngei1-1));
+				
+					for (size_t s = 0; s < STAT_INT.size(); s++) 
+					{
+						// PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
+						if (arma::is_finite(PVAL_MAIN[s])) 
+						{
+							PVAL_JOINT[s] = chi_square_CDF(STAT_JOINT[s], 1+ei, 0, 0);
+						}
+					} 
+				} 
+				catch (const std::runtime_error& error) 
+				{
+					std::cout << "It is singular matrix "<< "\n";
+					for (size_t s = 0; s < STAT_INT.size(); s++) 
+					{
+						PVAL_JOINT[s] = DBL_EPSILON;
+					}
+				}
+				
+				for (size_t s = 0; s < STAT_INT.size(); s++)
+				{
+					PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
+				}
+			}
+
+			arma::uvec b_idx1 = arma::regspace<arma::uvec>(0, ng, (ei+qi) * ng);
+			int ng_j = 0;
+			//Write in the file
+
+			for (size_t j = 0; j < npbidx; ++j)
+			{
+				if (snp_skip[j] == 1)
+				{ 
+					continue;
+				}
+				else
+				{
+					writefile << tmpout[j] <<  BETA_MAIN[ng_j] << "\t" << SE_MAIN[ng_j] << "\t";
+					
+					if (meta_output)
+					{
+						// Beta Int the diaganol of BETA_INT1
+						for (int b = 0; b < ei + qi + 1; b++)
+						{
+							int row = b_idx1[b] + ng_j;
+							writefile << BETA_INT1(row, ng_j) << "\t";
+						}
+						// Var (the diaganol of IV_V_i1)
+						for (int b = 0; b < ei + qi + 1; b++)
+						{
+							int col = b_idx1[b] + ng_j;
+							for (int d = 0; d < ei + qi + 1; d++)
+							{
+								if (b == d)
+								{
+									int row = b_idx1[d] + ng_j;
+									writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
+								}
+							}
+						}
+
+						// Cov (the lower triangle elements of IV_V_i1)
+						for (int b = 0; b < ei + qi + 1; b++)
+						{
+							int col = b_idx1[b] + ng_j;
+							for (int d = 0; d < ei + qi + 1; d++)
+							{
+								if (d > b)
+								{
+									int row = b_idx1[d] + ng_j;
+									writefile << IV_V_i1(row, col) << "\t";
+								}
+							}
+						}
+					}
+					else
+					{
+						int ncolE = ei + qi + 1;
+						arma::mat split_mat(ncolE,ncolE);
+
+						for (int i=0; i<ncolE; i++) 
+						{
+							for (int j=0; j<ncolE; j++)
+							split_mat(i,j) = i+1-ncolE+ncolE*(j+1);
+						}
+						
+						split_mat = split_mat(arma::span(1,ei), arma::span(1,ei));
+
+						if (split_mat.size() == 1)
+						{
+							for (int b = 0; b < ei + 1; b++)
+							{
+								int row = b_idx1[b] + ng_j;
+								// NOT the first ng row
+
+								if (row > ng - 1)
+								{
+
+									writefile << BETA_INT1(row, ng_j) << "\t";
+								}
+							}
+							// Var (the diaganol elements)
+							for (int b = 0; b < ei + 1; b++)
+							{
+								int col = b_idx1[b] + ng_j;
+								for (int d = 0; d < ei + 1; d++)
+								{
+									if (b == d)
+									{
+										int row = b_idx1[d] + ng_j;
+										// NOT the first ng row or first ng col
+										if (row > ng - 1 && col > ng - 1)
+										{
+											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
+										}
+									}
+								}
+							}
+						}
+
+						else
+						{
+							for (int b = 0; b < ei + 1; b++)
+							{
+								int row = b_idx1[b] + ng_j;
+								// NOT the first ng row
+								if (row > ng - 1)
+								{
+									writefile << BETA_INT1(row, ng_j) << "\t";
+								}
+							}
+
+							for (int b = 0; b < ei + 1; b++)
+							{
+								int col = b_idx1[b] + ng_j;
+								for (int d = 0; d < ei + 1; d++)
+								{
+									if (b == d)
+									{
+										int row = b_idx1[d] + ng_j;
+										// NOT the first ng row or first ng col
+										if (row > ng - 1 && col > ng - 1)
+										{
+											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
+										}
+									}
+								}
+							}
+
+							for (int b = 0; b < ei + 1; b++)
+							{
+								int col = b_idx1[b] + ng_j;
+								for (int d = 0; d < ei + 1; d++)
+								{
+									if (d > b)
+									{
+										int row = b_idx1[d] + ng_j;
+										if (row > ng - 1 && col > ng - 1)
+										{
+											writefile << IV_V_i1(row, col) << "\t";
+										}
+									}
+								}
+							}
+						}
+					}
+					writefile << PVAL_MAIN[ng_j] << "\t" << PVAL_INT[ng_j] << "\t" << PVAL_JOINT[ng_j] << "\n"; 
+					ng_j++;
+				}
+			}
+
+			npbidx = 0;
+			snp_skip.zeros();
+			G.reshape(n, npb);
+		}
+
+		if ((m) % 10000 == 0)
+		{
+			writefile << std::flush;
+		} 
+
+}
 
 void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					string const &outfile, double minmaf, double missrate,
@@ -99,7 +398,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					uint begin, uint end, long long unsigned int byte, uint Nbgen,
 					uint compression, bool meta_output)
 {
-	bool isDupeID = null_obj.dupflag;
+	// bool isDupeID = null_obj.dupflag;
     std::ext::V_int select = null_obj.select;
     int strataList_size = strata_list.size();
     bool skip_strata = strata_list.empty();
@@ -112,7 +411,6 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
         std::exit(EXIT_FAILURE);
     }
 
-	std::string line, snp;
 	size_t n = null_obj.n;
 	size_t n_obs = null_obj.n_obs;
 
@@ -122,11 +420,10 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
 	// arma::mat G(n_obs, npb);
 	std::ext::V_string tmpout(npb);
-	std::ext::V_string biminfo;
 
 	double gmean, gsqmean, geno, gmax, gmin;
 	size_t ncount, nmiss, npbidx = 0;
-	double compute_time = 0.0;
+	
 	struct libdeflate_decompressor *decompressor = libdeflate_alloc_decompressor();
 
 	uint maxLA = 65536;
@@ -157,7 +454,6 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		ret = fread(&LS, 2, 1, fp);
 		snpID.resize(LS);
 		ret = fread(&snpID[0], 1, LS, fp);
-
 		std::string str_snpID = "NA";
 		if (LS != 0)
 		{
@@ -335,6 +631,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 				{
 					double p11 = numer_aa / double(1.0 * numer_mask);
 					double p10 = numer_ab / double(1.0 * numer_mask);
+					// geno = 2 * p11 + p10;
 					geno = 2 * (1 - p11 - p10) + p10;
 					gmiss(select[ncount]) = 0;
 					g[select[ncount]] = geno;
@@ -416,7 +713,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		gmean /= static_cast<double>(n - nmiss);
 		gsqmean /= static_cast<double>(n - nmiss);
 		//rsq = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1) / (gmean * (1.0 - gmean / 2.0));
-		
+
 		if (skip_strata)
 		{
 			writeout << std::string (snpID.begin(), snpID.end()) << "\t" << std::string (rsID.begin(), rsID.end()) << "\t" << std::string (chrStr.begin(), chrStr.end()) << "\t" << physpos_tmp << "\t" << std::string (allele1.begin(), allele1.end()) << "\t" << std::string (allele0.begin(), allele0.end()) << "\t" << (n - nmiss) << "\t" << gmean / 2.0 << "\t";
@@ -470,289 +767,9 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		writeout.clear();
 		npbidx++;
 
-		if ((m == end) || (npbidx == npb))
-		{
-			if (npbidx != npb)
-			{
-				G.reshape(n_obs, npbidx);
-				snp_skip = snp_skip.rows(0,npbidx-1);
-			}
-			arma::uvec snp_idx = find(snp_skip == 0);
-			G = G.cols(snp_idx);
-			int ng = G.n_cols;
-			arma::mat IV_U;
-			arma::mat IV_U1;
-			arma::mat IV_V_i;
-			arma::mat IV_V_i1;
-			arma::mat IV_E_i;
-			arma::mat IV_GE_i;
-			arma::mat STAT_JOINT_tmp;
-			arma::vec BETA_MAIN;
-			arma::vec STAT_INT;
-			arma::vec STAT_JOINT;
-			arma::vec SE_MAIN;
-			arma::mat BETA_INT;
-			arma::mat BETA_INT1;
-			arma::vec PVAL_MAIN(ng);
-			PVAL_MAIN.fill(arma::datum::nan);
-			arma::vec PVAL_INT(ng);
-			PVAL_INT.fill(arma::datum::nan);
-			arma::vec PVAL_JOINT(ng);
-			PVAL_JOINT.fill(arma::datum::nan);
-			size_t ngei1 = ng * (ei + 1);
-			if (G.n_cols != 0)
-			{
-				arma::sp_mat Gsp(G);
-				arma::sp_mat PG;
-				arma::vec U;
-				arma::mat GPG;
-				
-				U = G.t() * null_obj.Jres;// 1*1 if G be a vec
-				arma::sp_mat Gsigma_ixJ =  Gsp.t() * null_obj.sigma_ixJ;
-				PG = (null_obj.sigma_iJJ.t() * Gsp) - (null_obj.sigma_ixJ * (Gsigma_ixJ * null_obj.cov.t()).t());//P projection matrix
-				GPG = (G.t() * PG) % kron(arma::ones<arma::mat>(1, 1), arma::mat(ng, ng, arma::fill::eye));         
-				arma::mat GPG_i;
-				bool is_non_singular = inv(GPG_i, GPG);
-				if (!is_non_singular) 
-				{
-					GPG_i = pinv(GPG);
-				}
-				arma::mat V_i;
-				V_i = diagvec(GPG_i);           
-				arma::vec V_MAIN_adj = diagvec(GPG_i);
-				V_MAIN_adj = V_MAIN_adj.rows(0, ng-1);            
-				arma::vec BETA_MAIN_adj = GPG_i.t() * U;
-				BETA_MAIN_adj= BETA_MAIN_adj.rows(0, ng-1);
-				arma::vec STAT_MAIN_adj(ng);
-				STAT_MAIN_adj.fill(arma::datum::nan);
+		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+				writefile, meta_output, tmpout, m, end);
 
-				for (size_t s = 0; s < V_MAIN_adj.size(); s++) 
-				{
-					if (V_MAIN_adj[s] > 0) 
-					{
-						STAT_MAIN_adj[s] = (BETA_MAIN_adj[s] * BETA_MAIN_adj[s]) / V_MAIN_adj[s];
-					}
-				} 
-
-				BETA_MAIN = V_i % U.rows(0,ng-1);
-				SE_MAIN = sqrt(V_i);
-				arma::vec STAT_MAIN = BETA_MAIN % U.rows(0,ng-1);
-
-				for (size_t s = 0; s < STAT_MAIN.size(); s++) 
-				{
-					if (STAT_MAIN[s] > 0) 
-					{
-						PVAL_MAIN[s] = chiSquareCDF(STAT_MAIN[s], 1, 0, 0);
-					}
-				}
-				
-				arma::mat Hv(ei+qi+1, ei+qi+1, arma::fill::zeros);
-				arma::mat Gtblock = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t());
-				// arma::sp_mat Gtblock = kron(arma::speye<arma::sp_mat>(ei+qi+1, ei+qi+1), arma::sp_mat(G).t());
-				arma::mat GblockXi = Gtblock * null_obj.Xi;
-				// arma::sp_mat GblockXi = Gtblock * null_obj.Xi;
-				Hv = Gtblock * null_obj.Psi * Gtblock.t() - (GblockXi * null_obj.cov.t() * GblockXi.t());
-				Hv = Hv % arma::kron(arma::ones(ei+qi+1, ei+qi+1), arma::mat(ng, ng, arma::fill::eye));
-				bool is_non_singular_Hv = inv(IV_V_i1, Hv);
-				if (!is_non_singular_Hv) 
-				{
-					IV_V_i1 = arma::pinv(Hv);
-				}
-
-				arma::mat cross_Eres_G;
-				cross_Eres_G = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t()) * null_obj.JEresblock;//G.t() * cross_K1_J;
-				arma::mat IV_U_kron1 = arma::kron(arma::ones<arma::mat>(ei + qi + 1, 1), arma::mat(ng, ng, arma::fill::eye));
-				IV_U1 = IV_U_kron1.each_col() % cross_Eres_G;// V_U_kron1.each_col() % cross_K1_J_G //cross_K_res;
-				BETA_INT1 = (IV_V_i1 * IV_U1);
-				bool is_non_singular_IV_V1 = arma::inv(IV_E_i,IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1)));
-				if (!is_non_singular_IV_V1) 
-				{
-					IV_E_i = arma::pinv(IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1))); 
-				}
-
-				IV_U = IV_E_i* BETA_INT1.rows(ng,ngei1-1);
-				STAT_INT = diagvec(IV_U.t()*BETA_INT1.rows(ng,ngei1-1));
-
-				try 
-				{
-					IV_GE_i = arma::inv(IV_V_i1(arma::span(0,ngei1-1), arma::span(0,ngei1-1))); 
-					STAT_JOINT_tmp=  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
-					STAT_JOINT = diagvec(STAT_JOINT_tmp.t()*BETA_INT1.rows(0,ngei1-1));
-				
-					for (size_t s = 0; s < STAT_INT.size(); s++) 
-					{
-						// PVAL_INT[s] = chiSquareCDF(STAT_INT[s], ei, 0, 0);
-						if (arma::is_finite(PVAL_MAIN[s])) 
-						{
-							PVAL_JOINT[s] = chiSquareCDF(STAT_JOINT[s], 1+ei, 0, 0);
-						}
-					} 
-				} 
-				catch (const std::runtime_error& error) 
-				{
-					std::cout << "It is singular matrix "<< "\n";
-					for (size_t s = 0; s < STAT_INT.size(); s++) 
-					{
-						PVAL_JOINT[s] = DBL_EPSILON;
-					}
-				}
-				
-				for (size_t s = 0; s < STAT_INT.size(); s++)
-				{
-					PVAL_INT[s] = chiSquareCDF(STAT_INT[s], ei, 0, 0);
-				}
-			}
-
-			arma::uvec b_idx1 = arma::regspace<arma::uvec>(0, ng, (ei+qi) * ng);
-			int ng_j = 0;
-			//Write in the file
-
-			for (size_t j = 0; j < npbidx; ++j)
-			{
-				if (snp_skip[j] == 1)
-				{ 
-					continue;
-				}
-				else
-				{
-					writefile << tmpout[j] <<  BETA_MAIN[ng_j] << "\t" << SE_MAIN[ng_j] << "\t";
-					
-					if (meta_output)
-					{
-						// Beta Int the diaganol of BETA_INT1
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int row = b_idx1[b] + ng_j;
-							writefile << BETA_INT1(row, ng_j) << "\t";
-						}
-						// Var (the diaganol of IV_V_i1)
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int col = b_idx1[b] + ng_j;
-							for (int d = 0; d < ei + qi + 1; d++)
-							{
-								if (b == d)
-								{
-									int row = b_idx1[d] + ng_j;
-									writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-								}
-							}
-						}
-
-						// Cov (the lower triangle elements of IV_V_i1)
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int col = b_idx1[b] + ng_j;
-							for (int d = 0; d < ei + qi + 1; d++)
-							{
-								if (d > b)
-								{
-									int row = b_idx1[d] + ng_j;
-									writefile << IV_V_i1(row, col) << "\t";
-								}
-							}
-						}
-					}
-					else
-					{
-						int ncolE = ei + qi + 1;
-						arma::mat split_mat(ncolE,ncolE);
-
-						for (int i=0; i<ncolE; i++) 
-						{
-							for (int j=0; j<ncolE; j++)
-							split_mat(i,j) = i+1-ncolE+ncolE*(j+1);
-						}
-						
-						split_mat = split_mat(arma::span(1,ei), arma::span(1,ei));
-
-						if (split_mat.size() == 1)
-						{
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int row = b_idx1[b] + ng_j;
-								// NOT the first ng row
-
-								if (row > ng - 1)
-								{
-
-									writefile << BETA_INT1(row, ng_j) << "\t";
-								}
-							}
-							// Var (the diaganol elements)
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
-								{
-									if (b == d)
-									{
-										int row = b_idx1[d] + ng_j;
-										// NOT the first ng row or first ng col
-										if (row > ng - 1 && col > ng - 1)
-										{
-											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-										}
-									}
-								}
-							}
-						}
-
-						else
-						{
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int row = b_idx1[b] + ng_j;
-								// NOT the first ng row
-								if (row > ng - 1)
-								{
-									writefile << BETA_INT1(row, ng_j) << "\t";
-								}
-							}
-
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
-								{
-									if (b == d)
-									{
-										int row = b_idx1[d] + ng_j;
-										// NOT the first ng row or first ng col
-										if (row > ng - 1 && col > ng - 1)
-										{
-											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-										}
-									}
-								}
-							}
-
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
-								{
-									if (d > b)
-									{
-										int row = b_idx1[d] + ng_j;
-										if (row > ng - 1 && col > ng - 1)
-										{
-											writefile << IV_V_i1(row, col) << "\t";
-										}
-									}
-								}
-							}
-						}
-					}
-					writefile << PVAL_MAIN[ng_j] << "\t" << PVAL_INT[ng_j] << "\t" << PVAL_JOINT[ng_j] << "\n"; 
-					ng_j++;
-				}
-			}
-
-			npbidx = 0;
-			snp_skip.zeros();
-			G.reshape(n, npb);
-		}
 
 		if ((m) % 10000 == 0)
 		{
@@ -769,4 +786,598 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 	writefile.clear();
 	libdeflate_free_decompressor(decompressor);
 	fclose(fp);
+}
+
+
+
+
+void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile, 
+					std::string pvarFile, string const &outfile, double minmaf,
+					double missrate, size_t npb, int ei, int qi, 
+					std::ext::Map_str_Vint const &strata_list, 
+					uint begin, uint end, std::ext::V_lluint pgenPos, 
+					bool filterVariants, int pvarLength, int pvarLast,
+					std::ext::V_int pvarIndex, bool meta_output)
+{
+    std::ifstream fIDMat;
+    fIDMat.open(pvarFile);
+    std::string IDline;
+    std::string tmpvalue;
+    std::ext::V_string tmpvalues;
+    int prev = fIDMat.tellg();
+	std::ext::V_string geno_snpid(npb);
+	// bool isDupeID = null_obj.dupflag;
+    std::ext::V_int select = null_obj.select;
+    int strataList_size = strata_list.size();
+    bool skip_strata = strata_list.empty();
+    double maxmaf = 1 - minmaf;
+	size_t n = null_obj.n;
+	size_t n_obs = null_obj.n_obs;
+
+	arma::mat G(n, npb);
+	arma::vec g(n);
+    arma::uvec gmiss(n);
+	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
+	std::ext::V_string tmpout(npb);
+	double gmean, geno, gmax, gmin;
+	size_t ncount, nmiss, npbidx = 0;
+	
+	arma::mat strata_AF(end +1, strataList_size);
+	arma::mat strata_N(end +1, strataList_size);
+
+	std::string output = outfile + "_bin_" + std::to_string(begin) + ".tmp";
+	std::ofstream writefile(output, std::ios::binary);
+
+    if (!writefile) {
+        std::cerr << "Unable to open file for appending: " << outfile << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+
+	while (getline(fIDMat, IDline)) 
+	{
+        std::istringstream iss(IDline);
+        while (getline(iss, tmpvalue, '\t')) 
+		{
+            tmpvalue.erase(std::remove(tmpvalue.begin(), tmpvalue.end(), '\r'), tmpvalue.end());
+            tmpvalues.push_back(tmpvalue);
+        }
+        if (tmpvalues[0].rfind("##", 0) != 0) 
+		{
+            break;
+        }
+        prev = fIDMat.tellg();
+        tmpvalues.clear();
+    }
+
+    if (tmpvalues[0].compare("#CHROM") != 0) 
+	{
+        fIDMat.seekg(prev);
+    }
+
+    uint32_t skipIndex = 0;
+    if (!filterVariants) 
+	{
+        while (skipIndex != begin) 
+		{
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+    }
+    else {
+        while (skipIndex != pgenPos[begin]) 
+		{
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+    }
+
+    const char* geno_filename = pgenfile.c_str();
+    plink2::PgenFileInfo _info_ptr;
+    plink2::PreinitPgfi(&_info_ptr);
+    plink2::PgenHeaderCtrl header_ctrl;
+
+    uintptr_t pgfi_alloc_cacheline_ct;
+    char errstr_buf[plink2::kPglErrstrBufBlen];
+    if (PgfiInitPhase1(geno_filename, geno_filename, UINT32_MAX, UINT32_MAX, &header_ctrl, &_info_ptr, &pgfi_alloc_cacheline_ct, errstr_buf) != plink2::kPglRetSuccess) 
+	{
+        throw std::runtime_error(errstr_buf);
+    }
+
+    const uint32_t raw_variant_ct = _info_ptr.raw_variant_ct;
+    const uint32_t file_sample_ct = _info_ptr.raw_sample_ct;
+
+    unsigned char* pgfi_alloc = nullptr;
+    if (plink2::cachealigned_malloc(pgfi_alloc_cacheline_ct * plink2::kCacheline, &pgfi_alloc)) 
+	{
+        cerr << "Out of memory" << endl;
+    }
+
+    uint32_t max_vrec_width;
+    uintptr_t pgr_alloc_cacheline_ct;
+    if (PgfiInitPhase2(header_ctrl, 1, 0, 0, 0, raw_variant_ct, &max_vrec_width, &_info_ptr, pgfi_alloc, &pgr_alloc_cacheline_ct, errstr_buf)) 
+	{
+        if (pgfi_alloc && (!_info_ptr.vrtypes)) 
+		{
+            plink2::aligned_free(pgfi_alloc);
+        }
+        throw std::runtime_error(errstr_buf);
+    }
+    
+    plink2::PgenVariant _pgv;
+    plink2::PgenReader _state_ptr;
+    plink2::PreinitPgr(&_state_ptr);
+    plink2::PgrSetFreadBuf(nullptr, &_state_ptr);
+    const uintptr_t pgr_alloc_main_byte_ct = pgr_alloc_cacheline_ct * plink2::kCacheline;
+    const uintptr_t sample_subset_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerVec) * plink2::kBytesPerVec;
+    const uintptr_t cumulative_popcounts_byte_ct = plink2::DivUp(file_sample_ct, plink2::kBitsPerWord * plink2::kInt32PerVec) * plink2::kBytesPerVec;
+    const uintptr_t genovec_byte_ct = plink2::DivUp(file_sample_ct, plink2::kNypsPerVec) * plink2::kBytesPerVec;
+    const uintptr_t dosage_main_byte_ct = plink2::DivUp(file_sample_ct, (2 * plink2::kInt32PerVec)) * plink2::kBytesPerVec;
+    uintptr_t multiallelic_hc_byte_ct = 0;
+
+    unsigned char* pgr_alloc;
+    if (plink2::cachealigned_malloc(pgr_alloc_main_byte_ct + (2 * plink2::kPglNypTransposeBatch + 5) * sample_subset_byte_ct + cumulative_popcounts_byte_ct + (1 + plink2::kPglNypTransposeBatch) * genovec_byte_ct + multiallelic_hc_byte_ct + dosage_main_byte_ct + plink2::kPglBitTransposeBufbytes + 4 * (plink2::kPglNypTransposeBatch * plink2::kPglNypTransposeBatch / 8), &pgr_alloc)) 
+	{
+        cerr << "Out of memory" << endl;
+    }
+
+    plink2::PglErr reterr = PgrInit(geno_filename, max_vrec_width, &_info_ptr, &_state_ptr, pgr_alloc);
+    if (reterr) 
+	{
+        throw std::runtime_error("Out of memory.");
+    }
+
+    unsigned char* pgr_alloc_iter = &(pgr_alloc[pgr_alloc_main_byte_ct]);
+    uintptr_t* _subset_include_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    uintptr_t* _subset_include_interleaved_vec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _subset_include_interleaved_vec[-1] = 0;
+
+    pgr_alloc_iter = &(pgr_alloc_iter[cumulative_popcounts_byte_ct]);
+    _pgv.genovec = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[genovec_byte_ct]);
+
+    _pgv.phasepresent = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.phaseinfo = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.dosage_present = reinterpret_cast<uintptr_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[sample_subset_byte_ct]);
+    _pgv.dosage_main = reinterpret_cast<uint16_t*>(pgr_alloc_iter);
+    pgr_alloc_iter = &(pgr_alloc_iter[dosage_main_byte_ct]);
+
+    uint32_t _subset_size = file_sample_ct;
+    plink2::PgrSampleSubsetIndex _subset_index;
+    pgr_alloc_iter = &(pgr_alloc_iter[plink2::kPglBitTransposeBufbytes]);
+
+    // int variant_index = 0;
+    // int keepIndex = 0;
+    vector<double> buf(file_sample_ct);
+    
+	for (uint m = begin; m <= end; ++m)
+	{
+		std::ostringstream writeout;
+		
+		if (m >= _info_ptr.raw_variant_ct) 
+		{
+			char errstr_buf[256];
+			sprintf(errstr_buf, "variant_num out of range (%d; must be 1..%u)", m + 1, _info_ptr.raw_variant_ct);
+			cerr << errstr_buf << "\n";
+		}
+
+		uint32_t dosage_ct;
+		string value;
+		std::ext::V_string values;
+		if (!filterVariants) 
+		{
+			reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, m, 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
+			getline(fIDMat, IDline);
+			std::istringstream iss(IDline);
+			while (getline(iss, value, '\t')) 
+			{
+				values.push_back(value);					
+			}
+		}
+		else 
+		{
+			while (skipIndex != pgenPos[m]) 
+			{
+				getline(fIDMat, IDline);
+				skipIndex++;
+			}
+			getline(fIDMat, IDline);
+			skipIndex++;
+			std::istringstream iss(IDline);
+			while (getline(iss, value, '\t')) 
+			{
+				values.push_back(value);
+			}
+			reterr = plink2::PgrGet1D(_subset_include_vec, _subset_index, _subset_size, pgenPos[m], 1, &_state_ptr, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, &dosage_ct);
+		}
+
+		plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
+		
+		gmean = 0.0;
+		//double mac = 0.0;
+		// gsqmean = 0.0;
+		gmax = -100.0;
+		gmin = 100.0;
+		//double rsq = 0.0;
+		nmiss = 0;
+		ncount = 0;
+		int idx_k = 0;
+
+		for (uint32_t ct = 0; ct < file_sample_ct; ct++) 
+		{
+			if (buf[ct] == -9.0) 
+			{
+				if (select[idx_k] >= 0)
+				{
+					// missingIndex.push_back(idx_k);
+					gmiss(select[idx_k]) = 1;
+					nmiss++;
+					// idx_k++;
+				}
+				idx_k++;
+				continue;
+			}
+
+			if (select[idx_k] >= 0) 
+			{
+				geno = buf[ct];
+				gmiss(select[idx_k]) = 0;
+				g[select[idx_k]] = geno;
+				gmean += geno;
+				if (geno > gmax)
+				{
+					gmax = geno;
+				}
+				if (geno < gmin)
+				{
+					gmin = geno;
+				}
+			}
+			idx_k++;
+		}
+
+		gmean /= static_cast<double>(n - nmiss);
+		double AF = gmean / 2.0;
+		double percMissing = nmiss / (n * 1.0);
+
+		for (size_t j = 0; j < n; ++j)
+		{
+			if (gmiss(j) == 1)
+			{
+				g[j] = gmean;
+			}
+		}
+
+		if ((static_cast<double>(nmiss) / n > missrate) || ((AF < minmaf) || (AF > maxmaf)))
+		{ 
+			snp_skip[npbidx] = 1;
+		}
+		else
+		{
+			G.col(npbidx) = g; 
+		}
+
+		std::string tmpString = "";
+		values[pvarLast].erase(std::remove(values[pvarLast].begin(), values[pvarLast].end(), '\r'), values[pvarLast].end());
+
+		for (int p = 0; p < pvarLength; p++) 
+		{
+			tmpString = tmpString + values[pvarIndex[p]] + "\t";
+		}
+
+		geno_snpid[npbidx] = tmpString + std::to_string(n - nmiss);
+		
+		
+		if (skip_strata)
+		{
+			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t";
+		}
+		else
+		{
+			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t";
+			std::vector<double> strata_range(strataList_size);
+			int strata_cnt = 0;
+			arma::uvec strata_gmiss;
+			arma::vec strata_g;
+
+			for (const auto &strata : strata_list)
+			{
+				std::ext::V_int vec = strata.second;
+				arma::uvec strata_tmp = arma::conv_to<arma::uvec>::from(vec);
+				strata_gmiss = gmiss.elem(strata_tmp);
+				strata_g = g.elem(strata_tmp);
+				strata_AF(m,strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
+				arma::vec tmp = strata_g.elem(find(strata_gmiss == 0));
+				strata_N(m,strata_cnt) =tmp.n_elem;
+				strata_cnt++;
+			}
+		
+			for (int strata_idx = 0; strata_idx < strataList_size; strata_idx++)
+			{
+				writeout << strata_N(m, strata_idx) << "\t";
+				writeout << strata_AF(m, strata_idx) << "\t";
+			}
+		}
+
+		// variant_index++;
+        // keepIndex++;
+		tmpout[npbidx] = writeout.str();
+		writeout.clear();
+		npbidx++;
+
+		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+				writefile, meta_output, tmpout, m, end);
+
+		if ((m) % 10000 == 0)
+		{
+			writefile << std::flush;
+		} 
 	}
+
+	if (end % 10000 != 0)
+	{
+		writefile << std::flush;
+	}
+
+	writefile.close();
+	writefile.clear();
+	fIDMat.close();
+}
+
+
+void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile, 
+					std::string bimFile, string const &outfile, double minmaf,
+					double missrate, size_t npb, int ei, int qi, 
+					std::ext::Map_str_Vint const &strata_list, 
+					uint begin, uint end, std::ext::V_lluint bedPos, 
+					bool filterVariants, char bimDelim, int bimLast, 
+					uint32_t n_samples, bool meta_output)
+{
+	std::ifstream fIDMat;
+    fIDMat.open(bimFile);
+    std::string IDline;
+	std::string geno_snpid;
+    std::ext::V_int select = null_obj.select;
+    int strataList_size = strata_list.size();
+    bool skip_strata = strata_list.empty();
+    double maxmaf = 1 - minmaf;
+	std::string output = outfile + "_bin_" + std::to_string(begin) + ".tmp";
+	std::ofstream writefile(output, std::ios::binary);
+
+    if (!writefile) 
+	{
+        std::cerr << "Unable to open file for appending: " << outfile << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+	size_t n = null_obj.n;
+	size_t n_obs = null_obj.n_obs;
+
+	arma::mat G(n, npb);
+	arma::vec g(n);
+    arma::uvec gmiss(n);
+	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
+	std::ext::V_string tmpout(npb);
+	double gmean, geno, gmax, gmin;
+	size_t ncount, nmiss, npbidx = 0;
+	arma::mat strata_AF(end +1, strataList_size);
+	arma::mat strata_N(end +1, strataList_size);
+	uint32_t skipIndex = 0;
+	
+    
+    if (!filterVariants) 
+	{
+        while (skipIndex != begin) 
+		{
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+    }
+    else 
+	{
+        while (skipIndex != bedPos[begin]) 
+		{
+            getline(fIDMat, IDline);
+            skipIndex++;
+        }
+        
+    }
+	   
+    std::ifstream readbedfile(bedfile.c_str(), std::ios::binary);
+    uint nblocks = (n_samples + 3) / 4, pos;
+    unsigned char temp[2];
+    unsigned char* buffer = new unsigned char[nblocks];
+
+	for (uint m = begin; m <= end; ++m)
+	{
+		std::ostringstream writeout;
+		std::string value;
+		std::vector <string> values;
+		if (!filterVariants) 
+		{
+			readbedfile.seekg((std::streamoff)m * nblocks + 3, readbedfile.beg);
+			getline(fIDMat, IDline);             
+			std::istringstream iss(IDline);
+			while (getline(iss, value, bimDelim)) 
+			{
+				values.push_back(value);  
+			}
+			
+		}
+		else 
+		{
+			while (skipIndex != bedPos[m]) 
+			{
+				getline(fIDMat, IDline);
+				skipIndex++;
+			}
+			readbedfile.seekg((std::streamoff)bedPos[m] * nblocks + 3, readbedfile.beg);                
+			getline(fIDMat, IDline);
+			skipIndex++;
+			std::istringstream iss(IDline);
+			while (getline(iss, value, bimDelim)) 
+			{
+				values.push_back(value);
+			}
+		}
+
+		readbedfile.read((char*)buffer, nblocks);
+		gmean = 0.0;
+		//double mac = 0.0;
+		// gsqmean = 0.0;
+		gmax = -100.0;
+		gmin = 100.0;
+		//double rsq = 0.0;
+		nmiss = 0;
+		ncount = 0;
+		int idx_k = 0;
+
+		for (size_t block = 0; block < nblocks; block++) 
+		{
+            pos = 0;
+
+            for (int i = 0; i < 4; i++) 
+			{
+				if ((ncount == n_samples) && (block == nblocks - 1)) 
+				{
+					break;
+				}
+				for (size_t l = 0; l < 2; ++l) 
+				{
+					temp[l] = (buffer[block] >> pos) & 1;
+					pos++;
+				}
+				
+				if (select[idx_k] == -1) 
+				{
+					ncount++;
+					idx_k++;
+					continue;
+				}
+			
+				if (temp[0] == 0 && temp[1] == 0) 
+				{
+					geno = 2.0;
+				}
+				else if (temp[0] == 1 && temp[1] == 1) 
+				{
+					geno = 0.0;
+				}
+				else if (temp[0] == 0 && temp[1] == 1) 
+				{
+					geno = 1.0;
+				}
+				else 
+				{
+					// missingIndex.push_back(idx_k);
+					gmiss(select[idx_k]) = 1;
+					nmiss++;
+					idx_k++;
+					ncount++;
+					continue;
+				}
+
+				gmean += geno;
+				if (geno > gmax)
+				{
+					gmax = geno;
+				}
+				if (geno < gmin)
+				{
+					gmin = geno;
+				}
+
+				g(select[idx_k]) = geno;
+				gmiss(select[idx_k]) = 0;
+				idx_k++;
+				ncount++;
+			}
+        }
+		
+		gmean /=  static_cast<double>(n - nmiss);
+		double AF = gmean / 2.0;
+		double percMissing = nmiss / (n * 1.0);
+		for (size_t j = 0; j < n; ++j)
+		{
+			if (gmiss(j) == 1)
+			{
+				g[j] = gmean;
+			}
+		}
+
+		if ((static_cast<double>(nmiss) / n > missrate) || ((AF < minmaf) || (AF > maxmaf)))
+		{
+            snp_skip[npbidx] = 1;
+			continue;                           
+        }
+		else
+		{
+			G.col(npbidx) = g; //size of g is nobs
+		}
+
+		values[bimLast].erase(std::remove(values[bimLast].begin(), values[bimLast].end(), '\r'), values[bimLast].end());
+        geno_snpid = values[1] + "\t" + values[0] + "\t" + values[bimLast - 2] + "\t" + values[bimLast] + "\t" + values[bimLast - 1] + "\t" + std::to_string(n - nmiss);
+
+		if (skip_strata)
+		{
+			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t";
+		}
+		else
+		{
+			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t";
+			std::vector<double> strata_range(strataList_size);
+			int strata_cnt = 0;
+			arma::uvec strata_gmiss;
+			arma::vec strata_g;
+
+			for (const auto &strata : strata_list)
+			{
+				std::ext::V_int vec = strata.second;
+				arma::uvec strata_tmp = arma::conv_to<arma::uvec>::from(vec);
+				strata_gmiss = gmiss.elem(strata_tmp);
+				strata_g = g.elem(strata_tmp);
+				strata_AF(m,strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
+				arma::vec tmp = strata_g.elem(find(strata_gmiss == 0));
+				strata_N(m,strata_cnt) =tmp.n_elem;
+				strata_cnt++;
+			}
+		
+			for (int strata_idx = 0; strata_idx < strataList_size; strata_idx++)
+			{
+				writeout << strata_N(m, strata_idx) << "\t";
+				writeout << strata_AF(m, strata_idx) << "\t";
+			}
+		}
+
+		tmpout[npbidx] = writeout.str();
+				
+		writeout.clear();
+		npbidx++;
+
+		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+				writefile, meta_output, tmpout, m, end);
+
+		if ((m) % 10000 == 0)
+		{
+			writefile << std::flush;
+		} 
+	}
+
+	delete[] buffer;
+	buffer = nullptr;
+	
+	if (end % 10000 != 0)
+	{
+		writefile << std::flush;
+	}
+
+	writefile.close();
+	writefile.clear();
+	fIDMat.close();
+}
+

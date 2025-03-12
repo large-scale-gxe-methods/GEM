@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 2.0   
+Current version: 2.1   
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.0/binary.tar.gz.
-* Change the permission: chmod a+x GEM_2.0_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1/GEM_2.1_Intel
+* Change the permission: chmod a+x GEM_2.1_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++17 compiler or later 
@@ -73,8 +73,13 @@ Boost C++ Libraries
 
 Eigen Library
 * The Eigen library is used for linear algebra of dense and sparse matrices.
-* Download the source code from https://eigen.tuxfamily.org/index.php?title=Main_Page and add the directory of Eigen header files in the include path when compiling.
- 
+
+SuiteSparse Library
+* The SuiteSparse library is used for linear algebra operations on dense and sparse matrices. It is particularly utilized in in the GLMM model to fit the null model during association test.
+
+Armadillo Library
+* The Armadillo library is used for linear algebra of dense and sparse matrices. It is particularly utilized in G × E (Gene-Environment) interaction test.
+
 
 ## Usage
 
@@ -90,8 +95,8 @@ Eigen Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable ```./GEM``` can be used to run the program.  
-For a list of options, use ```./GEM --help```.  
+Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1_Intel`` can be used to run the program.  
+For a list of options, use ```./GEM --help``` or ```./GEM_2.1_Intel --help```.  
 
 <details>
      <summary> <b>List of Options</b> </summary>
@@ -271,20 +276,20 @@ Performance Options:
 <br />
 
 * #### Kinship File
-    A file contains nonzero values in a three-column format, where the first two columns represent sample identifiers, and the third column indicates the genetic relatedness between them.
+    A file contains nonzero values in a three-column format, where the first two columns represent sample identifiers, and the third column indicates the kinship coefficient or genetic relatedness between individuals, or the inbreeding coefficient for the same individual. The scale of the kinship matrix does not matter (e.g., you can use two times the kinship matrix, or identity-by-descent information), as long as the values are on the same scale of the diagonal elements to be added in --kin-diag. For genetic relationship matrices computed from genotypes that have different values on the diagonals, we recommend specifying all diagonal values explicitly in the kinship file, along with --kin-diag 0.
 
-##### Example 1 of Kinship Matrix:
+##### Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.05 for the fifth individual):
 ```
 
-⎡ 0.5    0    0.25  0.25    0 ⎤
-⎢  0    0.5   0.25  0.25    0 ⎥
-⎢ 0.25  0.25  0.5   0.25    0 ⎥
-⎢ 0.25  0.25  0.25  0.5     0 ⎥
+⎡ 0.5    0    0.25  0.25   0  ⎤
+⎢  0    0.5   0.25  0.25   0  ⎥
+⎢ 0.25  0.25  0.5   0.25   0  ⎥
+⎢ 0.25  0.25  0.25  0.5    0  ⎥
 ⎣  0     0     0     0   0.55 ⎦
 
 ```
 
-##### Kinship Table Coressponding to Example 1(--kin-diag = 0.5):
+##### The Kinship File Corresponding to Example 1 (along with --kin-diag 0.5):
 ```
 
 | ID1 | ID2 | Kinship|
@@ -298,17 +303,17 @@ Performance Options:
 
 ```
 
-##### Example 2 of Kinship Matrix:
+##### Example 2 of Kinship Matrix (two times the kinship matrix in Example 1):
 ```
-⎡  1    0    0.5   0.5  0.5 ⎤
-⎢  0    1    0.5   0.5  0.5 ⎥
-⎢ 0.5  0.5    1    0.5  0.5 ⎥
-⎢ 0.5  0.5   0.5    1   0.5 ⎥
-⎣ 0.5  0.5   0.5   0.5  1.1 ⎦
+⎡  1    0    0.5   0.5   0  ⎤
+⎢  0    1    0.5   0.5   0  ⎥
+⎢ 0.5  0.5    1    0.5   0  ⎥
+⎢ 0.5  0.5   0.5    1    0  ⎥
+⎣  0    0     0     0   1.1 ⎦
 
 ```
 
-##### Kinship Table Coressponding to Example 2(--kin-diag = 1):
+##### The Kinship File Corresponding to Example 2 (along with --kin-diag 1):
 ```
 | ID1 | ID2 | Kinship|
 |-----|-----|--------|
@@ -411,12 +416,29 @@ Includes, in addition to "meta", an initial header line with the residual varian
 <br />
 
 To run GEM using the example data, execute GEM with the following code.
+Example for cross-sectional data without kinship:
 ```
-./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out my_example.out
+./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out cross_sectional_without_kinship.out
 ```
-The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
+The results should look like the following output file [cross_sectional_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/cross_sectional_without_kinship.out).  
 
+Example for cross-sectional data with kinship:
+```
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
+```
+The results should look like the following output file [cross_sectional_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/cross_sectional_with_kinship.out).  
 
+Example for longitudinal data without kinship:
+```
+/.GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
+```
+The results should look like the following output file [longitudinal_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/longitudinal_without_kinship.out).  
+
+Example for longitudinal data with kinship:
+```
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
+```
+The results should look like the following output file [longitudinal_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/longitudinal_with_kinship.out).  
 
 <br />
 
@@ -512,7 +534,7 @@ The results should look like the following output file [my_example.out](https://
 <br />
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 <br />
 <br />

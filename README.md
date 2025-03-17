@@ -415,6 +415,7 @@ Includes, in addition to "meta", an initial header line with the residual varian
 <br />
 
 To run GEM using the example data, execute GEM with the following code.
+
 Example for cross-sectional data without kinship:
 ```
 ./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out cross_sectional_without_kinship.out
@@ -423,19 +424,19 @@ The results should look like the following output file [cross_sectional_without_
 
 Example for cross-sectional data with kinship:
 ```
-./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
 ```
 The results should look like the following output file [cross_sectional_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_with_kinship.out).  
 
 Example for longitudinal data without kinship:
 ```
-/.GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
+/.GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
 ```
 The results should look like the following output file [longitudinal_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_without_kinship.out).  
 
 Example for longitudinal data with kinship:
 ```
-./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope pheno2 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
 ```
 The results should look like the following output file [longitudinal_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_with_kinship.out).  
 
@@ -577,4 +578,4 @@ If you use GEM in your analysis, please cite
 * Eigen: Mozilla Public License, Version 2.0
 * Intel oneAPI Math Kernel Library (oneMKL): Intel Simplified Software License (Version October 2022 or later)
 
- Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE.md">here</a>.
+ Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE">here</a>.

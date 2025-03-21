@@ -88,6 +88,14 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
         kin.read_file(kin.m_path, kin_delim);
         std::unordered_set<uint64_t> added_pairsdiag;
         std::unordered_set<uint64_t> added_pairs;
+        uint64_t combined_key;
+
+        for(unsigned int i {0}; i < pheno.size(); ++i)
+        {
+            combined_key = combine_indices(i, i);
+            added_pairsdiag.insert(combined_key);
+            vt4spmat.emplace_back(std::ext::Triplet_d(i, i, kin.m_diag)); 
+        }
 
         if (pheno.m_data_frame.any_duplicated(pheno.m_sam_id))
         {
@@ -101,7 +109,7 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
                 {
                     for(auto& id2 : v_indices)
                     {
-                        uint64_t combined_key = combine_indices(id1, id2);
+                        combined_key = combine_indices(id1 - 1, id2 - 1);
                         if(added_pairsdiag.insert(combined_key).second)
                         {
                             vt4spmat.emplace_back(std::ext::Triplet_d(id1 - 1 , id2 - 1, kin.m_diag));
@@ -114,38 +122,7 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
                 } 
             }
         }
-        else
-        {
-            // auto id0 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[0]];
-            // auto id1 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[1]];
-            // std::set<std::string> set_id0(id0.begin(), id0.end());
-            // std::set<std::string> set_id1(id1.begin(), id1.end());
-            // std::set<std::string> combined_ids(id0.begin(), id0.end());
-            // combined_ids.insert(id1.begin(), id1.end());
-            // std::unordered_set<int> mapped_ids;         
-            // for(auto id : combined_ids)
-            // {
-            //     id.erase(std::remove(id.begin(), id.end(), '\"'), id.end());
-            //     if (m_idx_mp.find(id) != m_idx_mp.end()) 
-            //     {
-            //         auto ids = m_idx_mp[id];
-            //         for(auto& diag : ids)
-            //         {
-            //             mapped_ids.insert(diag);
-            //         }
-            //     }
-            // }
-            for(unsigned int i {0}; i < pheno.size(); ++i)
-            {
-                vt4spmat.emplace_back(std::ext::Triplet_d(i, i, kin.m_diag)); 
-            }
-            // if(mapped_ids.size() == 0)
-            // {
-            //     std::cerr << "Warning: There is no matching ID in kinship file and Phenotype file\n";
-            //     std::exit(EXIT_FAILURE);
-            // }
-        }
-
+        
         for(unsigned int i{0}; i < kin.size(); ++i)
         {
             auto val0 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[0]][i];//Retutn first ID in kin
@@ -169,7 +146,7 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
                 {
                     for (int v1_idx : v_v1_idx) 
                     {
-                        uint64_t combined_key = combine_indices(v0_idx, v1_idx);
+                        uint64_t combined_key = combine_indices(v0_idx - 1, v1_idx - 1);
                         //Check if pairs are not repeated and kinship's ids are in the phenodata
                         if (!is_missing(v0_idx, v1_idx) && added_pairs.insert(combined_key).second) 
                         {

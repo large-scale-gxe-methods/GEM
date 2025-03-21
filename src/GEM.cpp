@@ -242,13 +242,6 @@ int main(int argc, char* argv[]) {
 
         if (cmd.kin_flag || is_duplicated)
         {
-            if (is_duplicated && !cmd.kin_flag)
-            {
-                if (cmd.diag_flag)
-                {
-                    cout << "Warning: kin-diag has been defined without specifying kinship file address\n"; 
-                }
-            }
             phenomap.clear();
             auto start_time_gmmat = std::chrono::high_resolution_clock::now();
             vector <string> phenoHeaders(covSelHeadersName);
@@ -446,14 +439,7 @@ int main(int argc, char* argv[]) {
         
         if (cmd.kin_flag || is_duplicated)
         {
-            if (is_duplicated && !cmd.kin_flag)
-            {
-                if (cmd.diag_flag)
-                {
-                    cout << "Warning: kin-diag has been defined without specifying kinship file address\n"; 
-                }
-            }
-            phenomap.clear();
+           phenomap.clear();
             auto start_time_gmmat = std::chrono::high_resolution_clock::now();
             vector <string> phenoHeaders(covSelHeadersName);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
@@ -652,13 +638,6 @@ int main(int argc, char* argv[]) {
         //Run GMMAT and MAGEE if(cmd.kin_flag) True
         if (cmd.kin_flag || is_duplicated)
         {
-            if (is_duplicated && !cmd.kin_flag)
-            {
-                if (cmd.diag_flag)
-                {
-                    cout << "Warning: kin-diag has been defined without specifying kinship file address\n"; 
-                }
-            }
             phenomap.clear();
             auto start_time_gmmat = std::chrono::high_resolution_clock::now();
             vector <string> phenoHeaders(covSelHeadersName);

@@ -35,7 +35,6 @@ public:
 	std::string delim_k;
 	bool kin_flag = false;
 	double kin_diag;
-	bool diag_flag = false;
 //	std::string missing;
 	char kin_delim;
 

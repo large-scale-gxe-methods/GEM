@@ -389,14 +389,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
     }
 
-    // if(out.count("kin-diag")){
-    //     kin_diag = out["kin-diag"].as<double>();
-    //     diag_flag = true;
-    //     }
-    if (out.count("kin-diag") && out["kin-diag"].defaulted() == false) {
+    if(out.count("kin-diag"))
+    {
         kin_diag = out["kin-diag"].as<double>();
-        diag_flag = true;
     }
+    
 
     if (out.count("missing-value")) {
         missing = out["missing-value"].as<std::string>();

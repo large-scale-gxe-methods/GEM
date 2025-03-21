@@ -363,58 +363,6 @@ DensMat slice_mat(DensMat const& dm, std::ext::Var_bool_int const& indices)
 
 // Function to slice SpaMat (sparse matrix) based on row and column indices
 
-// SpaMat slice_mat(SpaMat const& spm, std::ext::V_int ind1, std::ext::V_int ind2, bool check_size)
-// {
-//     if (check_size && spm.rows() == ind1.size() && spm.cols() == ind2.size())
-//     {
-//         return spm;
-//     }
-//     std::cout <<"inside" <<std::endl;
-//     SpaMat sliced_matrix(ind1.size(), ind2.size());
-//     std::mutex mtx;  // Mutex for thread-safe access to the sparse matrix
-//     size_t num_threads = std::thread::hardware_concurrency();  // Get the number of available threads
-//     std::vector<std::thread> threads;
-
-//     // Worker function for slicing the sparse matrix
-//     auto worker = [&](size_t start_row, size_t end_row) 
-//     {
-//         for (size_t i = start_row; i < end_row; ++i)
-//         {
-//             for (size_t j = 0; j < ind2.size(); ++j)
-//             {
-//                 double value = spm.coeff(ind1[i], ind2[j]);
-//                 if (value != 0.0)  // Only insert non-zero values
-//                 {
-//                     std::lock_guard<std::mutex> lock(mtx);  // Ensure thread-safe insertion
-//                     sliced_matrix.insert(i, j) = value;
-//                 }
-//             }
-//         }
-//     };
-
-//     // Split work across threads
-//     size_t chunk_size = ind1.size() / num_threads;
-//     size_t remainder = ind1.size() % num_threads;
-//     size_t start_row = 0;
-
-//     // Create threads
-//     for (size_t t = 0; t < num_threads; ++t)
-//     {
-//         size_t end_row = start_row + chunk_size + (t < remainder ? 1 : 0);  // Distribute remainder
-//         threads.emplace_back(worker, start_row, end_row);
-//         start_row = end_row;
-//     }
-
-//     for (auto& thread : threads)
-//     {
-//         thread.join();
-//     }
-
-//     return sliced_matrix;
-// }
-
-
-
 SpaMat slice_mat(SpaMat const& spm, std::ext::V_int ind1, std::ext::V_int ind2, bool check_size)
 {
     if (check_size && spm.rows() == ind1.size() && spm.cols() == ind2.size())
@@ -1419,7 +1367,7 @@ Glmmkin GMMAT::glmmkin_final(std::ext::FitNull_f fit0, Pheno pheno,
                 }
             } 
         }
-        
+
         spi_mat.setFromTriplets(triplets.begin(), triplets.end());
         spi_mat.makeCompressed();
         if(!m_vkins_sp[0].kin.m_null_kin)

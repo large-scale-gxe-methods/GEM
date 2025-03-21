@@ -430,7 +430,7 @@ The results should look like the following output file [cross_sectional_with_kin
 
 Example for longitudinal data without kinship:
 ```
-/.GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
+./GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
 ```
 The results should look like the following output file [longitudinal_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_without_kinship.out).  
 
@@ -577,5 +577,17 @@ If you use GEM in your analysis, please cite
 * Boost: Boost Software License, Version 1.0
 * Eigen: Mozilla Public License, Version 2.0
 * Intel oneAPI Math Kernel Library (oneMKL): Intel Simplified Software License (Version October 2022 or later)
+* Armadillo: Apache License 2.0
+* SuiteSparse:
+     * libcholmod: GNU Lesser General Public License (LGPL), version 2.1 or later
+     * libcxsparse: GNU Lesser General Public License (LGPL), version 2.1 or later
+     * libspqr:GNU General Public License (GPL), version 2 or later
+     * libumfpack: GNU General Public License (GPL), version 2 or later
+     * libcamd: BSD 3-Clause License
+     * libccolamd: BSD 3-Clause License
+     * libcolamd: BSD 3-Clause License
+     * libamd: BSD 3-Clause License
+     * libsuitesparseconfig: BSD-3-clause
+* fmt: MIT License
 
- Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE">here</a>.
+ Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE">here</a>.

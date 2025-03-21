@@ -34,7 +34,7 @@ class Pheno
          * @param delim 
          */
         void read_file(std::string_view, char delim = ',');  
-        std::pair<std::string, std::string> check_binary(std::string pheno_name );
+        std::pair<std::string, std::string> check_binary(std::string pheno_name);
     private:
         std::string m_path;
 };

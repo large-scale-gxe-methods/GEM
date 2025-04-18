@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 2.1   
+Current version: 2.1.1
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1/GEM_2.1_Intel
-* Change the permission: chmod a+x GEM_2.1_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.1/GEM_2.1.1_Intel
+* Change the permission: chmod a+x GEM_2.1.1_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++17 compiler or later 
@@ -94,8 +94,8 @@ Armadillo Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1_Intel`` can be used to run the program.  
-For a list of options, use ```./GEM --help``` or ```./GEM_2.1_Intel --help```.  
+Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1.1_Intel`` can be used to run the program.  
+For a list of options, use ```./GEM --help``` or ```./GEM_2.1.1_Intel --help```.  
 
 <details>
      <summary> <b>List of Options</b> </summary>
@@ -443,6 +443,9 @@ The results should look like the following output file [longitudinal_with_kinshi
 <br />
 
 ## Recent Updates 
+[Version 2.1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.1) - April 18, 2025:
+* Prints the SNP ID where a singular matrix is detected.
+
 [Version 2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1) - March 10, 2025:
 * Added support for GLMM on PGEN and BED files.
 * Added support for GEI test on PGEN and BED files.

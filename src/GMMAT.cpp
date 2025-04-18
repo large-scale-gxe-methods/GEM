@@ -683,6 +683,7 @@ void GMMAT::calc_rand_effect(int &kins_size, int ng)
         SpaMat sp_cov = sp_left + sp_right;
         sp_cov.makeCompressed();
         spi_cov.set_spmat(sp_cov);
+        //insert spi_cov to vector of SparseInverse
         m_vkins_sp[kins_size + i] = spi_cov;
         SpaMat sp_slope = sp_right * m_rand_slope.asDiagonal();
         sp_slope.makeCompressed();

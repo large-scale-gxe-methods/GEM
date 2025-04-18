@@ -25,13 +25,13 @@ public:
 	bool useBedFile = false;
 
 	// Phenotype file
-	std::string phenoFile;
+	std::string pheno_file;
 	std::string delim;
 	std::string missing;
 	char pheno_delim;
 
 	// kinship file
-	std::string kinFile;
+	std::string kin_file;
 	std::string delim_k;
 	bool kin_flag = false;
 	double kin_diag;

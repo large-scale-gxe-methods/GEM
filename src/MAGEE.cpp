@@ -1,6 +1,6 @@
 #include "MAGEE.h"
 
-
+// glmm_gei_* functions to run G*E test
 extern void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					string const &outfile, double minmaf, double missrate,
 					size_t npb, int ei, int qi, std::ext::Map_str_Vint const &strata_list, 
@@ -21,14 +21,18 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 					bool filterVariants, char bimDelim, int bimLast,
 					uint32_t n_samples, bool meta_output = false);
 
-void conver_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) {
+void conver_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) 
+{
     // Determine the number of non-zero elements
     arma::umat locations(2, eigenMat.nonZeros());  // Store row and column indices
     arma::vec values(eigenMat.nonZeros());  // Store the values
 
     size_t index = 0;
-    for (int k = 0; k < eigenMat.outerSize(); ++k) {
-        for (SpaMat::InnerIterator it(eigenMat, k); it; ++it) {
+
+    for (int k = 0; k < eigenMat.outerSize(); ++k) 
+    {
+        for (SpaMat::InnerIterator it(eigenMat, k); it; ++it) 
+        {
             // Collect the row, column, and value for non-zero elements
             locations(0, index) = it.row();
             locations(1, index) = it.col();
@@ -36,7 +40,6 @@ void conver_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) {
             ++index;
         }
     }
-
     // Use the collected data to construct the Armadillo sparse matrix
     armaMat = arma::sp_mat(locations, values, eigenMat.rows(), eigenMat.cols());
 }
@@ -54,12 +57,17 @@ std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_op
     }
 
     std::ext::V_int indices;
+
     for (const auto& id : original) 
     {
         auto it = filtered_map.find(id);
-        if (it != filtered_map.end()) {
+
+        if (it != filtered_map.end()) 
+        {
             indices.push_back(it->second);
-        } else {
+        } 
+        else 
+        {
             indices.push_back(-1); // Use -1 to indicate not found
         }
     }
@@ -69,16 +77,23 @@ std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_op
 //Return id for match indexes or -1 for not match
 std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_string const& filtered) {
     std::ext::map_str_int filtered_map;
-    for (size_t i = 0; i < filtered.size(); ++i) {
+    
+    for (size_t i = 0; i < filtered.size(); ++i) 
+    {
         filtered_map[filtered[i]] = i;
     }
     
     std::ext::V_int indices;
-    for (const auto& id : original) {
+    for (const auto& id : original) 
+    {
         auto it = filtered_map.find(id);
-        if (it != filtered_map.end()) {
+
+        if (it != filtered_map.end()) 
+        {
             indices.push_back(it->second);
-        } else {
+        } 
+        else 
+        {
             indices.push_back(-1); // Use -1 to indicate not found
         }
     }
@@ -90,8 +105,11 @@ std::ext::V_string match_id_include(std::ext::V_string const& id_include, std::e
 {
     std::unordered_set<std::string> sample_set(sample_id.begin(), sample_id.end());
     std::ext::V_string matched_ids;
-    for (const auto& id : id_include) {
-        if (sample_set.find(id) != sample_set.end()) {
+
+    for (const auto& id : id_include) 
+    {
+        if (sample_set.find(id) != sample_set.end()) 
+        {
             matched_ids.push_back(id);
         }
     }
@@ -122,11 +140,15 @@ std::ext::V_int remove_minus_one(std::ext::V_int vec)
 }
 
 
-std::ext::V_string createStrata(std::ext::VV_string const& Ecat) {
+std::ext::V_string create_strata(std::ext::VV_string const& Ecat) {
     std::ext::V_string strata;
-    for (const auto& row : Ecat) {
+
+    for (const auto& row : Ecat) 
+    {
         std::ostringstream oss;
-        for (size_t i = 0; i < row.size(); ++i) {
+
+        for (size_t i = 0; i < row.size(); ++i) 
+        {
             if (i != 0) oss << "_";
             oss << std::stoi(row[i]);
         }
@@ -143,7 +165,8 @@ std::vector<T> unique_id(const std::vector<T> &vec)
     std::unordered_set<T> seen; 
     std::vector<T> result;
 
-    for (auto const& val : vec) {
+    for (auto const& val : vec) 
+    {
         if (seen.find(val) == seen.end()) 
         {  
             result.push_back(val);          
@@ -170,22 +193,21 @@ std::ext::V_bool in_op(std::ext::V_string const& vec1, std::ext::V_string const&
 std::ext::V_int in_op_indices(std::ext::V_bool const& vec) 
 {
     std::ext::V_int filtered;
-    // filtered.reserve(vec1.size());
+
     for (size_t i = 0; i < vec.size(); ++i) 
     {
         if (vec[i]) 
         {
             filtered.push_back(i);
         }
-    }
-    
+    }    
     return filtered;
 }
 
 std::ext::V_string filtered_ids(std::ext::V_string const& vec1, std::ext::V_bool const& vec2) 
 {
     std::ext::V_string filtered;
-    // filtered.reserve(vec1.size());
+
     for (size_t i = 0; i < vec1.size(); ++i) 
     {
         if (vec2[i]) 
@@ -193,8 +215,7 @@ std::ext::V_string filtered_ids(std::ext::V_string const& vec1, std::ext::V_bool
             filtered.push_back(vec1[i]);
         }
     }
-    
-    return filtered;
+        return filtered;
 }
 
 void check_not_empty(std::ext::V_string const& sample_id) 
@@ -206,12 +227,11 @@ void check_not_empty(std::ext::V_string const& sample_id)
 }
 
 
-
 template <typename T>
 std::ext::V_opt_string slice(std::vector<T> const& vec, std::ext::V_int const& indices) 
 {
     std::ext::V_opt_string result;
-    // result.reserve(indices.size());
+
     for (const auto& idx : indices) 
     {
         if (idx != -1) 
@@ -230,6 +250,7 @@ std::ext::V_opt_string slice(std::vector<T> const& vec, std::ext::V_int const& i
 bool any_duplicated(std::ext::V_string const& vec)
 {
     std::set<std::string> tmp_st;
+
     for(auto elm : vec)  
     {
         auto [it, success] = tmp_st.insert(elm);
@@ -242,15 +263,18 @@ bool any_duplicated(std::ext::V_string const& vec)
 }
 
 
-
 std::ext::V_bool list_duplicates_bool(std::ext::V_string const& vec) 
 {
     std::set<std::string> seen;
     std::vector<bool> result(vec.size(), false);
-    for (size_t i = 0; i < vec.size(); ++i) {
-        if (seen.find(vec[i]) != seen.end()) {
+
+    for (size_t i = 0; i < vec.size(); ++i) 
+    {
+        if (seen.find(vec[i]) != seen.end()) 
+        {
             result[i] = true;
-        } else {
+        } else 
+        {
             seen.insert(vec[i]);
         }
     }
@@ -262,14 +286,19 @@ Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include)
 {
     std::ext::V_bool is_duplicate = list_duplicates_bool(id_include);
     std::ext::V_int non_duplicate_indices;
-    for (size_t i = 0; i < is_duplicate.size(); ++i) {
-        if (!is_duplicate[i]) {
+
+    for (size_t i = 0; i < is_duplicate.size(); ++i) 
+    {
+        if (!is_duplicate[i]) 
+        {
             non_duplicate_indices.push_back(i);
         }
     }
 
     Mat filtered(non_duplicate_indices.size(), mat.cols());
-    for (size_t i = 0; i < non_duplicate_indices.size(); ++i) {
+
+    for (size_t i = 0; i < non_duplicate_indices.size(); ++i) 
+    {
         filtered.row(i) = mat.row(non_duplicate_indices[i]);
     }
     return filtered;
@@ -279,7 +308,9 @@ Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include)
 std::ext::V_bool apply_on_columns(Mat const& mat, const std::function<bool(VectorXd const&, int)>& func, int threshold) 
 {
     std::ext::V_bool result(mat.cols(), false);
-    for (int col = 0; col < mat.cols(); ++col) {
+
+    for (int col = 0; col < mat.cols(); ++col) 
+    {
         result[col] = func(mat.col(col), threshold);
     }
     return result;
@@ -292,18 +323,19 @@ bool unique_less_equal(DensVec const& vec, int threshold)
     return unique_elements.size() <= threshold;
 }
 
-
 std::ext::Map_str_Vint generate_strata_list(std::ext::V_string const& vec) 
 {
   std::ext::Map_str_Vint strata_list;
-  for (int i = 0; i < vec.size(); ++i) {
+
+  for (int i = 0; i < vec.size(); ++i) 
+  {
     strata_list[vec[i]].push_back(i);
   }
   return strata_list;
 }
 
-void scale(Mat& mat, bool center, bool scale) {
-    
+void scale(Mat& mat, bool center, bool scale) 
+{    
     if (center) 
     {
         mat = mat.rowwise() - mat.colwise().mean();
@@ -317,7 +349,8 @@ void scale(Mat& mat, bool center, bool scale) {
 }
 
 
-Mat cbind(Mat const& A, Mat const& B) {
+Mat cbind(Mat const& A, Mat const& B) 
+{
     Mat combined(A.rows(), A.cols() + B.cols());
     combined << A, B;
     return combined;
@@ -332,7 +365,8 @@ void spa_mat_ones(arma::sp_mat &arma_mat)
 
     for (int i = 0, k = 0; i < rows; ++i) 
 	{
-        for (int j = 0; j < cols; ++j, ++k) {
+        for (int j = 0; j < cols; ++j, ++k) 
+        {
             locations(0, k) = i; // Row index
             locations(1, k) = j; // Column index
         }
@@ -340,7 +374,7 @@ void spa_mat_ones(arma::sp_mat &arma_mat)
 
     arma_mat = arma::sp_mat(locations, values, rows, cols);
 }
-// Magee_Glmmkin::Magee_Glmmkin(Glmmkin &glmmkin_ref) : Glmmkin(glmmkin) {}
+
 
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen bgen,
             std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
@@ -360,6 +394,8 @@ MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bed bed,
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bed)),
             m_active_genotype(GENOTYPE::Bed), m_interaction_exp(interaction_exp), 
             m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+
+
 void MAGEE::clear_m_magee_glmmkin() 
 {
     m_magee_glmmkin.J.resize(0, 0);
@@ -371,7 +407,6 @@ void MAGEE::clear_m_magee_glmmkin()
     m_magee_glmmkin.cov.resize(0, 0);
     m_magee_glmmkin.select.clear();
 }
-
 
 void MAGEE::create_E()
 {
@@ -398,16 +433,19 @@ void MAGEE::create_E()
 void MAGEE::fill_sel(std::ext::V_string& sample_id)
 {
     std::ext::V_int missing_id= match_indices(m_glmmkin_fitnull.id_include, sample_id);
+    
     if(any_isna(missing_id))
     {
         std::cout << "Warnning: check your data... Some individuals of pheno file are missing in sample file!\n";
        m_glmmkin_fitnull.id_include =  match_id_include(m_glmmkin_fitnull.id_include, sample_id);
         std::cout << "Missing IDs were removed...\n" << "Remaind IDs are: " << m_glmmkin_fitnull.id_include.size() << "\n";
     }
+
     std::ext::V_string sample_id_original =  sample_id;
     std::ext::V_bool sample_id_bool = in_op(sample_id, unique_id(m_glmmkin_fitnull.id_include));
     sample_id = filtered_ids(sample_id, sample_id_bool); 
     m_magee_glmmkin.select  = match_indices(sample_id_original, sample_id);
+    
     try
     {
         check_not_empty(sample_id);
@@ -423,17 +461,15 @@ void MAGEE::fill_sel(std::ext::V_string& sample_id)
 void MAGEE::fill_mat(const int numRows, const int numCols, std::ext::V_int& indixes_col, int value)
 {
     std::ext::VecTriple_i tripletList;
-    // tripletList.reserve(numRows * numCols);
+
     for (int i = 0; i < numRows; ++i) 
     {
-        // for (int j = 0; j < numCols; ++j) 
-        // {
-            if (indixes_col[i] != -1)
-            {
-                tripletList.emplace_back(i, indixes_col[i], value); 
-            }
-        // }
+        if (indixes_col[i] != -1)
+        {
+            tripletList.emplace_back(i, indixes_col[i], value); 
+        }
     } 
+
     m_magee_glmmkin.J.setFromTriplets(tripletList.begin(), tripletList.end());   
 }
 
@@ -483,7 +519,7 @@ void MAGEE::calculate_bin_header()
         }
 
         // Concatinate values of each column 0-1 
-        std::ext::V_string strata = createStrata(Ecat_str);
+        std::ext::V_string strata = create_strata(Ecat_str);
         std::ext::V_string uni_strata = unique_id(strata);
         // It help to keep the last occurance of each element
         std::reverse(uni_strata.begin(), uni_strata.end());
@@ -528,8 +564,6 @@ void MAGEE::calculate_bin_header()
     }
 }
 
-
-
 void MAGEE::printOutputHeader_magee() 
 { 
     std::ofstream results(m_cmd.outFile, std::ofstream::binary); 
@@ -573,20 +607,24 @@ void MAGEE::printOutputHeader_magee()
     } 
  
     results << "Beta_Marginal" << "\t" << seMHeader << "\t"; 
+
     if ((m_cmd.robust == 1) && (printMeta || printFull)) 
     { 
         results << "SE_Beta_Marginal" << "\t"; 
     } 
+
     if (m_interaction_exp.size() != 0)  
     { 
         for (int i = printStart; i < printEnd; i++) 
         { 
             results << "Beta_" << m_interaction_exp[i] << "\t"; 
         } 
+
         for (int i = printStart; i < printEnd; i++) 
         { 
             results << seHeader << m_interaction_exp[i] << "\t";   
         } 
+
         for (int i = printStart; i < printEnd; i++) 
         { 
             for (int j = printStart; j <  printEnd; j++) 
@@ -611,6 +649,7 @@ void MAGEE::printOutputHeader_magee()
                         } 
                     } 
                 } 
+
                 for (int i = printStart; i < printEnd; i++) 
                 { 
                     for (int j = printStart; j < printEnd; j++) 
@@ -652,8 +691,7 @@ void MAGEE::printOutputHeader_magee()
         else 
         { 
             results << "P_Value_Marginal\n"; 
-        } 
-         
+        }          
     } 
     results.close();
 }
@@ -671,9 +709,7 @@ void MAGEE::fitglmm()
 	{ 
 		m_interaction.insert(m_interaction.end(), m_interaction_cov[i]); 
 	}
-	// std::string bgenfile = m_cmd.bgenFile;
-	// std::string samplefile = m_cmd.samplefile;
-	// bool use_samplefile = m_cmd.useSampleFile;
+	
 	std::string pheno_missing_key = m_cmd.missing;//NA values
     bool meta_output = (m_cmd.outStyle == "meta") ? true : false;//output style
     double miss_cutoff = m_cmd.missGenoRate;
@@ -681,10 +717,10 @@ void MAGEE::fitglmm()
     int nperbatch = m_cmd.stream_snps;
     double minmaf = m_cmd.MAF;
     create_E();
-    std::ext::V_int match_id; 
- 
+    std::ext::V_int match_id;  
     std::ext::V_string sample_id; 
 	int samSize =  m_gmmat->m_vkins_sp[0].pheno.m_data_frame.m_nrows;
+
     if(m_active_genotype == GENOTYPE::Bgen)
     {
         sample_id = std::get<Bgen>(m_genotype).sampleID_all;//sampleID; 
@@ -696,6 +732,7 @@ void MAGEE::fitglmm()
         sample_id = std::get<Pgen>(m_genotype).sampleID_all;//sampleID;
         std::get<Pgen>(m_genotype).getPgenVariantPos(std::get<Pgen>(m_genotype), m_cmd);
     }
+    
     if(m_active_genotype == GENOTYPE::Bed)
     {
         sample_id = std::get<Bed>(m_genotype).sampleID_all;//sampleID;

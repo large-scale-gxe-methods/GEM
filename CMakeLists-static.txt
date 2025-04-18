@@ -6,7 +6,7 @@ project(GEM)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Set C++ standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-O2 -g -no-pie -static")
+set(CMAKE_CXX_FLAGS "-O3 -g -no-pie -static")
 include(FetchContent)
 
 # Fetch fmt ======================================================
@@ -90,10 +90,10 @@ file(GLOB C_SOURCES
 file(GLOB CC_SOURCES "thirdparty/plink-2.0/*.cc")
 
 # Create the executable
-add_executable(GEM_2_Intel ${CXX_SOURCES} ${C_SOURCES} ${CC_SOURCES})
+add_executable(GEM_2.1.1_Intel ${CXX_SOURCES} ${C_SOURCES} ${CC_SOURCES})
 
 # Link libraries
-target_link_libraries(GEM_2_Intel 
+target_link_libraries(GEM_2.1.1_Intel 
     ${SUITESPARSE_LIBRARIES}
     ${MKL_LIBS} 
     fmt::fmt

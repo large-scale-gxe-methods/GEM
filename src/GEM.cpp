@@ -34,9 +34,7 @@
  */
 
 #include "GEM.h"
-// #include "GMMAT.h"
-// #include "MAGEE.h"
-// #include <suitesparse/SuiteSparse_config.h>
+
 int main(int argc, char* argv[]) {
     // Process command line
     CommandLine cmd;
@@ -50,8 +48,8 @@ int main(int argc, char* argv[]) {
     int randomSlopeeCol;
     int robust = cmd.robust;
     char delim = cmd.pheno_delim;
-    std::string kin_path = cmd.kinFile;
-    std::string pheno_path = cmd.phenoFile;
+    std::string kin_path = cmd.kin_file;
+    std::string pheno_path = cmd.pheno_file;
     char delim_k = cmd.kin_delim;
     double epsilon = cmd.tol;
     string phenoHeaderName = cmd.phenoName;
@@ -89,7 +87,7 @@ int main(int argc, char* argv[]) {
     std::unordered_map<string, int> colNames;
     long unsigned int  phenoncols;
 
-    string phenopath(cmd.phenoFile);
+    string phenopath(cmd.pheno_file);
     std::ifstream finph;
     finph.open(phenopath);
     if (!finph.is_open()) {
@@ -142,7 +140,6 @@ int main(int argc, char* argv[]) {
             randomSlopeeCol = colNames[randomSlopeHeaderName];
         }
     }
-
 
     for (int i = 0; i < numExpSelCol; i++) {
         if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
@@ -204,7 +201,7 @@ int main(int argc, char* argv[]) {
         }
         std::vector<std::string> entry;
         entry.push_back(values[phenoCol]);
-        // phenomap[values[samIDCol]] = {values[phenoCol]};
+
         for (int c = 0; c < numSelCol; c++) 
         {
             values[colSelVec[c]].erase(std::remove(values[colSelVec[c]].begin(), values[colSelVec[c]].end(), '"'), values[colSelVec[c]].end());
@@ -212,6 +209,7 @@ int main(int argc, char* argv[]) {
         }
         phenomap[values[samIDCol]].push_back(entry);
     }
+
     finph.close();
     if (nrows != samSize) 
     {
@@ -230,12 +228,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-
     double sigma2;
     BinE binE;
-    if (cmd.usePgenFile) {
+    if (cmd.usePgenFile) 
+    {
         Pgen pgen;
-
         pgen.processPgenHeader(cmd.pgenFile);
         pgen.processPvar(pgen, cmd.pvarFile);
         pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, numSelCol, samSize);
@@ -282,23 +279,27 @@ int main(int argc, char* argv[]) {
             exit(EXIT_SUCCESS);
         }
 
-        for (int i=0; i<covSelHeadersName.size(); i++){
-                if (std::find(pgen.excludeCol.begin(), pgen.excludeCol.end(), (i+1)) == pgen.excludeCol.end()){
+        for (int i=0; i<covSelHeadersName.size(); i++)
+        {
+                if (std::find(pgen.excludeCol.begin(), pgen.excludeCol.end(), (i+1)) == pgen.excludeCol.end())
+                {
                     
-                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
-                    
-                }
-                    
+                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                   
+                }                    
         }
 
-        for (int i=0; i<expCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<expCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
             }
         }
 
-        for (int i=0; i<intCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<intCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
             }
         }
@@ -310,16 +311,18 @@ int main(int argc, char* argv[]) {
         pgen.numExpSelCol_new=expCovSelHeadersName_new.size();
         pgen.numSelCol_new=covSelHeadersName_new.size() - pgen.numIntSelCol_new - pgen.numExpSelCol_new;
         
-
-        if (pgen.excludeCol.size()==1){
+        if (pgen.excludeCol.size()==1)
+        {
             cout<<"Warning:"<<endl;
             cout<<"Variable "<<covSelHeadersName[pgen.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
             cout << "*********************************************************\n";
             cout<<endl;
         }
-        if (pgen.excludeCol.size() > 1) {
+        if (pgen.excludeCol.size() > 1) 
+        {
             string excluded_cols;
-            for (int i=0; i<pgen.excludeCol.size(); i++){
+            for (int i=0; i<pgen.excludeCol.size(); i++)
+            {
                 excluded_cols = excluded_cols+ covSelHeadersName[pgen.excludeCol[i]-1];
                 if (i!=(pgen.excludeCol.size()-1))
                 excluded_cols = excluded_cols + ",";
@@ -342,62 +345,70 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
         }
 
-        samSize = pgen.new_samSize;
-        
+        samSize = pgen.new_samSize;        
         pgen.phenoType = checkBinary(phenomap, pgen.sampleID, epsilon);
         binE.checkBinaryCovariates(binE, cmd, phenomap, pgen.sampleID, pgen.include_idx, samSize,  pgen.phenoType, phenoHeaderName, covSelHeadersName, covSelHeadersName_new,Sq_new);
         cout << "*********************************************************\n";
         phenomap.clear();
-
-
         vector<double> tmp1(samSize, 1);
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &pgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
         cout << "\nMean raw values for exposure(s) and covariate(s): \n";
-        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+        
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) 
+        {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
         cout << "\n";
-        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+        
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++)
+        {
             tmpMean[i] /= double(samSize * 1.0);
             cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
-        if (cmd.center == 2){            
+        if (cmd.center == 2)
+        {            
             vector<double> newIntcov_center;
             int numtotal_col = covSelHeadersName_new.size() +1;
-            for (int i=0; i < samSize ; i++) {
+            for (int i=0; i < samSize ; i++) 
+            {
                 newIntcov_center.push_back(1);
-                for (int j=0; j < pgen.numIntSelCol_new; j++) {
+                for (int j=0; j < pgen.numIntSelCol_new; j++) 
+                {
                     newIntcov_center.push_back (pgen.new_covdata[i* numtotal_col + j+ pgen.numExpSelCol_new+1]);
                 }            
             }
             center(1, cmd.scale, samSize, pgen.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
             string Intname;
-            for (int i=0; i<pgen.numIntSelCol_new; i++){
+            for (int i=0; i<pgen.numIntSelCol_new; i++)
+            {
                 Intname = Intname + intCovSelHeadersName_new[i];
                 if (i!=(pgen.numIntSelCol_new-1))
                 Intname = Intname + ",";        
             }
             cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
-            for (int i=0; i < samSize ; i++) {
+            for (int i=0; i < samSize ; i++) 
+            {
                 for (int j=0; j < pgen.numIntSelCol_new; j++) {
                     pgen.new_covdata[i* numtotal_col + j+ pgen.numExpSelCol_new+1] = newIntcov_center [i * (pgen.numIntSelCol_new +1) + j+1];
-                }
-            
+                }            
             }
         }
 
-        if ((cmd.center == 1) || (cmd.scale == 1)) {
+        if ((cmd.center == 1) || (cmd.scale == 1)) 
+        {
             center(cmd.center, cmd.scale, samSize, (numSelCol-pgen.excludeCol.size()), pgen.new_covdata, &pgen.new_covdata);
             cout<<"Warning:"<<endl;
             cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
             cout << "*********************************************************\n";
         }
 
-        if (cmd.center == 0){
+        if (cmd.center == 0)
+        {
             cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
-            if ( pgen.numIntSelCol_new > 0){
+            if ( pgen.numIntSelCol_new > 0)
+            {
                 cout<<"Warning:"<<endl;
                 cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
                 cout << "*********************************************************\n";
@@ -412,27 +423,32 @@ int main(int argc, char* argv[]) {
         pgen.getPgenVariantPos(pgen, cmd);
         cout << "The ALT allele in the .pvar file will be used for association testing.\n";
         auto start_time = std::chrono::high_resolution_clock::now();
-        if (pgen.threads > 1) {
+        
+        if (pgen.threads > 1) 
+        {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
-		    for (uint i = 0; i < pgen.threads; i++) {
+		    for (uint i = 0; i < pgen.threads; i++) 
+            {
 				thread_grp.create_thread(boost::bind(&gemPGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, boost::ref(binE), boost::ref(pgen), boost::ref(cmd)));
 			}
             cout << "Joining threads... \n";
             thread_grp.join_all();
         }
-        else {
+        else 
+        {
             cout << "Running with single thread...\n";
             gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, pgen, cmd);
 
         }
+
         cmd.threads = pgen.threads;
         auto end_time = std::chrono::high_resolution_clock::now();
         printExecutionTime(start_time, end_time);
     }
-
     
-    if (cmd.useBedFile) {
+    if (cmd.useBedFile) 
+    {
         Bed bed;
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
         bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, numSelCol, samSize);
@@ -479,40 +495,47 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
             exit(EXIT_SUCCESS);
         }
-
         
-        for (int i=0; i<covSelHeadersName.size(); i++){
-                if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end()){
-                    
-                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
-                    
-                }
-                    
+        for (int i=0; i<covSelHeadersName.size(); i++)
+        {
+                if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end())
+                {
+                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
+                }                    
         }
 
-        for (int i=0; i<expCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<expCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
             }
         }
 
-        for (int i=0; i<intCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<intCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
             }
         }
 
         Sq_new = expCovSelHeadersName_new.size() + intCovSelHeadersName_new.size();
         numExpSelCol_new = expCovSelHeadersName_new.size();
-        if (bed.excludeCol.size()==1){
+
+        if (bed.excludeCol.size()==1)
+        {
             cout<<"Warning:"<<endl;
             cout<<"Variable "<<covSelHeadersName[bed.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
             cout << "*********************************************************\n";
             cout<<endl;
         }
-        if (bed.excludeCol.size() > 1) {
+
+        if (bed.excludeCol.size() > 1) 
+        {
             string excluded_cols;
-            for (int i=0; i<bed.excludeCol.size(); i++){
+            for (int i=0; i<bed.excludeCol.size(); i++)
+            {
                 excluded_cols = excluded_cols+ covSelHeadersName[bed.excludeCol[i]-1];
                 if (i!=(bed.excludeCol.size()-1))
                 excluded_cols = excluded_cols + ",";
@@ -523,24 +546,24 @@ int main(int argc, char* argv[]) {
            cout<<endl;
         }
 
-        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0){
+        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0)
+        {
             cout<<"Warning:"<<endl;
             cout<<"There are no environmental exposures remaining after the collinearity check. Interaction covariates should not be included when there are no exposures."<<endl;
             exit(1);
         }
 
-        if (Sq_new == 0){
+        if (Sq_new == 0)
+        {
             cout<<"Warning:"<<endl;
             cout<<"There are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis."<<endl;
             cout << "*********************************************************\n";
         }
 
-
         samSize = bed.new_samSize;
         bed.numIntSelCol_new=intCovSelHeadersName_new.size();
         bed.numExpSelCol_new=expCovSelHeadersName_new.size();
         bed.numSelCol_new=covSelHeadersName_new.size() - bed.numIntSelCol_new - bed.numExpSelCol_new;
-
         bed.phenoType = checkBinary(phenomap, bed.sampleID, epsilon);
         binE.checkBinaryCovariates(binE, cmd, phenomap, bed.sampleID, bed.include_idx, samSize, bed.phenoType, phenoHeaderName, covSelHeadersName, covSelHeadersName_new, Sq_new);
         cout << "*********************************************************\n";
@@ -550,50 +573,63 @@ int main(int argc, char* argv[]) {
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &bed.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
         cout << "\nMean raw values for exposure(s) and covariate(s): \n";
-        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+        
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) 
+        {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
         cout << "\n";
-        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) 
+        {
             tmpMean[i] /= double(samSize * 1.0);
             cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
-        if (cmd.center == 2){            
+
+        if (cmd.center == 2)
+        {            
             vector<double> newIntcov_center;
             int numtotal_col = covSelHeadersName_new.size() +1;
-            for (int i=0; i < samSize ; i++) {
+            for (int i=0; i < samSize ; i++) 
+            {
                 newIntcov_center.push_back(1);
-                for (int j=0; j < bed.numIntSelCol_new; j++) {
+                for (int j=0; j < bed.numIntSelCol_new; j++) 
+                {
                     newIntcov_center.push_back (bed.new_covdata[i* numtotal_col + j+ bed.numExpSelCol_new+1]);
                 }            
             }
             center(1, cmd.scale, samSize, bed.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
             string Intname;
-            for (int i=0; i<bed.numIntSelCol_new; i++){
+            for (int i=0; i<bed.numIntSelCol_new; i++)
+            {
                 Intname = Intname + intCovSelHeadersName_new[i];
                 if (i!=(bed.numIntSelCol_new-1))
                 Intname = Intname + ",";        
             }
             cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
-            for (int i=0; i < samSize ; i++) {
-                for (int j=0; j < bed.numIntSelCol_new; j++) {
+            for (int i=0; i < samSize ; i++) 
+            {
+                for (int j=0; j < bed.numIntSelCol_new; j++) 
+                {
                     bed.new_covdata[i* numtotal_col + j+ bed.numExpSelCol_new+1] = newIntcov_center [i * (bed.numIntSelCol_new +1) + j+1];
                 }
-            
             }
         }
 
-        if ((cmd.center == 1) || (cmd.scale == 1)) {
+        if ((cmd.center == 1) || (cmd.scale == 1)) 
+        {
             center(cmd.center, cmd.scale, samSize, (numSelCol-bed.excludeCol.size()), bed.new_covdata, &bed.new_covdata);
             cout<<"Warning:"<<endl;
             cout<<"All the interaction covariates, exposure and covariates were centered. Meta-analysis is not recommended using centered results."<<endl;
             cout << "*********************************************************\n";
         }
 
-        if (cmd.center == 0){
+        if (cmd.center == 0)
+        {
             cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
-            if (bed.numIntSelCol_new > 0){
+            if (bed.numIntSelCol_new > 0)
+            {
                 cout<<"Warning:"<<endl;
                 cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
                 cout << "*********************************************************\n";
@@ -611,16 +647,19 @@ int main(int argc, char* argv[]) {
         bed.getBedVariantPos(bed, cmd);
         cout << "The ALT allele in the .bim file will be used for association testing.\n";
         auto start_time = std::chrono::high_resolution_clock::now();
+        
         if (bed.threads > 1) {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
-			for (uint i = 0; i < bed.threads; i++) {
+			for (uint i = 0; i < bed.threads; i++) 
+            {
 				thread_grp.create_thread(boost::bind(&gemBED, i, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, boost::ref(binE), boost::ref(bed), boost::ref(cmd)));
 			}
             cout << "Joining threads... \n";
 			thread_grp.join_all();
         }
-        else {
+        else 
+        {
             cout << "Running with single thread...\n";
             gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, bed, cmd);
         }
@@ -629,7 +668,6 @@ int main(int argc, char* argv[]) {
         printExecutionTime(start_time, end_time);
     }
 
-    
     if (cmd.useBgenFile) 
     {
         Bgen bgen;
@@ -643,6 +681,7 @@ int main(int argc, char* argv[]) {
             vector <string> phenoHeaders(covSelHeadersName);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
             phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            
             if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
             {
                 phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
@@ -678,23 +717,26 @@ int main(int argc, char* argv[]) {
             exit(EXIT_SUCCESS);
         }     
         
-        for (int i=0; i<covSelHeadersName.size(); i++){
-                if (std::find(bgen.excludeCol.begin(), bgen.excludeCol.end(), (i+1)) == bgen.excludeCol.end()){
-                    
-                        covSelHeadersName_new.push_back(covSelHeadersName[i]);
-                    
+        for (int i=0; i<covSelHeadersName.size(); i++)
+        {
+                if (std::find(bgen.excludeCol.begin(), bgen.excludeCol.end(), (i+1)) == bgen.excludeCol.end())
+                {
+                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
                 }
-                    
         }
 
-        for (int i=0; i<expCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<expCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), expCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 expCovSelHeadersName_new.push_back(expCovSelHeadersName[i]);
             }
         }
 
-        for (int i=0; i<intCovSelHeadersName.size(); i++){
-            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end()){
+        for (int i=0; i<intCovSelHeadersName.size(); i++)
+        {
+            if (std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), intCovSelHeadersName[i]) != covSelHeadersName_new.end())
+            {
                 intCovSelHeadersName_new.push_back(intCovSelHeadersName[i]);
             }
         }
@@ -702,15 +744,18 @@ int main(int argc, char* argv[]) {
             Sq_new = expCovSelHeadersName_new.size() + intCovSelHeadersName_new.size();
             numExpSelCol_new = expCovSelHeadersName_new.size();
         
-        if (bgen.excludeCol.size()==1){
+        if (bgen.excludeCol.size()==1)
+        {
             cout<<"Warning:"<<endl;
             cout<<"Variable "<<covSelHeadersName[bgen.excludeCol[0]-1]<<" is collinear with previous predictor(s) and dropped from the null model"<<endl;
             cout << "*********************************************************"<<endl;
             cout<<endl;
         }
-        if (bgen.excludeCol.size() > 1) {
+        if (bgen.excludeCol.size() > 1) 
+        {
             string excluded_cols;
-            for (int i=0; i<bgen.excludeCol.size(); i++){
+            for (int i=0; i<bgen.excludeCol.size(); i++)
+            {
                 excluded_cols = excluded_cols+ covSelHeadersName[bgen.excludeCol[i]-1];
                 if (i!=(bgen.excludeCol.size()-1))
                 excluded_cols = excluded_cols + ",";
@@ -721,13 +766,15 @@ int main(int argc, char* argv[]) {
            cout<<endl;
         }
 
-        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0){
+        if (expCovSelHeadersName_new.size()==0 && intCovSelHeadersName_new.size() > 0)
+        {
             cout<<"Warning:"<<endl;
             cout<<"There are no environmental exposures remaining after the collinearity check. Interaction covariates should not be included when there are no exposures."<<endl;
             exit(1);
         }
 
-        if ( Sq_new == 0){
+        if ( Sq_new == 0)
+        {
             cout<<"Warning:"<<endl;
             cout<<"There are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis. "<<endl;
             cout << "*********************************************************\n";
@@ -746,37 +793,47 @@ int main(int argc, char* argv[]) {
         double* tmpMean = new double[covSelHeadersName_new.size() + 1];
         matmatprod(&tmp1[0], &bgen.new_covdata[0], tmpMean, 1, samSize, covSelHeadersName_new.size() + 1);
         cout << "\nMean raw values for exposure(s) and covariate(s): \n";
-        for (int i = 0; i < covSelHeadersName_new.size(); i++) {
+        
+        for (int i = 0; i < covSelHeadersName_new.size(); i++) 
+        {
             cout << boost::format("%+20s") % covSelHeadersName_new[i];
         }
         cout << "\n";
-        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) {
+
+        for (int i = 1; i < (covSelHeadersName_new.size() +1); i++) 
+        {
             tmpMean[i] /= double(samSize * 1.0);
             cout << boost::format("%20s") % tmpMean[i];
         }
         cout << "\n";
-        if (cmd.center == 2){            
+
+        if (cmd.center == 2)
+        {            
             vector<double> newIntcov_center;
             int numtotal_col = covSelHeadersName_new.size() +1;
-            for (int i=0; i < samSize ; i++) {
+            for (int i=0; i < samSize ; i++) 
+            {
                 newIntcov_center.push_back(1);
-                for (int j=0; j < bgen.numIntSelCol_new; j++) {
+                for (int j=0; j < bgen.numIntSelCol_new; j++) 
+                {
                     newIntcov_center.push_back (bgen.new_covdata[i* numtotal_col + j+ bgen.numExpSelCol_new+1]);
                 }            
             }
             center(1, cmd.scale, samSize, bgen.numIntSelCol_new, newIntcov_center, &newIntcov_center); 
             string Intname;
-            for (int i=0; i<bgen.numIntSelCol_new; i++){
+            for (int i=0; i<bgen.numIntSelCol_new; i++)
+            {
                 Intname = Intname + intCovSelHeadersName_new[i];
                 if (i!=(bgen.numIntSelCol_new-1))
                 Intname = Intname + ",";        
             }
             cout<<"GEM centered only the interaction covariate(s): "<<Intname<<"."<<endl;           
-            for (int i=0; i < samSize ; i++) {
-                for (int j=0; j < bgen.numIntSelCol_new; j++) {
+            for (int i=0; i < samSize ; i++) 
+            {
+                for (int j=0; j < bgen.numIntSelCol_new; j++) 
+                {
                     bgen.new_covdata[i* numtotal_col + j+ bgen.numExpSelCol_new+1] = newIntcov_center [i * (bgen.numIntSelCol_new +1) + j+1];
                 }
-            
             }
         }
 
@@ -787,9 +844,11 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
         }
 
-        if (cmd.center == 0){
+        if (cmd.center == 0)
+        {
             cout<<"None of the interaction covariates, exposure and covariates were centered."<<endl;
-            if (bgen.numIntSelCol_new > 0){
+            if (bgen.numIntSelCol_new > 0)
+            {
                 cout<<"Warning:"<<endl;
                 cout<<"It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<<endl;
                 cout << "*********************************************************\n";
@@ -812,16 +871,20 @@ int main(int argc, char* argv[]) {
         //Preparing for parallelizing of BGEN file
         cout << "The second allele in the BGEN file will be used for association testing.\n";
         start_time = std::chrono::high_resolution_clock::now();
-        if (bgen.threads > 1) {
+
+        if (bgen.threads > 1) 
+        {
             cout << "Running multithreading...\n";
             boost::thread_group thread_grp;
-			for (uint i = 0; i < bgen.threads; i++) {
+			for (uint i = 0; i < bgen.threads; i++) 
+            {
 				thread_grp.create_thread(boost::bind(&gemBGEN, i, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, boost::ref(binE), boost::ref(bgen), boost::ref(cmd)));
 			}
             cout << "Joining threads... \n";
 			thread_grp.join_all();
         }
-        else {
+        else 
+        {
             cout << "Running with single thread...\n";
             gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, bgen, cmd);
         }
@@ -830,28 +893,28 @@ int main(int argc, char* argv[]) {
         printExecutionTime(start_time, end_time);
     }
 
-
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
     auto start_time = std::chrono::high_resolution_clock::now();
     printOutputHeader(cmd.useBgenFile, numExpSelCol_new, Sq_new+1, covSelHeadersName_new, output, cmd.outStyle, cmd.robust, sigma2, binE);
     std::ofstream results(output, std::ios_base::app);
-    for (int i = 0; i < cmd.threads; i++) {
-         std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
-         std::ifstream thread_output(threadOutputFile);
-         if ( thread_output.peek() != std::ifstream::traits_type::eof() ){
+    
+    for (int i = 0; i < cmd.threads; i++) 
+    {
+        std::string threadOutputFile = cmd.outFile + "_bin_" + std::to_string(i) + ".tmp";
+        std::ifstream thread_output(threadOutputFile);
+        if (thread_output.peek() != std::ifstream::traits_type::eof())
+        {
             results<<thread_output.rdbuf();
-         }
+        }
 
-
-         thread_output.close();
-         boost::filesystem::remove(threadOutputFile.c_str());
+        thread_output.close();
+        boost::filesystem::remove(threadOutputFile.c_str());
     }
+
     results.close();
     auto end_time = std::chrono::high_resolution_clock::now();
     printExecutionTime(start_time, end_time);
-
-
     // Finished
     std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
     double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
@@ -864,94 +927,126 @@ int main(int argc, char* argv[]) {
 int checkBinary(unordered_map<string, vector<vector<string>>> phenoMap, vector<string> sampleID, double epsilon) 
 {
 	std::unordered_map<string, vector<string>> phenomap;
-    for (const auto& entry : phenoMap) {
+    for (const auto& entry : phenoMap) 
+    {
         phenomap[entry.first] = entry.second[0]; // Take the first (and only) vector
     }
    
     int is_bin = 1;  //1 means binary
     std::unordered_map<string, int> map;
     size_t sampleSize = sampleID.size();
-    for (size_t i = 0; i < sampleSize; i++) {
+    for (size_t i = 0; i < sampleSize; i++) 
+    {
         auto tmp = phenomap[sampleID[i]];
-        if (!map.count(tmp[0])) {
+        if (!map.count(tmp[0])) 
+        {
             map[tmp[0]] = 1;
         }
-        if (map.size() > 2) {
+        if (map.size() > 2) 
+        {
             is_bin = 0;
             break;
         }
     }
-    if (map.size() < 2) {
+
+    if (map.size() < 2) 
+    {
         cerr << "ERROR: All values of the phenotype are the same. \n\n";
     }
+   
     cout << "Phenotype detected: "; ((is_bin) ? cout << "Binary\n" : cout << "Continuous\n");
-    if (is_bin) {
+    
+    if (is_bin) 
+    {
         cout << "Logistic convergence threshold: " << epsilon << "\n";
     }
+
     return is_bin;
 }
-
-
 
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret) 
 {
     vector<double> tmp1(samSize, 1);
     double* tmpMean = new double[numSelCol + 1];
     vector<double> tmpSD(numSelCol + 1);
+    
     if (center) 
     {
         matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-        if (!scale) {
+        
+        if (!scale) 
+        {
             cout << "Centering without rescaling..." << endl;
-            for (int i = 1; i < numSelCol + 1; i++) {
+            for (int i = 1; i < numSelCol + 1; i++) 
+            {
                 tmpMean[i] /= double(samSize * 1.0);
                 tmpSD[i] = 1.0;
             }
         }
-        else {
+        else 
+        {
             cout << "Centering and rescaling..." << endl;
             for (int i = 1; i < numSelCol + 1; i++) {
                 tmpMean[i] /= double(samSize * 1.0);
             }
-            for (int i = 0; i < samSize; i++) {
-                for (int j = 1; j < numSelCol + 1; j++) {
+
+            for (int i = 0; i < samSize; i++) 
+            {
+                for (int j = 1; j < numSelCol + 1; j++) 
+                {
                     tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
                 }
             }
-            for (int i = 1; i < numSelCol + 1; i++) {
+
+            for (int i = 1; i < numSelCol + 1; i++) 
+            {
                 tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
             }
         }
 
-        for (int i = 0; i < samSize; i++) {
-            for (int j = 1; j < numSelCol + 1; j++) {
+        for (int i = 0; i < samSize; i++) 
+        {
+            for (int j = 1; j < numSelCol + 1; j++) 
+            {
                 covdata[i * (numSelCol + 1) + j] = (covdata[i * (numSelCol + 1) + j] - tmpMean[j]) / tmpSD[j];
             }
         }
-
     }
-    else {
-        if (scale) {
+    else 
+    {
+        if (scale) 
+        {
             cout << "Scaling ALL exposures and covariates..." << endl;
             matmatprod(&tmp1[0], &covdata[0], tmpMean, 1, samSize, numSelCol + 1);
-            for (int i = 1; i < numSelCol + 1; i++) {
+            
+            for (int i = 1; i < numSelCol + 1; i++) 
+            {
                 tmpMean[i] /= double(samSize * 1.0);
             }
-            for (int i = 0; i < samSize; i++) {
-                for (int j = 1; j < numSelCol + 1; j++) {
+
+            for (int i = 0; i < samSize; i++) 
+            {
+                for (int j = 1; j < numSelCol + 1; j++) 
+                {
                     tmpSD[j] += pow(covdata[i * (numSelCol + 1) + j] - tmpMean[j], 2.0);
                 }
             }
-            for (int i = 1; i < numSelCol + 1; i++) {
+
+            for (int i = 1; i < numSelCol + 1; i++) 
+            {
                 tmpSD[i] = sqrt(tmpSD[i] / double(samSize * 1.0 - 1.0));
             }
-            for (int i = 0; i < samSize; i++) {
-                for (int j = 1; j < numSelCol + 1; j++) {
+
+            for (int i = 0; i < samSize; i++) 
+            {
+                for (int j = 1; j < numSelCol + 1; j++) 
+                {
                     covdata[i * (numSelCol + 1) + j] /= tmpSD[j];
                 }
             }
         }
     }
+
     delete[] tmpMean;
     *covdata_ret = covdata;
 }
@@ -965,6 +1060,7 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 
     cout << "\nCoefficients: \n";
     cout << boost::format("%-26s %-17s %-22s %-19s %-15s\n") % "" % "Estimate" % "Std. Error" % "Z-value" % "P-value";
+    
     for (int i = 0; i < numCovs; i++) 
     {
         double stdError = sqrt(covVarMat[i * numCovs + i]);
@@ -975,13 +1071,19 @@ void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, dou
 
     cout << "\nVariance-Covariance Matrix: \n";
     cout << boost::format("%+35s") % covNames[0];
-    for (int i = 1; i < numCovs; i++) {
+
+    for (int i = 1; i < numCovs; i++) 
+    {
         cout << boost::format("%+20s") % covNames[i];
     }
     cout << "\n";
-    for (int i = 0; i < numCovs; i++) {
+
+    for (int i = 0; i < numCovs; i++) 
+    {
         cout << boost::format("%+15s") % covNames[i];
-        for (int j = 0; j < numCovs; j++) {
+
+        for (int j = 0; j < numCovs; j++) 
+        {
             cout << boost::format("%20.6e") % covVarMat[j * numCovs + i];
         }
         cout << "\n";
@@ -998,11 +1100,15 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
     bool printMeta = false;
     int printStart = 1; 
     int printEnd   = numExpSelCol_new+1; 
-    if (outStyle.compare("meta") == 0) {
+
+    if (outStyle.compare("meta") == 0) 
+    {
         printStart = 0; 
         printEnd   = Sq1;
         printMeta  = true;
-    } else if (outStyle.compare("full") == 0) {
+    } 
+    else if (outStyle.compare("full") == 0) 
+    {
         printStart = 0; 
         printEnd   = Sq1; 
         printFull  = true;
@@ -1011,59 +1117,84 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
 
     results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
     int nBinE = binE.nBinE;
-    if (nBinE > 0) {
+    if (nBinE > 0) 
+    {
         vector<string> bin_headers = binE.bin_headers;
-        for (size_t i = 0; i < bin_headers.size(); i++) {
+
+        for (size_t i = 0; i < bin_headers.size(); i++) 
+        {
             results << "N_" << bin_headers[i] << "\t";
             results << "AF_" << bin_headers[i] << "\t";
         }
     }
 
-    for (int i = 0; i < Sq1-1; i++) {
+    for (int i = 0; i < Sq1-1; i++) 
+    {
         covNames[i] = "G-" + covNames[i];
     }
     covNames.insert(covNames.begin(), "G");
 
-
     string seMHeader = "SE_Beta_Marginal";
     string seHeader  = "SE_Beta_";
     string covHeader = "Cov_Beta_";
-    if (robust == 1) {
+
+    if (robust == 1) 
+    {
         seMHeader = "robust_" + seMHeader;
         seHeader  = "robust_" + seHeader;
         covHeader = "robust_" + covHeader;
     }
 
     results << "Beta_Marginal" << "\t" << seMHeader << "\t";
-    if ((robust == 1) && (printMeta || printFull)) {
+
+    if ((robust == 1) && (printMeta || printFull)) 
+    {
         results << "SE_Beta_Marginal" << "\t";
     }
-    if (numExpSelCol_new != 0) {
-        for (int i = printStart; i < printEnd; i++) {
+
+    if (numExpSelCol_new != 0) 
+    {
+        for (int i = printStart; i < printEnd; i++) 
+        {
             results << "Beta_" << covNames[i] << "\t";
         }
-        for (int i = printStart; i < printEnd; i++) {
+
+        for (int i = printStart; i < printEnd; i++) 
+        {
              results << seHeader << covNames[i] << "\t";  
         }
-        for (int i = printStart; i < printEnd; i++) {
-            for (int j = printStart; j < printEnd; j++) {
-                if (i < j) {
+
+        for (int i = printStart; i < printEnd; i++) 
+        {
+            for (int j = printStart; j < printEnd; j++) 
+            {
+                if (i < j) 
+                {
                    results << covHeader << covNames[i] << "_" << covNames[j] << "\t";  
                 } 
             }
         }
-        if (robust == 1) {
-            if (printMeta || printFull) {
-                for (int i = printStart; i < printEnd; i++) {
-                    for (int j = printStart; j < printEnd; j++) {
-                        if (i == j) {
+
+        if (robust == 1) 
+        {
+            if (printMeta || printFull) 
+            {
+                for (int i = printStart; i < printEnd; i++) 
+                {
+                    for (int j = printStart; j < printEnd; j++) 
+                    {
+                        if (i == j) 
+                        {
                             results << "SE_Beta_" << covNames[j] << "\t"; 
                         }
                     }
                 }
-                for (int i = printStart; i < printEnd; i++) {
-                    for (int j = printStart; j < printEnd; j++) {
-                        if (i < j) {
+                for (int i = printStart; i < printEnd; i++) 
+                {
+                    for (int j = printStart; j < printEnd; j++) 
+                    {
+                        if (i < j) 
+                        {
                             results << "Cov_Beta_" << covNames[i] << "_" << covNames[j] << "\t"; 
                         }
                     }
@@ -1071,29 +1202,36 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
 
                 results << "robust_P_Value_Marginal" << "\t" << "robust_P_Value_Interaction" << "\t" << "robust_P_Value_Joint" << "\t";
                 results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
-            } else {
+            } 
+            else 
+            {
                 results << "robust_P_Value_Marginal" << "\t" << "robust_P_Value_Interaction" << "\t" << "robust_P_Value_Joint\n";
             }
-        } else {
+        } 
+        else 
+        {
                 results << "P_Value_Marginal" << "\t" << "P_Value_Interaction" << "\t" << "P_Value_Joint\n";
         }
     }
-    else {
-        if (robust == 1) {
-            if (printMeta || printFull) {
+    else 
+    {
+        if (robust == 1) 
+        {
+            if (printMeta || printFull) 
+            {
                 results << "robust_P_Value_Marginal" << "\t" << "P_Value_Marginal\n";
             }
-            else{
+            else
+            {
                  results << "robust_P_Value_Marginal\n";
             }
             
         }
-        else {
+        else 
+        {
                 results << "P_Value_Marginal\n";
-        }
-        
+        }        
     }
-
     results.close();
 }
 
@@ -1136,11 +1274,14 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         // W * X and W * Y
         double* WX = new double[samSize * (numSelCol + 1)];
         double* WYip1 = new double[samSize];
-        for (int i = 0; i < samSize; i++) {
+
+        for (int i = 0; i < samSize; i++) 
+        {
             miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
             Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
             WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
-            for (int j = 0; j < numSelCol + 1; j++) {
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
             }
         }
@@ -1154,7 +1295,9 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         double* betaT = new double[(numSelCol + 1)];
         matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
         Check = 0;
-        for (int i = 0; i < numSelCol + 1; i++) {
+
+        for (int i = 0; i < numSelCol + 1; i++) 
+        {
             if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
             beta[i] = betaT[i];
         }
@@ -1173,12 +1316,17 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
     // X*[invert (XTransX)]
     vector<double> XinvXTXvec(samSize * (numSelCol + 1));
     double* XinvXTX = &XinvXTXvec[0];
+
     if (phenoType == 1) {
         double* WX = new double[samSize * (numSelCol + 1)];
-        for (int i = 0; i < samSize; i++) {
+
+        for (int i = 0; i < samSize; i++) 
+        {
             miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
             Xbeta[i] = miu[i];
-            for (int j = 0; j < numSelCol + 1; j++) {
+
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
             }
         }
@@ -1191,14 +1339,16 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
 
         cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
     }
-    else {
+    else 
+    {
         matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
     }
 
-
     // residual = Y - X * beta
     double sigma2 = 0;
-    for (int i = 0; i < samSize; i++) {
+
+    for (int i = 0; i < samSize; i++) 
+    {
         residvec[i] = phenoY[i] - Xbeta[i];
         sigma2 += residvec[i] * residvec[i];
     }
@@ -1208,19 +1358,23 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
     sigma2 = sigma2 / (samSize - (numSelCol + 1));
     if (phenoType == 1) sigma2 = 1.0;
 
-
     vector<double> XR2vec;
     if (!robust) 
     {
-        for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+        for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) 
+        {
             XTransX[i] = XTransX[i] * sigma2;
         }
         printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta, phenoType, samSize);
     }
-    else {
+    else 
+    {
         vector<double> XR2vec = covdata;
-        for (int i = 0; i < samSize; i++) {
-            for (int j = 0; j < numSelCol + 1; j++) {
+
+        for (int i = 0; i < samSize; i++) 
+        {
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
             }
         }
@@ -1266,8 +1420,6 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     vector <double> miu(samSize);
     int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
     int iter = 1;
-
-
     cout << "Precalculations and fitting null model..." << endl;
     //auto start_time = std::chrono::high_resolution_clock::now();
     // transpose(X) * X
@@ -1294,11 +1446,15 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
         // W * X and W * Y
         double* WX = new double[samSize * (numSelCol + 1)];
         double* WYip1 = new double[samSize];
-        for (int i = 0; i < samSize; i++) {
+
+        for (int i = 0; i < samSize; i++) 
+        {
             miu[i] = exp(XbetaFL[i]) / (1.0 + exp(XbetaFL[i]));
             Yip1[i] = XbetaFL[i] + (phenoY[i] - miu[i]) / (miu[i] * (1 - miu[i]));
             WYip1[i] = miu[i] * (1 - miu[i]) * Yip1[i];
-            for (int j = 0; j < numSelCol + 1; j++) {
+
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 WX[i * (numSelCol + 1) + j] = miu[i] * (1 - miu[i]) * covX[i * (numSelCol + 1) + j];
             }
         }
@@ -1312,7 +1468,9 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
         double* betaT = new double[(numSelCol + 1)];
         matvecprod(XTransX, XTransY, betaT, numSelCol + 1, numSelCol + 1);
         Check = 0;
-        for (int i = 0; i < numSelCol + 1; i++) {
+
+        for (int i = 0; i < numSelCol + 1; i++) 
+        {
             if (std::abs(betaT[i] - beta[i]) <= epsilon) Check++;
             beta[i] = betaT[i];
         }
@@ -1337,12 +1495,18 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     // X*[invert (XTransX)]
     vector<double> XinvXTXvec(samSize * (numSelCol + 1));
     double* XinvXTX = &XinvXTXvec[0];
-    if (phenoType == 1) {
+
+    if (phenoType == 1) 
+    {
         double* WX = new double[samSize * (numSelCol + 1)];
-        for (int i = 0; i < samSize; i++) {
+
+        for (int i = 0; i < samSize; i++) 
+        {
             miu[i] = exp(Xbeta[i]) / (1.0 + exp(Xbeta[i]));
             Xbeta[i] = miu[i];
-            for (int j = 0; j < numSelCol + 1; j++) {
+
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 WX[i * (numSelCol + 1) + j] = miu[i] * (1.0 - miu[i]) * covX[i * (numSelCol + 1) + j];
             }
         }
@@ -1355,14 +1519,17 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
 
         cout << "Logistic regression reaches convergence after " << iter << " steps...\n";
     }
-    else {
+    else 
+    {
         matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
     }
 
 
     // residual = Y - X * beta
     double sigma2 = 0;
-    for (int i = 0; i < samSize; i++) {
+
+    for (int i = 0; i < samSize; i++) 
+    {
         residvec[i] = phenoY[i] - Xbeta[i];
         sigma2 += residvec[i] * residvec[i];
     }
@@ -1371,20 +1538,22 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     // sqr(sigma) = transpose(resid)*resid/[samSize-(numSelCol+1)]
     sigma2 = sigma2 / (samSize - (numSelCol + 1));
     if (phenoType == 1) sigma2 = 1.0;
-
-
     vector<double> XR2vec;
     if (!robust) 
     {
-        for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) {
+        for (int i = 0; i < (numSelCol + 1) * (numSelCol + 1); i++) 
+        {
             XTransX[i] = XTransX[i] * sigma2;
         }
         printCovVarMat(numSelCol + 1, covSelHeadersName, XTransX, beta, phenoType, samSize);
     }
-    else {
+    else 
+    {
         vector<double> XR2vec = covdata;
-        for (int i = 0; i < samSize; i++) {
-            for (int j = 0; j < numSelCol + 1; j++) {
+        for (int i = 0; i < samSize; i++) 
+        {
+            for (int j = 0; j < numSelCol + 1; j++) 
+            {
                 XR2vec[i * (numSelCol + 1) + j] = XR2vec[i * (numSelCol + 1) + j] * resid[i] * resid[i];
             }
         }

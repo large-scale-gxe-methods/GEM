@@ -97,7 +97,7 @@ double chi_square_CDF(double x, double df, bool lower_tail, bool log_p)
     }
 }
 
-void glmm_gei(arma::mat &G, arma::uvec &snp_skip, size_t &npbidx, size_t npb, size_t n, 
+void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npbidx, size_t npb, size_t n, 
                         int ei, int qi, const Magee_Arma &null_obj, std::ofstream &writefile, 
                         bool meta_output, std::ext::V_string &tmpout, uint m, uint end) 
 {
@@ -219,15 +219,16 @@ void glmm_gei(arma::mat &G, arma::uvec &snp_skip, size_t &npbidx, size_t npb, si
 						}
 					} 
 				} 
-				catch (const std::runtime_error& error) 
+
+				catch (std::runtime_error const& error) 
 				{
-					std::cout << "It is singular matrix "<< "\n";
+					std::cout << "Warning: A singular matrix was observed for snpID: "<< snpID << "\n";
 					for (size_t s = 0; s < STAT_INT.size(); s++) 
 					{
 						PVAL_JOINT[s] = DBL_EPSILON;
 					}
 				}
-				
+
 				for (size_t s = 0; s < STAT_INT.size(); s++)
 				{
 					PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
@@ -754,20 +755,21 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		}
 
 		double AF = gmean / 2.0; // convert mean to allele freq
+		
 		if ((static_cast<double>(nmiss) / n > missrate) || ((AF < minmaf) || (AF > maxmaf)))
 		{ 
 			snp_skip[npbidx] = 1;
 		}
 		else
 		{
-			G.col(npbidx) = g; //size of g is nobs
+			G.col(npbidx) = g; 
 		}
 
 		tmpout[npbidx] = writeout.str();
 		writeout.clear();
 		npbidx++;
 
-		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+		glmm_gei(std::string (snpID.begin(), snpID.end()), G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
 				writefile, meta_output, tmpout, m, end);
 
 
@@ -1063,11 +1065,16 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 		}
 
 		std::string tmpString = "";
+		std::string snpID;
 		values[pvarLast].erase(std::remove(values[pvarLast].begin(), values[pvarLast].end(), '\r'), values[pvarLast].end());
 
 		for (int p = 0; p < pvarLength; p++) 
 		{
 			tmpString = tmpString + values[pvarIndex[p]] + "\t";
+			if(p == 0)
+			{
+				snpID = values[pvarIndex[p]];
+			}
 		}
 
 		geno_snpid[npbidx] = tmpString + std::to_string(n - nmiss);
@@ -1104,13 +1111,12 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 			}
 		}
 
-		// variant_index++;
-        // keepIndex++;
+		
 		tmpout[npbidx] = writeout.str();
 		writeout.clear();
 		npbidx++;
-
-		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+		
+		glmm_gei(snpID, G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
 				writefile, meta_output, tmpout, m, end);
 
 		if ((m) % 10000 == 0)
@@ -1317,7 +1323,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
         }
 		else
 		{
-			G.col(npbidx) = g; //size of g is nobs
+			G.col(npbidx) = g; 
 		}
 
 		values[bimLast].erase(std::remove(values[bimLast].begin(), values[bimLast].end(), '\r'), values[bimLast].end());
@@ -1359,7 +1365,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 		writeout.clear();
 		npbidx++;
 
-		glmm_gei(G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
+		glmm_gei(values[1], G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
 				writefile, meta_output, tmpout, m, end);
 
 		if ((m) % 10000 == 0)

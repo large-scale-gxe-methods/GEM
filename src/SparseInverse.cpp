@@ -68,13 +68,29 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
     pheno.read_file(path, pheno_delim);
     //Match genofile sample IDs
     size_t unique_phenoIDs_beforematch = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
-    fmt::println("The number of unique IDs in Phenotype file before matching IDs is: {}", unique_phenoIDs_beforematch);
+    size_t phenoIDs_beforematch = pheno.m_data_frame.n_rows();
     pheno.m_data_frame.match_genoids(pheno.m_sam_id, pheno.m_v_hdrs);
     size_t unique_phenoIDs = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
-    fmt::println("The number of unique IDs in Phenotype file after matching IDs is: {}", unique_phenoIDs);
+    size_t phenoIDs = pheno.m_data_frame.n_rows();
+
+    if (!pheno.m_data_frame.any_duplicated(pheno.m_sam_id))
+    {
+        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
+        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
+    }
+    else
+    {
+        fmt::println("The number of unique IDs in Phenotype file before matching IDs is: {}", unique_phenoIDs_beforematch);
+        fmt::println("The number of unique IDs in Phenotype file after matching IDs is: {}", unique_phenoIDs);
+        fmt::println("****************************************************************************");
+        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
+        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
+    }
+    
     fmt::println("****************************************************************************");
     //Map pheno sample ids to int to be used as matrix indices
     set_idx_mp(pheno.m_data_frame.m_data[pheno.m_sam_id]);
+
     if(kin.m_null_kin)
     {
         for(unsigned int i {0}; i < pheno.size(); ++i)
@@ -123,6 +139,7 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
             }
         }
         
+
         for(unsigned int i{0}; i < kin.size(); ++i)
         {
             auto val0 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[0]][i];//Retutn first ID in kin

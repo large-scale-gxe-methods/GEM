@@ -70,7 +70,15 @@ void DataFrame::fill_data(std::ext::V_string const& lines, char delim)
         while(std::getline(iss, cell, delim))
         {
             cell.erase(std::remove(cell.begin(), cell.end(), '\"'), cell.end());
-            v_str_tmp.emplace_back(cell);
+            // v_str_tmp.emplace_back(cell);
+            if (cell.empty())
+            {   
+                v_str_tmp.emplace_back(m_missing_key);
+            }
+                else
+            {
+                v_str_tmp.emplace_back(cell);
+            }
         }
         vv_strs.emplace_back(v_str_tmp);
     }

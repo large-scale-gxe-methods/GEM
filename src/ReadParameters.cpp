@@ -120,7 +120,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     // Input/Output Files
     if (out.count("pheno-file")) {
-        phenoFile = out["pheno-file"].as<string>();
+        pheno_file = out["pheno-file"].as<string>();
 
     }
     else {
@@ -131,7 +131,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     if (out.count("kin-file")) 
     {
-        kinFile = out["kin-file"].as<string>();
+        kin_file = out["kin-file"].as<string>();
         kin_flag = true;
     }
  
@@ -515,10 +515,10 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
 
     // Print parameter info
-    cout << "The Phenotype File is: " << phenoFile << "\n";
+    cout << "The Phenotype File is: " << pheno_file << "\n";
 
     if(kin_flag) {
-        cout << "The Kinship File is: " << kinFile << "\n";
+        cout << "The Kinship File is: " << kin_file << "\n";
         cout << "The diagonal value is: " << kin_diag << "\n";
     }
     

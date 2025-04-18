@@ -6,7 +6,6 @@
 #include <numeric>
 #include <thread>
 
-// change it to define object og glmmkin in magee_glmmkin
 /**
  * @brief struct to include magee data
  * 
@@ -152,6 +151,12 @@ class MAGEE
 		void printOutputHeader_magee();
 };
 
+/**
+ * @brief Convert Eigen matrix to armadillo
+ * 
+ * @param eigenMat 
+ * @param armaMat 
+*/
 
 void conver_eigen_to_arma( SpaMat const& eigenMat, arma::sp_mat& armaMat);
 
@@ -337,4 +342,4 @@ std::ext::V_int remove_minus_one(std::ext::V_int vec);
  * @param Ecat A vector of vector of strings representing categorical data.
  * @return A vector of concatenated strings representing strata.
 */
-std::ext::V_string createStrata(std::ext::VV_string const& Ecat);
+std::ext::V_string create_strata(std::ext::VV_string const& Ecat);

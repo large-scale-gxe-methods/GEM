@@ -550,6 +550,7 @@ void MAGEE::calculate_bin_header()
         for (const auto& str : tmp1) {
             m_bin_headers.push_back("N_" + str);
             m_bin_headers.push_back("AF_" + str);
+            m_bin_headers.push_back("GV_" + str);
         }
 
         // Create hash table labeling which observation belong to which strata using its index
@@ -582,7 +583,7 @@ void MAGEE::printOutputHeader_magee()
         results << "#dispersion: " << m_glmmkin_fitnull.sigma2 << "\n"; //sigma2 is comming from fitNullModel
     } 
  
-    results << "SNPID" << ((m_cmd.useBgenFile) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t"; 
+    results << "SNPID" << ((m_cmd.useBgenFile) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "GV" << "\t"; 
     if (m_bin_headers.size() > 0)  
     { 
         for (size_t i = 0; i < m_bin_headers.size(); i++)  

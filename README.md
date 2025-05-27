@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 2.1.1
+Current version: 2.1.2
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.1/GEM_2.1.1_Intel
-* Change the permission: chmod a+x GEM_2.1.1_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.2/GEM_2.1.2_Intel
+* Change the permission: chmod a+x GEM_2.1.2_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++17 compiler or later 
@@ -94,8 +94,8 @@ Armadillo Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1.1_Intel`` can be used to run the program.  
-For a list of options, use ```./GEM --help``` or ```./GEM_2.1.1_Intel --help```.  
+Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1.2_Intel`` can be used to run the program.  
+For a list of options, use ```./GEM --help``` or ```./GEM_2.1.2_Intel --help```.  
 
 <details>
      <summary> <b>List of Options</b> </summary>
@@ -219,7 +219,7 @@ Phenotype File Options:
 --cat-threshold
      A cut-off to determine which exposure or interaction covariate not specified using --categorical-names 
      should be automatically treated as categorical based on the number of levels (unique observations).
-        Default: 20
+        Default: 2
    
 
 
@@ -370,8 +370,10 @@ Non_Effect_Allele  - The allele not counted in association testing.
 Effect_Allele      - The allele that is counted in association testing.  
 N_Samples          - The number of samples without missing genotypes.
 AF                 - The allele frequency of the effect allele.
+GV                 - The variance of the effected allele.
 N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
 AF_catE_*          - The allele frequency of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
+GV_catE_*          -The variance of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
 
 Beta_Marginal           - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
 SE_Beta_Marginal        - The model-based SE associated with the marginal genetic effect estimate.
@@ -443,6 +445,9 @@ The results should look like the following output file [longitudinal_with_kinshi
 <br />
 
 ## Recent Updates 
+[Version 2.1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.2) - May 27, 2025:
+* Added output columns GV and GV_catE_*.
+
 [Version 2.1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.1) - April 18, 2025:
 * Prints the SNP ID where a singular matrix is detected.
 

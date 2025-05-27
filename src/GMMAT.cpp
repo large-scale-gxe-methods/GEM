@@ -1259,7 +1259,7 @@ Glmmkin GMMAT::glmmkin_fit(Fit fit_null, std::ext::V_int group_id,
 }
 
 
-Glmmkin GMMAT::glmmkin_final(std::ext::FitNull_f fit0, Pheno pheno,
+Glmmkin GMMAT::glmmkin_postfit(std::ext::FitNull_f fit0, Pheno pheno,
                             std::ext::V_string cov_selected_hdrs,
                             std::string phenoname,
                             std::string const& id, 

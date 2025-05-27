@@ -255,7 +255,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_final(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "calculating the duration of association test...\n";
@@ -472,7 +472,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_final(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "calculating the duration of association test...\n";
@@ -693,7 +693,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_final(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "calculating the duration of association test...\n";

@@ -86,11 +86,9 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
         fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
         fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
     }
-    
     fmt::println("****************************************************************************");
     //Map pheno sample ids to int to be used as matrix indices
     set_idx_mp(pheno.m_data_frame.m_data[pheno.m_sam_id]);
-
     if(kin.m_null_kin)
     {
         for(unsigned int i {0}; i < pheno.size(); ++i)

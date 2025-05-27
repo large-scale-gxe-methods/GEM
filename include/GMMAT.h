@@ -220,7 +220,7 @@ class GMMAT
          * @param tau_region 
          * @return Glmmkin 
          */
-        [[nodiscard]] Glmmkin glmmkin_final(std::ext::FitNull_f fit0, Pheno pheno,
+        [[nodiscard]] Glmmkin glmmkin_postfit(std::ext::FitNull_f fit0, Pheno pheno,
                             std::ext::V_string covSelectedHeader,
                             std::string phenoname,
                             std::string const& id, 

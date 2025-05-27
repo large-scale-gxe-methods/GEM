@@ -3,7 +3,7 @@
 ****************************************************************************/
 
 #include "declars.h"
-#define VERSION "2.1"
+#define VERSION "2.1.2"
 
 void print_help();
 
@@ -61,7 +61,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("center", po::value<int>()->default_value(2))
         ("scale", po::value<int>()->default_value(0))
         ("categorical-names", po::value<std::vector<std::string>>()->multitoken(), "")
-        ("cat-threshold", po::value<int>()->default_value(20));
+        ("cat-threshold", po::value<int>()->default_value(2));
     // Kinship file
     po::options_description kinfile("kinship file options");
     kinfile.add_options()

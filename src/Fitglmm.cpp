@@ -446,6 +446,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 	int ret;
 
 	arma::mat strata_AF(end +1, strataList_size);
+	arma::mat strata_Var(end +1, strataList_size);
 	arma::mat strata_N(end +1, strataList_size);
 
 	for (uint m = begin; m <= end; ++m)
@@ -636,7 +637,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					geno = 2 * (1 - p11 - p10) + p10;
 					gmiss(select[ncount]) = 0;
 					g[select[ncount]] = geno;
-					g2[select[ncount]] = geno;
+					g2[select[ncount]] = geno * geno;
 					
 					gmean += geno;
 					gsqmean += geno * geno;
@@ -691,9 +692,10 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					geno = double(1.0 * missing_and_ploidy) - (p11 + p10); // help to calculate mac
 					gmiss(select[ncount]) = 0;
 					g[select[ncount]] = geno;
-					g2[select[ncount]] = geno;
+					g2[select[ncount]] = geno * geno;
 					gmean += geno;
 					gsqmean += geno * geno;
+
 					if (geno > gmax)
 					{
 						gmax = geno;
@@ -714,18 +716,20 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		gmean /= static_cast<double>(n - nmiss);
 		gsqmean /= static_cast<double>(n - nmiss);
 		//rsq = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1) / (gmean * (1.0 - gmean / 2.0));
-
+		double var = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
+		
 		if (skip_strata)
 		{
-			writeout << std::string (snpID.begin(), snpID.end()) << "\t" << std::string (rsID.begin(), rsID.end()) << "\t" << std::string (chrStr.begin(), chrStr.end()) << "\t" << physpos_tmp << "\t" << std::string (allele1.begin(), allele1.end()) << "\t" << std::string (allele0.begin(), allele0.end()) << "\t" << (n - nmiss) << "\t" << gmean / 2.0 << "\t";
+			writeout << std::string (snpID.begin(), snpID.end()) << "\t" << std::string (rsID.begin(), rsID.end()) << "\t" << std::string (chrStr.begin(), chrStr.end()) << "\t" << physpos_tmp << "\t" << std::string (allele1.begin(), allele1.end()) << "\t" << std::string (allele0.begin(), allele0.end()) << "\t" << (n - nmiss) << "\t" << gmean / 2.0 << "\t" << var << "\t";
 		}
 		else
 		{
-			writeout << std::string (snpID.begin(), snpID.end()) << "\t" << std::string (rsID.begin(), rsID.end()) << "\t" << std::string (chrStr.begin(), chrStr.end()) << "\t" << physpos_tmp << "\t" << std::string (allele1.begin(), allele1.end()) << "\t" << std::string (allele0.begin(), allele0.end()) << "\t" << (n - nmiss) << "\t" << gmean / 2.0 << "\t";
+			writeout << std::string (snpID.begin(), snpID.end()) << "\t" << std::string (rsID.begin(), rsID.end()) << "\t" << std::string (chrStr.begin(), chrStr.end()) << "\t" << physpos_tmp << "\t" << std::string (allele1.begin(), allele1.end()) << "\t" << std::string (allele0.begin(), allele0.end()) << "\t" << (n - nmiss) << "\t" << gmean / 2.0 << "\t" << var << "\t";
 			std::vector<double> strata_range(strataList_size);
 			int strata_cnt = 0;
 			arma::uvec strata_gmiss;
 			arma::vec strata_g;
+			arma::vec strata_g2;
 
 			for (const auto &strata : strata_list)
 			{
@@ -733,9 +737,13 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 				arma::uvec strata_tmp = arma::conv_to<arma::uvec>::from(vec);
 				strata_gmiss = gmiss.elem(strata_tmp);
 				strata_g = g.elem(strata_tmp);
-				strata_AF(m,strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
+				strata_g2 = g2.elem(strata_tmp);//To calc var
+				strata_AF(m, strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
 				arma::vec tmp = strata_g.elem(find(strata_gmiss == 0));
-				strata_N(m,strata_cnt) =tmp.n_elem;
+				arma::vec tmp2 = strata_g2.elem(find(strata_gmiss == 0)); //To calc var
+				strata_Var(m, strata_cnt) = (mean(tmp2) - (mean(tmp) * mean(tmp))) * static_cast<double>(tmp.n_elem) / static_cast<double>(tmp.n_elem -1);//(gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
+				strata_N(m, strata_cnt) = tmp.n_elem;
+		
 				strata_cnt++;
 			}
 
@@ -743,6 +751,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 			{
 				writeout << strata_N(m, strata_idx) << "\t";
 				writeout << strata_AF(m, strata_idx) << "\t";
+				writeout << strata_Var(m, strata_idx) << "\t";
 			}
 		}
 
@@ -791,8 +800,6 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 }
 
 
-
-
 void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile, 
 					std::string pvarFile, string const &outfile, double minmaf,
 					double missrate, size_t npb, int ei, int qi, 
@@ -815,9 +822,10 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
     double maxmaf = 1 - minmaf;
 	size_t n = null_obj.n;
 	size_t n_obs = null_obj.n_obs;
-
+	double gsqmean;
 	arma::mat G(n, npb);
 	arma::vec g(n);
+	arma::vec g2(n);
     arma::uvec gmiss(n);
 	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
 	std::ext::V_string tmpout(npb);
@@ -826,6 +834,7 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 	
 	arma::mat strata_AF(end +1, strataList_size);
 	arma::mat strata_N(end +1, strataList_size);
+	arma::mat strata_Var(end +1, strataList_size);
 
 	std::string output = outfile + "_bin_" + std::to_string(begin) + ".tmp";
 	std::ofstream writefile(output, std::ios::binary);
@@ -1001,11 +1010,9 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 		plink2::Dosage16ToDoubles(plink2::kGenoDoublePairs, _pgv.genovec, _pgv.dosage_present, _pgv.dosage_main, _subset_size, dosage_ct, &buf[0]);
 		
 		gmean = 0.0;
-		//double mac = 0.0;
-		// gsqmean = 0.0;
+		gsqmean = 0.0;
 		gmax = -100.0;
 		gmin = 100.0;
-		//double rsq = 0.0;
 		nmiss = 0;
 		ncount = 0;
 		int idx_k = 0;
@@ -1030,7 +1037,10 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 				geno = buf[ct];
 				gmiss(select[idx_k]) = 0;
 				g[select[idx_k]] = geno;
+				g2[select[idx_k]] = geno * geno;
 				gmean += geno;
+				gsqmean += geno * geno;
+
 				if (geno > gmax)
 				{
 					gmax = geno;
@@ -1044,6 +1054,9 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 		}
 
 		gmean /= static_cast<double>(n - nmiss);
+		gsqmean /= static_cast<double>(n - nmiss);
+		//rsq = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1) / (gmean * (1.0 - gmean / 2.0));
+		double var = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
 		double AF = gmean / 2.0;
 		double percMissing = nmiss / (n * 1.0);
 
@@ -1082,15 +1095,16 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 		
 		if (skip_strata)
 		{
-			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t";
+			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t" << var << "\t";
 		}
 		else
 		{
-			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t";
+			writeout << geno_snpid[npbidx] << "\t" << gmean / 2.0 << "\t" << var << "\t";
 			std::vector<double> strata_range(strataList_size);
 			int strata_cnt = 0;
 			arma::uvec strata_gmiss;
 			arma::vec strata_g;
+			arma::vec strata_g2;
 
 			for (const auto &strata : strata_list)
 			{
@@ -1098,9 +1112,12 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 				arma::uvec strata_tmp = arma::conv_to<arma::uvec>::from(vec);
 				strata_gmiss = gmiss.elem(strata_tmp);
 				strata_g = g.elem(strata_tmp);
-				strata_AF(m,strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
+				strata_g2 = g2.elem(strata_tmp);
+				strata_AF(m, strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
 				arma::vec tmp = strata_g.elem(find(strata_gmiss == 0));
-				strata_N(m,strata_cnt) =tmp.n_elem;
+				arma::vec tmp2 = strata_g2.elem(find(strata_gmiss == 0)); //To calc var
+				strata_Var(m, strata_cnt) = (mean(tmp2) - (mean(tmp) * mean(tmp))) * tmp.n_elem/ static_cast<double>(tmp.n_elem -1);//(gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
+				strata_N(m, strata_cnt) = tmp.n_elem;
 				strata_cnt++;
 			}
 		
@@ -1108,6 +1125,7 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
 			{
 				writeout << strata_N(m, strata_idx) << "\t";
 				writeout << strata_AF(m, strata_idx) << "\t";
+				writeout << strata_Var(m, strata_idx) << "\t";
 			}
 		}
 
@@ -1152,6 +1170,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
     int strataList_size = strata_list.size();
     bool skip_strata = strata_list.empty();
     double maxmaf = 1 - minmaf;
+	double gsqmean;
 	std::string output = outfile + "_bin_" + std::to_string(begin) + ".tmp";
 	std::ofstream writefile(output, std::ios::binary);
 
@@ -1166,6 +1185,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 
 	arma::mat G(n, npb);
 	arma::vec g(n);
+	arma::vec g2(n);
     arma::uvec gmiss(n);
 	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
 	std::ext::V_string tmpout(npb);
@@ -1173,6 +1193,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 	size_t ncount, nmiss, npbidx = 0;
 	arma::mat strata_AF(end +1, strataList_size);
 	arma::mat strata_N(end +1, strataList_size);
+	arma::mat strata_Var(end +1, strataList_size);
 	uint32_t skipIndex = 0;
 	
     
@@ -1190,8 +1211,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 		{
             getline(fIDMat, IDline);
             skipIndex++;
-        }
-        
+        }       
     }
 	   
     std::ifstream readbedfile(bedfile.c_str(), std::ios::binary);
@@ -1212,8 +1232,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 			while (getline(iss, value, bimDelim)) 
 			{
 				values.push_back(value);  
-			}
-			
+			}			
 		}
 		else 
 		{
@@ -1234,11 +1253,9 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 
 		readbedfile.read((char*)buffer, nblocks);
 		gmean = 0.0;
-		//double mac = 0.0;
-		// gsqmean = 0.0;
+		gsqmean = 0.0;
 		gmax = -100.0;
 		gmin = 100.0;
-		//double rsq = 0.0;
 		nmiss = 0;
 		ncount = 0;
 		int idx_k = 0;
@@ -1289,6 +1306,8 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 				}
 
 				gmean += geno;
+				gsqmean += geno * geno;
+
 				if (geno > gmax)
 				{
 					gmax = geno;
@@ -1299,6 +1318,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 				}
 
 				g(select[idx_k]) = geno;
+				g2(select[idx_k]) = geno * geno;
 				gmiss(select[idx_k]) = 0;
 				idx_k++;
 				ncount++;
@@ -1306,8 +1326,12 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
         }
 		
 		gmean /=  static_cast<double>(n - nmiss);
+		gsqmean /= static_cast<double>(n - nmiss);
+		//rsq = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1) / (gmean * (1.0 - gmean / 2.0));
+		double var = (gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
 		double AF = gmean / 2.0;
 		double percMissing = nmiss / (n * 1.0);
+		
 		for (size_t j = 0; j < n; ++j)
 		{
 			if (gmiss(j) == 1)
@@ -1331,15 +1355,16 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 
 		if (skip_strata)
 		{
-			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t";
+			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t" << var << "\t";
 		}
 		else
 		{
-			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t";
+			writeout << geno_snpid << "\t" << gmean / 2.0 << "\t" << var << "\t";
 			std::vector<double> strata_range(strataList_size);
 			int strata_cnt = 0;
 			arma::uvec strata_gmiss;
 			arma::vec strata_g;
+			arma::vec strata_g2;
 
 			for (const auto &strata : strata_list)
 			{
@@ -1347,9 +1372,12 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 				arma::uvec strata_tmp = arma::conv_to<arma::uvec>::from(vec);
 				strata_gmiss = gmiss.elem(strata_tmp);
 				strata_g = g.elem(strata_tmp);
+				strata_g2 = g2.elem(strata_tmp);
 				strata_AF(m,strata_cnt) = mean(strata_g.elem(find(strata_gmiss == 0))) / 2.0;
 				arma::vec tmp = strata_g.elem(find(strata_gmiss == 0));
-				strata_N(m,strata_cnt) =tmp.n_elem;
+				arma::vec tmp2 = strata_g2.elem(find(strata_gmiss == 0));
+				strata_Var(m, strata_cnt) = (mean(tmp2) - (mean(tmp) * mean(tmp))) * tmp.n_elem/ static_cast<double>(tmp.n_elem -1);//(gsqmean - gmean * gmean) * static_cast<double>(n - nmiss) / static_cast<double>(n - nmiss - 1);
+				strata_N(m,strata_cnt) = tmp.n_elem;
 				strata_cnt++;
 			}
 		
@@ -1357,6 +1385,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 			{
 				writeout << strata_N(m, strata_idx) << "\t";
 				writeout << strata_AF(m, strata_idx) << "\t";
+				writeout << strata_Var(m, strata_idx) << "\t";
 			}
 		}
 

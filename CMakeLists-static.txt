@@ -13,9 +13,19 @@ include(FetchContent)
 set(FMT_USE_STATIC_LIBS ON)
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG master
+  GIT_TAG 11.0.2
 )
 FetchContent_MakeAvailable(fmt)
+
+# Fetch spdlog ===================================================
+set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_STATIC ON CACHE BOOL "" FORCE)
+FetchContent_Declare(spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.15.0
+)
+FetchContent_MakeAvailable(spdlog)
 
 
 # Include directories Eigen======================================================
@@ -35,10 +45,6 @@ if(NOT armadillo_POPULATED)
   include_directories(${armadillo_SOURCE_DIR}/include)
   # add_subdirectory(${armadillo_SOURCE_DIR} ${armadillo_BINARY_DIR})
 endif()
-
-
-# Linker flags==================================================================
-# set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -L/usr/lib64")
 
 # Intel MKL libraries==================================================================
 set(MKLROOT "/opt/intel/compilers_and_libraries_2020.2.254/linux/mkl")
@@ -67,7 +73,6 @@ set(SUITESPARSE_LIBRARIES
     libsuitesparseconfig.a 
 )
 
-
 # Set Boost options============================================================
 set(BOOST_ROOT /usr/local)
 set(Boost_USE_STATIC_LIBS ON)
@@ -90,10 +95,10 @@ file(GLOB C_SOURCES
 file(GLOB CC_SOURCES "thirdparty/plink-2.0/*.cc")
 
 # Create the executable
-add_executable(GEM_2.1.1_Intel ${CXX_SOURCES} ${C_SOURCES} ${CC_SOURCES})
+add_executable(GEM_2.1.3_Intel ${CXX_SOURCES} ${C_SOURCES} ${CC_SOURCES})
 
 # Link libraries
-target_link_libraries(GEM_2.1.1_Intel 
+target_link_libraries(GEM_2.1.3_Intel 
     ${SUITESPARSE_LIBRARIES}
     ${MKL_LIBS} 
     fmt::fmt
@@ -101,4 +106,5 @@ target_link_libraries(GEM_2.1.1_Intel
     Boost::system
     Boost::filesystem
     Boost::program_options
+    spdlog
 )

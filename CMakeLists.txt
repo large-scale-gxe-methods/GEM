@@ -10,13 +10,18 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Fetch fmt ======================================================
 FetchContent_Declare(fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG master
+ GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+ GIT_TAG 11.0.2
 )
 FetchContent_MakeAvailable(fmt)
+# Fetch spdlog ===================================================
+FetchContent_Declare(spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.15.0
+)
+FetchContent_MakeAvailable(spdlog)
 
 # Fetch Armadillo=================================================================
 FetchContent_Declare(
@@ -143,6 +148,7 @@ set(SOURCES ${SRC} ${CC_SOURCES} ${C_SOURCES})
 add_executable(GEM ${SOURCES} )
 target_link_libraries(GEM
   PRIVATE
+    spdlog
     fmt::fmt
     # BLAS::BLAS 
     # LAPACK::LAPACK

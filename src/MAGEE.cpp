@@ -571,14 +571,14 @@ void MAGEE::printOutputHeader_magee()
     bool printFull = false; 
     bool printMeta = false; 
     int printStart = 1;  //escape first index as we will add G for beta_G
-    int printEnd  = m_interaction_exp.size() + 1;  
+    int printEnd  = m_interaction.size() + 1;  
     if (m_cmd.outStyle.compare("meta") == 0) { 
         printStart = 0;  
-        printEnd   = m_interaction_exp.size() + 1; 
+        printEnd   = m_interaction.size() + 1; 
         printMeta  = true; 
     } else if (m_cmd.outStyle.compare("full") == 0) { 
         printStart = 0;  
-        printEnd   = m_interaction_exp.size() + 1;  
+        printEnd   = m_interaction.size() + 1;  
         printFull  = true; 
         results << "#dispersion: " << m_glmmkin_fitnull.sigma2 << "\n"; //sigma2 is comming from fitNullModel
     } 
@@ -592,11 +592,11 @@ void MAGEE::printOutputHeader_magee()
         } 
     } 
  
-    for (int i = 0; i < m_interaction_exp.size(); i++) 
+    for (int i = 0; i < m_interaction.size(); i++) 
     { 
-        m_interaction_exp[i] = "G-" + m_interaction_exp[i]; 
+        m_interaction[i] = "G-" + m_interaction[i]; 
     } 
-    m_interaction_exp.insert(m_interaction_exp.begin(), "G"); //To create beta_G
+    m_interaction.insert(m_interaction.begin(), "G"); //To create beta_G
  
     string seMHeader = "SE_Beta_Marginal"; 
     string seHeader  = "SE_Beta_"; 
@@ -614,16 +614,16 @@ void MAGEE::printOutputHeader_magee()
         results << "SE_Beta_Marginal" << "\t"; 
     } 
 
-    if (m_interaction_exp.size() != 0)  
+    if (m_interaction.size() != 0)  
     { 
         for (int i = printStart; i < printEnd; i++) 
         { 
-            results << "Beta_" << m_interaction_exp[i] << "\t"; 
+            results << "Beta_" << m_interaction[i] << "\t"; 
         } 
 
         for (int i = printStart; i < printEnd; i++) 
         { 
-            results << seHeader << m_interaction_exp[i] << "\t";   
+            results << seHeader << m_interaction[i] << "\t";   
         } 
 
         for (int i = printStart; i < printEnd; i++) 
@@ -632,7 +632,7 @@ void MAGEE::printOutputHeader_magee()
             { 
                 if (i < j) 
                 { 
-                    results << covHeader << m_interaction_exp[i] << "_" << m_interaction_exp[j] << "\t";   
+                    results << covHeader << m_interaction[i] << "_" << m_interaction[j] << "\t";   
                 }  
             } 
         } 
@@ -646,7 +646,7 @@ void MAGEE::printOutputHeader_magee()
                     { 
                         if (i == j) 
                         { 
-                            results << "SE_Beta_" << m_interaction_exp[j] << "\t";  
+                            results << "SE_Beta_" << m_interaction[j] << "\t";  
                         } 
                     } 
                 } 
@@ -657,7 +657,7 @@ void MAGEE::printOutputHeader_magee()
                     { 
                         if (i < j) 
                         { 
-                            results << "Cov_Beta_" << m_interaction_exp[i] << "_" << m_interaction_exp[j] << "\t";  
+                            results << "Cov_Beta_" << m_interaction[i] << "_" << m_interaction[j] << "\t";  
                         } 
                     } 
                 } 

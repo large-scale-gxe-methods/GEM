@@ -35,10 +35,25 @@
 
 #include "GEM.h"
 
+
 int main(int argc, char* argv[]) {
+    
+    std::string log_file = get_log_name(argc, argv) + ".log";
+    LoggerSetup::init(log_file);
+    
+    //Add command to the log file
+    std::ostringstream oss;
+    for (int i = 0; i < argc; ++i) 
+    {
+        oss << argv[i] << ' ';
+    }
+    spdlog::info("Command: {}", oss.str());
+
     // Process command line
     CommandLine cmd;
     cmd.processCommandLine(argc, argv);
+   
+
     bool is_duplicated = false;
 
     // Parameters
@@ -923,6 +938,23 @@ int main(int argc, char* argv[]) {
     cout << "*********************************************************\n";
     return 0;
 }
+
+
+// Specify the logger file name
+std::string get_log_name(int argc, char* argv[]) 
+{
+    std::string log_file;  // fallback
+    for (int i = 1; i < argc - 1; ++i) 
+    {
+        if (std::string(argv[i]) == "--out") 
+        {
+            log_file = argv[i + 1];
+            break;
+        }
+    }
+    return log_file;
+}
+
 
 int checkBinary(unordered_map<string, vector<vector<string>>> phenoMap, vector<string> sampleID, double epsilon) 
 {

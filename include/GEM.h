@@ -2,7 +2,9 @@
 #include "GMMAT.h"
 #include "MAGEE.h"
 #include "declars.h"
+#include "Logger.h"
 
+std::string get_log_name(int argc, char* argv[]);
 int  checkBinary(unordered_map<string, vector<vector<string>>> phenoMap, vector<string> sampleID, double epsilon);
 void center(int center, int scale, int samSize, int numSelCol, vector<double> covdata, vector<double>* covdata_ret);
 void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon, 
@@ -17,5 +19,6 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon,
 void printCovVarMat(int numCovs, vector<string> covNames, double* covVarMat, double* beta, int phenoType, int samSize);
 void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<string> covNames, string output, string outStyle, 
                        int robust, double sigma2, BinE binE);
+
             
 

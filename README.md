@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 2.1.2
+Current version: 2.1.3
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.2/GEM_2.1.2_Intel
-* Change the permission: chmod a+x GEM_2.1.2_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.3/GEM_2.1.3_Intel
+* Change the permission: chmod a+x GEM_2.1.3_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++17 compiler or later 
@@ -94,8 +94,9 @@ Armadillo Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable ```./GEM``` or ```./GEM_2.1.2_Intel`` can be used to run the program.  
-For a list of options, use ```./GEM --help``` or ```./GEM_2.1.2_Intel --help```.  
+Once GEM is installed, the executable `./GEM_2.1.3_Intel` can be used to run the program.  
+For a list of options, use `./GEM_2.1.3_Intel --help`.
+ 
 
 <details>
      <summary> <b>List of Options</b> </summary>
@@ -156,11 +157,11 @@ Input/Output File Options:
   
 --output-style  
      Modifies the output of GEM. Must be one of the following:
-	minimum: Output the summary statistics for only the GxE and marginal G terms.
+     minimum: Output the summary statistics for only the GxE and marginal G terms.
         meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms.
                For a robust analysis, additional columns for the model-based summary statistics will be included.
         full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions.
-	Default: minimum   
+     Default: minimum   
 
 
 
@@ -206,7 +207,7 @@ Phenotype File Options:
   
 --center 
      0 for no centering to be done, 1 to center ALL exposures and covariates, and 2 to center all the interaction covariates only.
-     	Default: 2
+          Default: 2
 
 --scale
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
@@ -255,7 +256,7 @@ Performance Options:
 
 --threads
      Set number of compute threads.
-    	  Default: ceiling(detected threads / 2)  
+       Default: ceiling(detected threads / 2)  
 
 --stream-snps 
      Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
@@ -445,15 +446,19 @@ The results should look like the following output file [longitudinal_with_kinshi
 <br />
 
 ## Recent Updates 
+[Version 2.1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.3) - June 14, 2025:
+* Added log file support
+* Updated headers in the output file
+
 [Version 2.1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.2) - May 27, 2025:
-* Added output columns GV and GV_catE_*.
+* Added output columns GV and GV_catE_*
 
 [Version 2.1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.1) - April 18, 2025:
-* Prints the SNP ID where a singular matrix is detected.
+* Logged the SNP ID when a singular matrix is detected
 
 [Version 2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1) - March 10, 2025:
-* Added support for GLMM on PGEN and BED files.
-* Added support for GEI test on PGEN and BED files.
+* Added support for GLMM on PGEN and BED files
+* Added support for GEI test on PGEN and BED files
 
 [Version 2.0](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.0) - February 14, 2025:
 * Added generalized linear mixed model (GLMM)

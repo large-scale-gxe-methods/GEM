@@ -293,7 +293,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
             expHM[exp[i]] += 1;
             if (expHM[exp[i]] > 1) {
-                cerr << "\nERROR: Exposure " + exp[i] + " is specified more than once.\n\n";
+                cerr << "\nERROR: Exposure " << exp[i] << " is specified more than once.\n\n";
                 exit(1);
             }
         }
@@ -318,7 +318,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
             intHM[icov[i]] += 1;
             if (intHM[icov[i]] > 1) {
-                cerr << "\nERROR: Interactive covariate " + icov[i] + "is specified more than once.\n\n";
+                cerr << "\nERROR: Interactive covariate " << icov[i] << "is specified more than once.\n\n";
                 exit(1);
             }
         }
@@ -332,6 +332,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             if (expHM.find(cov[i]) != expHM.end()) {
                 cerr << "\nERROR: Covariate " << cov[i] << " is specified as a covariate (--covar-names) and exposure (--exposure-names)." << "\n\n";
                 exit(1);
+                // spdlog::error("ERROR: Covariate {} is specified as a covariate (--covar-names) and exposure (--exposure-names).\n\n", cov[i]);
+                // exit(1);
             }
             if (intHM.find(cov[i]) != intHM.end()) {
                 cerr << "\nERROR: Covariate " << cov[i] << " is specified as a covariate (--covar-names) and interaction covariate (--int-covar-names)." << "\n\n";
@@ -344,7 +346,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
             covHM[cov[i]] += 1;
             if (covHM[cov[i]] > 1) {
-                cerr << "\nERROR: Covariate " + cov[i] + " is specified more than once.\n\n";
+                cerr << "\nERROR: Covariate " << cov[i] << " is specified more than once.\n\n";
                 exit(1);
             }
         }

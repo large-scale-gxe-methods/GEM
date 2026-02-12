@@ -152,19 +152,7 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<vecto
         string strtmp = values[1];
         sampleID_all.push_back(strtmp);//IDS befor matching
         int itmp = k;
-        // if (phenomap.find(strtmp) != phenomap.end()) {
-        //     auto tmp_valvec = phenomap[strtmp];
-        //     if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-        //         sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-        //         new_covdata_orig[k * (numSelCol+1)] = 1.0;
-        //         for (int c = 0; c < numSelCol; c++) {
-        //             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
-        //         }
 
-        //         sampleID.push_back(strtmp);
-        //         k++;
-        //     }
-        // }
         if (phenomap.find(strtmp) != phenomap.end()) 
         {
             auto& tmp_valvecs = phenomap[strtmp]; 

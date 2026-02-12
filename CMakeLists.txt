@@ -8,8 +8,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Options
 # =========================================================
 option(BUILD_STATIC "Build static executable" OFF)
-option(USE_MKL "Use Intel MKL instead of BLAS/LAPACK" OFF)
-
+# option(USE_MKL "Use Intel MKL instead of BLAS/LAPACK" OFF)
+set(BLAS_BACKEND "MKL" CACHE STRING "BLAS backend: AUTO, MKL, OPENBLAS")
+set_property(CACHE BLAS_BACKEND PROPERTY STRINGS AUTO MKL OPENBLAS)
 # =========================================================
 # C++ standard
 # =========================================================
@@ -28,7 +29,6 @@ if(BUILD_STATIC)
 else()
     message(STATUS "Building DYNAMIC executable")
 endif()
-
 # =========================================================
 # fmt
 # =========================================================
@@ -48,8 +48,9 @@ FetchContent_Declare(spdlog
   GIT_TAG v1.15.0
 )
 FetchContent_MakeAvailable(spdlog)
-
-# Fetch Eigen=====================================================
+# =========================================================
+# Fetch Eigen
+# =========================================================
 FetchContent_Declare(
     eigen
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen
@@ -76,7 +77,6 @@ if(NOT armadillo_POPULATED)
   include_directories(${armadillo_SOURCE_DIR}/include)
   # add_subdirectory(${armadillo_SOURCE_DIR} ${armadillo_BINARY_DIR})
 endif()
-
 # =========================================================
 # Boost (required)
 # =========================================================
@@ -92,16 +92,17 @@ find_package(Boost REQUIRED COMPONENTS
     system
     filesystem
 )
+# =========================================================
+# BLAS Backend Selection
+# =========================================================
+if(BLAS_BACKEND STREQUAL "MKL")
 
-# =========================================================
-# BLAS / LAPACK or MKL
-# =========================================================
-if(USE_MKL)
+    message(STATUS "Configuring MKL backend")
+
     if(DEFINED ENV{MKLROOT})
         set(MKLROOT $ENV{MKLROOT})
         message(STATUS "Using exported MKL path: ${MKLROOT}")
-    elseif(EXISTS "/opt/intel/oneapi/mkl/latest")
-    # Set MKL path
+    elseif()
         set(MKLROOT "/opt/intel/compilers_and_libraries_2020.2.254/linux/mkl")
         message(STATUS "Using default MKL path: ${MKLROOT}")
     else()
@@ -113,39 +114,102 @@ if(USE_MKL)
     endif()
 
     if(BUILD_STATIC)
-      message(STATUS "Using STATIC MKL")
+        message(STATUS "Using STATIC MKL")
+        set(BLAS_LIBS
+            -Wl,--start-group
+            ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a
+            ${MKLROOT}/lib/intel64/libmkl_sequential.a
+            ${MKLROOT}/lib/intel64/libmkl_core.a
+            -Wl,--end-group
+            -Wl,-Bstatic -ldl -lpthread -lm
+        )
+    else()
+        set(BLAS_LIBS
+            mkl_intel_lp64
+            mkl_sequential
+            mkl_core
+            pthread m dl
+        )
+    endif()
 
-      set(MKL_LIBS
-          -Wl,--start-group
-          ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a
-          ${MKLROOT}/lib/intel64/libmkl_sequential.a
-          ${MKLROOT}/lib/intel64/libmkl_core.a
-          -Wl,--end-group
-          -Wl,-Bstatic -ldl -lpthread -lm
-      )
+elseif(BLAS_BACKEND STREQUAL "OPENBLAS")
+
+    message(STATUS "Configuring OpenBLAS backend")
+
+    if(BUILD_STATIC)
+        message(STATUS "BUILD_STATIC is ON → trying static OpenBLAS")
+
+        find_library(OPENBLAS_STATIC
+            NAMES openblas
+            PATH_SUFFIXES lib lib64
+        )
+
+        if(OPENBLAS_STATIC AND OPENBLAS_STATIC MATCHES "\\.a$")
+            message(STATUS "Found static OpenBLAS: ${OPENBLAS_STATIC}")
+
+           set(BLAS_LIBS
+            # -Wl,-Bstatic
+            ${OPENBLAS_STATIC}
+            # -Wl,-Bdynamic #dynamic libs
+            # gfortran
+            # dl
+            # pthread
+            # m
+            -Wl,-Bstatic -lgfortran -ldl -lpthread -lm
+        )
+
+        else()
+            message(STATUS "System OpenBLAS not found. Using local OpenBLAS.")
+
+            set(OPENBLAS_LOCAL "$ENV{HOME}/local/openblas")
+
+            set(BLAS_LIBS ${OPENBLAS_LOCAL}/lib/libopenblas.a)
+            include_directories(${OPENBLAS_LOCAL}/include)
+
+            if (NOT EXISTS ${BLAS_LIBS})
+                message(FATAL_ERROR "Local OpenBLAS not found in ${OPENBLAS_LOCAL}")
+            endif()
+
+        endif()
 
     else()
-      message(STATUS "Using SHARED MKL")
 
-      set(MKL_LIBS
-          mkl_intel_lp64
-          mkl_sequential
-          mkl_core
-          pthread m dl
-      )
+        message(STATUS "BUILD_STATIC is OFF → using shared OpenBLAS")
+
+        find_library(OPENBLAS_LIB
+            NAMES openblas
+            PATHS /usr/lib64
+        )
+
+        if(NOT OPENBLAS_LIB)
+            message(FATAL_ERROR "System OpenBLAS not found")
+        endif()
+
+        message(STATUS "Using system OpenBLAS: ${OPENBLAS_LIB}")
+        set(BLAS_LIBS ${OPENBLAS_LIB})
+
     endif()
-else()
+
+elseif(BLAS_BACKEND STREQUAL "AUTO")
+
+    message(STATUS "Configuring AUTO BLAS detection")
+
     find_package(BLAS REQUIRED)
     find_package(LAPACK REQUIRED)
+    set(BLAS_LIBS ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+
+else()
+    message(FATAL_ERROR "Invalid BLAS_BACKEND: ${BLAS_BACKEND}")
 endif()
+
 # =========================================================
 # SuiteSparse (required)
 # =========================================================
 # Uncomment the line below and comment out the following lines if SuiteSparse is installed in the system root directory
 # find_package(SuiteSparse REQUIRED)
 # If SuiteSparse is not installed in the system root directory, set the paths manually
-include_directories("/home/ssalehinasab/local/suitesparse_7.6.0_no_omp/include/suitesparse/")
-link_directories("/home/ssalehinasab/local/suitesparse_7.6.0_no_omp/lib64")
+include_directories("$ENV{HOME}/local/suitesparse_7.6.0_no_omp/include/suitesparse")
+link_directories("$ENV{HOME}/local/suitesparse_7.6.0_no_omp/lib64")
 set(SUITESPARSE_LIBRARIES
     libcholmod.a 
     libcxsparse.a
@@ -188,18 +252,20 @@ target_compile_definitions(GEM2 PRIVATE
     ARMA_USE_LAPACK
     ARMA_DONT_USE_WRAPPER
 )
+if(BLAS_BACKEND STREQUAL "MKL")
+    target_compile_definitions(GEM2 PRIVATE EIGEN_USE_MKL_ALL)
 
-# Eigen uses MKL only if MKL is enabled
-if(USE_MKL)
+elseif(BLAS_BACKEND STREQUAL "OPENBLAS")
     target_compile_definitions(GEM2 PRIVATE
-        EIGEN_USE_MKL_ALL
+        EIGEN_USE_BLAS
+        EIGEN_USE_LAPACKE
     )
 endif()
+
 # =========================================================
 # Link libraries
 # =========================================================
 target_link_libraries(GEM2 PRIVATE
-    # Eigen3::Eigen
     eigen
     fmt::fmt
     spdlog::spdlog
@@ -208,11 +274,8 @@ target_link_libraries(GEM2 PRIVATE
     Boost::system
     Boost::filesystem
     ${SUITESPARSE_LIBRARIES}
+    ${BLAS_LIBS}
 )
 
-if(USE_MKL)
-    target_link_libraries(GEM2 PRIVATE ${MKL_LIBS})
-else()
-    target_link_libraries(GEM2 PRIVATE ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-endif()
+
 

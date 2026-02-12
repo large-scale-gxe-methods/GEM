@@ -63,14 +63,11 @@ class MAGEE
         enum class GENOTYPE {Bgen, Pgen, Bed};
         MAGEE() = default;
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bgen bgen,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
-                int numSelCol); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Pgen pgen,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
-                int numSelCol); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bed bed,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov,  
-                int numSelCol); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
         /**
          * @brief Run GEI based on glmm 
          * 
@@ -88,7 +85,7 @@ class MAGEE
         std::ext::V_string m_interaction_exp;
 		std::ext::V_string m_interaction_new;
         std::ext::V_string m_interaction_cov;
-        int m_numSelCol;
+        // int m_numSelCol;
         std::ext::Map_str_Vint m_strata_list;
 		std::ext::V_string m_bin_headers;
         /**

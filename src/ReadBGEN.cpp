@@ -342,7 +342,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
         exit(1);
     }
 
-    //the first column of matcovX is Y
+    // The first column of matcovX is Y
     MatrixXd matcovX (samSize,(numSelCol+1));
     for (int i=0; i<samSize; i++){    
         for (int j=0; j<(numSelCol+1); j++) {

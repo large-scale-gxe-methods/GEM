@@ -262,8 +262,30 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    if (robust == 1 && (cmd.kin_flag || is_duplicated))  
+    {
+        std::cerr << "Warning: Robust standard errors (--robust 1) "
+                << "are not supported for longitudinal models "
+                << "or models including a kinship matrix. "
+                << "Using model-based standard errors instead (--robust 0).\n";
+
+        robust = 0;
+        cmd.robust = 0;
+    }
+
+    // Check whether the random slope variable is among the covariates
+    if(randomSlopeHeaderName.size() > 0)
+    {
+        if(std::find(covSelHeadersName.begin(), covSelHeadersName.end(), randomSlopeHeaderName) == covSelHeadersName.end())
+        {
+            std::cerr << "Warning: The random slope variable '" << randomSlopeHeaderName << "' was not found among the covariates.\n";
+            exit(EXIT_FAILURE);
+        }
+    }
+
     double sigma2;
     BinE binE;
+    
     if (cmd.usePgenFile) 
     {
         Pgen pgen;
@@ -337,17 +359,21 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
         }
 
-
-        if (cmd.kin_flag || is_duplicated)
+       if (cmd.kin_flag || is_duplicated)
         {
             phenomap.clear();
             auto start_time_gmmat = std::chrono::steady_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
+            vector <string> phenoHeaders(covSelHeadersName_new);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
             phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+
+            if(randomSlopeHeaderName.size() > 0)
             {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+                if(std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), randomSlopeHeaderName) == covSelHeadersName_new.end())
+                {
+                    randomSlopeHeaderName.clear();
+                    std::cerr << "Warning: The random slope variable was excluded because it is collinear with other predictors. The random slope will not be fitted.\n";
+                }
             }
 
             if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
@@ -361,7 +387,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName_new, phenoHeaderName, samIDHeaderName, intCovSelHeadersName_new, randomSlopeHeaderName, groupHeaderName, cmd.center, cmd.scale, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of association test...\n";
@@ -370,8 +396,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName_new, intCovSelHeadersName_new); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";
@@ -560,13 +585,17 @@ int main(int argc, char* argv[]) {
         {
            phenomap.clear();
             auto start_time_gmmat = std::chrono::steady_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
+            vector <string> phenoHeaders(covSelHeadersName_new);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
             phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+
+            if(randomSlopeHeaderName.size() > 0)
             {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+                if(std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), randomSlopeHeaderName) == covSelHeadersName_new.end())
+                {
+                    randomSlopeHeaderName.clear();
+                    std::cerr << "Warning: The random slope variable was excluded because it is collinear with other predictors. The random slope will not be fitted.\n";
+                }
             }
 
             if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
@@ -580,7 +609,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName_new, phenoHeaderName, samIDHeaderName, intCovSelHeadersName_new, randomSlopeHeaderName, groupHeaderName, cmd.center, cmd.scale, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of association test...\n";
@@ -589,8 +618,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName_new, intCovSelHeadersName_new); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";
@@ -786,13 +814,17 @@ int main(int argc, char* argv[]) {
         {
             phenomap.clear();
             auto start_time_gmmat = std::chrono::steady_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
+            vector <string> phenoHeaders(covSelHeadersName_new);
             phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
             phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
             
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            if(randomSlopeHeaderName.size() > 0)
             {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+                if(std::find(covSelHeadersName_new.begin(), covSelHeadersName_new.end(), randomSlopeHeaderName) == covSelHeadersName_new.end())
+                {
+                    randomSlopeHeaderName.clear();
+                    std::cerr << "Warning: The random slope variable was excluded because it is collinear with other predictors. The random slope will not be fitted.\n";
+                }
             }
                       
             if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
@@ -806,7 +838,7 @@ int main(int argc, char* argv[]) {
 
             GMMAT gmmat;
             gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName_new, phenoHeaderName, samIDHeaderName, intCovSelHeadersName_new, randomSlopeHeaderName, groupHeaderName, cmd.center, cmd.scale, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
             cout << "\nEnd of association test\n";
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of association test...\n";
@@ -815,8 +847,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName_new, intCovSelHeadersName_new); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";

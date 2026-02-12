@@ -460,23 +460,20 @@ static arma::sp_mat kron_ones_I(int p, arma::uword nObs)
 
 
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen bgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bgen)),
             m_active_genotype(GENOTYPE::Bgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Pgen pgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(pgen)),
             m_active_genotype(GENOTYPE::Pgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bed bed,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bed)),
             m_active_genotype(GENOTYPE::Bed), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 
 
 void MAGEE::clear_m_magee_glmmkin() 

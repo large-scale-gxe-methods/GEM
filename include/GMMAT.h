@@ -10,24 +10,30 @@
 
 const int MAX_N_ITER = 500; 
 
-/**
- * @brief Type aliases used for integrating fitNullModel2 functionality in GEM.
- *
- * FitNull_f:
- *   Function signature for calling the null model fitting routine.
- * Matrix_variant:
- *   A generic matrix holder that can store either a dense matrix (DensMat)
- *   or a sparse matrix (SpaMat).
- */
+
 namespace std
 {
     namespace ext
     {
+        /**
+         * @brief Function signature for the GEM null model fitting routine.
+         *
+         * This alias defines the callable interface used to invoke the
+         * null model fitting implementation (e.g., `fitNullModel2`).
+         * It returns results such as fitted values, residuals,
+         * regression coefficients, and variance estimates.
+         */
         using FitNull_f = std::function<void (int samSize, int numSelCol, int phenoType, double epsilon, 
                     int robust, std::vector<string> covSelHeadersName, std::vector<double> phenodata, 
                     std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, 
                     vector<double>* resid_ret, double* sigma2_ret, std::vector<double>& beta_ret,
                     std::vector<double>& Xbeta_ret)>;
+        /**
+         * @brief Variant type for storing dense or sparse matrices.
+         *
+         * This type is used to represent matrices that may be stored
+         * either in dense format (`DensMat`) or sparse format (`SpaMat`).
+         */
         using Matrix_variant = std::variant<DensMat, SpaMat>;
     }
 }
@@ -127,6 +133,7 @@ class GMMAT
         SpaMat m_J;
         SpaMat m_Psi;
         SpaMat m_Z;
+        SpaMat m_Zt_Z;
         size_t m_N;
         size_t m_Nobs;
         bool m_dup;
@@ -153,40 +160,36 @@ class GMMAT
          * This function builds the random-effect covariance matrix 
          * used in Woodbury longitudinal generalized linear mixed models (GLMMs).
          * ---
-         * ## 1. Random Intercept (RI) model
+         * **1. Random Intercept (RI) model**
          *
          * where:
          * - \f$\Phi_i\f$ are sparse kinship matrices
          * - \f$\theta_i\f$ are variance component parameters stored in `m_tau`
          * - \f$I\f$ is the identity matrix
          *
-         * The resulting matrix has dimension \f$N \times N\f`.
+         * The resulting matrix has dimension \f$N \times N\f$.
          *
-         * ---
-         * ## 2. Random Intercept + Random Slope (RS) model
+         * 
+         * **2. Random Intercept + Random Slope (RS) model**
          *
          * where:
          * - \f$\Phi_i\f$ are sparse kinship matrices
          * - \f$\theta_i\f$ are variance component parameters stored in `m_tau`
          * - \f$I\f$ is the identity matrix
          * 
-         * The resulting matrix has dimension \f$2N \times 2N\f`.
-         *
-         * ---
-         * ## Numerical Stability
-         *
-         * To prevent singular covariance matrices, the function enforces:
-         *
-         * - minimum variance thresholds for diagonal parameters
-         * ## Implementation Notes
+         * The resulting matrix has dimension \f$2N \times 2N\f$.
+         * 
+         * 
+         * **Implementation Notes**
          *
          * - The matrix is assembled efficiently using sparse triplets.
          *
-         * @param ng Offset index in `m_tau` where variance components begin.         
+         * @param ng Offset index in `m_tau` where variance components begin.   
+         * @param calc_diag_kin To calculate the mean of the diagonal of kinsip   
          * @note The resulting matrix is stored in the member variable `m_Psi`.
          */
 
-        void build_Psi(int const ng);
+        void build_Psi(int const ng, bool calc_diag_kin = false);
         /**
          * @brief Construct the random-effects design matrix.
          *
@@ -294,11 +297,13 @@ class GMMAT
          */
 
         [[nodiscard]] Glmmkin glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
-                            std::ext::V_string covSelectedHeader,
+                            std::ext::V_string cov_selected_hdrs,
                             std::string phenoname,
                             std::string const& id, 
+                            std::ext::V_string int_cov_hdrs_name_new,
                             std::string randomSlopeName,
                             std::string const& groups,
+                            int center, int scale,
                             std::string const method = "REML", 
                             std::string method_optim = "AI", 
                             int maxiter = 500,

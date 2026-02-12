@@ -5,6 +5,57 @@
 #include <thread>
 #include <mutex>
 
+void center_dataframe(
+    DataFrame& df,
+    const std::vector<std::string>& headers,
+    bool center,
+    bool scale
+)
+{
+    for (const auto& hdr : headers)
+    {
+        std::vector<std::string>& col_str = df.m_data[hdr];
+
+        // Convert to double temporarily
+        std::vector<double> col(col_str.size());
+        for (size_t i = 0; i < col.size(); ++i)
+            col[i] = std::stod(col_str[i]);
+
+        double mean = 0.0;
+        double sd = 1.0;
+
+        if (center || scale)
+        {
+            for (double v : col)
+                mean += v;
+            mean /= static_cast<double>(col.size());
+        }
+
+        if (scale)
+        {
+            double var = 0.0;
+            for (double v : col)
+                var += (v - mean) * (v - mean);
+
+            sd = std::sqrt(var / (col.size() - 1.0));
+            if (sd == 0.0)
+                sd = 1.0;
+        }
+
+        // Apply transform
+        for (size_t i = 0; i < col.size(); ++i)
+        {
+            if (center)
+                col[i] -= mean;
+
+            if (scale)
+                col[i] /= sd;
+
+            col_str[i] = std::to_string(col[i]);
+        }
+    }
+}
+
 
 DensMat apply_wb(Eigen::Ref<const Eigen::MatrixXd> const& mat, DensVec const& diag_sigma_i, SpaMat const& diag_sigma_i_ZPchol)
 {
@@ -100,9 +151,8 @@ namespace details{
     }
 }
 
-//Create matrix X covariate data by adding extra column filled with one 
-DensMat create_covdata(const DataFrame& df) 
-{
+//Create matrix X covariate data by adding extra col fill with one and pheno data
+DensMat create_covdata(const DataFrame& df) {
     // Get dimensions of the data frame
     int num_rows = df.n_rows();
     int num_cols = df.n_cols();
@@ -113,7 +163,7 @@ DensMat create_covdata(const DataFrame& df)
    {
         dmat2ret(i, 0) = 1.0;
    }
-    // Populate the Eigen matrix using the data frame
+    // Populate the Eigen matrix from the data frame
     for (int i = 0; i < num_rows; ++i) {
         for (int j = 1; j < num_cols + 1; ++j) {
             
@@ -125,7 +175,6 @@ DensMat create_covdata(const DataFrame& df)
             {
                 std::cerr << "value" << df.m_data.at(df.m_headers[j-1])[i] << " is not a valid number \n"; 
             }
-
               
         }
     } 
@@ -144,17 +193,16 @@ std::ext::map_str_int createHeaderMap(std::ext::V_string const& headers)
     return headerMap;
 }
 
-
 std::ext::V_int conv_stdvs2stdvi(std::ext::V_string const& strings) 
 {
     std::ext::V_int result;
     result.reserve(strings.size());
-    for (const std::string& str : strings) {
+    for (const std::string& str : strings) 
+    {
         result.push_back(std::stoi(str));
     }
     return result;
 }
-
 
 DensVec linkinv(DensVec const& eta, std::string const& family_t, const std::string& link) 
 {
@@ -168,13 +216,14 @@ DensVec linkinv(DensVec const& eta, std::string const& family_t, const std::stri
         else if (link == "log") 
         {
             result = eta.array().exp().matrix(); 
-        } else if (link == "sqrt") 
+        } 
+        else if (link == "sqrt") 
         {
             result = eta.array().pow(2).matrix(); 
         } 
         else 
         {
-            std::cerr << "Unsupported link function for the Gaussian family." << std::endl;
+            std::cerr << "Unsupported link function for the Gaussian family." << "\n";
         }
     } 
     else if (family_t == "binomial") 
@@ -190,11 +239,10 @@ DensVec linkinv(DensVec const& eta, std::string const& family_t, const std::stri
     } 
     else 
     {
-        std::cerr << "Unsupported family type." << std::endl;
+        std::cerr << "Unsupported family type." << "\n";
     }
     return result;
 }
-
 
 double calc_variance(DensVec const& dv)
 {
@@ -202,8 +250,8 @@ double calc_variance(DensVec const& dv)
     int size = dv.size();
     if(size < 2)
     {
-            fmt::print("Warning: Variance calculation requires at least two elements.\n");
-            return variance;
+        fmt::print("Warning: Variance calculation requires at least two elements.\n");
+        return variance;
     }
 
     double mean = dv.mean();
@@ -216,7 +264,6 @@ double calc_variance(DensVec const& dv)
     variance /= (size - 1);
     return variance;
 }
-
 
 void Fit::calc_dmu_deta(std::string const& family_t, int size)
 {
@@ -234,12 +281,10 @@ void Fit::calc_dmu_deta(std::string const& family_t, int size)
     }
 }
 
-
 DensVec Fit::calc_sqrtW()
 {
     return dmu_deta.array().sqrt();
 }
-
 
 std::ext::V_double conv_dm2stdV(DensMat const& dm)
 {
@@ -256,13 +301,12 @@ std::ext::V_double conv_dm2stdV(DensMat const& dm)
     return v2ret;
 }
 
-
 std::ext::V_double conv_dv2stdVd(DensVec const& dv)
 {
     std::ext::V_double v2ret(dv.size());
     for (int i=0; i < dv.size(); ++i) 
     {
-            v2ret[i] = dv(i);
+        v2ret[i] = dv(i);
     }
     return v2ret;
 }
@@ -568,9 +612,8 @@ bool check_convergence(const DensVec& alpha, const DensVec& alpha0,
     {
         return true; // Converged
     }
-
     if ((tau.array().abs().maxCoeff()) > pow(tol, -2)) {
-        std::cerr << "Large variance estimate observed in the iterations, model not converged..." << std::endl;
+        std::cerr << "Large variance estimate observed in the iterations, model not converged..." << "\n";
         i = maxiter;
         return true; // Indicating non-convergence
     }
@@ -725,7 +768,6 @@ void GMMAT::set_VZpy(DensMat& VZpy, DensVec const& Zpy, int nk)
             VZpy.col(i + 2*nk).tail(n) = kinsZpy.tail(n);           // bottom half
         }
     }
-
 }
 
 static void ensure_compressed(SpaMat& M) //static for ODR
@@ -758,10 +800,12 @@ double hadamard_sum_block(SpaMat& Z, const SpaMat& K, int n, int rowOff, int col
             {
                 s += itZ.value() * itK.value();
                 ++itZ; ++itK;
-            } else if (rZ < rK_abs) 
+            } 
+            else if (rZ < rK_abs) 
             {
                 ++itZ;
-            } else 
+            } 
+            else 
             {
                 ++itK;
             }
@@ -777,50 +821,50 @@ void GMMAT::calc_tr_corr(int i, DensVec &score, DensMat const& Ztsigma_ix,
     {
         int kin_index = i - ng; 
     // ----- identity matrix case -----
-    if (kin_index == nk - 1)
-    {
-        if (!has_random_slope)
+        if (kin_index == nk - 1)
         {
-            double tr = Ztsigma_iZ.diagonal().sum();   
-
-            double corr = Ztsigma_ix.cwiseProduct(Ztsigma_ixcov).sum();
-            score(i) -= (tr - corr);
-        }
-        if (has_random_slope)
-        {
-            int nind = dimZ / 2; 
-            DensVec diagZ = Ztsigma_iZ.diagonal();     // length 2n (DensVec)
-            double tr11 = diagZ.head(nind).sum();
-            
-            double corr11 = Ztsigma_ix.topRows(nind)
-                    .cwiseProduct(Ztsigma_ixcov.topRows(nind)).sum();
-
-            score(i) -= (tr11 - corr11);
-
-            double tr12 = 0.0;
-            for (int k = 0; k < nind; ++k)
+            if (!has_random_slope)
             {
-                tr12 += Ztsigma_iZ.coeff(k, nind + k);
+                double tr = Ztsigma_iZ.diagonal().sum();   
+
+                double corr = Ztsigma_ix.cwiseProduct(Ztsigma_ixcov).sum();
+                score(i) -= (tr - corr);
             }
+            if (has_random_slope)
+            {
+                int nind = dimZ / 2; 
+                DensVec diagZ = Ztsigma_iZ.diagonal();     // length 2n (DensVec)
+                double tr11 = diagZ.head(nind).sum();
+                
+                double corr11 = Ztsigma_ix.topRows(nind)
+                        .cwiseProduct(Ztsigma_ixcov.topRows(nind)).sum();
 
-            double corr12 =
-                Ztsigma_ix.topRows(nind)
-                    .cwiseProduct(Ztsigma_ixcov.bottomRows(nind)).sum();
-            score(i + nk) -= 2.0 * (tr12 - corr12);
-            
-            double tr22 = diagZ.tail(nind).sum();
-            double corr22 =
-                Ztsigma_ix.bottomRows(nind)
-                    .cwiseProduct(Ztsigma_ixcov.bottomRows(nind)).sum();
+                score(i) -= (tr11 - corr11);
 
-            score(i + 2*nk) -= (tr22 - corr22);
+                double tr12 = 0.0;
+                for (int k = 0; k < nind; ++k)
+                {
+                    tr12 += Ztsigma_iZ.coeff(k, nind + k);
+                }
+
+                double corr12 =
+                    Ztsigma_ix.topRows(nind)
+                        .cwiseProduct(Ztsigma_ixcov.bottomRows(nind)).sum();
+                score(i + nk) -= 2.0 * (tr12 - corr12);
+                
+                double tr22 = diagZ.tail(nind).sum();
+                double corr22 =
+                    Ztsigma_ix.bottomRows(nind)
+                        .cwiseProduct(Ztsigma_ixcov.bottomRows(nind)).sum();
+
+                score(i + 2*nk) -= (tr22 - corr22);
+            }
         }
-    }
 
-    // ----- kinship matrix case -----
-    else if (kin_index >= 0 && kin_index < nk - 1)
-    {
-        const SpaMat& K =  m_vkins_sp[kin_index].get_spmat();  // n × n
+        // ----- kinship matrix case -----
+        else if (kin_index >= 0 && kin_index < nk - 1)
+        {
+            const SpaMat& K =  m_vkins_sp[kin_index].get_spmat();  // n × n
         if (!has_random_slope)
         {
             DensMat kinsZtsigma_ixcov = K * Ztsigma_ixcov;   // n×p
@@ -993,8 +1037,7 @@ void GMMAT::set_ai_high_ng(int i, DensVec& score, DensMat& ai, DensVec const& wp
 }
 
 void GMMAT::set_ai(DensVec& score, DensMat& ai, DensVec const& wpy, Fit const& fit, DensVec const& py, DensVec diagp, DensMat sigma_ixcov, int ng, int fixtau_0_counts)
-{
-    
+{    
     for(size_t i{0}; i < fixtau_0_counts; ++i)
     {
         if(m_idxtau[i] < ng)
@@ -1040,7 +1083,7 @@ void GMMAT::calc_covariance(int &kins_size, int ng)
 }
 
 
-void GMMAT::build_Psi(int const ng)
+void GMMAT::build_Psi(int const ng, bool calc_diag_kin)
 {
     // ----------longitudinal (RI only) ----------
     if (m_modeltype == LONGITUDINAL_RI)
@@ -1093,6 +1136,34 @@ void GMMAT::build_Psi(int const ng)
 
     // ---------- longitudinal + slope ----------
     // Reserve triplets: each B_i contributes ~ (Phi_i.nnz * 4)
+    DensVec diag_block1;
+    DensVec diag_block4;
+    DensVec diag_block2;
+    DensVec diag_kin;
+    double mean_diag_block1 = 1.0; 
+    double mean_diag_block4 = 1.0;
+    double mean_diag_block2 = 1.0;
+    
+    if(calc_diag_kin)
+    {
+        diag_block1.resize(m_N);
+        diag_block4.resize(m_N);
+        diag_block2.resize(m_N);
+
+        for (int i = 0; i < m_N; ++i)
+        {
+            // Block (1,1) diagonal
+            diag_block1(i) = m_Zt_Z.coeff(i, i);
+
+            // Block (2,2) diagonal
+            diag_block4(i) = m_Zt_Z.coeff(m_N + i, m_N + i);
+
+            // Block (1,2) diagonal
+            diag_block2(i) = m_Zt_Z.coeff(i, m_N + i) * 2;
+        }
+    }
+    
+    
     size_t total_nnz = 0;
     int K = 0;
     for (auto& ks : m_vkins_sp) 
@@ -1105,7 +1176,7 @@ void GMMAT::build_Psi(int const ng)
     }
     int kins_size = K + 1;          // plus identity block
     total_nnz += m_N;               // identity block
-
+    
     m_Psi.resize(2*m_N, 2*m_N);
     std::ext::VecTuples4spmat triples;
     triples.reserve(4 * total_nnz);
@@ -1117,23 +1188,41 @@ void GMMAT::build_Psi(int const ng)
 
         if (i < K)
         {
-            phi_ptr = &m_vkins_sp[i].get_spmat();  
+            phi_ptr = &m_vkins_sp[i].get_spmat(); 
+            if(calc_diag_kin)
+            {
+                diag_kin = phi_ptr->diagonal();
+                mean_diag_block1 = diag_block1.dot(diag_kin) / m_Nobs;
+                mean_diag_block2 =  diag_block2.dot(diag_kin) / m_Nobs;
+                mean_diag_block4 =  diag_block4.dot(diag_kin) / m_Nobs;
+            }
         }
         else
         {
             phi_ptr = nullptr;    // identity I
+            if(calc_diag_kin)
+            {
+                mean_diag_block1 = diag_block1.sum() / m_Nobs;
+                mean_diag_block2 =  diag_block2.sum() / m_Nobs;
+                mean_diag_block4 =  diag_block4.sum() / m_Nobs;
+            }
         }
         // θ-indexing for block i
-        double th11 = m_tau[ng + i];
-        double th12 = m_tau[ng + i + kins_size];
-        double th22 = m_tau[ng + i + 2 * kins_size];
+        m_tau[ng + i] = m_tau[ng + i] / mean_diag_block1;
+        m_tau[ng + i + kins_size] = m_tau[ng + i + kins_size] / mean_diag_block2;
+        m_tau[ng + i + 2 * kins_size] = m_tau[ng + i + 2 * kins_size] / mean_diag_block4;
+
+        double th11 = m_tau[ng + i] ;
+        double th12 = m_tau[ng + i + kins_size] ;
+        double th22 = m_tau[ng + i + 2 * kins_size] ;
+
         // small det near zero  -> singular mat 
         const double eps = 1e-10;     // min variance
         const double rho = 0.999;      // <-- margin 
 
         th11 = std::max(th11, eps);
         th22 = std::max(th22, eps);
-
+        
         double max_abs_th12 = rho * std::sqrt(th11 * th22);
         th12 = std::clamp(th12, -max_abs_th12, max_abs_th12);
 
@@ -1150,7 +1239,7 @@ void GMMAT::build_Psi(int const ng)
             for (int j = 0; j < m_N; j++)
                 triples.emplace_back(j, j, th11);
         }
-
+        
         // block (1,2): th12 * Φ_i or th12*I
         if (phi_ptr)
         {
@@ -1178,14 +1267,16 @@ void GMMAT::build_Psi(int const ng)
             for (int j = 0; j < m_N; j++)
                 triples.emplace_back(m_N + j, j, th12);
         }
-
+        
         // block (2,2): th22 * Φ_i or th22*I
         if (phi_ptr)
-        {
+        {          
             const SpaMat &phi = *phi_ptr;
+            
             for (int col = 0; col < phi.outerSize(); ++col)
                 for (SpaMat::InnerIterator it(phi, col); it; ++it)
                     triples.emplace_back(m_N + it.row(), m_N + it.col(), th22 * it.value());
+            
         }
         else
         {
@@ -1193,13 +1284,12 @@ void GMMAT::build_Psi(int const ng)
                 triples.emplace_back(m_N + j, m_N + j, th22);
         }
     }
-
-    m_Psi.setFromTriplets(triples.begin(), triples.end());
+    
+    m_Psi.setFromTriplets(triples.begin(), triples.end());   
 }
 
 void GMMAT::build_Z()
 {
-    // If no Z is needed, still keep correct row count later:
     m_Z.resize(m_Nobs, 0);
 
     std::ext::VecTuples4spmat triples;
@@ -1567,14 +1657,13 @@ Fit GMMAT::fitglmm_ai(DensVec const& W)
             } 
             else 
             {
-                std::cout << "The matrix is not invertible, solve operation failed." << std::endl;
+                std::cout << "The matrix is not invertible, solve operation failed." << "\n";
                 fit_to_return.dtau = std::nullopt;
                 exit(EXIT_FAILURE); 
             }
             return fit_to_return;
         }
-    } 
-    
+    }   
     return fit_to_return;
 }
 
@@ -1666,7 +1755,13 @@ Glmmkin GMMAT::glmmkin_ai(Fit fit_null, int maxiter, double tol)
             build_Z();
             m_diag_sigma_im_Z = details::diag(glmmkin.fit.diag_sigma_i) * m_Z; 
             SpaMat Ztdiag_sigma_iZ = crossprod(m_Z, m_diag_sigma_im_Z); //2N in 2N
-            build_Psi(ng);
+            
+            // Calculate Zt_Z to do -->  m_tau(i + ng) / (curr_kin_spmat).diagonal().mean();
+            m_Zt_Z.resize(m_Z.cols(), m_Z.cols());
+            m_Zt_Z = m_Z.transpose() * m_Z;
+            bool calc_diag_kin = true;
+            build_Psi(ng, calc_diag_kin);
+
             SpaMat Pchol = SparseInverse::inv_spamat_chol(SparseInverse::inv_spamat_chol(m_Psi, true) + Ztdiag_sigma_iZ); //2N in 2N or N in N
             glmmkin.fit.diag_sigma_i_ZPchol = m_diag_sigma_im_Z * Pchol; //Nobs * 2N sparse or in N
             DensMat YX(m_Y.rows(), m_Y.cols() + m_X.cols());
@@ -1930,7 +2025,6 @@ Glmmkin GMMAT::glmmkin_fit(Fit fit_null, std::ext::V_int group_id,
                 {   
                     ++kins_size;
                 }
-            
             }
             ++kins_size; //I matrix
         }
@@ -1940,6 +2034,7 @@ Glmmkin GMMAT::glmmkin_fit(Fit fit_null, std::ext::V_int group_id,
         }
 
         m_kins_size = kins_size;
+
         if(m_rand_slope.size() > 0)
         {
             //Fill m_covariance_idx
@@ -1994,7 +2089,7 @@ Glmmkin GMMAT::glmmkin_fit(Fit fit_null, std::ext::V_int group_id,
             if(kins_size == 1)
             {
                 fmt::print(stderr, "Average Information REML not converged, refitting model using Brent method...\n");
-                fmt::print(stderr, "Brent is not available for the time being, stay in touch for updates ;)\n");
+                fmt::print(stderr, "Brent is not available for the time being, stay in touch for updates.\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -2011,11 +2106,13 @@ Glmmkin GMMAT::glmmkin_fit(Fit fit_null, std::ext::V_int group_id,
 
 
 Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
-                            std::ext::V_string cov_selected_hdrs,
+                            std::ext::V_string cov_selected_hdrs_new,
                             std::string phenoname,
                             std::string const& id, 
+                            std::ext::V_string int_cov_hdrs_name_new,
                             std::string randomSlopeName,
                             std::string const& group,
+                            int center, int scale,
                             std::string const method, 
                             std::string method_optim, 
                             int maxiter,
@@ -2026,7 +2123,43 @@ Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
     pheno.m_sam_id = id;
     m_y = conv_stdVs2dV(pheno.m_data_frame.get_header(phenoname));
     m_Nobs = m_y.size();
+    DensMat m_X_org = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs_new));
+    // Centering 
+    if (center == 2)
+    {
+        center_dataframe(pheno.m_data_frame, int_cov_hdrs_name_new, true, scale);
 
+        std::cout << "GEM centered only the interaction covariate(s): ";
+        for (size_t i = 0; i < int_cov_hdrs_name_new.size(); ++i)
+        {
+            std::cout << int_cov_hdrs_name_new[i];
+            if (i != int_cov_hdrs_name_new.size() - 1)
+                std::cout << ",";
+        }
+        std::cout << "." << "\n";
+        std::cout << "*********************************************************\n";
+    }
+    if (center == 1 || scale == 1)
+    {
+        center_dataframe(pheno.m_data_frame, cov_selected_hdrs_new, center, scale);
+
+        std::cout << "Warning:" << std::endl;
+        std::cout << "All interaction covariates, exposure and covariates were centered. "
+            << "Meta-analysis is not recommended using centered results." << std::endl;
+        std::cout << "*********************************************************\n";
+    }
+    if (center == 0)
+    {
+        std::cout<<"None of the interaction covariates, exposure and covariates were centered."<< std::endl;
+        if (int_cov_hdrs_name_new.size() > 0)
+        {
+            std::cout<< "Warning:"<< std::endl;
+            std::cout<< "It is strongly recommended to center all interaction covariates (program default) for better interpretation of the joint test for genetic main effects and gene-exposure interactions"<< "\n";
+            std::cout << "*********************************************************\n";
+        }
+    }
+    m_X = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs_new));
+    
     std::ext::V_string v_valid_methods {"REML", "ML"};
     std::string rand_slope_hdr = randomSlopeName;
 
@@ -2034,15 +2167,14 @@ Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
     if(it == v_valid_methods.end())
     {
         fmt::print(stderr, "Error: {} is not in GMMAT valid methods (REML, ML)\n", method);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 
     if(method ==  "ML" && method_optim == "AI")
     {
         fmt::print(stderr, "Error: {} is not available for {}\n", method, method_optim);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
-
     
     if(rand_slope_hdr.size() > 0)
     {
@@ -2054,19 +2186,26 @@ Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
         std::ext::V_string slope_temp = pheno.m_data_frame.get_header(rand_slope_hdr);
         m_rand_slope = conv_stdVs2dV(slope_temp);
     }
+
     Fit fit_null; 
     auto pair = pheno.check_binary(phenoname);
     m_family_t = pair.first;
     m_link = pair.second;
     auto pheno_type = (m_family_t == "binomial") ? 1 : 0;
-    GEMFit gf;
-    std::ext::V_double pheno_data = conv_dv2stdVd(m_y);
-    m_X = create_covdata(pheno.m_data_frame.copy_by_hdrs(cov_selected_hdrs));
-    std::ext::V_double cov_data = conv_dm2stdV(m_X); 
-    m_n_sel_col = cov_selected_hdrs.size();
+
+    if(pheno_type == 1 && group.size() > 0)
+    {
+        std::cerr << "Error: 'group' option cannot be used with a binary phenotype ";
+        exit(EXIT_FAILURE); 
+    }
     
-    fit0(m_Nobs, m_n_sel_col, pheno_type, tol, m_robust, cov_selected_hdrs, pheno_data, cov_data,
+    GEMFit gf;
+    std::ext::V_double cov_data = conv_dm2stdV(m_X); 
+    std::ext::V_double pheno_data = conv_dv2stdVd(m_y);
+    m_n_sel_col = cov_selected_hdrs_new.size();
+    fit0(m_Nobs, m_n_sel_col, pheno_type, tol, m_robust, cov_selected_hdrs_new, pheno_data, cov_data,
                  &gf.XinvXTX, &gf.mu, &gf.resid, &gf.sigma2, gf.alpha, gf.eta); 
+
 
     std::cout << std::flush;
     std::cout << "****************************************************************************\n";
@@ -2135,7 +2274,7 @@ Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
                 }
             } 
         }
-
+        
         spi_mat.setFromTriplets(triplets.begin(), triplets.end());
         spi_mat.makeCompressed();
         if(!m_vkins_sp[0].kin.m_null_kin)
@@ -2157,11 +2296,12 @@ Glmmkin GMMAT::glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
     {
         group_id = conv_stdvs2stdvi(pheno.m_data_frame.get_header(group));
     }
-
+    
     glmmkin = glmmkin_fit(fit_null, group_id, method, method_optim, 
                           maxiter, tol, tau_min, tau_max, tau_region);
     glmmkin.id_include = pheno.m_data_frame.get_header(id);
 	glmmkin.sigma2 = gf.sigma2;
-    m_hdrsMap = createHeaderMap(cov_selected_hdrs);
+    m_hdrsMap = createHeaderMap(cov_selected_hdrs_new);
+    m_X = m_X_org;
     return glmmkin;    
 }

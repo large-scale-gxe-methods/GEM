@@ -176,7 +176,7 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 						PVAL_MAIN[s] = chi_square_CDF(STAT_MAIN[s], 1, 0, 0);
 					}
 				}
-				// If there is interaction term
+				// If there is an interaction term
 				if(ei > 0)
 				{
 					arma::mat Hv(ei+qi+1, ei+qi+1, arma::fill::zeros);
@@ -208,7 +208,7 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 					try 
 					{
 						IV_GE_i = arma::inv(IV_V_i1(arma::span(0,ngei1-1), arma::span(0,ngei1-1))); 
-						STAT_JOINT_tmp=  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
+						STAT_JOINT_tmp =  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
 						STAT_JOINT = diagvec(STAT_JOINT_tmp.t()*BETA_INT1.rows(0,ngei1-1));
 					
 						for (size_t s = 0; s < STAT_INT.size(); s++) 

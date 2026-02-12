@@ -1,0 +1,62 @@
+\doxysection{include/\+Binary\+EUtils.h File Reference}
+\hypertarget{BinaryEUtils_8h}{}\label{BinaryEUtils_8h}\index{include/BinaryEUtils.h@{include/BinaryEUtils.h}}
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include "{}Read\+Parameters.\+h"{}}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classBinE}{BinE}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{BinaryEUtils_8h_ae2be3ae3ae26fa5f04181c2f43b500af}{Binary\+EUtils\+\_\+H}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::unordered\+\_\+map$<$ int, vector$<$ int $>$ $>$ \mbox{\hyperlink{BinaryEUtils_8h_a38517a9c56f3fb5832dfc507e5281b0b}{Get\+Power\+Set}} (std\+::string v)
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{BinaryEUtils_8h_af001e835e4228b72f345a210daf95c36}{vector\+\_\+binstrings}} (int width)
+\item 
+std\+::unordered\+\_\+map$<$ std\+::string, unsigned int $>$ \mbox{\hyperlink{BinaryEUtils_8h_af76a0c6586fbae6c5229fecdf5a792c3}{cartesian\+\_\+map}} (vector$<$ vector$<$ string $>$ $>$ \&v)
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{BinaryEUtils_8h_ab177e93e25ff683f12fd1e61a55444d6}{cartesian\+\_\+vec\+\_\+sep}} (vector$<$ vector$<$ string $>$ $>$ \&v)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{BinaryEUtils_8h_ae2be3ae3ae26fa5f04181c2f43b500af}\label{BinaryEUtils_8h_ae2be3ae3ae26fa5f04181c2f43b500af} 
+\index{BinaryEUtils.h@{BinaryEUtils.h}!BinaryEUtils\_H@{BinaryEUtils\_H}}
+\index{BinaryEUtils\_H@{BinaryEUtils\_H}!BinaryEUtils.h@{BinaryEUtils.h}}
+\doxysubsubsection{\texorpdfstring{BinaryEUtils\_H}{BinaryEUtils\_H}}
+{\footnotesize\ttfamily \#define Binary\+EUtils\+\_\+H}
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{BinaryEUtils_8h_af76a0c6586fbae6c5229fecdf5a792c3}\label{BinaryEUtils_8h_af76a0c6586fbae6c5229fecdf5a792c3} 
+\index{BinaryEUtils.h@{BinaryEUtils.h}!cartesian\_map@{cartesian\_map}}
+\index{cartesian\_map@{cartesian\_map}!BinaryEUtils.h@{BinaryEUtils.h}}
+\doxysubsubsection{\texorpdfstring{cartesian\_map()}{cartesian\_map()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ std\+::string, unsigned int $>$ cartesian\+\_\+map (\begin{DoxyParamCaption}\item[{vector$<$ vector$<$ string $>$ $>$ \&}]{v }\end{DoxyParamCaption})}
+
+\Hypertarget{BinaryEUtils_8h_ab177e93e25ff683f12fd1e61a55444d6}\label{BinaryEUtils_8h_ab177e93e25ff683f12fd1e61a55444d6} 
+\index{BinaryEUtils.h@{BinaryEUtils.h}!cartesian\_vec\_sep@{cartesian\_vec\_sep}}
+\index{cartesian\_vec\_sep@{cartesian\_vec\_sep}!BinaryEUtils.h@{BinaryEUtils.h}}
+\doxysubsubsection{\texorpdfstring{cartesian\_vec\_sep()}{cartesian\_vec\_sep()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ cartesian\+\_\+vec\+\_\+sep (\begin{DoxyParamCaption}\item[{vector$<$ vector$<$ string $>$ $>$ \&}]{v }\end{DoxyParamCaption})}
+
+\Hypertarget{BinaryEUtils_8h_a38517a9c56f3fb5832dfc507e5281b0b}\label{BinaryEUtils_8h_a38517a9c56f3fb5832dfc507e5281b0b} 
+\index{BinaryEUtils.h@{BinaryEUtils.h}!GetPowerSet@{GetPowerSet}}
+\index{GetPowerSet@{GetPowerSet}!BinaryEUtils.h@{BinaryEUtils.h}}
+\doxysubsubsection{\texorpdfstring{GetPowerSet()}{GetPowerSet()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ int, vector$<$ int $>$ $>$ Get\+Power\+Set (\begin{DoxyParamCaption}\item[{std\+::string}]{v }\end{DoxyParamCaption})}
+
+\Hypertarget{BinaryEUtils_8h_af001e835e4228b72f345a210daf95c36}\label{BinaryEUtils_8h_af001e835e4228b72f345a210daf95c36} 
+\index{BinaryEUtils.h@{BinaryEUtils.h}!vector\_binstrings@{vector\_binstrings}}
+\index{vector\_binstrings@{vector\_binstrings}!BinaryEUtils.h@{BinaryEUtils.h}}
+\doxysubsubsection{\texorpdfstring{vector\_binstrings()}{vector\_binstrings()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ vector\+\_\+binstrings (\begin{DoxyParamCaption}\item[{int}]{width }\end{DoxyParamCaption})}
+

@@ -11,13 +11,13 @@ class Kinship
         bool m_null_kin = false;
         double m_diag;
         /**
-         * @brief Set the path object
+         * @brief Set the kinship path 
          * 
          * @param path 
          */
         void set_path(std::string const& path);
         /**
-         * @brief Read kinship files with a given delimeter (default ",") and path
+         * @brief Read the kinship path
          * 
          * @param delim 
          */

@@ -1,0 +1,154 @@
+\doxysection{Fit Struct Reference}
+\hypertarget{structFit}{}\label{structFit}\index{Fit@{Fit}}
+
+
+A structure that contains all required parameters and functions related to the fitting function and return parameters of the method fitglmm\+\_\+ai in \doxylink{classGMMAT}{GMMAT} class.  
+
+
+
+
+{\ttfamily \#include $<$GMMAT.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{structFit_a21c3c1b71b4a8699eb1da7fe7ecdaa63}{calc\+\_\+dmu\+\_\+deta}} (std\+::string const \&family\+\_\+t, int size)
+\begin{DoxyCompactList}\small\item\em A function to calculate derivative of mu in respect of eta based on the family type. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a49a7fb85a9b61428040b674eade0142f}{calc\+\_\+sqrtW}} ()
+\begin{DoxyCompactList}\small\item\em A function to calculate the square root of W. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a586c7e4d166dbfe0814f6308ecdf912a}{eta}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_ab70df984a21e6e0cc08042ffd03be6b9}{mu}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a6ae3ffc0c117f435dd27896699e8fe64}{dmu\+\_\+deta}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{structFit_a65e1cd138118a4f955a789b8aee6eef1}{cov}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a83787d98bf25318645b0dc98c9877479}{alpha}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structFit_aab0ae4679dc7f1fc3a567cb5b118535b}{sigma\+\_\+i}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a9fb8305625f80d3e77fdac25a516189c}{diag\+\_\+sigma\+\_\+i}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structFit_ae5f70672af17a65cf0792f2bf8704c3b}{diag\+\_\+sigma\+\_\+i\+\_\+\+ZPchol}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{structFit_a0cbd590169bd49c82fc975251c5a9007}{sigma\+\_\+ix}}
+\item 
+std\+::optional$<$ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} $>$ \mbox{\hyperlink{structFit_a312cab4d0df8c4bfe77602558429e09f}{dtau}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structFit_a2f1da9a839dfa978ccd303f9cdd5fbac}{W}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A structure that contains all required parameters and functions related to the fitting function and return parameters of the method fitglmm\+\_\+ai in \doxylink{classGMMAT}{GMMAT} class. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{structFit_a21c3c1b71b4a8699eb1da7fe7ecdaa63}\label{structFit_a21c3c1b71b4a8699eb1da7fe7ecdaa63} 
+\index{Fit@{Fit}!calc\_dmu\_deta@{calc\_dmu\_deta}}
+\index{calc\_dmu\_deta@{calc\_dmu\_deta}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{calc\_dmu\_deta()}{calc\_dmu\_deta()}}
+{\footnotesize\ttfamily void Fit\+::calc\+\_\+dmu\+\_\+deta (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{family\+\_\+t,  }\item[{int}]{size }\end{DoxyParamCaption})}
+
+
+
+A function to calculate derivative of mu in respect of eta based on the family type. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em family\+\_\+t} & \\
+\hline
+{\em size} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structFit_a49a7fb85a9b61428040b674eade0142f}\label{structFit_a49a7fb85a9b61428040b674eade0142f} 
+\index{Fit@{Fit}!calc\_sqrtW@{calc\_sqrtW}}
+\index{calc\_sqrtW@{calc\_sqrtW}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{calc\_sqrtW()}{calc\_sqrtW()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::calc\+\_\+sqrtW (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+A function to calculate the square root of W. 
+
+\begin{DoxyReturn}{Returns}
+Dens\+Vec 
+\end{DoxyReturn}
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{structFit_a83787d98bf25318645b0dc98c9877479}\label{structFit_a83787d98bf25318645b0dc98c9877479} 
+\index{Fit@{Fit}!alpha@{alpha}}
+\index{alpha@{alpha}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{alpha}{alpha}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::alpha}
+
+\Hypertarget{structFit_a65e1cd138118a4f955a789b8aee6eef1}\label{structFit_a65e1cd138118a4f955a789b8aee6eef1} 
+\index{Fit@{Fit}!cov@{cov}}
+\index{cov@{cov}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{cov}{cov}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Fit\+::cov}
+
+\Hypertarget{structFit_a9fb8305625f80d3e77fdac25a516189c}\label{structFit_a9fb8305625f80d3e77fdac25a516189c} 
+\index{Fit@{Fit}!diag\_sigma\_i@{diag\_sigma\_i}}
+\index{diag\_sigma\_i@{diag\_sigma\_i}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{diag\_sigma\_i}{diag\_sigma\_i}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::diag\+\_\+sigma\+\_\+i}
+
+\Hypertarget{structFit_ae5f70672af17a65cf0792f2bf8704c3b}\label{structFit_ae5f70672af17a65cf0792f2bf8704c3b} 
+\index{Fit@{Fit}!diag\_sigma\_i\_ZPchol@{diag\_sigma\_i\_ZPchol}}
+\index{diag\_sigma\_i\_ZPchol@{diag\_sigma\_i\_ZPchol}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{diag\_sigma\_i\_ZPchol}{diag\_sigma\_i\_ZPchol}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Fit\+::diag\+\_\+sigma\+\_\+i\+\_\+\+ZPchol}
+
+\Hypertarget{structFit_a6ae3ffc0c117f435dd27896699e8fe64}\label{structFit_a6ae3ffc0c117f435dd27896699e8fe64} 
+\index{Fit@{Fit}!dmu\_deta@{dmu\_deta}}
+\index{dmu\_deta@{dmu\_deta}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{dmu\_deta}{dmu\_deta}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::dmu\+\_\+deta}
+
+\Hypertarget{structFit_a312cab4d0df8c4bfe77602558429e09f}\label{structFit_a312cab4d0df8c4bfe77602558429e09f} 
+\index{Fit@{Fit}!dtau@{dtau}}
+\index{dtau@{dtau}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{dtau}{dtau}}
+{\footnotesize\ttfamily std\+::optional$<$\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}}$>$ Fit\+::dtau}
+
+\Hypertarget{structFit_a586c7e4d166dbfe0814f6308ecdf912a}\label{structFit_a586c7e4d166dbfe0814f6308ecdf912a} 
+\index{Fit@{Fit}!eta@{eta}}
+\index{eta@{eta}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{eta}{eta}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::eta}
+
+\Hypertarget{structFit_ab70df984a21e6e0cc08042ffd03be6b9}\label{structFit_ab70df984a21e6e0cc08042ffd03be6b9} 
+\index{Fit@{Fit}!mu@{mu}}
+\index{mu@{mu}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{mu}{mu}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::mu}
+
+\Hypertarget{structFit_aab0ae4679dc7f1fc3a567cb5b118535b}\label{structFit_aab0ae4679dc7f1fc3a567cb5b118535b} 
+\index{Fit@{Fit}!sigma\_i@{sigma\_i}}
+\index{sigma\_i@{sigma\_i}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{sigma\_i}{sigma\_i}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Fit\+::sigma\+\_\+i}
+
+\Hypertarget{structFit_a0cbd590169bd49c82fc975251c5a9007}\label{structFit_a0cbd590169bd49c82fc975251c5a9007} 
+\index{Fit@{Fit}!sigma\_ix@{sigma\_ix}}
+\index{sigma\_ix@{sigma\_ix}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{sigma\_ix}{sigma\_ix}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Fit\+::sigma\+\_\+ix}
+
+\Hypertarget{structFit_a2f1da9a839dfa978ccd303f9cdd5fbac}\label{structFit_a2f1da9a839dfa978ccd303f9cdd5fbac} 
+\index{Fit@{Fit}!W@{W}}
+\index{W@{W}!Fit@{Fit}}
+\doxysubsubsection{\texorpdfstring{W}{W}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Fit\+::W}
+
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{GMMAT_8h}{GMMAT.\+h}}\item 
+src/\mbox{\hyperlink{GMMAT_8cpp}{GMMAT.\+cpp}}\end{DoxyCompactItemize}

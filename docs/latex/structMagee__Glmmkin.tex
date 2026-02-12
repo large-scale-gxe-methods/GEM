@@ -1,0 +1,147 @@
+\doxysection{Magee\+\_\+\+Glmmkin Struct Reference}
+\hypertarget{structMagee__Glmmkin}{}\label{structMagee__Glmmkin}\index{Magee\_Glmmkin@{Magee\_Glmmkin}}
+
+
+Structure for storing GEI-\/related data in Eigen matrices.  
+
+
+
+
+{\ttfamily \#include $<$MAGEE.\+h$>$}
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_aefb36b092169c651742860d5373e50f8}{E}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_ab991080f8968633d9b18dfbc78f376bf}{EC}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a8fa0759c99944d9c2e55d471d1803d72}{J}}
+\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} \mbox{\hyperlink{structMagee__Glmmkin_a54a3d4296c5771c07dae5a47dcd567a4}{select}}
+\item 
+bool \mbox{\hyperlink{structMagee__Glmmkin_a69ec658411a9a3908144ec515eb38403}{dupflag}} = false
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_aa17eee4b6e2d490721b0cfb30ab6e5d4}{sigma\+\_\+i}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structMagee__Glmmkin_aa9a21630020720399894c2754557b6d1}{diag\+\_\+sigma\+\_\+i}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a4dfd0df49300401686e6cda187ad5d49}{diag\+\_\+sigma\+\_\+i\+\_\+\+ZPchol}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a5bb47841149dfdad3856b431fd528f33}{sigma\+\_\+ix}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a48b409c6796ef6c2863e6c26cfdb1911}{cov}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} \mbox{\hyperlink{structMagee__Glmmkin_a88d72ed4d1a7425b1b067b3d79b43c29}{residuals}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_afbf363a35731612c186542f75b77d327}{JEres}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a9fb0d6b594f9e1e770f8e07d53ea32d9}{JPJ}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a0896a3ddca7be8921eb18c7e8b0484ff}{JEPJ}}
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{structMagee__Glmmkin_a073b3aa8d1e877301df6c988f2c016a8}{JEPEJ}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Structure for storing GEI-\/related data in Eigen matrices. 
+
+This structure holds intermediate matrices and vectors used in the \doxylink{classGMMAT}{GMMAT} + \doxylink{classMAGEE}{MAGEE} workflow, including design matrices, covariance components, residuals, and Woodbury-\/related terms. 
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{structMagee__Glmmkin_a48b409c6796ef6c2863e6c26cfdb1911}\label{structMagee__Glmmkin_a48b409c6796ef6c2863e6c26cfdb1911} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!cov@{cov}}
+\index{cov@{cov}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{cov}{cov}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::cov}
+
+\Hypertarget{structMagee__Glmmkin_aa9a21630020720399894c2754557b6d1}\label{structMagee__Glmmkin_aa9a21630020720399894c2754557b6d1} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!diag\_sigma\_i@{diag\_sigma\_i}}
+\index{diag\_sigma\_i@{diag\_sigma\_i}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{diag\_sigma\_i}{diag\_sigma\_i}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Magee\+\_\+\+Glmmkin\+::diag\+\_\+sigma\+\_\+i}
+
+\Hypertarget{structMagee__Glmmkin_a4dfd0df49300401686e6cda187ad5d49}\label{structMagee__Glmmkin_a4dfd0df49300401686e6cda187ad5d49} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!diag\_sigma\_i\_ZPchol@{diag\_sigma\_i\_ZPchol}}
+\index{diag\_sigma\_i\_ZPchol@{diag\_sigma\_i\_ZPchol}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{diag\_sigma\_i\_ZPchol}{diag\_sigma\_i\_ZPchol}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::diag\+\_\+sigma\+\_\+i\+\_\+\+ZPchol}
+
+\Hypertarget{structMagee__Glmmkin_a69ec658411a9a3908144ec515eb38403}\label{structMagee__Glmmkin_a69ec658411a9a3908144ec515eb38403} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!dupflag@{dupflag}}
+\index{dupflag@{dupflag}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{dupflag}{dupflag}}
+{\footnotesize\ttfamily bool Magee\+\_\+\+Glmmkin\+::dupflag = false}
+
+\Hypertarget{structMagee__Glmmkin_aefb36b092169c651742860d5373e50f8}\label{structMagee__Glmmkin_aefb36b092169c651742860d5373e50f8} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!E@{E}}
+\index{E@{E}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{E}{E}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Magee\+\_\+\+Glmmkin\+::E}
+
+\Hypertarget{structMagee__Glmmkin_ab991080f8968633d9b18dfbc78f376bf}\label{structMagee__Glmmkin_ab991080f8968633d9b18dfbc78f376bf} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!EC@{EC}}
+\index{EC@{EC}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{EC}{EC}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Magee\+\_\+\+Glmmkin\+::\+EC}
+
+\Hypertarget{structMagee__Glmmkin_a8fa0759c99944d9c2e55d471d1803d72}\label{structMagee__Glmmkin_a8fa0759c99944d9c2e55d471d1803d72} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!J@{J}}
+\index{J@{J}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{J}{J}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::J}
+
+\Hypertarget{structMagee__Glmmkin_a073b3aa8d1e877301df6c988f2c016a8}\label{structMagee__Glmmkin_a073b3aa8d1e877301df6c988f2c016a8} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!JEPEJ@{JEPEJ}}
+\index{JEPEJ@{JEPEJ}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{JEPEJ}{JEPEJ}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::\+JEPEJ}
+
+\Hypertarget{structMagee__Glmmkin_a0896a3ddca7be8921eb18c7e8b0484ff}\label{structMagee__Glmmkin_a0896a3ddca7be8921eb18c7e8b0484ff} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!JEPJ@{JEPJ}}
+\index{JEPJ@{JEPJ}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{JEPJ}{JEPJ}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::\+JEPJ}
+
+\Hypertarget{structMagee__Glmmkin_afbf363a35731612c186542f75b77d327}\label{structMagee__Glmmkin_afbf363a35731612c186542f75b77d327} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!JEres@{JEres}}
+\index{JEres@{JEres}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{JEres}{JEres}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Magee\+\_\+\+Glmmkin\+::\+JEres}
+
+\Hypertarget{structMagee__Glmmkin_a9fb0d6b594f9e1e770f8e07d53ea32d9}\label{structMagee__Glmmkin_a9fb0d6b594f9e1e770f8e07d53ea32d9} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!JPJ@{JPJ}}
+\index{JPJ@{JPJ}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{JPJ}{JPJ}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::\+JPJ}
+
+\Hypertarget{structMagee__Glmmkin_a88d72ed4d1a7425b1b067b3d79b43c29}\label{structMagee__Glmmkin_a88d72ed4d1a7425b1b067b3d79b43c29} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!residuals@{residuals}}
+\index{residuals@{residuals}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{residuals}{residuals}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} Magee\+\_\+\+Glmmkin\+::residuals}
+
+\Hypertarget{structMagee__Glmmkin_a54a3d4296c5771c07dae5a47dcd567a4}\label{structMagee__Glmmkin_a54a3d4296c5771c07dae5a47dcd567a4} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!select@{select}}
+\index{select@{select}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{select}{select}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} Magee\+\_\+\+Glmmkin\+::select}
+
+\Hypertarget{structMagee__Glmmkin_aa17eee4b6e2d490721b0cfb30ab6e5d4}\label{structMagee__Glmmkin_aa17eee4b6e2d490721b0cfb30ab6e5d4} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!sigma\_i@{sigma\_i}}
+\index{sigma\_i@{sigma\_i}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{sigma\_i}{sigma\_i}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::sigma\+\_\+i}
+
+\Hypertarget{structMagee__Glmmkin_a5bb47841149dfdad3856b431fd528f33}\label{structMagee__Glmmkin_a5bb47841149dfdad3856b431fd528f33} 
+\index{Magee\_Glmmkin@{Magee\_Glmmkin}!sigma\_ix@{sigma\_ix}}
+\index{sigma\_ix@{sigma\_ix}!Magee\_Glmmkin@{Magee\_Glmmkin}}
+\doxysubsubsection{\texorpdfstring{sigma\_ix}{sigma\_ix}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Magee\+\_\+\+Glmmkin\+::sigma\+\_\+ix}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{MAGEE_8h}{MAGEE.\+h}}\end{DoxyCompactItemize}

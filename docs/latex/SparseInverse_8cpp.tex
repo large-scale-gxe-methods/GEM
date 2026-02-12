@@ -1,0 +1,46 @@
+\doxysection{src/\+Sparse\+Inverse.cpp File Reference}
+\hypertarget{SparseInverse_8cpp}{}\label{SparseInverse_8cpp}\index{src/SparseInverse.cpp@{src/SparseInverse.cpp}}
+{\ttfamily \#include "{}../include/\+Sparse\+Inverse.\+h"{}}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$iterator$>$}\newline
+{\ttfamily \#include $<$unordered\+\_\+set$>$}\newline
+{\ttfamily \#include $<$chrono$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{SparseInverse_8cpp_a8313efe5d588c1d64b8af081811a540e}{combine\+\_\+indices}} (long long a, long long b)
+\item 
+cholmod\+\_\+sparse \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{SparseInverse_8cpp_a9c5498e74aaa13b29ff9d9cea1993677}{convert\+Eigen\+To\+Suite\+Sparse}} (\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&sm, cholmod\+\_\+common \texorpdfstring{$\ast$}{*}cm)
+\item 
+cs\+\_\+di \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{SparseInverse_8cpp_a527b68a53da305e86ff3e43d6bfdb130}{cholmod\+Sparse\+To\+Csparse}} (cholmod\+\_\+sparse \texorpdfstring{$\ast$}{*}L)
+\item 
+cs\+\_\+di \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{SparseInverse_8cpp_a66b6512a95b1f229701c4345df9a7666}{create\+Sparse\+Identity}} (int m)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{SparseInverse_8cpp_a527b68a53da305e86ff3e43d6bfdb130}\label{SparseInverse_8cpp_a527b68a53da305e86ff3e43d6bfdb130} 
+\index{SparseInverse.cpp@{SparseInverse.cpp}!cholmodSparseToCsparse@{cholmodSparseToCsparse}}
+\index{cholmodSparseToCsparse@{cholmodSparseToCsparse}!SparseInverse.cpp@{SparseInverse.cpp}}
+\doxysubsubsection{\texorpdfstring{cholmodSparseToCsparse()}{cholmodSparseToCsparse()}}
+{\footnotesize\ttfamily cs\+\_\+di \texorpdfstring{$\ast$}{*} cholmod\+Sparse\+To\+Csparse (\begin{DoxyParamCaption}\item[{cholmod\+\_\+sparse \texorpdfstring{$\ast$}{*}}]{L }\end{DoxyParamCaption})}
+
+\Hypertarget{SparseInverse_8cpp_a8313efe5d588c1d64b8af081811a540e}\label{SparseInverse_8cpp_a8313efe5d588c1d64b8af081811a540e} 
+\index{SparseInverse.cpp@{SparseInverse.cpp}!combine\_indices@{combine\_indices}}
+\index{combine\_indices@{combine\_indices}!SparseInverse.cpp@{SparseInverse.cpp}}
+\doxysubsubsection{\texorpdfstring{combine\_indices()}{combine\_indices()}}
+{\footnotesize\ttfamily uint64\+\_\+t combine\+\_\+indices (\begin{DoxyParamCaption}\item[{long long}]{a,  }\item[{long long}]{b }\end{DoxyParamCaption})}
+
+\Hypertarget{SparseInverse_8cpp_a9c5498e74aaa13b29ff9d9cea1993677}\label{SparseInverse_8cpp_a9c5498e74aaa13b29ff9d9cea1993677} 
+\index{SparseInverse.cpp@{SparseInverse.cpp}!convertEigenToSuiteSparse@{convertEigenToSuiteSparse}}
+\index{convertEigenToSuiteSparse@{convertEigenToSuiteSparse}!SparseInverse.cpp@{SparseInverse.cpp}}
+\doxysubsubsection{\texorpdfstring{convertEigenToSuiteSparse()}{convertEigenToSuiteSparse()}}
+{\footnotesize\ttfamily cholmod\+\_\+sparse \texorpdfstring{$\ast$}{*} convert\+Eigen\+To\+Suite\+Sparse (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&}]{sm,  }\item[{cholmod\+\_\+common \texorpdfstring{$\ast$}{*}}]{cm }\end{DoxyParamCaption})}
+
+\Hypertarget{SparseInverse_8cpp_a66b6512a95b1f229701c4345df9a7666}\label{SparseInverse_8cpp_a66b6512a95b1f229701c4345df9a7666} 
+\index{SparseInverse.cpp@{SparseInverse.cpp}!createSparseIdentity@{createSparseIdentity}}
+\index{createSparseIdentity@{createSparseIdentity}!SparseInverse.cpp@{SparseInverse.cpp}}
+\doxysubsubsection{\texorpdfstring{createSparseIdentity()}{createSparseIdentity()}}
+{\footnotesize\ttfamily cs\+\_\+di \texorpdfstring{$\ast$}{*} create\+Sparse\+Identity (\begin{DoxyParamCaption}\item[{int}]{m }\end{DoxyParamCaption})}
+

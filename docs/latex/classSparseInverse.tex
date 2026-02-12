@@ -1,0 +1,206 @@
+\doxysection{Sparse\+Inverse Class Reference}
+\hypertarget{classSparseInverse}{}\label{classSparseInverse}\index{SparseInverse@{SparseInverse}}
+
+
+{\ttfamily \#include $<$Sparse\+Inverse.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classSparseInverse_ac35ba9414a032cd57b447d3c69880b10}{Sparse\+Inverse}} ()=default
+\item 
+\mbox{\hyperlink{classSparseInverse_ad7d9d126c1ee14b86769dc0bb52e124d}{Sparse\+Inverse}} (std\+::string kin\+\_\+add, std\+::string pheno\+\_\+add, char \mbox{\hyperlink{classSparseInverse_a86302332ed819132285e8e4bcc938aad}{kin\+\_\+delim}}, double kin\+\_\+diag, char \mbox{\hyperlink{classSparseInverse_a458f8a3b3f3ed7a67765446671bbc136}{pheno\+\_\+delim}}, std\+::string \&m\+\_\+sam\+\_\+id, \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&m\+\_\+v\+\_\+hdrs, \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&bgen\+\_\+sample\+\_\+id, std\+::string pheno\+Missing\+Key)
+\item 
+void \mbox{\hyperlink{classSparseInverse_af9258e2feb99f92da3ee3c706baade9a}{set\+\_\+idx\+\_\+mp\+\_\+unq}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec)
+\item 
+void \mbox{\hyperlink{classSparseInverse_a8e3453fafebdd4a3c6b7cc5ae5f5f5b7}{set\+\_\+idx\+\_\+mp}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} v\+\_\+strs)
+\item 
+\mbox{\hyperlink{namespacestd_1_1ext_ae897c6228d3824e278a52f5305e657c9}{std\+::ext\+::\+Index\+Map}} \mbox{\hyperlink{classSparseInverse_a417405580289a4ebd60d09bd01e06986}{get\+\_\+idx\+\_\+mp}} ()
+\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a87d1397fc8fee28bd35057d1aeaaf1c1}{std\+::ext\+::\+Index\+Map\+Unq}} \mbox{\hyperlink{classSparseInverse_ada169ec295c8d64ac84e5681b23c30b3}{get\+\_\+idx\+\_\+mp\+\_\+unq}} ()
+\item 
+void \mbox{\hyperlink{classSparseInverse_a2e9bafc8bf20b8e7de2d95f651e5eaa6}{set\+\_\+kin\+\_\+\+Nsize}} (\mbox{\hyperlink{namespacestd_1_1ext_af2f39d956ec29f71901d3f6cf2224b0c}{std\+::ext\+::\+Vec\+Tuples4spmat}} \&vt4spmat)
+\item 
+void \mbox{\hyperlink{classSparseInverse_a8f5e4bc71c615de51b845b95ffafc922}{set\+\_\+kin\+\_\+\+Nobssize}} (\mbox{\hyperlink{namespacestd_1_1ext_af2f39d956ec29f71901d3f6cf2224b0c}{std\+::ext\+::\+Vec\+Tuples4spmat}} \&vt4spmat)
+\item 
+void \mbox{\hyperlink{classSparseInverse_a975368ece802e29e5202050f04e7ce02}{set\+\_\+spmat}} ()
+\item 
+void \mbox{\hyperlink{classSparseInverse_a29467c19beaf4ba65c31f3484ab41349}{set\+\_\+spmat}} (\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} sm)
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \& \mbox{\hyperlink{classSparseInverse_ac2ce08b89cb11de5650e4be1c87d34d7}{get\+\_\+spmat}} ()
+\item 
+\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{classSparseInverse_aa0a7ea3e01e0cde33fa089da6c5da37f}{inv\+\_\+spamat}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{classSparseInverse_a13b5541fe8f5bbeec1a3caec2d8dc6f9}{solve\+\_\+chol}} (const \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \&sm)
+\item 
+static \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{classSparseInverse_a874f2f480489d8a53f21f6b00692a7c8}{inv\+\_\+spamat}} (\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&sm)
+\item 
+static \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \mbox{\hyperlink{classSparseInverse_abd26b4c91804bfab04db15a44e1be8b3}{inv\+\_\+spamat\+\_\+chol}} (\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&sm, bool return\+\_\+full\+\_\+inverse=false)
+\item 
+static \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{classSparseInverse_a71ebcfb31a5a8014f3aee5669c96e97f}{inv}} (\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&dm)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classPheno}{Pheno}} \mbox{\hyperlink{classSparseInverse_ac3864f2ed50352da835d6d6685811a4a}{pheno}}
+\item 
+\mbox{\hyperlink{classKinship}{Kinship}} \mbox{\hyperlink{classSparseInverse_a5ccdf566e2f57267e3b82f89d93a3af8}{kin}}
+\item 
+char \mbox{\hyperlink{classSparseInverse_a458f8a3b3f3ed7a67765446671bbc136}{pheno\+\_\+delim}}
+\item 
+char \mbox{\hyperlink{classSparseInverse_a86302332ed819132285e8e4bcc938aad}{kin\+\_\+delim}}
+\item 
+int \mbox{\hyperlink{classSparseInverse_a5433ad4262da429967f6dc4c898f6a2b}{m\+\_\+ratio\+\_\+\+Nob2N}}
+\item 
+int \mbox{\hyperlink{classSparseInverse_a20e2f6965a795fe12198905c21c6f9a6}{m\+\_\+thr}} = 2
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classSparseInverse_ac35ba9414a032cd57b447d3c69880b10}\label{classSparseInverse_ac35ba9414a032cd57b447d3c69880b10} 
+\index{SparseInverse@{SparseInverse}!SparseInverse@{SparseInverse}}
+\index{SparseInverse@{SparseInverse}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{SparseInverse()}{SparseInverse()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Sparse\+Inverse\+::\+Sparse\+Inverse (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+\Hypertarget{classSparseInverse_ad7d9d126c1ee14b86769dc0bb52e124d}\label{classSparseInverse_ad7d9d126c1ee14b86769dc0bb52e124d} 
+\index{SparseInverse@{SparseInverse}!SparseInverse@{SparseInverse}}
+\index{SparseInverse@{SparseInverse}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{SparseInverse()}{SparseInverse()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Sparse\+Inverse\+::\+Sparse\+Inverse (\begin{DoxyParamCaption}\item[{std\+::string}]{kin\+\_\+add,  }\item[{std\+::string}]{pheno\+\_\+add,  }\item[{char}]{kin\+\_\+delim,  }\item[{double}]{kin\+\_\+diag,  }\item[{char}]{pheno\+\_\+delim,  }\item[{std\+::string \&}]{m\+\_\+sam\+\_\+id,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&}]{m\+\_\+v\+\_\+hdrs,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&}]{bgen\+\_\+sample\+\_\+id,  }\item[{std\+::string}]{pheno\+Missing\+Key }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classSparseInverse_a417405580289a4ebd60d09bd01e06986}\label{classSparseInverse_a417405580289a4ebd60d09bd01e06986} 
+\index{SparseInverse@{SparseInverse}!get\_idx\_mp@{get\_idx\_mp}}
+\index{get\_idx\_mp@{get\_idx\_mp}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{get\_idx\_mp()}{get\_idx\_mp()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_ae897c6228d3824e278a52f5305e657c9}{std\+::ext\+::\+Index\+Map}} Sparse\+Inverse\+::get\+\_\+idx\+\_\+mp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_ada169ec295c8d64ac84e5681b23c30b3}\label{classSparseInverse_ada169ec295c8d64ac84e5681b23c30b3} 
+\index{SparseInverse@{SparseInverse}!get\_idx\_mp\_unq@{get\_idx\_mp\_unq}}
+\index{get\_idx\_mp\_unq@{get\_idx\_mp\_unq}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{get\_idx\_mp\_unq()}{get\_idx\_mp\_unq()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a87d1397fc8fee28bd35057d1aeaaf1c1}{std\+::ext\+::\+Index\+Map\+Unq}} Sparse\+Inverse\+::get\+\_\+idx\+\_\+mp\+\_\+unq (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_ac2ce08b89cb11de5650e4be1c87d34d7}\label{classSparseInverse_ac2ce08b89cb11de5650e4be1c87d34d7} 
+\index{SparseInverse@{SparseInverse}!get\_spmat@{get\_spmat}}
+\index{get\_spmat@{get\_spmat}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{get\_spmat()}{get\_spmat()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \& Sparse\+Inverse\+::get\+\_\+spmat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a71ebcfb31a5a8014f3aee5669c96e97f}\label{classSparseInverse_a71ebcfb31a5a8014f3aee5669c96e97f} 
+\index{SparseInverse@{SparseInverse}!inv@{inv}}
+\index{inv@{inv}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{inv()}{inv()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} Sparse\+Inverse\+::inv (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&}]{dm }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\Hypertarget{classSparseInverse_aa0a7ea3e01e0cde33fa089da6c5da37f}\label{classSparseInverse_aa0a7ea3e01e0cde33fa089da6c5da37f} 
+\index{SparseInverse@{SparseInverse}!inv\_spamat@{inv\_spamat}}
+\index{inv\_spamat@{inv\_spamat}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{inv\_spamat()}{inv\_spamat()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Sparse\+Inverse\+::inv\+\_\+spamat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a874f2f480489d8a53f21f6b00692a7c8}\label{classSparseInverse_a874f2f480489d8a53f21f6b00692a7c8} 
+\index{SparseInverse@{SparseInverse}!inv\_spamat@{inv\_spamat}}
+\index{inv\_spamat@{inv\_spamat}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{inv\_spamat()}{inv\_spamat()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Sparse\+Inverse\+::inv\+\_\+spamat (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&}]{sm }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\Hypertarget{classSparseInverse_abd26b4c91804bfab04db15a44e1be8b3}\label{classSparseInverse_abd26b4c91804bfab04db15a44e1be8b3} 
+\index{SparseInverse@{SparseInverse}!inv\_spamat\_chol@{inv\_spamat\_chol}}
+\index{inv\_spamat\_chol@{inv\_spamat\_chol}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{inv\_spamat\_chol()}{inv\_spamat\_chol()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Sparse\+Inverse\+::inv\+\_\+spamat\+\_\+chol (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&}]{sm,  }\item[{bool}]{return\+\_\+full\+\_\+inverse = {\ttfamily false} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\Hypertarget{classSparseInverse_a8e3453fafebdd4a3c6b7cc5ae5f5f5b7}\label{classSparseInverse_a8e3453fafebdd4a3c6b7cc5ae5f5f5b7} 
+\index{SparseInverse@{SparseInverse}!set\_idx\_mp@{set\_idx\_mp}}
+\index{set\_idx\_mp@{set\_idx\_mp}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_idx\_mp()}{set\_idx\_mp()}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+idx\+\_\+mp (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}}}]{v\+\_\+strs }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_af9258e2feb99f92da3ee3c706baade9a}\label{classSparseInverse_af9258e2feb99f92da3ee3c706baade9a} 
+\index{SparseInverse@{SparseInverse}!set\_idx\_mp\_unq@{set\_idx\_mp\_unq}}
+\index{set\_idx\_mp\_unq@{set\_idx\_mp\_unq}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_idx\_mp\_unq()}{set\_idx\_mp\_unq()}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+idx\+\_\+mp\+\_\+unq (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{vec }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a8f5e4bc71c615de51b845b95ffafc922}\label{classSparseInverse_a8f5e4bc71c615de51b845b95ffafc922} 
+\index{SparseInverse@{SparseInverse}!set\_kin\_Nobssize@{set\_kin\_Nobssize}}
+\index{set\_kin\_Nobssize@{set\_kin\_Nobssize}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_kin\_Nobssize()}{set\_kin\_Nobssize()}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+kin\+\_\+\+Nobssize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_af2f39d956ec29f71901d3f6cf2224b0c}{std\+::ext\+::\+Vec\+Tuples4spmat}} \&}]{vt4spmat }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a2e9bafc8bf20b8e7de2d95f651e5eaa6}\label{classSparseInverse_a2e9bafc8bf20b8e7de2d95f651e5eaa6} 
+\index{SparseInverse@{SparseInverse}!set\_kin\_Nsize@{set\_kin\_Nsize}}
+\index{set\_kin\_Nsize@{set\_kin\_Nsize}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_kin\_Nsize()}{set\_kin\_Nsize()}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+kin\+\_\+\+Nsize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_af2f39d956ec29f71901d3f6cf2224b0c}{std\+::ext\+::\+Vec\+Tuples4spmat}} \&}]{vt4spmat }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a975368ece802e29e5202050f04e7ce02}\label{classSparseInverse_a975368ece802e29e5202050f04e7ce02} 
+\index{SparseInverse@{SparseInverse}!set\_spmat@{set\_spmat}}
+\index{set\_spmat@{set\_spmat}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_spmat()}{set\_spmat()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+spmat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a29467c19beaf4ba65c31f3484ab41349}\label{classSparseInverse_a29467c19beaf4ba65c31f3484ab41349} 
+\index{SparseInverse@{SparseInverse}!set\_spmat@{set\_spmat}}
+\index{set\_spmat@{set\_spmat}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{set\_spmat()}{set\_spmat()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void Sparse\+Inverse\+::set\+\_\+spmat (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}}}]{sm }\end{DoxyParamCaption})}
+
+\Hypertarget{classSparseInverse_a13b5541fe8f5bbeec1a3caec2d8dc6f9}\label{classSparseInverse_a13b5541fe8f5bbeec1a3caec2d8dc6f9} 
+\index{SparseInverse@{SparseInverse}!solve\_chol@{solve\_chol}}
+\index{solve\_chol@{solve\_chol}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{solve\_chol()}{solve\_chol()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} Sparse\+Inverse\+::solve\+\_\+chol (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} \&}]{sm }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classSparseInverse_a5ccdf566e2f57267e3b82f89d93a3af8}\label{classSparseInverse_a5ccdf566e2f57267e3b82f89d93a3af8} 
+\index{SparseInverse@{SparseInverse}!kin@{kin}}
+\index{kin@{kin}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{kin}{kin}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classKinship}{Kinship}} Sparse\+Inverse\+::kin}
+
+\Hypertarget{classSparseInverse_a86302332ed819132285e8e4bcc938aad}\label{classSparseInverse_a86302332ed819132285e8e4bcc938aad} 
+\index{SparseInverse@{SparseInverse}!kin\_delim@{kin\_delim}}
+\index{kin\_delim@{kin\_delim}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{kin\_delim}{kin\_delim}}
+{\footnotesize\ttfamily char Sparse\+Inverse\+::kin\+\_\+delim}
+
+\Hypertarget{classSparseInverse_a5433ad4262da429967f6dc4c898f6a2b}\label{classSparseInverse_a5433ad4262da429967f6dc4c898f6a2b} 
+\index{SparseInverse@{SparseInverse}!m\_ratio\_Nob2N@{m\_ratio\_Nob2N}}
+\index{m\_ratio\_Nob2N@{m\_ratio\_Nob2N}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{m\_ratio\_Nob2N}{m\_ratio\_Nob2N}}
+{\footnotesize\ttfamily int Sparse\+Inverse\+::m\+\_\+ratio\+\_\+\+Nob2N}
+
+\Hypertarget{classSparseInverse_a20e2f6965a795fe12198905c21c6f9a6}\label{classSparseInverse_a20e2f6965a795fe12198905c21c6f9a6} 
+\index{SparseInverse@{SparseInverse}!m\_thr@{m\_thr}}
+\index{m\_thr@{m\_thr}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{m\_thr}{m\_thr}}
+{\footnotesize\ttfamily int Sparse\+Inverse\+::m\+\_\+thr = 2}
+
+\Hypertarget{classSparseInverse_ac3864f2ed50352da835d6d6685811a4a}\label{classSparseInverse_ac3864f2ed50352da835d6d6685811a4a} 
+\index{SparseInverse@{SparseInverse}!pheno@{pheno}}
+\index{pheno@{pheno}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{pheno}{pheno}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classPheno}{Pheno}} Sparse\+Inverse\+::pheno}
+
+\Hypertarget{classSparseInverse_a458f8a3b3f3ed7a67765446671bbc136}\label{classSparseInverse_a458f8a3b3f3ed7a67765446671bbc136} 
+\index{SparseInverse@{SparseInverse}!pheno\_delim@{pheno\_delim}}
+\index{pheno\_delim@{pheno\_delim}!SparseInverse@{SparseInverse}}
+\doxysubsubsection{\texorpdfstring{pheno\_delim}{pheno\_delim}}
+{\footnotesize\ttfamily char Sparse\+Inverse\+::pheno\+\_\+delim}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{SparseInverse_8h}{Sparse\+Inverse.\+h}}\item 
+src/\mbox{\hyperlink{SparseInverse_8cpp}{Sparse\+Inverse.\+cpp}}\end{DoxyCompactItemize}

@@ -1,0 +1,33 @@
+\doxysection{Binary\+EUtils.\+h}
+\hypertarget{BinaryEUtils_8h_source}{}\label{BinaryEUtils_8h_source}\index{include/BinaryEUtils.h@{include/BinaryEUtils.h}}
+\mbox{\hyperlink{BinaryEUtils_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ReadParameters_8h}{ReadParameters.h}}"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#ifndef\ BinaryEUtils\_H}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#define\ BinaryEUtils\_H}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classBinE}{BinE}}\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classBinE_ae5a8125f4c201c9aed01cfc5e47c0190}{nBinE}}\ =\ 0;}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classBinE_a28c56a08873beff096f09b3b0ce6dc7c}{strataLen}}\ =\ 0;}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ std::vector<int>\ \mbox{\hyperlink{classBinE_a1534460303289346ec5d7ed37b94afc1}{stratum\_idx}};}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ std::vector<string>\ \mbox{\hyperlink{classBinE_af22e6168064dae319c27904f4a26a996}{bin\_headers}};}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classBinE_a880f075b9f517a56f6696d8366856221}{checkBinaryCovariates}}(\mbox{\hyperlink{classBinE}{BinE}}\ binE,\ \mbox{\hyperlink{classCommandLine}{CommandLine}}\ cmd,\ unordered\_map<\textcolor{keywordtype}{string},\ vector<vector<string>>>\ phenoMap,\ vector<string>\ sampleID,\ vector<long\ int>\ include\_idx,\ \textcolor{keywordtype}{int}\ samSize,\ \textcolor{keywordtype}{int}\ phenoType,\ \textcolor{keywordtype}{string}\ phenoHeaderName,\ std::vector<string>\ covSelHeadersName,\ std::vector<string>\ covSelHeadersName\_new,\ \textcolor{keywordtype}{int}\ Sq\_new);}
+\DoxyCodeLine{00020\ \};}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ std::unordered\_map\ <int,\ vector<int>>\ \mbox{\hyperlink{BinaryEUtils_8h_a38517a9c56f3fb5832dfc507e5281b0b}{GetPowerSet}}(std::string\ v);}
+\DoxyCodeLine{00023\ std::vector<std::string>\ \mbox{\hyperlink{BinaryEUtils_8h_af001e835e4228b72f345a210daf95c36}{vector\_binstrings}}(\textcolor{keywordtype}{int}\ width);}
+\DoxyCodeLine{00024\ std::unordered\_map<std::string,\ unsigned\ int>\ \mbox{\hyperlink{BinaryEUtils_8h_af76a0c6586fbae6c5229fecdf5a792c3}{cartesian\_map}}(\ vector<vector<string>\ >\&\ v);}
+\DoxyCodeLine{00025\ std::vector<std::string>\ \mbox{\hyperlink{BinaryEUtils_8h_ab177e93e25ff683f12fd1e61a55444d6}{cartesian\_vec\_sep}}(\ vector<vector<string>\ >\&\ v);}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

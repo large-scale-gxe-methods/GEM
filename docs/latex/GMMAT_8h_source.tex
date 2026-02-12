@@ -1,0 +1,296 @@
+\doxysection{GMMAT.\+h}
+\hypertarget{GMMAT_8h_source}{}\label{GMMAT_8h_source}\index{include/GMMAT.h@{include/GMMAT.h}}
+\mbox{\hyperlink{GMMAT_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{SparseInverse_8h}{SparseInverse.h}}"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Kinship_8h}{Kinship.h}}"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <unordered\_set>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <iterator>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <variant>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{GMMAT_8h_a0280577fde5e2e7af03f0dc6320071e7}{MAX\_N\_ITER}}\ =\ 500;\ }
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespacestd}{std}}}
+\DoxyCodeLine{00023\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{namespace\ }ext}
+\DoxyCodeLine{00025\ \ \ \ \ \{}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{namespacestd_1_1ext_a474f47259347d846d697c283fa8baaab}{FitNull\_f}}\ =\ std::function<void\ (\textcolor{keywordtype}{int}\ samSize,\ \textcolor{keywordtype}{int}\ numSelCol,\ \textcolor{keywordtype}{int}\ phenoType,\ \textcolor{keywordtype}{double}\ epsilon,\ }
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ robust,\ std::vector<string>\ covSelHeadersName,\ std::vector<double>\ phenodata,\ }
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\ covdata,\ std::vector<double>*\ XinvXTX\_ret,\ vector<double>*\ miu\_ret,\ }
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vector<double>*\ resid\_ret,\ \textcolor{keywordtype}{double}*\ sigma2\_ret,\ std::vector<double>\&\ beta\_ret,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\&\ Xbeta\_ret)>;}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{namespacestd_1_1ext_a14077a6dbb57fc94ed9a59a8888f96e7}{Matrix\_variant}}\ =\ std::variant<DensMat,\ SpaMat>;}
+\DoxyCodeLine{00032\ \ \ \ \ \}}
+\DoxyCodeLine{00033\ \}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00041\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structFit}{Fit}}}
+\DoxyCodeLine{00042\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a586c7e4d166dbfe0814f6308ecdf912a}{eta}};}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_ab70df984a21e6e0cc08042ffd03be6b9}{mu}};}
+\DoxyCodeLine{00045\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a6ae3ffc0c117f435dd27896699e8fe64}{dmu\_deta}};}
+\DoxyCodeLine{00046\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{structFit_a65e1cd138118a4f955a789b8aee6eef1}{cov}};}
+\DoxyCodeLine{00047\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a83787d98bf25318645b0dc98c9877479}{alpha}};}
+\DoxyCodeLine{00048\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{structFit_aab0ae4679dc7f1fc3a567cb5b118535b}{sigma\_i}};\ }
+\DoxyCodeLine{00049\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a9fb8305625f80d3e77fdac25a516189c}{diag\_sigma\_i}};\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \ \mbox{\hyperlink{structFit_ae5f70672af17a65cf0792f2bf8704c3b}{diag\_sigma\_i\_ZPchol}};\ }
+\DoxyCodeLine{00051\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{structFit_a0cbd590169bd49c82fc975251c5a9007}{sigma\_ix}};}
+\DoxyCodeLine{00052\ \ \ \ \ std::optional<DensVec>\ \mbox{\hyperlink{structFit_a312cab4d0df8c4bfe77602558429e09f}{dtau}};}
+\DoxyCodeLine{00053\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a2f1da9a839dfa978ccd303f9cdd5fbac}{W}};}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{structFit_a21c3c1b71b4a8699eb1da7fe7ecdaa63}{calc\_dmu\_deta}}(std::string\ \textcolor{keyword}{const}\&\ family\_t,\ \textcolor{keywordtype}{int}\ size);}
+\DoxyCodeLine{00066\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structFit_a49a7fb85a9b61428040b674eade0142f}{calc\_sqrtW}}();}
+\DoxyCodeLine{00067\ \};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00073\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structGlmmkin}{Glmmkin}}}
+\DoxyCodeLine{00074\ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structGlmmkin_a6ee32bc89e7465dc2d7aa9bf6211a35a}{residuals}};\ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00076\ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{structGlmmkin_a99f0f66cfd955cded699e92cb02e6595}{scaled\_residuals}};}
+\DoxyCodeLine{00077\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ \mbox{\hyperlink{structGlmmkin_a08aba574ed5a26b0bf8bdfa472386584}{id\_include}};}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structGlmmkin_a5139543f9c48d1afb2bef53c2bdba647}{converged}};}
+\DoxyCodeLine{00079\ \ \ \ \ \mbox{\hyperlink{structFit}{Fit}}\ \mbox{\hyperlink{structGlmmkin_a218890d4d7fdf6d7af08622bff66c532}{fit}};}
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structGlmmkin_a2f1ca535f4af10e37dd57cbbeeff2f3e}{sigma2}};}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structGlmmkin_a73665b58756de9461a846bbbba0498f0}{run\_wb}}\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00082\ \};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00089\ \textcolor{keyword}{struct\ \ }\mbox{\hyperlink{structGEMFit}{GEMFit}}}
+\DoxyCodeLine{00090\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a07d34dff666cdc57d725ea961dd3dc92}{std::ext::V\_double}}\ \mbox{\hyperlink{structGEMFit_ab1ac16eb40b43f1632045aaf6f1c0950}{XinvXTX}};\ }
+\DoxyCodeLine{00092\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a07d34dff666cdc57d725ea961dd3dc92}{std::ext::V\_double}}\ \mbox{\hyperlink{structGEMFit_aa93b5ce78caa91c64280e43c02be0620}{mu}};\ }
+\DoxyCodeLine{00093\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a07d34dff666cdc57d725ea961dd3dc92}{std::ext::V\_double}}\ \mbox{\hyperlink{structGEMFit_a8629c5c93cdabe2674b34d9b813aae3c}{resid}};\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structGEMFit_a8822929f4b7a770d060e765590713816}{sigma2}};\ \textcolor{comment}{//\ Keep\ gf.sigma2\ from\ fitNullModel2}}
+\DoxyCodeLine{00095\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a07d34dff666cdc57d725ea961dd3dc92}{std::ext::V\_double}}\ \mbox{\hyperlink{structGEMFit_a8eee6d00ce1439a910dfe25df94a7e12}{alpha}};}
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a07d34dff666cdc57d725ea961dd3dc92}{std::ext::V\_double}}\ \mbox{\hyperlink{structGEMFit_a42dd239b5eb063aa3d11b2ee91f254a9}{eta}};}
+\DoxyCodeLine{00102\ \ \ \ \ \mbox{\hyperlink{structFit}{Fit}}\ \mbox{\hyperlink{structGEMFit_aeacdcbac5b8c2d4d8b43ffd2faa18e53}{convert\_2\_fit}}();}
+\DoxyCodeLine{00103\ \};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{GMMAT_8h_a9f27db0468ce0ce2994eb68dc919b15d}{ModelType}}\ }
+\DoxyCodeLine{00106\ \{}
+\DoxyCodeLine{00107\ \ \ \ \ \mbox{\hyperlink{GMMAT_8h_a9f27db0468ce0ce2994eb68dc919b15daeca9c25c669a6ab9a6715d43a9113c90}{LONGITUDINAL\_RI}},\ \ \ \ \ \textcolor{comment}{//\ Random\ intercept\ only}}
+\DoxyCodeLine{00108\ \ \ \ \ \mbox{\hyperlink{GMMAT_8h_a9f27db0468ce0ce2994eb68dc919b15da1265f0d5211c75772bf6a1f7474835c1}{LONGITUDINAL\_RS}}\ \ \ \ \ \ \textcolor{comment}{//\ Random\ slope\ +\ intercept}}
+\DoxyCodeLine{00109\ \};}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00116\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classGMMAT}{GMMAT}}}
+\DoxyCodeLine{00117\ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classGMMAT_a9a9a89525e265bcf489c2bedd4698a95}{m\_groups}}\ =\ 0;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classGMMAT_a542d867da9b348daf9fcd97c936d46c3}{m\_n\_sel\_col}};}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ std::vector<SparseInverse>\ \mbox{\hyperlink{classGMMAT_aef905e395e85c59b39b0cce83d3b9189}{m\_vkins\_sp}};}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_afbc652b81e1dfe3ce166c2e63e162c84}{std::ext::VV\_int}}\ \mbox{\hyperlink{classGMMAT_a42c3ba199dabb5242d06cfeae874ccd2}{m\_covariance\_idx}}\ ;}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_a990828262f4e77a98b25db4d512d0fcd}{m\_sqrtW}};\ \textcolor{comment}{//sqrtW\ is\ the\ weight\ matrix}}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_a1ce1f302e1854e934c2f4a882bfcd6c5}{m\_Y}};\ \textcolor{comment}{//\ working\ vector}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_a95d0cc9e646a85c5d5aad65f7165305a}{m\_group\_id}};}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ std::unordered\_map<int,\ std::ext::V\_int>\ \mbox{\hyperlink{classGMMAT_a8c8761e2d05b277cb4ee745ceabdff11}{m\_group\_idx}};}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{classGMMAT_a049bfd6903d0bc97d81f094200216932}{m\_J}};}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{classGMMAT_a05e8b1b26c1754f5bf725ea87dbb93bf}{m\_Psi}};}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{classGMMAT_afd3e4565dbad5c15c60baa2fb6a2393e}{m\_Z}};}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classGMMAT_af592b4716743fd961667db066607ce08}{m\_N}};}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classGMMAT_aeb0cda13d6aa8883bff09329c57ab300}{m\_Nobs}};}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classGMMAT_aeb67b62b0f0e7cc8a699f6eb9b72fa15}{m\_dup}};}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classGMMAT_ad9f12ba4475136c00f5b5937eee8318a}{m\_kins\_size}};}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_ace88ae8e861a49e33419c40209702719}{m\_tau}};}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_a38420d4e87e75eda3a9086d899738e33}{m\_fixtau}};}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_af382a9a584bd4531049ead4796204578}{m\_fixrho}};}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_a2796e196a9672ac820c331e71e582465}{m\_fixrho\_idx}};}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{classGMMAT_a19bff8aa9096e18a12292878af6026d5}{m\_family\_t}}\ =\ \textcolor{stringliteral}{"{}binomial"{}};}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{classGMMAT_a9da6545ef66e37d0899b41ac16167518}{m\_link}}\ =\ \textcolor{stringliteral}{"{}logit"{}};}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_a8a39fb52f36dabc96407f0fe0e7ca10a}{m\_offset}};}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_a021bd9503b2fdb47ff386e371b86b510}{m\_y}};}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{classGMMAT_a7b232b4ad1657e866e65103124fff97d}{m\_X}};\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{classGMMAT_a5eafb160058989bc4f8d40a12a2957b5}{m\_rand\_slope}};}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a044dc1d9fdb6bf3b39953ac969d41586}{std::ext::map\_str\_int}}\ \mbox{\hyperlink{classGMMAT_ac7615b459be644170cd0ee2a7f540a61}{m\_hdrsMap}};}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classGMMAT_ad32167aadf7a391a506f8a75be8e1771}{m\_robust}}\ =\ 0;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_a2f38a3f9d910af71006407d2ebf5f6a0}{m\_idxtau}};}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{classGMMAT_a17630c07633145d90e0ee0c223ab5cad}{m\_idxtau2}};}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{GMMAT_8h_a9f27db0468ce0ce2994eb68dc919b15d}{ModelType}}\ \mbox{\hyperlink{classGMMAT_a2ffa66569f5c5cca07da208393308c7c}{m\_modeltype}};}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{classGMMAT_a43a236a1dac22f06b7c9f5b7c5103a1d}{m\_diag\_sigma\_im\_Z}};}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classGMMAT_af54669bd5886b406b37cb54724042f79}{build\_Psi}}(\textcolor{keywordtype}{int}\ \textcolor{keyword}{const}\ ng);}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ build\_Z();}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structFit}{Fit}}\ fitglmm\_ai(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ W);}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structGlmmkin}{Glmmkin}}\ glmmkin\_ai(\mbox{\hyperlink{structFit}{Fit}}\ fit\_null,\ \textcolor{keywordtype}{int}\ maxiter\ =\ 500,\ \textcolor{keywordtype}{double}\ tol\ =\ 1e-\/5);}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structGlmmkin}{Glmmkin}}\ glmmkin\_fit(\mbox{\hyperlink{structFit}{Fit}}\ fit\_null,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ group\_id,\ }
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\ method\ =\ \textcolor{stringliteral}{"{}REML"{}},\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ method\_optim\ =\ \textcolor{stringliteral}{"{}AI"{}},\ }
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ maxiter\ =\ 500,}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tol\ =\ 1e-\/5,\ \textcolor{keywordtype}{double}\ tau\_min\ =\ 1e-\/5,\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tau\_max\ =\ 1e+5,\ \textcolor{keywordtype}{int}\ tau\_region\ =\ 10);}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structGlmmkin}{Glmmkin}}\ glmmkin\_init(\mbox{\hyperlink{namespacestd_1_1ext_a474f47259347d846d697c283fa8baaab}{std::ext::FitNull\_f}}\ fit0,\ \mbox{\hyperlink{classPheno}{Pheno}}\ pheno,}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ covSelectedHeader,}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ phenoname,}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ \textcolor{keywordtype}{id},\ }
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ randomSlopeName,}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ groups,}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\ method\ =\ \textcolor{stringliteral}{"{}REML"{}},\ }
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ method\_optim\ =\ \textcolor{stringliteral}{"{}AI"{}},\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ maxiter\ =\ 500,}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tol\ =\ 1e-\/5,\ \textcolor{keywordtype}{double}\ tau\_min\ =\ 1e-\/5,\ }
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ tau\_max\ =\ 1e+5,\ \textcolor{keywordtype}{int}\ tau\_region\ =\ 10);}
+\DoxyCodeLine{00307\ \ \ \ \ }
+\DoxyCodeLine{00308\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ fill\_mat(\textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ numRows,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\&\ indixes\_col,\ \textcolor{keywordtype}{int}\ value);}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ fill\_J(\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ \textcolor{keyword}{const}\&\ sample\_ids);}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_ai\_low\_ng(\textcolor{keywordtype}{int}\ i,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\&\ score,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ ai,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ wpy,\ \mbox{\hyperlink{structFit}{Fit}}\ \textcolor{keyword}{const}\&\ fit,\ }
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ py,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ diagp,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ sigma\_ixcov);}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_ai\_high\_ng(\textcolor{keywordtype}{int}\ i,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\&\ score,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ ai,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ wpy,\ \mbox{\hyperlink{structFit}{Fit}}\ \textcolor{keyword}{const}\&\ fit,}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ py,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ sigma\_ixcov,\ }
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ ng);}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_ai(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\&\ score,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ ai,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ wpy,\ \mbox{\hyperlink{structFit}{Fit}}\ \textcolor{keyword}{const}\&\ fit,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ py,\ }
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ diagp,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ sigma\_ixcov,\ \textcolor{keywordtype}{int}\ ng,\ \textcolor{keywordtype}{int}\ q2);}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ any\_negative();}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ any\_negative(\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ vec);}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ any\_nonzero();}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_tau(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ tau0,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ dtau);}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_tau\_below\_tol(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ tau0,\ \textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_tau\_below\_tol2(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ tau0,\ \textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ extract\_group\_idx(std::unordered\_set<int>\ \textcolor{keyword}{const}\&\ group\_unique,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ group\_id);}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ check\_pheno\_type();}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calc\_covariance(\textcolor{keywordtype}{int}\ \&kins\_size,\ \textcolor{keywordtype}{int}\ ng);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_dspy(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ dspy,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ wpy,\ \textcolor{keywordtype}{int}\ ng);}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_VZpy(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ VZpy,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ Zpy,\ \textcolor{keywordtype}{int}\ nk);}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_mtau(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ V\_tr\_corr,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ tau0,\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\&\ Ztsigma\_iZ,\ }
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ix,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ixcov,\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ diagp,\ \textcolor{keywordtype}{int}\ nk,\ \textcolor{keywordtype}{int}\ dimZ,\ \textcolor{keywordtype}{int}\ ng,\ \textcolor{keywordtype}{bool}\ has\_random\_slope);}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calc\_tr\_corr(\textcolor{keywordtype}{int}\ i,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \&score,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ix,\ }
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ixcov,\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\&\ Ztsigma\_iZ,\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nk,\ \textcolor{keywordtype}{int}\ dimZ,\ \textcolor{keywordtype}{int}\ \textcolor{keyword}{const}\&\ ng,\ \textcolor{keywordtype}{bool}\ has\_random\_slope);}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_score(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \&score,\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ix,\ }
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ Ztsigma\_ixcov,\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\&\ Ztsigma\_iZ,\ }
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ diagp,\ \textcolor{keywordtype}{int}\ nk,\ }
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ dimZ,\ \textcolor{keywordtype}{int}\ \textcolor{keyword}{const}\&\ ng,\ \textcolor{keywordtype}{bool}\ has\_random\_slope);}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ fill\_fixrho\_idx(\textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_fixtau\_fixrho(\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \&fixtau\_new,\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \&fixrho\_new,\ \textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ fill\_fixrho\_idx0(\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \&fixrho\_idx0,\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ tau0,\ \textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_mtau\_with\_m\_covariance\_idx\_tau0(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ tau0,\ \textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_mtau\_with\_m\_covariance\_idx\_mfixrho(\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ idxrho);}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_mtau\_with\_m\_covariance\_mfixrho\_idx\_fixrho\_idx0(\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ fixrho\_idx0);}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_mtau\_with\_m\_covariance\_mfixrho\_idx();}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update\_mtau\_with\_m\_covariance\_idx(\textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ exclude\_idx();}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ covariate\_larger\_slope\_intercept(\textcolor{keywordtype}{double}\ tol);}
+\DoxyCodeLine{00356\ \ \ \ \ \};}
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00366\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \textcolor{keyword}{const}\&\ spm,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ indices);}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ dm,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ indices);}
+\DoxyCodeLine{00369\ }
+\DoxyCodeLine{00379\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ dm,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ ind1\ ,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ ind2);}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00389\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ dm,\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\ \textcolor{keyword}{const}\&\ ind1,\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\ \textcolor{keyword}{const}\&\ ind2);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00399\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ dm,\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\ \textcolor{keyword}{const}\&\ ind1,\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\ \textcolor{keyword}{const}\&\ ind2);}
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00408\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ dm,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\&\ indices);}
+\DoxyCodeLine{00416\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\&\ dm,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\&\ indices);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00425\ \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \mbox{\hyperlink{GMMAT_8h_a95e3b788bcd4d8ff98b04ec576a809c9}{slice\_mat\_cols}}(\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{DensMat}}\ \textcolor{keyword}{const}\&\ dm,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ ind2);}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00436\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{GMMAT_8h_a39caa44776446b721e215e0f22cfa1e0}{slice\_vec}}(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ dv,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \textcolor{keyword}{const}\&\ indices);}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00445\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{GMMAT_8h_a39caa44776446b721e215e0f22cfa1e0}{slice\_vec}}(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ dv,\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\ \textcolor{keyword}{const}\&\ indices);}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00454\ \mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \mbox{\hyperlink{GMMAT_8h_a39caa44776446b721e215e0f22cfa1e0}{slice\_vec}}(\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{DensVec}}\ \textcolor{keyword}{const}\&\ dv,\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\ \textcolor{keyword}{const}\&\ indices);}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00464\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \textcolor{keyword}{const}\&\ spm,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ ind1,\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ ind2,\ \textcolor{keywordtype}{bool}\ check\_size\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00474\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \textcolor{keyword}{const}\&\ spm,\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\ \textcolor{keyword}{const}\&\ ind1,\ \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std::ext::V\_bool}}\ \textcolor{keyword}{const}\&\ ind2,\ \textcolor{keywordtype}{bool}\ check\_size\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00484\ \mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \mbox{\hyperlink{GMMAT_8h_ad4e996e6f9b7630c970516405c31d313}{slice\_mat}}(\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{SpaMat}}\ \textcolor{keyword}{const}\&\ spm,\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\ \textcolor{keyword}{const}\&\ ind1,\ \mbox{\hyperlink{namespacestd_1_1ext_a4594fe6a2ec879e15b29d63d829e378d}{std::ext::Var\_bool\_int}}\ \textcolor{keyword}{const}\&\ ind2,\ \textcolor{keywordtype}{bool}\ check\_size\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00485\ }
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00496\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}\ Pred>}
+\DoxyCodeLine{00497\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{GMMAT_8h_a00b18494f8c164f2f07a484a13caa7ce}{which}}(std::vector<T>\ \textcolor{keyword}{const}\&\ vec,\ Pred\ pred)}
+\DoxyCodeLine{00498\ \{}
+\DoxyCodeLine{00499\ \ \ \ \ std::vector<int>\ v\_idx;}
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{size\_t}\ i\{0\};\ i\ <\ vec.size();\ ++i)}
+\DoxyCodeLine{00501\ \ \ \ \ \{}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pred(vec[i]))}
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \ \ \ \ v\_idx.push\_back(i);}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00506\ \ \ \ \ \}}
+\DoxyCodeLine{00507\ \ \ \ \ \textcolor{keywordflow}{return}\ v\_idx;}
+\DoxyCodeLine{00508\ \}}
+\DoxyCodeLine{00509\ }
+\DoxyCodeLine{00519\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ Pred>}
+\DoxyCodeLine{00520\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{GMMAT_8h_a00b18494f8c164f2f07a484a13caa7ce}{which}}(\mbox{\hyperlink{SparseInverse_8h_a009c22fce90a8fa2cb8f7c9e335b89be}{DensVecInt}}\ \textcolor{keyword}{const}\&\ vec,\ Pred\ pred)}
+\DoxyCodeLine{00521\ \{}
+\DoxyCodeLine{00522\ \ \ \ \ std::vector<int>\ v\_idx;}
+\DoxyCodeLine{00523\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ i\{0\};\ i\ <\ vec.size();\ ++i)}
+\DoxyCodeLine{00524\ \ \ \ \ \{}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(pred(vec(i)))}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ v\_idx.push\_back(i);}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00529\ \ \ \ \ \}}
+\DoxyCodeLine{00530\ \ \ \ \ \textcolor{keywordflow}{return}\ v\_idx;}
+\DoxyCodeLine{00531\ \}}
+\DoxyCodeLine{00532\ }
+\DoxyCodeLine{00544\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ First,\ \textcolor{keyword}{typename}\ Second>}
+\DoxyCodeLine{00545\ \textcolor{keyword}{auto}\ \mbox{\hyperlink{GMMAT_8h_a6067093868e47fec6fb5dc8949f4c5b4}{crossprod}}(First\ \textcolor{keyword}{const}\&\ first,\ Second\ \textcolor{keyword}{const}\&\ second)\ \{}
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{keywordflow}{return}\ first.transpose()\ *\ second;}
+\DoxyCodeLine{00547\ \}}
+\DoxyCodeLine{00548\ }
+\DoxyCodeLine{00561\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ First,\ \textcolor{keyword}{typename}\ Second>}
+\DoxyCodeLine{00562\ \textcolor{keyword}{auto}\ \mbox{\hyperlink{GMMAT_8h_ac2ddf9c2babe19fc2a8167951f7c0a92}{tcrossprod}}(First\ \textcolor{keyword}{const}\&\ first,\ Second\ \textcolor{keyword}{const}\&\ second)\ \{}
+\DoxyCodeLine{00563\ \ \ \ \ \textcolor{keywordflow}{return}\ first\ *\ second.transpose();}
+\DoxyCodeLine{00564\ \}}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00575\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00576\ std::unordered\_set<T>\ \mbox{\hyperlink{GMMAT_8h_a3d3ae3d2569337249addaa4f91e0c64e}{unique}}(std::vector<T>\ \textcolor{keyword}{const}\&\ vec)}
+\DoxyCodeLine{00577\ \{}
+\DoxyCodeLine{00578\ \ \ \ \ std::unordered\_set<T>\ u\_set(vec.begin(),\ vec.end());}
+\DoxyCodeLine{00579\ \ \ \ \ \textcolor{keywordflow}{return}\ u\_set;}
+\DoxyCodeLine{00580\ \}}
+\DoxyCodeLine{00581\ }
+\DoxyCodeLine{00589\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00590\ std::vector<T>\ \mbox{\hyperlink{GMMAT_8h_a052bf751053468a48cd9a2b745678099}{unique\_id}}(std::vector<T>\ \textcolor{keyword}{const}\&\ vec)\ }
+\DoxyCodeLine{00591\ \{}
+\DoxyCodeLine{00592\ \ \ \ \ std::unordered\_set<T>\ seen;\ }
+\DoxyCodeLine{00593\ \ \ \ \ std::vector<T>\ result;}
+\DoxyCodeLine{00594\ }
+\DoxyCodeLine{00595\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ val\ :\ vec)\ }
+\DoxyCodeLine{00596\ \ \ \ \ \{}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (seen.find(val)\ ==\ seen.end())\ }
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \{\ \ }
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ result.push\_back(val);\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \ \ \ \ seen.insert(val);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00602\ \ \ \ \ \}}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00605\ \}}
+\DoxyCodeLine{00606\ }
+\DoxyCodeLine{00619\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ \mbox{\hyperlink{GMMAT_8h_a3a374b62b8e253ff44df8253a7e4220d}{match\_indices}}(\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ \textcolor{keyword}{const}\&\ original,\ \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ \textcolor{keyword}{const}\&\ filtered)\ \{}
+\DoxyCodeLine{00620\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a044dc1d9fdb6bf3b39953ac969d41586}{std::ext::map\_str\_int}}\ filtered\_map;}
+\DoxyCodeLine{00621\ \ \ \ \ }
+\DoxyCodeLine{00622\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ i\ =\ 0;\ i\ <\ filtered.size();\ ++i)\ }
+\DoxyCodeLine{00623\ \ \ \ \ \{}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ filtered\_map[filtered[i]]\ =\ i;}
+\DoxyCodeLine{00625\ \ \ \ \ \}\ }
+\DoxyCodeLine{00626\ \ \ \ \ }
+\DoxyCodeLine{00627\ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std::ext::V\_int}}\ indices;}
+\DoxyCodeLine{00628\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ \textcolor{keywordtype}{id}\ :\ original)\ }
+\DoxyCodeLine{00629\ \ \ \ \ \{}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ it\ =\ filtered\_map.find(\textcolor{keywordtype}{id});}
+\DoxyCodeLine{00631\ }
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (it\ !=\ filtered\_map.end())\ }
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00634\ \ \ \ \ \ \ \ \ \ \ \ \ indices.push\_back(it-\/>second);}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ }
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \ \ \ \ indices.push\_back(-\/1);\ \textcolor{comment}{//\ Use\ -\/1\ to\ indicate\ not\ found}}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00640\ \ \ \ \ \}}
+\DoxyCodeLine{00641\ \ \ \ \ \textcolor{keywordflow}{return}\ indices;}
+\DoxyCodeLine{00642\ \}}
+
+\end{DoxyCode}

@@ -2,7 +2,6 @@
 
 #include "SparseInverse.h"
 #include "Kinship.h"
-// #include "GEM.h"
 #include <optional>
 #include <unordered_set>
 #include <iterator>
@@ -12,8 +11,13 @@
 const int MAX_N_ITER = 500; 
 
 /**
- * @brief To use fitNullModel2 in GEM
- * 
+ * @brief Type aliases used for integrating fitNullModel2 functionality in GEM.
+ *
+ * FitNull_f:
+ *   Function signature for calling the null model fitting routine.
+ * Matrix_variant:
+ *   A generic matrix holder that can store either a dense matrix (DensMat)
+ *   or a sparse matrix (SpaMat).
  */
 namespace std
 {
@@ -24,9 +28,10 @@ namespace std
                     std::vector<double> covdata, std::vector<double>* XinvXTX_ret, vector<double>* miu_ret, 
                     vector<double>* resid_ret, double* sigma2_ret, std::vector<double>& beta_ret,
                     std::vector<double>& Xbeta_ret)>;
-        using Matrix_variant = std::variant<Mat, SpaMat>;
+        using Matrix_variant = std::variant<DensMat, SpaMat>;
     }
 }
+
 
 /**
  * @brief A structure that contains all required parameters and functions related to the fitting function
@@ -35,77 +40,50 @@ namespace std
  */
 struct Fit
 {
-    /**
-     * @brief linear predictor, glmm
-     * 
-     */
     DensVec eta;
-    /**
-     * @brief conditioanl mean
-     * 
-     */
     DensVec mu;
-    /**
-     * @brief derivative of mu in respect of eta
-     * 
-     */
     DensVec dmu_deta;
-    /**
-     * @brief 
-     * 
-     */
     DensMat cov;
-    /**
-     * @brief  fixed covariate effect.
-     * 
-     */
     DensVec alpha;
-    SpaMat sigma_i;
+    SpaMat sigma_i; 
+    DensVec diag_sigma_i;          
+    SpaMat  diag_sigma_i_ZPchol; 
     DensMat sigma_ix;
-    // std::vector<DataFrame> v_models;
     std::optional<DensVec> dtau;
-    /**
-     * @brief Weight of 
-     * 
-     */
     DensVec W;
     /**
-     * @brief A function for calculating derivative of mu in respect of eta based on the family type
+     * @brief A function to calculate derivative of mu in respect of eta based on the family type
      * 
-     * @param family_t : ei
+     * @param family_t 
      * @param size 
      */
     void calc_dmu_deta(std::string const& family_t, int size);
     /**
-     * @brief A function to cacluate the square root of W
+     * @brief A function to calculate the square root of W
      * 
      * @return DensVec 
      */
     DensVec calc_sqrtW();
-    //Fit& operator= (Fit const& fit);
 };
 
 /**
- * @brief A structure containg Fit and other variables pass within GMMAT methods and return by GMMAT object
+ * @brief A structure containing Fit and other variables to pass between GMMAT methods, also return GMMAT object type
  * 
  */
 struct Glmmkin
 {
-    //int n_pheno, n_group;//might needed
-    //SpaMat X;
     DensVec residuals; // 
     DensVec scaled_residuals;
     std::ext::V_string id_include;
-    //std::vector<bool> converged;
     bool converged;
     Fit fit;
 	double sigma2;
-
+    bool run_wb = false;
 };
 
 
 /**
- * @brief A structure for interconnect GEM with GMMAT, espcially parameters in Fit sturcture for the null model.
+ * @brief A structure to interconnect GEM with GMMAT, especially parameters in Fit structure for the null model.
  * 
  */
 struct  GEMFit
@@ -113,20 +91,26 @@ struct  GEMFit
     std::ext::V_double XinvXTX; 
     std::ext::V_double mu; 
     std::ext::V_double resid; 
-    double sigma2; // To return the gf.sigma2 from fitnull
+    double sigma2; // Keep gf.sigma2 from fitNullModel2
     std::ext::V_double alpha;
     std::ext::V_double eta;
     /**
-     * @brief A function to convert data and parameters in GEMFit to the ones in Fit structure.
+     * @brief A function to convert GEMFit to Fit structure data type.
      * 
      * @return Fit 
      */
     Fit convert_2_fit();
 };
 
+enum ModelType 
+{
+    LONGITUDINAL_RI,     // Random intercept only
+    LONGITUDINAL_RS      // Random slope + intercept
+};
+
 
 /**
- * @brief A class to run gene association test.
+ * @brief A class to run association test.
  * 
  */
 class GMMAT
@@ -140,9 +124,13 @@ class GMMAT
         DensVec m_Y; // working vector
         std::ext::V_int m_group_id;
         std::unordered_map<int, std::ext::V_int> m_group_idx;
-        /**
-         * @brief The variance component parameters.
-         */
+        SpaMat m_J;
+        SpaMat m_Psi;
+        SpaMat m_Z;
+        size_t m_N;
+        size_t m_Nobs;
+        bool m_dup;
+        int m_kins_size;
         DensVec m_tau;
         std::ext::V_int m_fixtau;
         std::ext::V_int m_fixrho;
@@ -150,55 +138,135 @@ class GMMAT
         std::string m_family_t = "binomial";
         std::string m_link = "logit";
         DensVec m_offset;
-        /**
-         * @brief data extracted from pheno files
-         * 
-         */
         DensVec m_y;
-        /**
-         * @brief Covariates data extracted from pheno files
-         * 
-        */
-        DensMat m_X;
-        /**
-         * @brief Data to use for calculating random slope
-         * 
-        */
+        DensMat m_X; 
         DensVec m_rand_slope;
         std::ext::map_str_int m_hdrsMap;
         int m_robust = 0;
         std::ext::V_int m_idxtau;
         std::ext::V_int m_idxtau2;
+        ModelType m_modeltype;
+        SpaMat m_diag_sigma_im_Z;
         /**
-         * @brief 
+         * @brief Construct the covariance matrix for the random effects.
+         *
+         * This function builds the random-effect covariance matrix 
+         * used in Woodbury longitudinal generalized linear mixed models (GLMMs).
+         * ---
+         * ## 1. Random Intercept (RI) model
+         *
+         * where:
+         * - \f$\Phi_i\f$ are sparse kinship matrices
+         * - \f$\theta_i\f$ are variance component parameters stored in `m_tau`
+         * - \f$I\f$ is the identity matrix
+         *
+         * The resulting matrix has dimension \f$N \times N\f`.
+         *
+         * ---
+         * ## 2. Random Intercept + Random Slope (RS) model
+         *
+         * where:
+         * - \f$\Phi_i\f$ are sparse kinship matrices
+         * - \f$\theta_i\f$ are variance component parameters stored in `m_tau`
+         * - \f$I\f$ is the identity matrix
          * 
-         * @param W 
-         * @return Fit 
+         * The resulting matrix has dimension \f$2N \times 2N\f`.
+         *
+         * ---
+         * ## Numerical Stability
+         *
+         * To prevent singular covariance matrices, the function enforces:
+         *
+         * - minimum variance thresholds for diagonal parameters
+         * ## Implementation Notes
+         *
+         * - The matrix is assembled efficiently using sparse triplets.
+         *
+         * @param ng Offset index in `m_tau` where variance components begin.         
+         * @note The resulting matrix is stored in the member variable `m_Psi`.
+         */
+
+        void build_Psi(int const ng);
+        /**
+         * @brief Construct the random-effects design matrix.
+         *
+         * This function builds the sparse design matrix that links
+         * random effects to observations in Woodbury longitudinal GLMM models.
+         *
+         * The structure depends on the model type:
+         *
+         * ---
+         * ## 1. Random Intercept (RI) model
+         * where:
+         * - \f$J\f$ is the subject-indicator matrix of size \f$N_{obs} \times N\f$
+         * - each row assigns an observation to its corresponding subject
+         *
+         * ---
+         * ## 2. Random Intercept + Random Slope (RS) model
+         *
+         * For `LONGITUDINAL_RS`, the design matrix includes both intercept
+         * and slope random effects:
+         *
+         * where:
+         * - the first block represents J
+         * - the second block represents random slope effects scaled by J
+         *
+         * The resulting matrix has dimension:
+         *
+         * \f$N_{obs} \times 2N\f'
+         * ---
+         * ## Implementation Notes
+         *
+         * - The matrix is assembled using sparse triplets for efficiency.
+         * - The subject-indicator matrix `m_J` must already be initialized.
+         *
+         * @note The resulting matrix is stored in the member variable `m_Z`.
+         */
+        void build_Z();
+
+        /**
+         * @brief Fits the null GLMM model using Average Information (AI) algorithm.
+         *
+         * @param W Working weight vector
+         * @return Fit Structure 
          */
         Fit fitglmm_ai(DensVec const& W);
-        /**
-         * @brief 
-         * 
-         * @param fit_null 
-         * @param maxiter 
-         * @param tol 
-         * @return Glmmkin 
+       /**
+         * @brief Fits the  GLMM using AI iterations starting from a null model.
+         *
+         * Iteratively updates:
+         *  - fixed-effect coefficients (alpha)
+         *  - variance components (tau)
+         *  - working response, weights, and residuals
+         * until convergence.
+         *
+         * Supports both Woodbury-based and direct sparse implementations.
+         *
+         * @param fit_null Initial null model fit.
+         * @param maxiter Maximum number of iterations.
+         * @param tol Convergence tolerance.
+         * @return Glmmkin object.
          */
+
         Glmmkin glmmkin_ai(Fit fit_null, int maxiter = 500, double tol = 1e-5);
-         /**
-          * @brief 
-          * 
-          * @param fit_null 
-          * @param group_id 
-          * @param method 
-          * @param method_optim 
-          * @param maxiter 
-          * @param tol 
-          * @param tau_min 
-          * @param tau_max 
-          * @param tau_region 
-          * @return Glmmkin 
-          */
+        /**
+         * @brief Fits the GLMM using the selected optimization method (currently AI-REML).
+         *
+         * Prepares group structure and variance components, runs AI-based fitting,
+         * and refits automatically if variance estimates hit parameter boundaries.
+         *
+         * @param fit_null Initial null model fit.
+         * @param group_id Group membership for heteroscedastic modeling.
+         * @param method Estimation method ("REML" or "ML").
+         * @param method_optim Optimization method ("AI").
+         * @param maxiter Maximum number of iterations.
+         * @param tol Convergence tolerance.
+         * @param tau_min Lower bound for variance components.
+         * @param tau_max Upper bound for variance components.
+         * @param tau_region 
+         * @return Fitted GLMM model object.
+         */
+ 
         Glmmkin glmmkin_fit(Fit fit_null, std::ext::V_int group_id, 
                             std::string const method = "REML", 
                             std::string method_optim = "AI", 
@@ -206,21 +274,26 @@ class GMMAT
                             double tol = 1e-5, double tau_min = 1e-5, 
                             double tau_max = 1e+5, int tau_region = 10);
         /**
-         * @brief 
-         * 
-         * @param pheno 
-         * @param id 
-         * @param groups 
-         * @param method 
-         * @param method_optim 
-         * @param maxiter 
-         * @param tol 
-         * @param tau_min 
-         * @param tau_max 
+         * @brief Initializes and fits a GLMM starting from phenotype and covariate data.
+         *
+         * @param fit0 Function to compute the initial null model.
+         * @param pheno Phenotype data container.
+         * @param cov_selected_hdrs Selected covariate column names.
+         * @param phenoname Phenotype column name.
+         * @param id Sample ID column.
+         * @param randomSlopeName Optional random slope variable.
+         * @param group Grouping variable for heteroscedastic models.
+         * @param method Estimation method ("REML" or "ML").
+         * @param method_optim Optimization method ("AI").
+         * @param maxiter Maximum number of iterations.
+         * @param tol Convergence tolerance.
+         * @param tau_min Minimum variance component value.
+         * @param tau_max Maximum variance component value.
          * @param tau_region 
-         * @return Glmmkin 
+         * @return Fitted GLMM object.
          */
-        [[nodiscard]] Glmmkin glmmkin_postfit(std::ext::FitNull_f fit0, Pheno pheno,
+
+        [[nodiscard]] Glmmkin glmmkin_init(std::ext::FitNull_f fit0, Pheno pheno,
                             std::ext::V_string covSelectedHeader,
                             std::string phenoname,
                             std::string const& id, 
@@ -233,10 +306,13 @@ class GMMAT
                             double tau_max = 1e+5, int tau_region = 10);
     
     private:
+        void fill_mat(const int numRows, std::ext::V_int& indixes_col, int value);
+        void fill_J(std::ext::V_string const& sample_ids);
         void set_ai_low_ng(int i, DensVec& score, DensMat& ai, DensVec const& wpy, Fit const& fit, 
                             DensVec const& py, DensVec diagp, DensMat sigma_ixcov);
         void set_ai_high_ng(int i, DensVec& score, DensMat& ai, DensVec const& wpy, Fit const& fit,
-                             DensVec const& py, DensMat sigma_ixcov, int ng);
+                             DensVec const& py, DensMat const& sigma_ixcov, 
+                             int ng);
         void set_ai(DensVec& score, DensMat& ai, DensVec const& wpy, Fit const& fit, DensVec const& py, 
                     DensVec diagp, DensMat sigma_ixcov, int ng, int q2);
         bool any_negative();
@@ -253,7 +329,20 @@ class GMMAT
          * @param kins_size 
          * @param ng 
          */
-        void calc_rand_effect(int &kins_size, int ng);
+        void calc_covariance(int &kins_size, int ng);
+        void set_dspy(DensMat& dspy, DensVec const& wpy, int ng);
+        void set_VZpy(DensMat& VZpy, DensVec const& Zpy, int nk);
+        void set_mtau(DensVec V_tr_corr, DensVec tau0, SpaMat& Ztsigma_iZ, 
+            DensMat const& Ztsigma_ix, DensMat const& Ztsigma_ixcov, 
+            DensVec diagp, int nk, int dimZ, int ng, bool has_random_slope);
+        void calc_tr_corr(int i, DensVec &score, DensMat const& Ztsigma_ix, 
+            DensMat const& Ztsigma_ixcov, SpaMat& Ztsigma_iZ, 
+            int nk, int dimZ, int const& ng, bool has_random_slope);
+        void set_score(DensVec &score, DensMat const& Ztsigma_ix, 
+            DensMat const& Ztsigma_ixcov, SpaMat& Ztsigma_iZ, 
+            DensVec const& diagp, int nk, 
+            int dimZ, int const& ng, bool has_random_slope);
+
         void fill_fixrho_idx(double tol);
         void update_fixtau_fixrho(std::ext::V_int &fixtau_new,std::ext::V_int &fixrho_new, double tol);
         void fill_fixrho_idx0(std::ext::V_int &fixrho_idx0, DensVec const& tau0, double tol);
@@ -266,17 +355,17 @@ class GMMAT
         bool covariate_larger_slope_intercept(double tol);
     };
 
+/**
+ * @brief Slice sparse matrix based on rows index
+ * 
+ * @param spm 
+ * @param indices 
+ * @return SpaMat 
+ */
 
+SpaMat slice_mat(SpaMat const& spm, std::ext::V_int const& indices);
 
-// //Helper functions declaration
-// /**
-//  * @brief Convert vector of string to vector of double
-//  * 
-//  * @param std::vector<string>  
-//  * @return std::vector<double> 
-//  */
-// std::ext::V_double convert_2_vector_of_double(const std::ext::V_string& strings);
-
+DensMat slice_mat(DensMat const& dm, std::ext::V_int const& indices);
 
 /**
  * @brief Slice dense matrix based on cols and rows index
@@ -286,25 +375,26 @@ class GMMAT
  * @param std::vector<int> 
  * @return Dens matrix 
  */
+
 DensMat slice_mat(DensMat const& dm, std::ext::V_int ind1 , std::ext::V_int ind2);
 
 /**
- * @brief Slice dense matrix based on cols and rows logical vectors
+ * @brief Slice dense matrix based on column and row logical vectors
  * 
  * @param Dense matrix 
  * @param std::vector<bool> 
  * @param std::vector<bool> 
- * @return Dens matrix 
+ * @return Dense matrix 
  */
 DensMat slice_mat(DensMat const& dm, std::ext::V_bool const& ind1, std::ext::V_bool const& ind2);
 
 /**
- * @brief Slice matrix based on cols and rows variant vectors(either int or bool)
+ * @brief Slice matrix based on columns and rows variant vectors(either int or bool)
  * 
  * @param Dense matrix 
- * @param std::variant<int, bool> > 
+ * @param std::variant<int, bool> 
  * @param std::variant<int, bool>  
- * @return Dens matrix 
+ * @return Dense matrix 
  */
 DensMat slice_mat(DensMat const& dm, std::ext::Var_bool_int const& ind1, std::ext::Var_bool_int const& ind2);
 
@@ -366,7 +456,7 @@ DensVec slice_vec(DensVec const& dv, std::ext::Var_bool_int const& indices);
 /**
  * @brief Slice sparse matrix based on cols and rows index
  * 
- * @param sparse matrix 
+ * @param Sparse matrix 
  * @param std::vector<int>  
  * @param std::vector<int>  
  * @return sparse matrix
@@ -374,11 +464,11 @@ DensVec slice_vec(DensVec const& dv, std::ext::Var_bool_int const& indices);
 SpaMat slice_mat(SpaMat const& spm, std::ext::V_int ind1, std::ext::V_int ind2, bool check_size = true);
 
 /**
- * @brief Slice sparse matrix based on cols and rows logical vector
+ * @brief Slice sparse matrix based on column and row logical vectors
  * 
- * @param sparse matrix 
+ * @param Sparse matrix 
  * @param std::vector<bool>  
- * @param std::vector<boll>  
+ * @param std::vector<bool>  
  * @return sparse matrix
  */
 SpaMat slice_mat(SpaMat const& spm, std::ext::V_bool const& ind1, std::ext::V_bool const& ind2, bool check_size = true);
@@ -386,7 +476,7 @@ SpaMat slice_mat(SpaMat const& spm, std::ext::V_bool const& ind1, std::ext::V_bo
 /**
  * @brief Slice sparse matrix based on cols and rows variant(either int or bool)
  * 
- * @param sparse matrix 
+ * @param Sparse matrix 
  * @param std::variant<int, bool>  
  * @param std::variant<int, bool>  
  * @return sparse matrix
@@ -395,13 +485,13 @@ SpaMat slice_mat(SpaMat const& spm, std::ext::Var_bool_int const& ind1, std::ext
 
 
 /**
- * @brief A function that returns vector of index for those values that meet the condition in predicate
+ * @brief Returns a vector of indices for elements that satisfy the predicate.
  * 
- * @tparam T : type of the vector
- * @tparam Pred : predicate
- * @param std::vector<T>  const& : the vector we check the predicate to fill a vector of integer values
- * @param pred : prdicate to fill  a vector on integer values to return 
- * @return std::ext::V_int 
+ * @tparam T  type of the vector.
+ * @tparam Pred predicate.
+ * @param std::vector<T> input vector.
+ * @param pred  prdicate to fill  a vector on integer values to return.
+ * @return std::ext::V_int, Vector of indices where the predicate is true.
  */
 template <typename T, typename Pred>
 std::ext::V_int which(std::vector<T> const& vec, Pred pred)
@@ -418,10 +508,10 @@ std::ext::V_int which(std::vector<T> const& vec, Pred pred)
 }
 
 /**
- * @brief A function that returns vector of index for those values that meet the condition in predicate
+ * @brief Returns a vector of indices for elements that satisfy the predicate.
  * 
- * @tparam T : type of the vector 
- * @tparam Pred : predicate
+ * @tparam T type of the vector 
+ * @tparam Pred predicate
  * @param DensVecInt 
  * @param pred 
  * @return std::ext::V_int 
@@ -445,10 +535,10 @@ std::ext::V_int which(DensVecInt const& vec, Pred pred)
  * it gets two matrix from eigen library of any type (dens or sparse) 
  * and calculates the transpose of the first one and mulitplies it by the second one.
  * 
- * @tparam First  : matrix from eigen library
- * @tparam Second : matrix from eigen libray
- * @param first  : first matrix from eigen library, it can be either dense or sparse.
- * @param second : second matrix from eigen library, it can be either dense or sparse.
+ * @tparam First  matrix from eigen library
+ * @tparam Second  matrix from eigen libray
+ * @param first first matrix from eigen library, it can be either dense or sparse.
+ * @param second second matrix from eigen library, it can be either dense or sparse.
  * @return auto
  */
 template<typename First, typename Second>
@@ -462,10 +552,10 @@ auto crossprod(First const& first, Second const& second) {
  * it gets two matrix from eigen library of any type (dens or sparse) 
  * and mulitplies the first one by the transpose of the second one.
  * 
- * @tparam First  : matrix from eigen library
- * @tparam Second : matrix from eigen libray 
- * @param first  : first matrix from eigen library, it can be either dense or sparse. 
- * @param second : second matrix from eigen library, it can be either dense or sparse. 
+ * @tparam First matrix from eigen library
+ * @tparam Second matrix from eigen libray 
+ * @param first  first matrix from eigen library, it can be either dense or sparse. 
+ * @param second  second matrix from eigen library, it can be either dense or sparse. 
  * @return auto 
  */
 template<typename First, typename Second>
@@ -473,17 +563,80 @@ auto tcrossprod(First const& first, Second const& second) {
     return first * second.transpose();
 }
 
-
 /**
- * @brief A function to remove the duplication in a given vector
- * 
- * @tparam T : type of the vector in the argument of the function and the return set.
- * @param vec 
- * @return std::unordered_set<T> 
+ * @brief Removes duplicate values from a vector.
+ *
+ * Constructs an unordered set from the input vector, keeping only unique elements.
+ *
+ * @tparam T Element type of the input vector.
+ * @param vec Input vector.
+ * @return std::unordered_set<T> Set containing the unique elements.
  */
 template<typename T>
 std::unordered_set<T> unique(std::vector<T> const& vec)
 {
     std::unordered_set<T> u_set(vec.begin(), vec.end());
     return u_set;
+}
+
+/**
+ * @brief Returns a vector of unique elements from the input vector.
+ * 
+ * @tparam T The type of elements in the vector.
+ * @param vec The input vector.
+ * @return std::vector<T> A vector of unique elements.
+*/
+template <typename T>
+std::vector<T> unique_id(std::vector<T> const& vec) 
+{
+    std::unordered_set<T> seen; 
+    std::vector<T> result;
+
+    for (auto const& val : vec) 
+    {
+        if (seen.find(val) == seen.end()) 
+        {  
+            result.push_back(val);          
+            seen.insert(val);               
+        }
+    }
+
+    return result;
+}
+
+/**
+ * @brief Matches indices from the original vector to the filtered vector.
+ * 
+ * Similar to the above `match_indices`, but this version accepts non-optional strings
+ * in both the original and filtered vectors. If an element in the original vector does not 
+ * have a match, the corresponding index is set to -1.
+ * 
+ * @param original The original vector of strings.
+ * @param filtered The filtered vector of strings.
+ * @return A vector of matched indices or -1 for non-matches.
+*/
+
+inline std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_string const& filtered) {
+    std::ext::map_str_int filtered_map;
+    
+    for (size_t i = 0; i < filtered.size(); ++i) 
+    {
+        filtered_map[filtered[i]] = i;
+    } 
+    
+    std::ext::V_int indices;
+    for (const auto& id : original) 
+    {
+        auto it = filtered_map.find(id);
+
+        if (it != filtered_map.end()) 
+        {
+            indices.push_back(it->second);
+        } 
+        else 
+        {
+            indices.push_back(-1); // Use -1 to indicate not found
+        }
+    }
+    return indices;
 }

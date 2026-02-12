@@ -1,0 +1,232 @@
+\doxysection{Pgen Class Reference}
+\hypertarget{classPgen}{}\label{classPgen}\index{Pgen@{Pgen}}
+
+
+{\ttfamily \#include $<$Read\+PGEN.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classPgen_a77ef1270ad87b132ed8085836c07302b}{process\+Pgen\+Header}} (string pgen\+File)
+\item 
+void \mbox{\hyperlink{classPgen_a53929cd64bf546229ddb3e76d02e782b}{process\+Pvar}} (\mbox{\hyperlink{classPgen}{Pgen}} pgen, string pvar\+File)
+\item 
+void \mbox{\hyperlink{classPgen_afb72212a43acacc40fc491118c0af1f9}{process\+Psam}} (\mbox{\hyperlink{classPgen}{Pgen}} pgen, string psam\+File, unordered\+\_\+map$<$ string, vector$<$ vector$<$ string $>$ $>$ $>$ phenomap, string pheno\+Missing\+Key, int num\+Sel\+Col, int sam\+Size)
+\item 
+void \mbox{\hyperlink{classPgen_a48923030b7cb820521309a1cd9d1a978}{get\+Pgen\+Variant\+Pos}} (\mbox{\hyperlink{classPgen}{Pgen}} pgen, \mbox{\hyperlink{classCommandLine}{Command\+Line}} cmd)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classPgen_af7f81e5da9c961bec992e5801a77d26f}{raw\+\_\+variant\+\_\+ct}}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classPgen_a12d6412d6d0620164788f1b721d1fb11}{raw\+\_\+sample\+\_\+ct}}
+\item 
+int \mbox{\hyperlink{classPgen_a4df81da31443946d525d1baf89110f4e}{new\+\_\+sam\+Size}}
+\item 
+std\+::vector$<$ string $>$ \mbox{\hyperlink{classPgen_ad7138d11672889b2773b22f0503b7d69}{sample\+ID}}
+\item 
+std\+::vector$<$ string $>$ \mbox{\hyperlink{classPgen_af840af1292a418707891453314ca02ae}{sample\+ID\+\_\+all}}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{classPgen_a5e6e24a5223abb8e89b1a2ab113552c9}{new\+\_\+covdata}}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{classPgen_aee30f1179e83eca3317154bdac402cec}{new\+\_\+phenodata}}
+\item 
+std\+::vector$<$ long int $>$ \mbox{\hyperlink{classPgen_a58b9378d07d62eaadb113bacca26fa30}{include\+\_\+idx}}
+\item 
+int \mbox{\hyperlink{classPgen_a9ae4986c3a0344ffec5b7bda7bb2b96b}{Num\+Exclude\+Col}}
+\item 
+int \mbox{\hyperlink{classPgen_a09bef79eb62d763b9b472488418ba68e}{pheno\+Type}}
+\item 
+vector$<$ uint32\+\_\+t $>$ \mbox{\hyperlink{classPgen_a3baf241f34eef1af966f3c0e63198d01}{begin}}
+\item 
+vector$<$ uint32\+\_\+t $>$ \mbox{\hyperlink{classPgen_a5c27a2f0e3e1f83b5abeaf347693e222}{end}}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classPgen_a0ba8d074631b185baffe55f303c14436}{threads}}
+\item 
+bool \mbox{\hyperlink{classPgen_ad4e017d4cc5afa85182e01f2a959fb54}{filter\+Variants}} = false
+\item 
+std\+::vector$<$ long long unsigned int $>$ \mbox{\hyperlink{classPgen_a88910f9113e2a71f6cc43631641bcbf4}{pgen\+Variant\+Pos}}
+\item 
+vector$<$ int $>$ \mbox{\hyperlink{classPgen_ac98e9fafc30d8e6ffc32d148024a5b85}{pvar\+Index}}
+\item 
+int \mbox{\hyperlink{classPgen_a13b2555176301ed01e31dbce67bb9ad0}{pvar\+Last}}
+\item 
+vector$<$ int $>$ \mbox{\hyperlink{classPgen_af1c9b8f8487d3cf7a421a6e4861077d0}{bin\+E\+\_\+idx}}
+\item 
+int \mbox{\hyperlink{classPgen_a24554e0dc19a8de65d3d3c252bfa4ef2}{num\+Int\+Sel\+Col\+\_\+new}}
+\item 
+int \mbox{\hyperlink{classPgen_ae0f2e40906683a0b18a5f0eba0774cca}{num\+Exp\+Sel\+Col\+\_\+new}}
+\item 
+int \mbox{\hyperlink{classPgen_a2f6724f1b251ea2cedaba6fbd060cb41}{num\+Sel\+Col\+\_\+new}}
+\item 
+std\+::vector$<$ int $>$ \mbox{\hyperlink{classPgen_aede4fb120917c3359e1371fd94f78d4e}{exclude\+Col}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classPgen_a48923030b7cb820521309a1cd9d1a978}\label{classPgen_a48923030b7cb820521309a1cd9d1a978} 
+\index{Pgen@{Pgen}!getPgenVariantPos@{getPgenVariantPos}}
+\index{getPgenVariantPos@{getPgenVariantPos}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{getPgenVariantPos()}{getPgenVariantPos()}}
+{\footnotesize\ttfamily void Pgen\+::get\+Pgen\+Variant\+Pos (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classPgen}{Pgen}}}]{pgen,  }\item[{\mbox{\hyperlink{classCommandLine}{Command\+Line}}}]{cmd }\end{DoxyParamCaption})}
+
+\Hypertarget{classPgen_a77ef1270ad87b132ed8085836c07302b}\label{classPgen_a77ef1270ad87b132ed8085836c07302b} 
+\index{Pgen@{Pgen}!processPgenHeader@{processPgenHeader}}
+\index{processPgenHeader@{processPgenHeader}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{processPgenHeader()}{processPgenHeader()}}
+{\footnotesize\ttfamily void Pgen\+::process\+Pgen\+Header (\begin{DoxyParamCaption}\item[{string}]{pgen\+File }\end{DoxyParamCaption})}
+
+\Hypertarget{classPgen_afb72212a43acacc40fc491118c0af1f9}\label{classPgen_afb72212a43acacc40fc491118c0af1f9} 
+\index{Pgen@{Pgen}!processPsam@{processPsam}}
+\index{processPsam@{processPsam}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{processPsam()}{processPsam()}}
+{\footnotesize\ttfamily void Pgen\+::process\+Psam (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classPgen}{Pgen}}}]{pgen,  }\item[{string}]{psam\+File,  }\item[{unordered\+\_\+map$<$ string, vector$<$ vector$<$ string $>$ $>$ $>$}]{phenomap,  }\item[{string}]{pheno\+Missing\+Key,  }\item[{int}]{num\+Sel\+Col,  }\item[{int}]{sam\+Size }\end{DoxyParamCaption})}
+
+\Hypertarget{classPgen_a53929cd64bf546229ddb3e76d02e782b}\label{classPgen_a53929cd64bf546229ddb3e76d02e782b} 
+\index{Pgen@{Pgen}!processPvar@{processPvar}}
+\index{processPvar@{processPvar}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{processPvar()}{processPvar()}}
+{\footnotesize\ttfamily void Pgen\+::process\+Pvar (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classPgen}{Pgen}}}]{pgen,  }\item[{string}]{pvar\+File }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classPgen_a3baf241f34eef1af966f3c0e63198d01}\label{classPgen_a3baf241f34eef1af966f3c0e63198d01} 
+\index{Pgen@{Pgen}!begin@{begin}}
+\index{begin@{begin}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{begin}{begin}}
+{\footnotesize\ttfamily vector$<$uint32\+\_\+t$>$ Pgen\+::begin}
+
+\Hypertarget{classPgen_af1c9b8f8487d3cf7a421a6e4861077d0}\label{classPgen_af1c9b8f8487d3cf7a421a6e4861077d0} 
+\index{Pgen@{Pgen}!binE\_idx@{binE\_idx}}
+\index{binE\_idx@{binE\_idx}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{binE\_idx}{binE\_idx}}
+{\footnotesize\ttfamily vector$<$int$>$ Pgen\+::bin\+E\+\_\+idx}
+
+\Hypertarget{classPgen_a5c27a2f0e3e1f83b5abeaf347693e222}\label{classPgen_a5c27a2f0e3e1f83b5abeaf347693e222} 
+\index{Pgen@{Pgen}!end@{end}}
+\index{end@{end}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{end}{end}}
+{\footnotesize\ttfamily vector$<$uint32\+\_\+t$>$ Pgen\+::end}
+
+\Hypertarget{classPgen_aede4fb120917c3359e1371fd94f78d4e}\label{classPgen_aede4fb120917c3359e1371fd94f78d4e} 
+\index{Pgen@{Pgen}!excludeCol@{excludeCol}}
+\index{excludeCol@{excludeCol}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{excludeCol}{excludeCol}}
+{\footnotesize\ttfamily std\+::vector$<$int$>$ Pgen\+::exclude\+Col}
+
+\Hypertarget{classPgen_ad4e017d4cc5afa85182e01f2a959fb54}\label{classPgen_ad4e017d4cc5afa85182e01f2a959fb54} 
+\index{Pgen@{Pgen}!filterVariants@{filterVariants}}
+\index{filterVariants@{filterVariants}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{filterVariants}{filterVariants}}
+{\footnotesize\ttfamily bool Pgen\+::filter\+Variants = false}
+
+\Hypertarget{classPgen_a58b9378d07d62eaadb113bacca26fa30}\label{classPgen_a58b9378d07d62eaadb113bacca26fa30} 
+\index{Pgen@{Pgen}!include\_idx@{include\_idx}}
+\index{include\_idx@{include\_idx}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{include\_idx}{include\_idx}}
+{\footnotesize\ttfamily std\+::vector$<$long int$>$ Pgen\+::include\+\_\+idx}
+
+\Hypertarget{classPgen_a5e6e24a5223abb8e89b1a2ab113552c9}\label{classPgen_a5e6e24a5223abb8e89b1a2ab113552c9} 
+\index{Pgen@{Pgen}!new\_covdata@{new\_covdata}}
+\index{new\_covdata@{new\_covdata}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{new\_covdata}{new\_covdata}}
+{\footnotesize\ttfamily std\+::vector$<$double$>$ Pgen\+::new\+\_\+covdata}
+
+\Hypertarget{classPgen_aee30f1179e83eca3317154bdac402cec}\label{classPgen_aee30f1179e83eca3317154bdac402cec} 
+\index{Pgen@{Pgen}!new\_phenodata@{new\_phenodata}}
+\index{new\_phenodata@{new\_phenodata}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{new\_phenodata}{new\_phenodata}}
+{\footnotesize\ttfamily std\+::vector$<$double$>$ Pgen\+::new\+\_\+phenodata}
+
+\Hypertarget{classPgen_a4df81da31443946d525d1baf89110f4e}\label{classPgen_a4df81da31443946d525d1baf89110f4e} 
+\index{Pgen@{Pgen}!new\_samSize@{new\_samSize}}
+\index{new\_samSize@{new\_samSize}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{new\_samSize}{new\_samSize}}
+{\footnotesize\ttfamily int Pgen\+::new\+\_\+sam\+Size}
+
+\Hypertarget{classPgen_a9ae4986c3a0344ffec5b7bda7bb2b96b}\label{classPgen_a9ae4986c3a0344ffec5b7bda7bb2b96b} 
+\index{Pgen@{Pgen}!NumExcludeCol@{NumExcludeCol}}
+\index{NumExcludeCol@{NumExcludeCol}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{NumExcludeCol}{NumExcludeCol}}
+{\footnotesize\ttfamily int Pgen\+::\+Num\+Exclude\+Col}
+
+\Hypertarget{classPgen_ae0f2e40906683a0b18a5f0eba0774cca}\label{classPgen_ae0f2e40906683a0b18a5f0eba0774cca} 
+\index{Pgen@{Pgen}!numExpSelCol\_new@{numExpSelCol\_new}}
+\index{numExpSelCol\_new@{numExpSelCol\_new}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{numExpSelCol\_new}{numExpSelCol\_new}}
+{\footnotesize\ttfamily int Pgen\+::num\+Exp\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classPgen_a24554e0dc19a8de65d3d3c252bfa4ef2}\label{classPgen_a24554e0dc19a8de65d3d3c252bfa4ef2} 
+\index{Pgen@{Pgen}!numIntSelCol\_new@{numIntSelCol\_new}}
+\index{numIntSelCol\_new@{numIntSelCol\_new}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{numIntSelCol\_new}{numIntSelCol\_new}}
+{\footnotesize\ttfamily int Pgen\+::num\+Int\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classPgen_a2f6724f1b251ea2cedaba6fbd060cb41}\label{classPgen_a2f6724f1b251ea2cedaba6fbd060cb41} 
+\index{Pgen@{Pgen}!numSelCol\_new@{numSelCol\_new}}
+\index{numSelCol\_new@{numSelCol\_new}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{numSelCol\_new}{numSelCol\_new}}
+{\footnotesize\ttfamily int Pgen\+::num\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classPgen_a88910f9113e2a71f6cc43631641bcbf4}\label{classPgen_a88910f9113e2a71f6cc43631641bcbf4} 
+\index{Pgen@{Pgen}!pgenVariantPos@{pgenVariantPos}}
+\index{pgenVariantPos@{pgenVariantPos}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{pgenVariantPos}{pgenVariantPos}}
+{\footnotesize\ttfamily std\+::vector$<$long long unsigned int$>$ Pgen\+::pgen\+Variant\+Pos}
+
+\Hypertarget{classPgen_a09bef79eb62d763b9b472488418ba68e}\label{classPgen_a09bef79eb62d763b9b472488418ba68e} 
+\index{Pgen@{Pgen}!phenoType@{phenoType}}
+\index{phenoType@{phenoType}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{phenoType}{phenoType}}
+{\footnotesize\ttfamily int Pgen\+::pheno\+Type}
+
+\Hypertarget{classPgen_ac98e9fafc30d8e6ffc32d148024a5b85}\label{classPgen_ac98e9fafc30d8e6ffc32d148024a5b85} 
+\index{Pgen@{Pgen}!pvarIndex@{pvarIndex}}
+\index{pvarIndex@{pvarIndex}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{pvarIndex}{pvarIndex}}
+{\footnotesize\ttfamily vector$<$int$>$ Pgen\+::pvar\+Index}
+
+\Hypertarget{classPgen_a13b2555176301ed01e31dbce67bb9ad0}\label{classPgen_a13b2555176301ed01e31dbce67bb9ad0} 
+\index{Pgen@{Pgen}!pvarLast@{pvarLast}}
+\index{pvarLast@{pvarLast}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{pvarLast}{pvarLast}}
+{\footnotesize\ttfamily int Pgen\+::pvar\+Last}
+
+\Hypertarget{classPgen_a12d6412d6d0620164788f1b721d1fb11}\label{classPgen_a12d6412d6d0620164788f1b721d1fb11} 
+\index{Pgen@{Pgen}!raw\_sample\_ct@{raw\_sample\_ct}}
+\index{raw\_sample\_ct@{raw\_sample\_ct}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{raw\_sample\_ct}{raw\_sample\_ct}}
+{\footnotesize\ttfamily uint32\+\_\+t Pgen\+::raw\+\_\+sample\+\_\+ct}
+
+\Hypertarget{classPgen_af7f81e5da9c961bec992e5801a77d26f}\label{classPgen_af7f81e5da9c961bec992e5801a77d26f} 
+\index{Pgen@{Pgen}!raw\_variant\_ct@{raw\_variant\_ct}}
+\index{raw\_variant\_ct@{raw\_variant\_ct}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{raw\_variant\_ct}{raw\_variant\_ct}}
+{\footnotesize\ttfamily uint32\+\_\+t Pgen\+::raw\+\_\+variant\+\_\+ct}
+
+\Hypertarget{classPgen_ad7138d11672889b2773b22f0503b7d69}\label{classPgen_ad7138d11672889b2773b22f0503b7d69} 
+\index{Pgen@{Pgen}!sampleID@{sampleID}}
+\index{sampleID@{sampleID}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{sampleID}{sampleID}}
+{\footnotesize\ttfamily std\+::vector$<$string$>$ Pgen\+::sample\+ID}
+
+\Hypertarget{classPgen_af840af1292a418707891453314ca02ae}\label{classPgen_af840af1292a418707891453314ca02ae} 
+\index{Pgen@{Pgen}!sampleID\_all@{sampleID\_all}}
+\index{sampleID\_all@{sampleID\_all}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{sampleID\_all}{sampleID\_all}}
+{\footnotesize\ttfamily std\+::vector$<$string$>$ Pgen\+::sample\+ID\+\_\+all}
+
+\Hypertarget{classPgen_a0ba8d074631b185baffe55f303c14436}\label{classPgen_a0ba8d074631b185baffe55f303c14436} 
+\index{Pgen@{Pgen}!threads@{threads}}
+\index{threads@{threads}!Pgen@{Pgen}}
+\doxysubsubsection{\texorpdfstring{threads}{threads}}
+{\footnotesize\ttfamily uint32\+\_\+t Pgen\+::threads}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{ReadPGEN_8h}{Read\+PGEN.\+h}}\item 
+src/\mbox{\hyperlink{ReadPGEN_8cpp}{Read\+PGEN.\+cpp}}\end{DoxyCompactItemize}

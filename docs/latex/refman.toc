@@ -1,0 +1,707 @@
+\@ifundefined {etoctocstyle}{\let \etoc@startlocaltoc \@gobble \let \etoc@settocdepth \@gobble \let \etoc@depthtag \@gobble \let \etoc@setlocaltop \@gobble }{}
+\contentsline {chapter}{\numberline {1}GEM}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Contents}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Quick Installation}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Dependencies}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Usage}{3}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Running GEM}{3}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Command Line Options}{4}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}Input Files}{6}{subsection.1.4.3}%
+\contentsline {paragraph}{Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}05 for the fifth individual)\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{6}{section*.1}%
+\contentsline {paragraph}{The Kinship File Corresponding to Example 1 (along with –kin-\/diag 0.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}5)\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{6}{section*.2}%
+\contentsline {paragraph}{Example 2 of Kinship Matrix (two times the kinship matrix in Example 1)\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{6}{section*.3}%
+\contentsline {paragraph}{The Kinship File Corresponding to Example 2 (along with –kin-\/diag 1)\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{7}{section*.4}%
+\contentsline {subsection}{\numberline {1.4.4}Output File Format}{8}{subsection.1.4.4}%
+\contentsline {subsubsection}{\numberline {1.4.4.1}minimum\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{8}{subsubsection.1.4.4.1}%
+\contentsline {subsubsection}{\numberline {1.4.4.2}meta\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{8}{subsubsection.1.4.4.2}%
+\contentsline {subsubsection}{\numberline {1.4.4.3}full\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:}{8}{subsubsection.1.4.4.3}%
+\contentsline {subsection}{\numberline {1.4.5}Examples}{9}{subsection.1.4.5}%
+\contentsline {section}{\numberline {1.5}Recent Updates}{9}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Contact}{12}{section.1.6}%
+\contentsline {section}{\numberline {1.7}References}{12}{section.1.7}%
+\contentsline {section}{\numberline {1.8}License}{13}{section.1.8}%
+\contentsline {chapter}{\numberline {2}Namespace Index}{15}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Namespace List}{15}{section.2.1}%
+\contentsline {chapter}{\numberline {3}Hierarchical Index}{17}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Class Hierarchy}{17}{section.3.1}%
+\contentsline {chapter}{\numberline {4}Class Index}{19}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Class List}{19}{section.4.1}%
+\contentsline {chapter}{\numberline {5}File Index}{21}{chapter.5}%
+\contentsline {section}{\numberline {5.1}File List}{21}{section.5.1}%
+\contentsline {chapter}{\numberline {6}Namespace Documentation}{23}{chapter.6}%
+\contentsline {section}{\numberline {6.1}details Namespace Reference}{23}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Function Documentation}{23}{subsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.1.1}add\_dquot()}{23}{subsubsection.6.1.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.1.2}diag()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{23}{subsubsection.6.1.1.2}%
+\contentsline {subsubsection}{\numberline {6.1.1.3}diag()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{23}{subsubsection.6.1.1.3}%
+\contentsline {section}{\numberline {6.2}std Namespace Reference}{23}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Detailed Description}{24}{subsection.6.2.1}%
+\contentsline {section}{\numberline {6.3}std\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}::ext Namespace Reference}{24}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Typedef Documentation}{25}{subsection.6.3.1}%
+\contentsline {subsubsection}{\numberline {6.3.1.1}Data}{25}{subsubsection.6.3.1.1}%
+\contentsline {subsubsection}{\numberline {6.3.1.2}FitNull\_f}{25}{subsubsection.6.3.1.2}%
+\contentsline {subsubsection}{\numberline {6.3.1.3}IndexMap}{25}{subsubsection.6.3.1.3}%
+\contentsline {subsubsection}{\numberline {6.3.1.4}IndexMapRev}{25}{subsubsection.6.3.1.4}%
+\contentsline {subsubsection}{\numberline {6.3.1.5}IndexMapUnq}{25}{subsubsection.6.3.1.5}%
+\contentsline {subsubsection}{\numberline {6.3.1.6}map\_str\_int}{25}{subsubsection.6.3.1.6}%
+\contentsline {subsubsection}{\numberline {6.3.1.7}Map\_str\_Vint}{25}{subsubsection.6.3.1.7}%
+\contentsline {subsubsection}{\numberline {6.3.1.8}Matrix\_variant}{25}{subsubsection.6.3.1.8}%
+\contentsline {subsubsection}{\numberline {6.3.1.9}Triplet\_d}{25}{subsubsection.6.3.1.9}%
+\contentsline {subsubsection}{\numberline {6.3.1.10}Triplet\_i}{26}{subsubsection.6.3.1.10}%
+\contentsline {subsubsection}{\numberline {6.3.1.11}Umap\_str\_int}{26}{subsubsection.6.3.1.11}%
+\contentsline {subsubsection}{\numberline {6.3.1.12}V\_bool}{26}{subsubsection.6.3.1.12}%
+\contentsline {subsubsection}{\numberline {6.3.1.13}V\_double}{26}{subsubsection.6.3.1.13}%
+\contentsline {subsubsection}{\numberline {6.3.1.14}V\_float}{26}{subsubsection.6.3.1.14}%
+\contentsline {subsubsection}{\numberline {6.3.1.15}V\_int}{26}{subsubsection.6.3.1.15}%
+\contentsline {subsubsection}{\numberline {6.3.1.16}V\_lluint}{26}{subsubsection.6.3.1.16}%
+\contentsline {subsubsection}{\numberline {6.3.1.17}V\_opt\_string}{26}{subsubsection.6.3.1.17}%
+\contentsline {subsubsection}{\numberline {6.3.1.18}V\_size\_t}{26}{subsubsection.6.3.1.18}%
+\contentsline {subsubsection}{\numberline {6.3.1.19}V\_string}{26}{subsubsection.6.3.1.19}%
+\contentsline {subsubsection}{\numberline {6.3.1.20}Var\_bool\_int}{27}{subsubsection.6.3.1.20}%
+\contentsline {subsubsection}{\numberline {6.3.1.21}VecTriple\_i}{27}{subsubsection.6.3.1.21}%
+\contentsline {subsubsection}{\numberline {6.3.1.22}VecTuples4spmat}{27}{subsubsection.6.3.1.22}%
+\contentsline {subsubsection}{\numberline {6.3.1.23}VV\_int}{27}{subsubsection.6.3.1.23}%
+\contentsline {subsubsection}{\numberline {6.3.1.24}VV\_string}{27}{subsubsection.6.3.1.24}%
+\contentsline {subsection}{\numberline {6.3.2}Function Documentation}{27}{subsection.6.3.2}%
+\contentsline {subsubsection}{\numberline {6.3.2.1}tuplePrint()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{27}{subsubsection.6.3.2.1}%
+\contentsline {subsubsection}{\numberline {6.3.2.2}tuplePrint()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{27}{subsubsection.6.3.2.2}%
+\contentsline {chapter}{\numberline {7}Class Documentation}{29}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Bed Class Reference}{29}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Member Function Documentation}{30}{subsection.7.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.1.1}getBedVariantPos()}{30}{subsubsection.7.1.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.1.2}processBed()}{30}{subsubsection.7.1.1.2}%
+\contentsline {subsubsection}{\numberline {7.1.1.3}processFam()}{30}{subsubsection.7.1.1.3}%
+\contentsline {subsection}{\numberline {7.1.2}Member Data Documentation}{30}{subsection.7.1.2}%
+\contentsline {subsubsection}{\numberline {7.1.2.1}bedVariantPos}{30}{subsubsection.7.1.2.1}%
+\contentsline {subsubsection}{\numberline {7.1.2.2}begin}{30}{subsubsection.7.1.2.2}%
+\contentsline {subsubsection}{\numberline {7.1.2.3}bimDelim}{30}{subsubsection.7.1.2.3}%
+\contentsline {subsubsection}{\numberline {7.1.2.4}bimLast}{30}{subsubsection.7.1.2.4}%
+\contentsline {subsubsection}{\numberline {7.1.2.5}end}{31}{subsubsection.7.1.2.5}%
+\contentsline {subsubsection}{\numberline {7.1.2.6}excludeCol}{31}{subsubsection.7.1.2.6}%
+\contentsline {subsubsection}{\numberline {7.1.2.7}famDelim}{31}{subsubsection.7.1.2.7}%
+\contentsline {subsubsection}{\numberline {7.1.2.8}filterVariants}{31}{subsubsection.7.1.2.8}%
+\contentsline {subsubsection}{\numberline {7.1.2.9}include\_idx}{31}{subsubsection.7.1.2.9}%
+\contentsline {subsubsection}{\numberline {7.1.2.10}n\_samples}{31}{subsubsection.7.1.2.10}%
+\contentsline {subsubsection}{\numberline {7.1.2.11}n\_variants}{31}{subsubsection.7.1.2.11}%
+\contentsline {subsubsection}{\numberline {7.1.2.12}new\_covdata}{31}{subsubsection.7.1.2.12}%
+\contentsline {subsubsection}{\numberline {7.1.2.13}new\_phenodata}{31}{subsubsection.7.1.2.13}%
+\contentsline {subsubsection}{\numberline {7.1.2.14}new\_samSize}{31}{subsubsection.7.1.2.14}%
+\contentsline {subsubsection}{\numberline {7.1.2.15}numExpSelCol\_new}{32}{subsubsection.7.1.2.15}%
+\contentsline {subsubsection}{\numberline {7.1.2.16}numIntSelCol\_new}{32}{subsubsection.7.1.2.16}%
+\contentsline {subsubsection}{\numberline {7.1.2.17}numSelCol\_new}{32}{subsubsection.7.1.2.17}%
+\contentsline {subsubsection}{\numberline {7.1.2.18}phenoType}{32}{subsubsection.7.1.2.18}%
+\contentsline {subsubsection}{\numberline {7.1.2.19}sampleID}{32}{subsubsection.7.1.2.19}%
+\contentsline {subsubsection}{\numberline {7.1.2.20}sampleID\_all}{32}{subsubsection.7.1.2.20}%
+\contentsline {subsubsection}{\numberline {7.1.2.21}threads}{32}{subsubsection.7.1.2.21}%
+\contentsline {section}{\numberline {7.2}Bgen Class Reference}{32}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Detailed Description}{33}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Member Function Documentation}{34}{subsection.7.2.2}%
+\contentsline {subsubsection}{\numberline {7.2.2.1}getPositionOfBgenVariant()}{34}{subsubsection.7.2.2.1}%
+\contentsline {subsubsection}{\numberline {7.2.2.2}processBgenHeaderBlock()}{34}{subsubsection.7.2.2.2}%
+\contentsline {subsubsection}{\numberline {7.2.2.3}processBgenSampleBlock()}{34}{subsubsection.7.2.2.3}%
+\contentsline {subsection}{\numberline {7.2.3}Member Data Documentation}{34}{subsection.7.2.3}%
+\contentsline {subsubsection}{\numberline {7.2.3.1}bgenVariantPos}{34}{subsubsection.7.2.3.1}%
+\contentsline {subsubsection}{\numberline {7.2.3.2}CompressedSNPBlocks}{34}{subsubsection.7.2.3.2}%
+\contentsline {subsubsection}{\numberline {7.2.3.3}excludeCol}{34}{subsubsection.7.2.3.3}%
+\contentsline {subsubsection}{\numberline {7.2.3.4}filterVariants}{34}{subsubsection.7.2.3.4}%
+\contentsline {subsubsection}{\numberline {7.2.3.5}fin}{34}{subsubsection.7.2.3.5}%
+\contentsline {subsubsection}{\numberline {7.2.3.6}include\_idx}{35}{subsubsection.7.2.3.6}%
+\contentsline {subsubsection}{\numberline {7.2.3.7}includeVariantIndex}{35}{subsubsection.7.2.3.7}%
+\contentsline {subsubsection}{\numberline {7.2.3.8}keepVariants}{35}{subsubsection.7.2.3.8}%
+\contentsline {subsubsection}{\numberline {7.2.3.9}Layout}{35}{subsubsection.7.2.3.9}%
+\contentsline {subsubsection}{\numberline {7.2.3.10}Mbgen}{35}{subsubsection.7.2.3.10}%
+\contentsline {subsubsection}{\numberline {7.2.3.11}Mbgen\_begin}{35}{subsubsection.7.2.3.11}%
+\contentsline {subsubsection}{\numberline {7.2.3.12}Mbgen\_end}{35}{subsubsection.7.2.3.12}%
+\contentsline {subsubsection}{\numberline {7.2.3.13}Nbgen}{35}{subsubsection.7.2.3.13}%
+\contentsline {subsubsection}{\numberline {7.2.3.14}new\_covdata}{35}{subsubsection.7.2.3.14}%
+\contentsline {subsubsection}{\numberline {7.2.3.15}new\_phenodata}{35}{subsubsection.7.2.3.15}%
+\contentsline {subsubsection}{\numberline {7.2.3.16}new\_samSize}{36}{subsubsection.7.2.3.16}%
+\contentsline {subsubsection}{\numberline {7.2.3.17}numExpSelCol\_new}{36}{subsubsection.7.2.3.17}%
+\contentsline {subsubsection}{\numberline {7.2.3.18}numIntSelCol\_new}{36}{subsubsection.7.2.3.18}%
+\contentsline {subsubsection}{\numberline {7.2.3.19}numSelCol\_new}{36}{subsubsection.7.2.3.19}%
+\contentsline {subsubsection}{\numberline {7.2.3.20}offset}{36}{subsubsection.7.2.3.20}%
+\contentsline {subsubsection}{\numberline {7.2.3.21}phenoType}{36}{subsubsection.7.2.3.21}%
+\contentsline {subsubsection}{\numberline {7.2.3.22}sampleID}{36}{subsubsection.7.2.3.22}%
+\contentsline {subsubsection}{\numberline {7.2.3.23}sampleID\_all}{36}{subsubsection.7.2.3.23}%
+\contentsline {subsubsection}{\numberline {7.2.3.24}SampleIdentifiers}{36}{subsubsection.7.2.3.24}%
+\contentsline {subsubsection}{\numberline {7.2.3.25}threads}{36}{subsubsection.7.2.3.25}%
+\contentsline {subsubsection}{\numberline {7.2.3.26}variant\_pos}{37}{subsubsection.7.2.3.26}%
+\contentsline {section}{\numberline {7.3}BinE Class Reference}{37}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Member Function Documentation}{37}{subsection.7.3.1}%
+\contentsline {subsubsection}{\numberline {7.3.1.1}checkBinaryCovariates()}{37}{subsubsection.7.3.1.1}%
+\contentsline {subsection}{\numberline {7.3.2}Member Data Documentation}{37}{subsection.7.3.2}%
+\contentsline {subsubsection}{\numberline {7.3.2.1}bin\_headers}{37}{subsubsection.7.3.2.1}%
+\contentsline {subsubsection}{\numberline {7.3.2.2}nBinE}{38}{subsubsection.7.3.2.2}%
+\contentsline {subsubsection}{\numberline {7.3.2.3}strataLen}{38}{subsubsection.7.3.2.3}%
+\contentsline {subsubsection}{\numberline {7.3.2.4}stratum\_idx}{38}{subsubsection.7.3.2.4}%
+\contentsline {section}{\numberline {7.4}Cerr\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Redirector Class Reference}{38}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Detailed Description}{38}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Member Function Documentation}{39}{subsection.7.4.2}%
+\contentsline {subsubsection}{\numberline {7.4.2.1}overflow()}{39}{subsubsection.7.4.2.1}%
+\contentsline {subsubsection}{\numberline {7.4.2.2}sync()}{39}{subsubsection.7.4.2.2}%
+\contentsline {section}{\numberline {7.5}Command\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Line Class Reference}{39}{section.7.5}%
+\contentsline {subsection}{\numberline {7.5.1}Member Function Documentation}{40}{subsection.7.5.1}%
+\contentsline {subsubsection}{\numberline {7.5.1.1}processCommandLine()}{40}{subsubsection.7.5.1.1}%
+\contentsline {subsection}{\numberline {7.5.2}Member Data Documentation}{40}{subsection.7.5.2}%
+\contentsline {subsubsection}{\numberline {7.5.2.1}bedFile}{40}{subsubsection.7.5.2.1}%
+\contentsline {subsubsection}{\numberline {7.5.2.2}bgenFile}{40}{subsubsection.7.5.2.2}%
+\contentsline {subsubsection}{\numberline {7.5.2.3}bimFile}{40}{subsubsection.7.5.2.3}%
+\contentsline {subsubsection}{\numberline {7.5.2.4}cat\_names}{41}{subsubsection.7.5.2.4}%
+\contentsline {subsubsection}{\numberline {7.5.2.5}cat\_threshold}{41}{subsubsection.7.5.2.5}%
+\contentsline {subsubsection}{\numberline {7.5.2.6}center}{41}{subsubsection.7.5.2.6}%
+\contentsline {subsubsection}{\numberline {7.5.2.7}cov}{41}{subsubsection.7.5.2.7}%
+\contentsline {subsubsection}{\numberline {7.5.2.8}covHM}{41}{subsubsection.7.5.2.8}%
+\contentsline {subsubsection}{\numberline {7.5.2.9}delim}{41}{subsubsection.7.5.2.9}%
+\contentsline {subsubsection}{\numberline {7.5.2.10}delim\_k}{41}{subsubsection.7.5.2.10}%
+\contentsline {subsubsection}{\numberline {7.5.2.11}doFilters}{41}{subsubsection.7.5.2.11}%
+\contentsline {subsubsection}{\numberline {7.5.2.12}exp}{41}{subsubsection.7.5.2.12}%
+\contentsline {subsubsection}{\numberline {7.5.2.13}expHM}{41}{subsubsection.7.5.2.13}%
+\contentsline {subsubsection}{\numberline {7.5.2.14}famFile}{42}{subsubsection.7.5.2.14}%
+\contentsline {subsubsection}{\numberline {7.5.2.15}group}{42}{subsubsection.7.5.2.15}%
+\contentsline {subsubsection}{\numberline {7.5.2.16}icov}{42}{subsubsection.7.5.2.16}%
+\contentsline {subsubsection}{\numberline {7.5.2.17}includeVariantFile}{42}{subsubsection.7.5.2.17}%
+\contentsline {subsubsection}{\numberline {7.5.2.18}intHM}{42}{subsubsection.7.5.2.18}%
+\contentsline {subsubsection}{\numberline {7.5.2.19}kin\_delim}{42}{subsubsection.7.5.2.19}%
+\contentsline {subsubsection}{\numberline {7.5.2.20}kin\_diag}{42}{subsubsection.7.5.2.20}%
+\contentsline {subsubsection}{\numberline {7.5.2.21}kin\_file}{42}{subsubsection.7.5.2.21}%
+\contentsline {subsubsection}{\numberline {7.5.2.22}kin\_flag}{42}{subsubsection.7.5.2.22}%
+\contentsline {subsubsection}{\numberline {7.5.2.23}MAF}{42}{subsubsection.7.5.2.23}%
+\contentsline {subsubsection}{\numberline {7.5.2.24}missGenoRate}{43}{subsubsection.7.5.2.24}%
+\contentsline {subsubsection}{\numberline {7.5.2.25}missing}{43}{subsubsection.7.5.2.25}%
+\contentsline {subsubsection}{\numberline {7.5.2.26}numExpSelCol}{43}{subsubsection.7.5.2.26}%
+\contentsline {subsubsection}{\numberline {7.5.2.27}numIntSelCol}{43}{subsubsection.7.5.2.27}%
+\contentsline {subsubsection}{\numberline {7.5.2.28}numSelCol}{43}{subsubsection.7.5.2.28}%
+\contentsline {subsubsection}{\numberline {7.5.2.29}outFile}{43}{subsubsection.7.5.2.29}%
+\contentsline {subsubsection}{\numberline {7.5.2.30}outStyle}{43}{subsubsection.7.5.2.30}%
+\contentsline {subsubsection}{\numberline {7.5.2.31}pgenFile}{43}{subsubsection.7.5.2.31}%
+\contentsline {subsubsection}{\numberline {7.5.2.32}pheno\_delim}{43}{subsubsection.7.5.2.32}%
+\contentsline {subsubsection}{\numberline {7.5.2.33}pheno\_file}{43}{subsubsection.7.5.2.33}%
+\contentsline {subsubsection}{\numberline {7.5.2.34}phenoName}{44}{subsubsection.7.5.2.34}%
+\contentsline {subsubsection}{\numberline {7.5.2.35}psamFile}{44}{subsubsection.7.5.2.35}%
+\contentsline {subsubsection}{\numberline {7.5.2.36}pvarFile}{44}{subsubsection.7.5.2.36}%
+\contentsline {subsubsection}{\numberline {7.5.2.37}randomSlope}{44}{subsubsection.7.5.2.37}%
+\contentsline {subsubsection}{\numberline {7.5.2.38}robust}{44}{subsubsection.7.5.2.38}%
+\contentsline {subsubsection}{\numberline {7.5.2.39}samplefile}{44}{subsubsection.7.5.2.39}%
+\contentsline {subsubsection}{\numberline {7.5.2.40}sampleFile}{44}{subsubsection.7.5.2.40}%
+\contentsline {subsubsection}{\numberline {7.5.2.41}sampleID}{44}{subsubsection.7.5.2.41}%
+\contentsline {subsubsection}{\numberline {7.5.2.42}scale}{44}{subsubsection.7.5.2.42}%
+\contentsline {subsubsection}{\numberline {7.5.2.43}stream\_snps}{44}{subsubsection.7.5.2.43}%
+\contentsline {subsubsection}{\numberline {7.5.2.44}threads}{45}{subsubsection.7.5.2.44}%
+\contentsline {subsubsection}{\numberline {7.5.2.45}tol}{45}{subsubsection.7.5.2.45}%
+\contentsline {subsubsection}{\numberline {7.5.2.46}useBedFile}{45}{subsubsection.7.5.2.46}%
+\contentsline {subsubsection}{\numberline {7.5.2.47}useBgenFile}{45}{subsubsection.7.5.2.47}%
+\contentsline {subsubsection}{\numberline {7.5.2.48}usePgenFile}{45}{subsubsection.7.5.2.48}%
+\contentsline {subsubsection}{\numberline {7.5.2.49}useSampleFile}{45}{subsubsection.7.5.2.49}%
+\contentsline {section}{\numberline {7.6}Cout\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Redirector Class Reference}{45}{section.7.6}%
+\contentsline {subsection}{\numberline {7.6.1}Detailed Description}{46}{subsection.7.6.1}%
+\contentsline {subsection}{\numberline {7.6.2}Member Function Documentation}{46}{subsection.7.6.2}%
+\contentsline {subsubsection}{\numberline {7.6.2.1}overflow()}{46}{subsubsection.7.6.2.1}%
+\contentsline {subsubsection}{\numberline {7.6.2.2}sync()}{46}{subsubsection.7.6.2.2}%
+\contentsline {section}{\numberline {7.7}Data\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Frame Class Reference}{46}{section.7.7}%
+\contentsline {subsection}{\numberline {7.7.1}Detailed Description}{47}{subsection.7.7.1}%
+\contentsline {subsection}{\numberline {7.7.2}Member Function Documentation}{47}{subsection.7.7.2}%
+\contentsline {subsubsection}{\numberline {7.7.2.1}any\_duplicated()}{47}{subsubsection.7.7.2.1}%
+\contentsline {subsubsection}{\numberline {7.7.2.2}copy\_by\_hdrs()}{47}{subsubsection.7.7.2.2}%
+\contentsline {subsubsection}{\numberline {7.7.2.3}get\_header()}{48}{subsubsection.7.7.2.3}%
+\contentsline {subsubsection}{\numberline {7.7.2.4}head()}{48}{subsubsection.7.7.2.4}%
+\contentsline {subsubsection}{\numberline {7.7.2.5}isDataFrameCreated()}{48}{subsubsection.7.7.2.5}%
+\contentsline {subsubsection}{\numberline {7.7.2.6}list\_duplicates()}{48}{subsubsection.7.7.2.6}%
+\contentsline {subsubsection}{\numberline {7.7.2.7}list\_unique()}{49}{subsubsection.7.7.2.7}%
+\contentsline {subsubsection}{\numberline {7.7.2.8}match\_genoids()}{49}{subsubsection.7.7.2.8}%
+\contentsline {subsubsection}{\numberline {7.7.2.9}n\_cols()}{49}{subsubsection.7.7.2.9}%
+\contentsline {subsubsection}{\numberline {7.7.2.10}n\_rows()}{49}{subsubsection.7.7.2.10}%
+\contentsline {subsubsection}{\numberline {7.7.2.11}read\_file()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{49}{subsubsection.7.7.2.11}%
+\contentsline {subsubsection}{\numberline {7.7.2.12}read\_file()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{49}{subsubsection.7.7.2.12}%
+\contentsline {subsubsection}{\numberline {7.7.2.13}remove\_duplicates()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{50}{subsubsection.7.7.2.13}%
+\contentsline {subsubsection}{\numberline {7.7.2.14}remove\_duplicates()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{50}{subsubsection.7.7.2.14}%
+\contentsline {subsubsection}{\numberline {7.7.2.15}size\_wo\_duplicates()}{50}{subsubsection.7.7.2.15}%
+\contentsline {subsection}{\numberline {7.7.3}Member Data Documentation}{50}{subsection.7.7.3}%
+\contentsline {subsubsection}{\numberline {7.7.3.1}m\_data}{50}{subsubsection.7.7.3.1}%
+\contentsline {subsubsection}{\numberline {7.7.3.2}m\_geno\_ids}{50}{subsubsection.7.7.3.2}%
+\contentsline {subsubsection}{\numberline {7.7.3.3}m\_headers}{50}{subsubsection.7.7.3.3}%
+\contentsline {subsubsection}{\numberline {7.7.3.4}m\_missing\_key}{50}{subsubsection.7.7.3.4}%
+\contentsline {subsubsection}{\numberline {7.7.3.5}m\_ncols}{50}{subsubsection.7.7.3.5}%
+\contentsline {subsubsection}{\numberline {7.7.3.6}m\_nrows}{51}{subsubsection.7.7.3.6}%
+\contentsline {section}{\numberline {7.8}Fit Struct Reference}{51}{section.7.8}%
+\contentsline {subsection}{\numberline {7.8.1}Detailed Description}{51}{subsection.7.8.1}%
+\contentsline {subsection}{\numberline {7.8.2}Member Function Documentation}{51}{subsection.7.8.2}%
+\contentsline {subsubsection}{\numberline {7.8.2.1}calc\_dmu\_deta()}{51}{subsubsection.7.8.2.1}%
+\contentsline {subsubsection}{\numberline {7.8.2.2}calc\_sqrtW()}{52}{subsubsection.7.8.2.2}%
+\contentsline {subsection}{\numberline {7.8.3}Member Data Documentation}{52}{subsection.7.8.3}%
+\contentsline {subsubsection}{\numberline {7.8.3.1}alpha}{52}{subsubsection.7.8.3.1}%
+\contentsline {subsubsection}{\numberline {7.8.3.2}cov}{52}{subsubsection.7.8.3.2}%
+\contentsline {subsubsection}{\numberline {7.8.3.3}diag\_sigma\_i}{52}{subsubsection.7.8.3.3}%
+\contentsline {subsubsection}{\numberline {7.8.3.4}diag\_sigma\_i\_ZPchol}{52}{subsubsection.7.8.3.4}%
+\contentsline {subsubsection}{\numberline {7.8.3.5}dmu\_deta}{52}{subsubsection.7.8.3.5}%
+\contentsline {subsubsection}{\numberline {7.8.3.6}dtau}{52}{subsubsection.7.8.3.6}%
+\contentsline {subsubsection}{\numberline {7.8.3.7}eta}{53}{subsubsection.7.8.3.7}%
+\contentsline {subsubsection}{\numberline {7.8.3.8}mu}{53}{subsubsection.7.8.3.8}%
+\contentsline {subsubsection}{\numberline {7.8.3.9}sigma\_i}{53}{subsubsection.7.8.3.9}%
+\contentsline {subsubsection}{\numberline {7.8.3.10}sigma\_ix}{53}{subsubsection.7.8.3.10}%
+\contentsline {subsubsection}{\numberline {7.8.3.11}W}{53}{subsubsection.7.8.3.11}%
+\contentsline {section}{\numberline {7.9}GEMFit Struct Reference}{53}{section.7.9}%
+\contentsline {subsection}{\numberline {7.9.1}Detailed Description}{54}{subsection.7.9.1}%
+\contentsline {subsection}{\numberline {7.9.2}Member Function Documentation}{54}{subsection.7.9.2}%
+\contentsline {subsubsection}{\numberline {7.9.2.1}convert\_2\_fit()}{54}{subsubsection.7.9.2.1}%
+\contentsline {subsection}{\numberline {7.9.3}Member Data Documentation}{54}{subsection.7.9.3}%
+\contentsline {subsubsection}{\numberline {7.9.3.1}alpha}{54}{subsubsection.7.9.3.1}%
+\contentsline {subsubsection}{\numberline {7.9.3.2}eta}{54}{subsubsection.7.9.3.2}%
+\contentsline {subsubsection}{\numberline {7.9.3.3}mu}{54}{subsubsection.7.9.3.3}%
+\contentsline {subsubsection}{\numberline {7.9.3.4}resid}{54}{subsubsection.7.9.3.4}%
+\contentsline {subsubsection}{\numberline {7.9.3.5}sigma2}{54}{subsubsection.7.9.3.5}%
+\contentsline {subsubsection}{\numberline {7.9.3.6}XinvXTX}{54}{subsubsection.7.9.3.6}%
+\contentsline {section}{\numberline {7.10}Glmmkin Struct Reference}{55}{section.7.10}%
+\contentsline {subsection}{\numberline {7.10.1}Detailed Description}{55}{subsection.7.10.1}%
+\contentsline {subsection}{\numberline {7.10.2}Member Data Documentation}{55}{subsection.7.10.2}%
+\contentsline {subsubsection}{\numberline {7.10.2.1}converged}{55}{subsubsection.7.10.2.1}%
+\contentsline {subsubsection}{\numberline {7.10.2.2}fit}{55}{subsubsection.7.10.2.2}%
+\contentsline {subsubsection}{\numberline {7.10.2.3}id\_include}{55}{subsubsection.7.10.2.3}%
+\contentsline {subsubsection}{\numberline {7.10.2.4}residuals}{55}{subsubsection.7.10.2.4}%
+\contentsline {subsubsection}{\numberline {7.10.2.5}run\_wb}{55}{subsubsection.7.10.2.5}%
+\contentsline {subsubsection}{\numberline {7.10.2.6}scaled\_residuals}{56}{subsubsection.7.10.2.6}%
+\contentsline {subsubsection}{\numberline {7.10.2.7}sigma2}{56}{subsubsection.7.10.2.7}%
+\contentsline {section}{\numberline {7.11}GMMAT Class Reference}{56}{section.7.11}%
+\contentsline {subsection}{\numberline {7.11.1}Detailed Description}{57}{subsection.7.11.1}%
+\contentsline {subsection}{\numberline {7.11.2}Member Function Documentation}{57}{subsection.7.11.2}%
+\contentsline {subsubsection}{\numberline {7.11.2.1}build\_Psi()}{57}{subsubsection.7.11.2.1}%
+\contentsline {subsubsection}{\numberline {7.11.2.2}used in Woodbury longitudinal generalized linear mixed models (\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}GLMMs).}{57}{subsubsection.7.11.2.2}%
+\contentsline {subsubsection}{\numberline {7.11.2.3}1. Random Intercept (\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}RI) model}{57}{subsubsection.7.11.2.3}%
+\contentsline {subsection}{\numberline {7.11.3}Member Data Documentation}{57}{subsection.7.11.3}%
+\contentsline {subsubsection}{\numberline {7.11.3.1}m\_covariance\_idx}{57}{subsubsection.7.11.3.1}%
+\contentsline {subsubsection}{\numberline {7.11.3.2}m\_diag\_sigma\_im\_Z}{57}{subsubsection.7.11.3.2}%
+\contentsline {subsubsection}{\numberline {7.11.3.3}m\_dup}{57}{subsubsection.7.11.3.3}%
+\contentsline {subsubsection}{\numberline {7.11.3.4}m\_family\_t}{58}{subsubsection.7.11.3.4}%
+\contentsline {subsubsection}{\numberline {7.11.3.5}m\_fixrho}{58}{subsubsection.7.11.3.5}%
+\contentsline {subsubsection}{\numberline {7.11.3.6}m\_fixrho\_idx}{58}{subsubsection.7.11.3.6}%
+\contentsline {subsubsection}{\numberline {7.11.3.7}m\_fixtau}{58}{subsubsection.7.11.3.7}%
+\contentsline {subsubsection}{\numberline {7.11.3.8}m\_group\_id}{58}{subsubsection.7.11.3.8}%
+\contentsline {subsubsection}{\numberline {7.11.3.9}m\_group\_idx}{58}{subsubsection.7.11.3.9}%
+\contentsline {subsubsection}{\numberline {7.11.3.10}m\_groups}{58}{subsubsection.7.11.3.10}%
+\contentsline {subsubsection}{\numberline {7.11.3.11}m\_hdrsMap}{58}{subsubsection.7.11.3.11}%
+\contentsline {subsubsection}{\numberline {7.11.3.12}m\_idxtau}{58}{subsubsection.7.11.3.12}%
+\contentsline {subsubsection}{\numberline {7.11.3.13}m\_idxtau2}{58}{subsubsection.7.11.3.13}%
+\contentsline {subsubsection}{\numberline {7.11.3.14}m\_J}{58}{subsubsection.7.11.3.14}%
+\contentsline {subsubsection}{\numberline {7.11.3.15}m\_kins\_size}{58}{subsubsection.7.11.3.15}%
+\contentsline {subsubsection}{\numberline {7.11.3.16}m\_link}{58}{subsubsection.7.11.3.16}%
+\contentsline {subsubsection}{\numberline {7.11.3.17}m\_modeltype}{59}{subsubsection.7.11.3.17}%
+\contentsline {subsubsection}{\numberline {7.11.3.18}m\_N}{59}{subsubsection.7.11.3.18}%
+\contentsline {subsubsection}{\numberline {7.11.3.19}m\_n\_sel\_col}{59}{subsubsection.7.11.3.19}%
+\contentsline {subsubsection}{\numberline {7.11.3.20}m\_Nobs}{59}{subsubsection.7.11.3.20}%
+\contentsline {subsubsection}{\numberline {7.11.3.21}m\_offset}{59}{subsubsection.7.11.3.21}%
+\contentsline {subsubsection}{\numberline {7.11.3.22}m\_Psi}{59}{subsubsection.7.11.3.22}%
+\contentsline {subsubsection}{\numberline {7.11.3.23}m\_rand\_slope}{59}{subsubsection.7.11.3.23}%
+\contentsline {subsubsection}{\numberline {7.11.3.24}m\_robust}{59}{subsubsection.7.11.3.24}%
+\contentsline {subsubsection}{\numberline {7.11.3.25}m\_sqrtW}{59}{subsubsection.7.11.3.25}%
+\contentsline {subsubsection}{\numberline {7.11.3.26}m\_tau}{59}{subsubsection.7.11.3.26}%
+\contentsline {subsubsection}{\numberline {7.11.3.27}m\_vkins\_sp}{59}{subsubsection.7.11.3.27}%
+\contentsline {subsubsection}{\numberline {7.11.3.28}m\_X}{59}{subsubsection.7.11.3.28}%
+\contentsline {subsubsection}{\numberline {7.11.3.29}m\_Y}{59}{subsubsection.7.11.3.29}%
+\contentsline {subsubsection}{\numberline {7.11.3.30}m\_y}{60}{subsubsection.7.11.3.30}%
+\contentsline {subsubsection}{\numberline {7.11.3.31}m\_Z}{60}{subsubsection.7.11.3.31}%
+\contentsline {section}{\numberline {7.12}Kinship Class Reference}{60}{section.7.12}%
+\contentsline {subsection}{\numberline {7.12.1}Member Function Documentation}{60}{subsection.7.12.1}%
+\contentsline {subsubsection}{\numberline {7.12.1.1}read\_file()}{60}{subsubsection.7.12.1.1}%
+\contentsline {subsubsection}{\numberline {7.12.1.2}set\_path()}{60}{subsubsection.7.12.1.2}%
+\contentsline {subsubsection}{\numberline {7.12.1.3}size()}{61}{subsubsection.7.12.1.3}%
+\contentsline {subsection}{\numberline {7.12.2}Member Data Documentation}{61}{subsection.7.12.2}%
+\contentsline {subsubsection}{\numberline {7.12.2.1}m\_data\_frame}{61}{subsubsection.7.12.2.1}%
+\contentsline {subsubsection}{\numberline {7.12.2.2}m\_diag}{61}{subsubsection.7.12.2.2}%
+\contentsline {subsubsection}{\numberline {7.12.2.3}m\_null\_kin}{61}{subsubsection.7.12.2.3}%
+\contentsline {subsubsection}{\numberline {7.12.2.4}m\_path}{61}{subsubsection.7.12.2.4}%
+\contentsline {section}{\numberline {7.13}Logger\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Setup Class Reference}{61}{section.7.13}%
+\contentsline {subsection}{\numberline {7.13.1}Detailed Description}{62}{subsection.7.13.1}%
+\contentsline {subsection}{\numberline {7.13.2}Member Function Documentation}{62}{subsection.7.13.2}%
+\contentsline {subsubsection}{\numberline {7.13.2.1}init()}{62}{subsubsection.7.13.2.1}%
+\contentsline {section}{\numberline {7.14}MAGEE Class Reference}{62}{section.7.14}%
+\contentsline {subsection}{\numberline {7.14.1}Detailed Description}{62}{subsection.7.14.1}%
+\contentsline {subsection}{\numberline {7.14.2}Member Enumeration Documentation}{62}{subsection.7.14.2}%
+\contentsline {subsubsection}{\numberline {7.14.2.1}GENOTYPE}{62}{subsubsection.7.14.2.1}%
+\contentsline {subsection}{\numberline {7.14.3}Constructor \& Destructor Documentation}{63}{subsection.7.14.3}%
+\contentsline {subsubsection}{\numberline {7.14.3.1}MAGEE()\hspace {0.1cm}{\footnotesize \ttfamily [1/4]}}{63}{subsubsection.7.14.3.1}%
+\contentsline {subsubsection}{\numberline {7.14.3.2}MAGEE()\hspace {0.1cm}{\footnotesize \ttfamily [2/4]}}{63}{subsubsection.7.14.3.2}%
+\contentsline {subsubsection}{\numberline {7.14.3.3}MAGEE()\hspace {0.1cm}{\footnotesize \ttfamily [3/4]}}{63}{subsubsection.7.14.3.3}%
+\contentsline {subsubsection}{\numberline {7.14.3.4}MAGEE()\hspace {0.1cm}{\footnotesize \ttfamily [4/4]}}{63}{subsubsection.7.14.3.4}%
+\contentsline {subsection}{\numberline {7.14.4}Member Function Documentation}{63}{subsection.7.14.4}%
+\contentsline {subsubsection}{\numberline {7.14.4.1}fitglmm()}{63}{subsubsection.7.14.4.1}%
+\contentsline {section}{\numberline {7.15}Magee\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Arma Struct Reference}{64}{section.7.15}%
+\contentsline {subsection}{\numberline {7.15.1}Detailed Description}{64}{subsection.7.15.1}%
+\contentsline {subsection}{\numberline {7.15.2}Member Data Documentation}{64}{subsection.7.15.2}%
+\contentsline {subsubsection}{\numberline {7.15.2.1}cov}{64}{subsubsection.7.15.2.1}%
+\contentsline {subsubsection}{\numberline {7.15.2.2}diag\_sigma\_i}{64}{subsubsection.7.15.2.2}%
+\contentsline {subsubsection}{\numberline {7.15.2.3}diag\_sigma\_i\_ZPchol}{64}{subsubsection.7.15.2.3}%
+\contentsline {subsubsection}{\numberline {7.15.2.4}dupflag}{64}{subsubsection.7.15.2.4}%
+\contentsline {subsubsection}{\numberline {7.15.2.5}EC}{64}{subsubsection.7.15.2.5}%
+\contentsline {subsubsection}{\numberline {7.15.2.6}JEresblock}{64}{subsubsection.7.15.2.6}%
+\contentsline {subsubsection}{\numberline {7.15.2.7}Jres}{65}{subsubsection.7.15.2.7}%
+\contentsline {subsubsection}{\numberline {7.15.2.8}n}{65}{subsubsection.7.15.2.8}%
+\contentsline {subsubsection}{\numberline {7.15.2.9}n\_obs}{65}{subsubsection.7.15.2.9}%
+\contentsline {subsubsection}{\numberline {7.15.2.10}Psi}{65}{subsubsection.7.15.2.10}%
+\contentsline {subsubsection}{\numberline {7.15.2.11}select}{65}{subsubsection.7.15.2.11}%
+\contentsline {subsubsection}{\numberline {7.15.2.12}sigma\_iJJ}{65}{subsubsection.7.15.2.12}%
+\contentsline {subsubsection}{\numberline {7.15.2.13}sigma\_ixJ}{65}{subsubsection.7.15.2.13}%
+\contentsline {subsubsection}{\numberline {7.15.2.14}Xi}{65}{subsubsection.7.15.2.14}%
+\contentsline {section}{\numberline {7.16}Magee\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Glmmkin Struct Reference}{65}{section.7.16}%
+\contentsline {subsection}{\numberline {7.16.1}Detailed Description}{66}{subsection.7.16.1}%
+\contentsline {subsection}{\numberline {7.16.2}Member Data Documentation}{66}{subsection.7.16.2}%
+\contentsline {subsubsection}{\numberline {7.16.2.1}cov}{66}{subsubsection.7.16.2.1}%
+\contentsline {subsubsection}{\numberline {7.16.2.2}diag\_sigma\_i}{66}{subsubsection.7.16.2.2}%
+\contentsline {subsubsection}{\numberline {7.16.2.3}diag\_sigma\_i\_ZPchol}{66}{subsubsection.7.16.2.3}%
+\contentsline {subsubsection}{\numberline {7.16.2.4}dupflag}{66}{subsubsection.7.16.2.4}%
+\contentsline {subsubsection}{\numberline {7.16.2.5}E}{66}{subsubsection.7.16.2.5}%
+\contentsline {subsubsection}{\numberline {7.16.2.6}EC}{66}{subsubsection.7.16.2.6}%
+\contentsline {subsubsection}{\numberline {7.16.2.7}J}{66}{subsubsection.7.16.2.7}%
+\contentsline {subsubsection}{\numberline {7.16.2.8}JEPEJ}{66}{subsubsection.7.16.2.8}%
+\contentsline {subsubsection}{\numberline {7.16.2.9}JEPJ}{66}{subsubsection.7.16.2.9}%
+\contentsline {subsubsection}{\numberline {7.16.2.10}JEres}{66}{subsubsection.7.16.2.10}%
+\contentsline {subsubsection}{\numberline {7.16.2.11}JPJ}{67}{subsubsection.7.16.2.11}%
+\contentsline {subsubsection}{\numberline {7.16.2.12}residuals}{67}{subsubsection.7.16.2.12}%
+\contentsline {subsubsection}{\numberline {7.16.2.13}select}{67}{subsubsection.7.16.2.13}%
+\contentsline {subsubsection}{\numberline {7.16.2.14}sigma\_i}{67}{subsubsection.7.16.2.14}%
+\contentsline {subsubsection}{\numberline {7.16.2.15}sigma\_ix}{67}{subsubsection.7.16.2.15}%
+\contentsline {section}{\numberline {7.17}pair\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}hash Struct Reference}{67}{section.7.17}%
+\contentsline {subsection}{\numberline {7.17.1}Member Function Documentation}{67}{subsection.7.17.1}%
+\contentsline {subsubsection}{\numberline {7.17.1.1}operator()()}{67}{subsubsection.7.17.1.1}%
+\contentsline {section}{\numberline {7.18}Pgen Class Reference}{67}{section.7.18}%
+\contentsline {subsection}{\numberline {7.18.1}Member Function Documentation}{68}{subsection.7.18.1}%
+\contentsline {subsubsection}{\numberline {7.18.1.1}getPgenVariantPos()}{68}{subsubsection.7.18.1.1}%
+\contentsline {subsubsection}{\numberline {7.18.1.2}processPgenHeader()}{68}{subsubsection.7.18.1.2}%
+\contentsline {subsubsection}{\numberline {7.18.1.3}processPsam()}{68}{subsubsection.7.18.1.3}%
+\contentsline {subsubsection}{\numberline {7.18.1.4}processPvar()}{69}{subsubsection.7.18.1.4}%
+\contentsline {subsection}{\numberline {7.18.2}Member Data Documentation}{69}{subsection.7.18.2}%
+\contentsline {subsubsection}{\numberline {7.18.2.1}begin}{69}{subsubsection.7.18.2.1}%
+\contentsline {subsubsection}{\numberline {7.18.2.2}binE\_idx}{69}{subsubsection.7.18.2.2}%
+\contentsline {subsubsection}{\numberline {7.18.2.3}end}{69}{subsubsection.7.18.2.3}%
+\contentsline {subsubsection}{\numberline {7.18.2.4}excludeCol}{69}{subsubsection.7.18.2.4}%
+\contentsline {subsubsection}{\numberline {7.18.2.5}filterVariants}{69}{subsubsection.7.18.2.5}%
+\contentsline {subsubsection}{\numberline {7.18.2.6}include\_idx}{69}{subsubsection.7.18.2.6}%
+\contentsline {subsubsection}{\numberline {7.18.2.7}new\_covdata}{69}{subsubsection.7.18.2.7}%
+\contentsline {subsubsection}{\numberline {7.18.2.8}new\_phenodata}{69}{subsubsection.7.18.2.8}%
+\contentsline {subsubsection}{\numberline {7.18.2.9}new\_samSize}{69}{subsubsection.7.18.2.9}%
+\contentsline {subsubsection}{\numberline {7.18.2.10}NumExcludeCol}{69}{subsubsection.7.18.2.10}%
+\contentsline {subsubsection}{\numberline {7.18.2.11}numExpSelCol\_new}{69}{subsubsection.7.18.2.11}%
+\contentsline {subsubsection}{\numberline {7.18.2.12}numIntSelCol\_new}{70}{subsubsection.7.18.2.12}%
+\contentsline {subsubsection}{\numberline {7.18.2.13}numSelCol\_new}{70}{subsubsection.7.18.2.13}%
+\contentsline {subsubsection}{\numberline {7.18.2.14}pgenVariantPos}{70}{subsubsection.7.18.2.14}%
+\contentsline {subsubsection}{\numberline {7.18.2.15}phenoType}{70}{subsubsection.7.18.2.15}%
+\contentsline {subsubsection}{\numberline {7.18.2.16}pvarIndex}{70}{subsubsection.7.18.2.16}%
+\contentsline {subsubsection}{\numberline {7.18.2.17}pvarLast}{70}{subsubsection.7.18.2.17}%
+\contentsline {subsubsection}{\numberline {7.18.2.18}raw\_sample\_ct}{70}{subsubsection.7.18.2.18}%
+\contentsline {subsubsection}{\numberline {7.18.2.19}raw\_variant\_ct}{70}{subsubsection.7.18.2.19}%
+\contentsline {subsubsection}{\numberline {7.18.2.20}sampleID}{70}{subsubsection.7.18.2.20}%
+\contentsline {subsubsection}{\numberline {7.18.2.21}sampleID\_all}{70}{subsubsection.7.18.2.21}%
+\contentsline {subsubsection}{\numberline {7.18.2.22}threads}{70}{subsubsection.7.18.2.22}%
+\contentsline {section}{\numberline {7.19}Pheno Class Reference}{70}{section.7.19}%
+\contentsline {subsection}{\numberline {7.19.1}Member Function Documentation}{71}{subsection.7.19.1}%
+\contentsline {subsubsection}{\numberline {7.19.1.1}check\_binary()}{71}{subsubsection.7.19.1.1}%
+\contentsline {subsubsection}{\numberline {7.19.1.2}get\_path()}{71}{subsubsection.7.19.1.2}%
+\contentsline {subsubsection}{\numberline {7.19.1.3}read\_file()}{71}{subsubsection.7.19.1.3}%
+\contentsline {subsubsection}{\numberline {7.19.1.4}set\_path()}{71}{subsubsection.7.19.1.4}%
+\contentsline {subsubsection}{\numberline {7.19.1.5}size()}{72}{subsubsection.7.19.1.5}%
+\contentsline {subsection}{\numberline {7.19.2}Member Data Documentation}{72}{subsection.7.19.2}%
+\contentsline {subsubsection}{\numberline {7.19.2.1}m\_data\_frame}{72}{subsubsection.7.19.2.1}%
+\contentsline {subsubsection}{\numberline {7.19.2.2}m\_sam\_id}{72}{subsubsection.7.19.2.2}%
+\contentsline {subsubsection}{\numberline {7.19.2.3}m\_v\_hdrs}{72}{subsubsection.7.19.2.3}%
+\contentsline {section}{\numberline {7.20}Sparse\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Inverse Class Reference}{72}{section.7.20}%
+\contentsline {subsection}{\numberline {7.20.1}Constructor \& Destructor Documentation}{73}{subsection.7.20.1}%
+\contentsline {subsubsection}{\numberline {7.20.1.1}SparseInverse()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{73}{subsubsection.7.20.1.1}%
+\contentsline {subsubsection}{\numberline {7.20.1.2}SparseInverse()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{73}{subsubsection.7.20.1.2}%
+\contentsline {subsection}{\numberline {7.20.2}Member Function Documentation}{73}{subsection.7.20.2}%
+\contentsline {subsubsection}{\numberline {7.20.2.1}get\_idx\_mp()}{73}{subsubsection.7.20.2.1}%
+\contentsline {subsubsection}{\numberline {7.20.2.2}get\_idx\_mp\_unq()}{73}{subsubsection.7.20.2.2}%
+\contentsline {subsubsection}{\numberline {7.20.2.3}get\_spmat()}{73}{subsubsection.7.20.2.3}%
+\contentsline {subsubsection}{\numberline {7.20.2.4}inv()}{73}{subsubsection.7.20.2.4}%
+\contentsline {subsubsection}{\numberline {7.20.2.5}inv\_spamat()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{74}{subsubsection.7.20.2.5}%
+\contentsline {subsubsection}{\numberline {7.20.2.6}inv\_spamat()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{74}{subsubsection.7.20.2.6}%
+\contentsline {subsubsection}{\numberline {7.20.2.7}inv\_spamat\_chol()}{74}{subsubsection.7.20.2.7}%
+\contentsline {subsubsection}{\numberline {7.20.2.8}set\_idx\_mp()}{74}{subsubsection.7.20.2.8}%
+\contentsline {subsubsection}{\numberline {7.20.2.9}set\_idx\_mp\_unq()}{74}{subsubsection.7.20.2.9}%
+\contentsline {subsubsection}{\numberline {7.20.2.10}set\_kin\_Nobssize()}{74}{subsubsection.7.20.2.10}%
+\contentsline {subsubsection}{\numberline {7.20.2.11}set\_kin\_Nsize()}{74}{subsubsection.7.20.2.11}%
+\contentsline {subsubsection}{\numberline {7.20.2.12}set\_spmat()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{74}{subsubsection.7.20.2.12}%
+\contentsline {subsubsection}{\numberline {7.20.2.13}set\_spmat()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{74}{subsubsection.7.20.2.13}%
+\contentsline {subsubsection}{\numberline {7.20.2.14}solve\_chol()}{74}{subsubsection.7.20.2.14}%
+\contentsline {subsection}{\numberline {7.20.3}Member Data Documentation}{74}{subsection.7.20.3}%
+\contentsline {subsubsection}{\numberline {7.20.3.1}kin}{74}{subsubsection.7.20.3.1}%
+\contentsline {subsubsection}{\numberline {7.20.3.2}kin\_delim}{75}{subsubsection.7.20.3.2}%
+\contentsline {subsubsection}{\numberline {7.20.3.3}m\_ratio\_Nob2N}{75}{subsubsection.7.20.3.3}%
+\contentsline {subsubsection}{\numberline {7.20.3.4}m\_thr}{75}{subsubsection.7.20.3.4}%
+\contentsline {subsubsection}{\numberline {7.20.3.5}pheno}{75}{subsubsection.7.20.3.5}%
+\contentsline {subsubsection}{\numberline {7.20.3.6}pheno\_delim}{75}{subsubsection.7.20.3.6}%
+\contentsline {section}{\numberline {7.21}Time Class Reference}{75}{section.7.21}%
+\contentsline {chapter}{\numberline {8}File Documentation}{77}{chapter.8}%
+\contentsline {section}{\numberline {8.1}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Binary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}EUtils.h File Reference}{77}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}Macro Definition Documentation}{77}{subsection.8.1.1}%
+\contentsline {subsubsection}{\numberline {8.1.1.1}BinaryEUtils\_H}{77}{subsubsection.8.1.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}Function Documentation}{77}{subsection.8.1.2}%
+\contentsline {subsubsection}{\numberline {8.1.2.1}cartesian\_map()}{77}{subsubsection.8.1.2.1}%
+\contentsline {subsubsection}{\numberline {8.1.2.2}cartesian\_vec\_sep()}{77}{subsubsection.8.1.2.2}%
+\contentsline {subsubsection}{\numberline {8.1.2.3}GetPowerSet()}{78}{subsubsection.8.1.2.3}%
+\contentsline {subsubsection}{\numberline {8.1.2.4}vector\_binstrings()}{78}{subsubsection.8.1.2.4}%
+\contentsline {section}{\numberline {8.2}Binary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}EUtils.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{78}{section.8.2}%
+\contentsline {section}{\numberline {8.3}include/declars.h File Reference}{78}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Typedef Documentation}{79}{subsection.8.3.1}%
+\contentsline {subsubsection}{\numberline {8.3.1.1}uchar}{79}{subsubsection.8.3.1.1}%
+\contentsline {subsubsection}{\numberline {8.3.1.2}uint}{79}{subsubsection.8.3.1.2}%
+\contentsline {subsubsection}{\numberline {8.3.1.3}uint64}{79}{subsubsection.8.3.1.3}%
+\contentsline {subsubsection}{\numberline {8.3.1.4}ushort}{79}{subsubsection.8.3.1.4}%
+\contentsline {section}{\numberline {8.4}declars.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{80}{section.8.4}%
+\contentsline {section}{\numberline {8.5}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}GEM.h File Reference}{81}{section.8.5}%
+\contentsline {subsection}{\numberline {8.5.1}Function Documentation}{81}{subsection.8.5.1}%
+\contentsline {subsubsection}{\numberline {8.5.1.1}center()}{81}{subsubsection.8.5.1.1}%
+\contentsline {subsubsection}{\numberline {8.5.1.2}checkBinary()}{81}{subsubsection.8.5.1.2}%
+\contentsline {subsubsection}{\numberline {8.5.1.3}fitNullModel()}{82}{subsubsection.8.5.1.3}%
+\contentsline {subsubsection}{\numberline {8.5.1.4}fitNullModel2()}{83}{subsubsection.8.5.1.4}%
+\contentsline {subsubsection}{\numberline {8.5.1.5}get\_log\_name()}{84}{subsubsection.8.5.1.5}%
+\contentsline {subsubsection}{\numberline {8.5.1.6}printCovVarMat()}{84}{subsubsection.8.5.1.6}%
+\contentsline {subsubsection}{\numberline {8.5.1.7}printOutputHeader()}{85}{subsubsection.8.5.1.7}%
+\contentsline {section}{\numberline {8.6}GEM.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{85}{section.8.6}%
+\contentsline {section}{\numberline {8.7}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}GMMAT.h File Reference}{86}{section.8.7}%
+\contentsline {subsection}{\numberline {8.7.1}Enumeration Type Documentation}{88}{subsection.8.7.1}%
+\contentsline {subsubsection}{\numberline {8.7.1.1}ModelType}{88}{subsubsection.8.7.1.1}%
+\contentsline {subsection}{\numberline {8.7.2}Function Documentation}{88}{subsection.8.7.2}%
+\contentsline {subsubsection}{\numberline {8.7.2.1}crossprod()}{88}{subsubsection.8.7.2.1}%
+\contentsline {subsubsection}{\numberline {8.7.2.2}match\_indices()}{89}{subsubsection.8.7.2.2}%
+\contentsline {subsubsection}{\numberline {8.7.2.3}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [1/10]}}{89}{subsubsection.8.7.2.3}%
+\contentsline {subsubsection}{\numberline {8.7.2.4}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [2/10]}}{89}{subsubsection.8.7.2.4}%
+\contentsline {subsubsection}{\numberline {8.7.2.5}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [3/10]}}{90}{subsubsection.8.7.2.5}%
+\contentsline {subsubsection}{\numberline {8.7.2.6}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [4/10]}}{90}{subsubsection.8.7.2.6}%
+\contentsline {subsubsection}{\numberline {8.7.2.7}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [5/10]}}{90}{subsubsection.8.7.2.7}%
+\contentsline {subsubsection}{\numberline {8.7.2.8}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [6/10]}}{91}{subsubsection.8.7.2.8}%
+\contentsline {subsubsection}{\numberline {8.7.2.9}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [7/10]}}{91}{subsubsection.8.7.2.9}%
+\contentsline {subsubsection}{\numberline {8.7.2.10}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [8/10]}}{91}{subsubsection.8.7.2.10}%
+\contentsline {subsubsection}{\numberline {8.7.2.11}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [9/10]}}{92}{subsubsection.8.7.2.11}%
+\contentsline {subsubsection}{\numberline {8.7.2.12}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [10/10]}}{92}{subsubsection.8.7.2.12}%
+\contentsline {subsubsection}{\numberline {8.7.2.13}slice\_mat\_cols()}{92}{subsubsection.8.7.2.13}%
+\contentsline {subsubsection}{\numberline {8.7.2.14}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [1/3]}}{93}{subsubsection.8.7.2.14}%
+\contentsline {subsubsection}{\numberline {8.7.2.15}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [2/3]}}{93}{subsubsection.8.7.2.15}%
+\contentsline {subsubsection}{\numberline {8.7.2.16}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [3/3]}}{93}{subsubsection.8.7.2.16}%
+\contentsline {subsubsection}{\numberline {8.7.2.17}tcrossprod()}{94}{subsubsection.8.7.2.17}%
+\contentsline {subsubsection}{\numberline {8.7.2.18}unique()}{94}{subsubsection.8.7.2.18}%
+\contentsline {subsubsection}{\numberline {8.7.2.19}unique\_id()}{95}{subsubsection.8.7.2.19}%
+\contentsline {subsubsection}{\numberline {8.7.2.20}which()\hspace {0.1cm}{\footnotesize \ttfamily [1/2]}}{95}{subsubsection.8.7.2.20}%
+\contentsline {subsubsection}{\numberline {8.7.2.21}which()\hspace {0.1cm}{\footnotesize \ttfamily [2/2]}}{95}{subsubsection.8.7.2.21}%
+\contentsline {subsection}{\numberline {8.7.3}Variable Documentation}{96}{subsection.8.7.3}%
+\contentsline {subsubsection}{\numberline {8.7.3.1}MAX\_N\_ITER}{96}{subsubsection.8.7.3.1}%
+\contentsline {section}{\numberline {8.8}GMMAT.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{96}{section.8.8}%
+\contentsline {section}{\numberline {8.9}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Kinship.h File Reference}{100}{section.8.9}%
+\contentsline {section}{\numberline {8.10}Kinship.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{100}{section.8.10}%
+\contentsline {section}{\numberline {8.11}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Logger.h File Reference}{100}{section.8.11}%
+\contentsline {section}{\numberline {8.12}Logger.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{101}{section.8.12}%
+\contentsline {section}{\numberline {8.13}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}MAGEE.h File Reference}{101}{section.8.13}%
+\contentsline {subsection}{\numberline {8.13.1}Function Documentation}{102}{subsection.8.13.1}%
+\contentsline {subsubsection}{\numberline {8.13.1.1}any\_duplicated()}{102}{subsubsection.8.13.1.1}%
+\contentsline {subsubsection}{\numberline {8.13.1.2}any\_isna()}{102}{subsubsection.8.13.1.2}%
+\contentsline {subsubsection}{\numberline {8.13.1.3}apply\_on\_columns()}{103}{subsubsection.8.13.1.3}%
+\contentsline {subsubsection}{\numberline {8.13.1.4}cbind()}{103}{subsubsection.8.13.1.4}%
+\contentsline {subsubsection}{\numberline {8.13.1.5}check\_not\_empty()}{103}{subsubsection.8.13.1.5}%
+\contentsline {subsubsection}{\numberline {8.13.1.6}conver\_eigen\_to\_arma()}{104}{subsubsection.8.13.1.6}%
+\contentsline {subsubsection}{\numberline {8.13.1.7}create\_strata()}{104}{subsubsection.8.13.1.7}%
+\contentsline {subsubsection}{\numberline {8.13.1.8}filter\_unique\_rows()}{104}{subsubsection.8.13.1.8}%
+\contentsline {subsubsection}{\numberline {8.13.1.9}filtered\_ids()}{105}{subsubsection.8.13.1.9}%
+\contentsline {subsubsection}{\numberline {8.13.1.10}generate\_strata\_list()}{105}{subsubsection.8.13.1.10}%
+\contentsline {subsubsection}{\numberline {8.13.1.11}in\_op()}{105}{subsubsection.8.13.1.11}%
+\contentsline {subsubsection}{\numberline {8.13.1.12}list\_duplicates\_bool()}{106}{subsubsection.8.13.1.12}%
+\contentsline {subsubsection}{\numberline {8.13.1.13}match\_id\_include()}{106}{subsubsection.8.13.1.13}%
+\contentsline {subsubsection}{\numberline {8.13.1.14}match\_indices()}{106}{subsubsection.8.13.1.14}%
+\contentsline {subsubsection}{\numberline {8.13.1.15}remove\_minus\_one()}{107}{subsubsection.8.13.1.15}%
+\contentsline {subsubsection}{\numberline {8.13.1.16}scale()}{107}{subsubsection.8.13.1.16}%
+\contentsline {subsubsection}{\numberline {8.13.1.17}slice()}{107}{subsubsection.8.13.1.17}%
+\contentsline {subsubsection}{\numberline {8.13.1.18}unique\_less\_equal()}{108}{subsubsection.8.13.1.18}%
+\contentsline {section}{\numberline {8.14}MAGEE.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{108}{section.8.14}%
+\contentsline {section}{\numberline {8.15}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Matrix\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.h File Reference}{110}{section.8.15}%
+\contentsline {subsection}{\numberline {8.15.1}Function Documentation}{110}{subsection.8.15.1}%
+\contentsline {subsubsection}{\numberline {8.15.1.1}initvec()}{110}{subsubsection.8.15.1.1}%
+\contentsline {subsubsection}{\numberline {8.15.1.2}matAdd()}{110}{subsubsection.8.15.1.2}%
+\contentsline {subsubsection}{\numberline {8.15.1.3}matInv()}{110}{subsubsection.8.15.1.3}%
+\contentsline {subsubsection}{\numberline {8.15.1.4}matmatprod()}{110}{subsubsection.8.15.1.4}%
+\contentsline {subsubsection}{\numberline {8.15.1.5}matmatTprod()}{111}{subsubsection.8.15.1.5}%
+\contentsline {subsubsection}{\numberline {8.15.1.6}matNmatNprod()}{111}{subsubsection.8.15.1.6}%
+\contentsline {subsubsection}{\numberline {8.15.1.7}matTmatprod()}{111}{subsubsection.8.15.1.7}%
+\contentsline {subsubsection}{\numberline {8.15.1.8}matTvecprod()}{111}{subsubsection.8.15.1.8}%
+\contentsline {subsubsection}{\numberline {8.15.1.9}matvecprod()}{111}{subsubsection.8.15.1.9}%
+\contentsline {subsubsection}{\numberline {8.15.1.10}matvecSprod()}{111}{subsubsection.8.15.1.10}%
+\contentsline {subsubsection}{\numberline {8.15.1.11}subMatrix()}{112}{subsubsection.8.15.1.11}%
+\contentsline {subsubsection}{\numberline {8.15.1.12}vecmatprod()}{112}{subsubsection.8.15.1.12}%
+\contentsline {section}{\numberline {8.16}Matrix\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{112}{section.8.16}%
+\contentsline {section}{\numberline {8.17}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Pheno.h File Reference}{112}{section.8.17}%
+\contentsline {section}{\numberline {8.18}Pheno.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{112}{section.8.18}%
+\contentsline {section}{\numberline {8.19}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Bed.h File Reference}{113}{section.8.19}%
+\contentsline {subsection}{\numberline {8.19.1}Macro Definition Documentation}{113}{subsection.8.19.1}%
+\contentsline {subsubsection}{\numberline {8.19.1.1}READBED\_H}{113}{subsubsection.8.19.1.1}%
+\contentsline {subsection}{\numberline {8.19.2}Function Documentation}{113}{subsection.8.19.2}%
+\contentsline {subsubsection}{\numberline {8.19.2.1}gemBED()}{113}{subsubsection.8.19.2.1}%
+\contentsline {section}{\numberline {8.20}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Bed.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{114}{section.8.20}%
+\contentsline {section}{\numberline {8.21}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}BGEN.h File Reference}{114}{section.8.21}%
+\contentsline {subsection}{\numberline {8.21.1}Function Documentation}{115}{subsection.8.21.1}%
+\contentsline {subsubsection}{\numberline {8.21.1.1}Bgen13GetTwoVals()}{115}{subsubsection.8.21.1.1}%
+\contentsline {subsubsection}{\numberline {8.21.1.2}gemBGEN()}{115}{subsubsection.8.21.1.2}%
+\contentsline {section}{\numberline {8.22}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}BGEN.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{115}{section.8.22}%
+\contentsline {section}{\numberline {8.23}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Files.h File Reference}{116}{section.8.23}%
+\contentsline {section}{\numberline {8.24}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Files.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{117}{section.8.24}%
+\contentsline {section}{\numberline {8.25}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Parameters.h File Reference}{118}{section.8.25}%
+\contentsline {section}{\numberline {8.26}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Parameters.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{118}{section.8.26}%
+\contentsline {section}{\numberline {8.27}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PGEN.h File Reference}{119}{section.8.27}%
+\contentsline {subsection}{\numberline {8.27.1}Function Documentation}{119}{subsection.8.27.1}%
+\contentsline {subsubsection}{\numberline {8.27.1.1}gemPGEN()}{120}{subsubsection.8.27.1.1}%
+\contentsline {section}{\numberline {8.28}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PGEN.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{120}{section.8.28}%
+\contentsline {section}{\numberline {8.29}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Sparse\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Inverse.h File Reference}{120}{section.8.29}%
+\contentsline {subsection}{\numberline {8.29.1}Typedef Documentation}{121}{subsection.8.29.1}%
+\contentsline {subsubsection}{\numberline {8.29.1.1}DenseMatInt}{121}{subsubsection.8.29.1.1}%
+\contentsline {subsubsection}{\numberline {8.29.1.2}DensMat}{121}{subsubsection.8.29.1.2}%
+\contentsline {subsubsection}{\numberline {8.29.1.3}DensVec}{122}{subsubsection.8.29.1.3}%
+\contentsline {subsubsection}{\numberline {8.29.1.4}DensVecInt}{122}{subsubsection.8.29.1.4}%
+\contentsline {subsubsection}{\numberline {8.29.1.5}SpaMat}{122}{subsubsection.8.29.1.5}%
+\contentsline {subsubsection}{\numberline {8.29.1.6}SpaMatRow}{122}{subsubsection.8.29.1.6}%
+\contentsline {section}{\numberline {8.30}Sparse\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Inverse.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{122}{section.8.30}%
+\contentsline {section}{\numberline {8.31}include/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Time\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.h File Reference}{123}{section.8.31}%
+\contentsline {subsection}{\numberline {8.31.1}Macro Definition Documentation}{124}{subsection.8.31.1}%
+\contentsline {subsubsection}{\numberline {8.31.1.1}TIMEUTILS\_H}{124}{subsubsection.8.31.1.1}%
+\contentsline {subsection}{\numberline {8.31.2}Function Documentation}{124}{subsection.8.31.2}%
+\contentsline {subsubsection}{\numberline {8.31.2.1}printExecutionTime()}{124}{subsubsection.8.31.2.1}%
+\contentsline {subsubsection}{\numberline {8.31.2.2}printExecutionTime1()}{124}{subsubsection.8.31.2.2}%
+\contentsline {section}{\numberline {8.32}Time\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}h}{124}{section.8.32}%
+\contentsline {section}{\numberline {8.33}README.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}md File Reference}{124}{section.8.33}%
+\contentsline {section}{\numberline {8.34}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}README.md File Reference}{124}{section.8.34}%
+\contentsline {section}{\numberline {8.35}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Binary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}EUtils.cpp File Reference}{124}{section.8.35}%
+\contentsline {subsection}{\numberline {8.35.1}Function Documentation}{125}{subsection.8.35.1}%
+\contentsline {subsubsection}{\numberline {8.35.1.1}cartesian\_map()}{125}{subsubsection.8.35.1.1}%
+\contentsline {subsubsection}{\numberline {8.35.1.2}cartesian\_vec\_sep()}{125}{subsubsection.8.35.1.2}%
+\contentsline {section}{\numberline {8.36}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Fitglmm.cpp File Reference}{125}{section.8.36}%
+\contentsline {subsection}{\numberline {8.36.1}Macro Definition Documentation}{126}{subsection.8.36.1}%
+\contentsline {subsubsection}{\numberline {8.36.1.1}DBL\_EPSILON}{126}{subsubsection.8.36.1.1}%
+\contentsline {subsection}{\numberline {8.36.2}Typedef Documentation}{126}{subsection.8.36.2}%
+\contentsline {subsubsection}{\numberline {8.36.2.1}llui}{126}{subsubsection.8.36.2.1}%
+\contentsline {subsubsection}{\numberline {8.36.2.2}uchar}{126}{subsubsection.8.36.2.2}%
+\contentsline {subsubsection}{\numberline {8.36.2.3}uint}{126}{subsubsection.8.36.2.3}%
+\contentsline {subsubsection}{\numberline {8.36.2.4}ushort}{126}{subsubsection.8.36.2.4}%
+\contentsline {subsection}{\numberline {8.36.3}Function Documentation}{126}{subsection.8.36.3}%
+\contentsline {subsubsection}{\numberline {8.36.3.1}chi\_square\_CDF()}{126}{subsubsection.8.36.3.1}%
+\contentsline {subsubsection}{\numberline {8.36.3.2}filter\_elements()}{126}{subsubsection.8.36.3.2}%
+\contentsline {subsubsection}{\numberline {8.36.3.3}find\_indx()}{127}{subsubsection.8.36.3.3}%
+\contentsline {subsubsection}{\numberline {8.36.3.4}glmm\_gei()}{127}{subsubsection.8.36.3.4}%
+\contentsline {subsubsection}{\numberline {8.36.3.5}glmm\_gei\_bed13()}{127}{subsubsection.8.36.3.5}%
+\contentsline {subsubsection}{\numberline {8.36.3.6}glmm\_gei\_bgen13()}{127}{subsubsection.8.36.3.6}%
+\contentsline {subsubsection}{\numberline {8.36.3.7}glmm\_gei\_pgen13()}{128}{subsubsection.8.36.3.7}%
+\contentsline {section}{\numberline {8.37}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}GEM.cpp File Reference}{128}{section.8.37}%
+\contentsline {subsection}{\numberline {8.37.1}Function Documentation}{129}{subsection.8.37.1}%
+\contentsline {subsubsection}{\numberline {8.37.1.1}center()}{129}{subsubsection.8.37.1.1}%
+\contentsline {subsubsection}{\numberline {8.37.1.2}checkBinary()}{129}{subsubsection.8.37.1.2}%
+\contentsline {subsubsection}{\numberline {8.37.1.3}fitNullModel()}{129}{subsubsection.8.37.1.3}%
+\contentsline {subsubsection}{\numberline {8.37.1.4}fitNullModel2()}{130}{subsubsection.8.37.1.4}%
+\contentsline {subsubsection}{\numberline {8.37.1.5}get\_log\_name()}{131}{subsubsection.8.37.1.5}%
+\contentsline {subsubsection}{\numberline {8.37.1.6}main()}{132}{subsubsection.8.37.1.6}%
+\contentsline {subsubsection}{\numberline {8.37.1.7}printCovVarMat()}{132}{subsubsection.8.37.1.7}%
+\contentsline {subsubsection}{\numberline {8.37.1.8}printOutputHeader()}{132}{subsubsection.8.37.1.8}%
+\contentsline {section}{\numberline {8.38}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}GMMAT.cpp File Reference}{133}{section.8.38}%
+\contentsline {subsection}{\numberline {8.38.1}Function Documentation}{134}{subsection.8.38.1}%
+\contentsline {subsubsection}{\numberline {8.38.1.1}apply\_wb()}{134}{subsubsection.8.38.1.1}%
+\contentsline {subsubsection}{\numberline {8.38.1.2}calc\_variance()}{135}{subsubsection.8.38.1.2}%
+\contentsline {subsubsection}{\numberline {8.38.1.3}check\_convergence()}{135}{subsubsection.8.38.1.3}%
+\contentsline {subsubsection}{\numberline {8.38.1.4}conv\_dm2stdV()}{135}{subsubsection.8.38.1.4}%
+\contentsline {subsubsection}{\numberline {8.38.1.5}conv\_dv2stdVd()}{135}{subsubsection.8.38.1.5}%
+\contentsline {subsubsection}{\numberline {8.38.1.6}conv\_stdV2dv()}{135}{subsubsection.8.38.1.6}%
+\contentsline {subsubsection}{\numberline {8.38.1.7}conv\_stdVs2dV()}{135}{subsubsection.8.38.1.7}%
+\contentsline {subsubsection}{\numberline {8.38.1.8}conv\_stdvs2stdvi()}{135}{subsubsection.8.38.1.8}%
+\contentsline {subsubsection}{\numberline {8.38.1.9}conv\_vec\_vecXd()}{135}{subsubsection.8.38.1.9}%
+\contentsline {subsubsection}{\numberline {8.38.1.10}create\_covdata()}{135}{subsubsection.8.38.1.10}%
+\contentsline {subsubsection}{\numberline {8.38.1.11}createHeaderMap()}{135}{subsubsection.8.38.1.11}%
+\contentsline {subsubsection}{\numberline {8.38.1.12}hadamard\_sum\_block()}{136}{subsubsection.8.38.1.12}%
+\contentsline {subsubsection}{\numberline {8.38.1.13}intersect()}{136}{subsubsection.8.38.1.13}%
+\contentsline {subsubsection}{\numberline {8.38.1.14}linkinv()}{136}{subsubsection.8.38.1.14}%
+\contentsline {subsubsection}{\numberline {8.38.1.15}logic\_update\_fixed\_condtion()}{136}{subsubsection.8.38.1.15}%
+\contentsline {subsubsection}{\numberline {8.38.1.16}sign()}{136}{subsubsection.8.38.1.16}%
+\contentsline {subsubsection}{\numberline {8.38.1.17}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [1/10]}}{136}{subsubsection.8.38.1.17}%
+\contentsline {subsubsection}{\numberline {8.38.1.18}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [2/10]}}{136}{subsubsection.8.38.1.18}%
+\contentsline {subsubsection}{\numberline {8.38.1.19}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [3/10]}}{137}{subsubsection.8.38.1.19}%
+\contentsline {subsubsection}{\numberline {8.38.1.20}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [4/10]}}{137}{subsubsection.8.38.1.20}%
+\contentsline {subsubsection}{\numberline {8.38.1.21}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [5/10]}}{137}{subsubsection.8.38.1.21}%
+\contentsline {subsubsection}{\numberline {8.38.1.22}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [6/10]}}{138}{subsubsection.8.38.1.22}%
+\contentsline {subsubsection}{\numberline {8.38.1.23}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [7/10]}}{138}{subsubsection.8.38.1.23}%
+\contentsline {subsubsection}{\numberline {8.38.1.24}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [8/10]}}{138}{subsubsection.8.38.1.24}%
+\contentsline {subsubsection}{\numberline {8.38.1.25}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [9/10]}}{139}{subsubsection.8.38.1.25}%
+\contentsline {subsubsection}{\numberline {8.38.1.26}slice\_mat()\hspace {0.1cm}{\footnotesize \ttfamily [10/10]}}{139}{subsubsection.8.38.1.26}%
+\contentsline {subsubsection}{\numberline {8.38.1.27}slice\_mat\_cols()}{139}{subsubsection.8.38.1.27}%
+\contentsline {subsubsection}{\numberline {8.38.1.28}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [1/3]}}{140}{subsubsection.8.38.1.28}%
+\contentsline {subsubsection}{\numberline {8.38.1.29}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [2/3]}}{140}{subsubsection.8.38.1.29}%
+\contentsline {subsubsection}{\numberline {8.38.1.30}slice\_vec()\hspace {0.1cm}{\footnotesize \ttfamily [3/3]}}{140}{subsubsection.8.38.1.30}%
+\contentsline {section}{\numberline {8.39}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Kinship.cpp File Reference}{141}{section.8.39}%
+\contentsline {section}{\numberline {8.40}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Logger.cpp File Reference}{141}{section.8.40}%
+\contentsline {section}{\numberline {8.41}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}MAGEE.cpp File Reference}{141}{section.8.41}%
+\contentsline {subsection}{\numberline {8.41.1}Function Documentation}{142}{subsection.8.41.1}%
+\contentsline {subsubsection}{\numberline {8.41.1.1}any\_duplicated()}{142}{subsubsection.8.41.1.1}%
+\contentsline {subsubsection}{\numberline {8.41.1.2}any\_isna()}{142}{subsubsection.8.41.1.2}%
+\contentsline {subsubsection}{\numberline {8.41.1.3}apply\_on\_columns()}{143}{subsubsection.8.41.1.3}%
+\contentsline {subsubsection}{\numberline {8.41.1.4}apply\_wb\_J()}{143}{subsubsection.8.41.1.4}%
+\contentsline {subsubsection}{\numberline {8.41.1.5}cbind()}{143}{subsubsection.8.41.1.5}%
+\contentsline {subsubsection}{\numberline {8.41.1.6}check\_not\_empty()}{143}{subsubsection.8.41.1.6}%
+\contentsline {subsubsection}{\numberline {8.41.1.7}convert\_eigen\_to\_arma()}{144}{subsubsection.8.41.1.7}%
+\contentsline {subsubsection}{\numberline {8.41.1.8}create\_strata()}{144}{subsubsection.8.41.1.8}%
+\contentsline {subsubsection}{\numberline {8.41.1.9}filter\_unique\_rows()}{144}{subsubsection.8.41.1.9}%
+\contentsline {subsubsection}{\numberline {8.41.1.10}filtered\_ids()}{144}{subsubsection.8.41.1.10}%
+\contentsline {subsubsection}{\numberline {8.41.1.11}generate\_strata\_list()}{145}{subsubsection.8.41.1.11}%
+\contentsline {subsubsection}{\numberline {8.41.1.12}glmm\_gei\_bed13()}{145}{subsubsection.8.41.1.12}%
+\contentsline {subsubsection}{\numberline {8.41.1.13}glmm\_gei\_bgen13()}{145}{subsubsection.8.41.1.13}%
+\contentsline {subsubsection}{\numberline {8.41.1.14}glmm\_gei\_pgen13()}{146}{subsubsection.8.41.1.14}%
+\contentsline {subsubsection}{\numberline {8.41.1.15}in\_op()}{146}{subsubsection.8.41.1.15}%
+\contentsline {subsubsection}{\numberline {8.41.1.16}in\_op\_indices()}{146}{subsubsection.8.41.1.16}%
+\contentsline {subsubsection}{\numberline {8.41.1.17}list\_duplicates\_bool()}{147}{subsubsection.8.41.1.17}%
+\contentsline {subsubsection}{\numberline {8.41.1.18}match\_id\_include()}{147}{subsubsection.8.41.1.18}%
+\contentsline {subsubsection}{\numberline {8.41.1.19}match\_indices()}{147}{subsubsection.8.41.1.19}%
+\contentsline {subsubsection}{\numberline {8.41.1.20}remove\_minus\_one()}{148}{subsubsection.8.41.1.20}%
+\contentsline {subsubsection}{\numberline {8.41.1.21}scale()}{148}{subsubsection.8.41.1.21}%
+\contentsline {subsubsection}{\numberline {8.41.1.22}slice()}{148}{subsubsection.8.41.1.22}%
+\contentsline {subsubsection}{\numberline {8.41.1.23}spa\_mat\_ones()}{149}{subsubsection.8.41.1.23}%
+\contentsline {subsubsection}{\numberline {8.41.1.24}unique\_less\_equal()}{149}{subsubsection.8.41.1.24}%
+\contentsline {section}{\numberline {8.42}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Matrix\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.cpp File Reference}{149}{section.8.42}%
+\contentsline {subsection}{\numberline {8.42.1}Function Documentation}{150}{subsection.8.42.1}%
+\contentsline {subsubsection}{\numberline {8.42.1.1}daxpy\_()}{150}{subsubsection.8.42.1.1}%
+\contentsline {subsubsection}{\numberline {8.42.1.2}dgemm\_()}{150}{subsubsection.8.42.1.2}%
+\contentsline {subsubsection}{\numberline {8.42.1.3}dgemv\_()}{150}{subsubsection.8.42.1.3}%
+\contentsline {subsubsection}{\numberline {8.42.1.4}dgetrf\_()}{150}{subsubsection.8.42.1.4}%
+\contentsline {subsubsection}{\numberline {8.42.1.5}dgetri\_()}{151}{subsubsection.8.42.1.5}%
+\contentsline {subsubsection}{\numberline {8.42.1.6}dlacpy\_()}{151}{subsubsection.8.42.1.6}%
+\contentsline {subsubsection}{\numberline {8.42.1.7}initvec()}{151}{subsubsection.8.42.1.7}%
+\contentsline {subsubsection}{\numberline {8.42.1.8}matAdd()}{151}{subsubsection.8.42.1.8}%
+\contentsline {subsubsection}{\numberline {8.42.1.9}matInv()}{151}{subsubsection.8.42.1.9}%
+\contentsline {subsubsection}{\numberline {8.42.1.10}matmatprod()}{151}{subsubsection.8.42.1.10}%
+\contentsline {subsubsection}{\numberline {8.42.1.11}matmatTprod()}{152}{subsubsection.8.42.1.11}%
+\contentsline {subsubsection}{\numberline {8.42.1.12}matNmatNprod()}{152}{subsubsection.8.42.1.12}%
+\contentsline {subsubsection}{\numberline {8.42.1.13}matTmatprod()}{152}{subsubsection.8.42.1.13}%
+\contentsline {subsubsection}{\numberline {8.42.1.14}matTvecprod()}{152}{subsubsection.8.42.1.14}%
+\contentsline {subsubsection}{\numberline {8.42.1.15}matvecprod()}{152}{subsubsection.8.42.1.15}%
+\contentsline {subsubsection}{\numberline {8.42.1.16}matvecSprod()}{152}{subsubsection.8.42.1.16}%
+\contentsline {subsubsection}{\numberline {8.42.1.17}subMatrix()}{153}{subsubsection.8.42.1.17}%
+\contentsline {subsubsection}{\numberline {8.42.1.18}vecmatprod()}{153}{subsubsection.8.42.1.18}%
+\contentsline {section}{\numberline {8.43}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Pheno.cpp File Reference}{153}{section.8.43}%
+\contentsline {section}{\numberline {8.44}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Bed.cpp File Reference}{153}{section.8.44}%
+\contentsline {subsection}{\numberline {8.44.1}Function Documentation}{153}{subsection.8.44.1}%
+\contentsline {subsubsection}{\numberline {8.44.1.1}gemBED()}{153}{subsubsection.8.44.1.1}%
+\contentsline {section}{\numberline {8.45}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}BGEN.cpp File Reference}{154}{section.8.45}%
+\contentsline {subsection}{\numberline {8.45.1}Typedef Documentation}{154}{subsection.8.45.1}%
+\contentsline {subsubsection}{\numberline {8.45.1.1}dbl}{154}{subsubsection.8.45.1.1}%
+\contentsline {subsection}{\numberline {8.45.2}Function Documentation}{154}{subsection.8.45.2}%
+\contentsline {subsubsection}{\numberline {8.45.2.1}Bgen13GetTwoVals()}{154}{subsubsection.8.45.2.1}%
+\contentsline {subsubsection}{\numberline {8.45.2.2}gemBGEN()}{154}{subsubsection.8.45.2.2}%
+\contentsline {section}{\numberline {8.46}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Files.cpp File Reference}{154}{section.8.46}%
+\contentsline {section}{\numberline {8.47}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Parameters.cpp File Reference}{155}{section.8.47}%
+\contentsline {subsection}{\numberline {8.47.1}Macro Definition Documentation}{155}{subsection.8.47.1}%
+\contentsline {subsubsection}{\numberline {8.47.1.1}VERSION}{155}{subsubsection.8.47.1.1}%
+\contentsline {subsection}{\numberline {8.47.2}Function Documentation}{155}{subsection.8.47.2}%
+\contentsline {subsubsection}{\numberline {8.47.2.1}print\_help()}{155}{subsubsection.8.47.2.1}%
+\contentsline {section}{\numberline {8.48}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Read\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PGEN.cpp File Reference}{155}{section.8.48}%
+\contentsline {subsection}{\numberline {8.48.1}Function Documentation}{156}{subsection.8.48.1}%
+\contentsline {subsubsection}{\numberline {8.48.1.1}gemPGEN()}{156}{subsubsection.8.48.1.1}%
+\contentsline {section}{\numberline {8.49}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Sparse\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Inverse.cpp File Reference}{156}{section.8.49}%
+\contentsline {subsection}{\numberline {8.49.1}Function Documentation}{156}{subsection.8.49.1}%
+\contentsline {subsubsection}{\numberline {8.49.1.1}cholmodSparseToCsparse()}{156}{subsubsection.8.49.1.1}%
+\contentsline {subsubsection}{\numberline {8.49.1.2}combine\_indices()}{156}{subsubsection.8.49.1.2}%
+\contentsline {subsubsection}{\numberline {8.49.1.3}convertEigenToSuiteSparse()}{156}{subsubsection.8.49.1.3}%
+\contentsline {subsubsection}{\numberline {8.49.1.4}createSparseIdentity()}{156}{subsubsection.8.49.1.4}%
+\contentsline {section}{\numberline {8.50}src/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Time\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Utils.cpp File Reference}{157}{section.8.50}%
+\contentsline {subsection}{\numberline {8.50.1}Function Documentation}{157}{subsection.8.50.1}%
+\contentsline {subsubsection}{\numberline {8.50.1.1}printExecutionTime()}{157}{subsubsection.8.50.1.1}%
+\contentsline {subsubsection}{\numberline {8.50.1.2}printExecutionTime1()}{157}{subsubsection.8.50.1.2}%
+\contentsline {section}{\numberline {8.51}testinv.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}cpp File Reference}{157}{section.8.51}%
+\contentsline {subsection}{\numberline {8.51.1}Function Documentation}{157}{subsection.8.51.1}%
+\contentsline {subsubsection}{\numberline {8.51.1.1}main()}{157}{subsubsection.8.51.1.1}%
+\contentsline {chapter}{Index}{159}{section*.100}%

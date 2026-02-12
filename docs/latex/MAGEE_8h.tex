@@ -1,0 +1,430 @@
+\doxysection{include/\+MAGEE.h File Reference}
+\hypertarget{MAGEE_8h}{}\label{MAGEE_8h}\index{include/MAGEE.h@{include/MAGEE.h}}
+{\ttfamily \#include "{}GMMAT.\+h"{}}\newline
+{\ttfamily \#include "{}declars.\+h"{}}\newline
+{\ttfamily \#include "{}Read\+BGEN.\+h"{}}\newline
+{\ttfamily \#include $<$numeric$>$}\newline
+{\ttfamily \#include $<$thread$>$}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structMagee__Glmmkin}{Magee\+\_\+\+Glmmkin}}
+\begin{DoxyCompactList}\small\item\em Structure for storing GEI-\/related data in Eigen matrices. \end{DoxyCompactList}\item 
+struct \mbox{\hyperlink{structMagee__Arma}{Magee\+\_\+\+Arma}}
+\begin{DoxyCompactList}\small\item\em Struct to create an object with armadillo type. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classMAGEE}{MAGEE}}
+\begin{DoxyCompactList}\small\item\em A class to run GEI test. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{MAGEE_8h_ae1562a125beea1ca15c8bfa927706e87}{conver\+\_\+eigen\+\_\+to\+\_\+arma}} (\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&eigen\+Mat, arma\+::sp\+\_\+mat \&arma\+Mat)
+\begin{DoxyCompactList}\small\item\em Convert Eigen matrix to armadillo. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} \mbox{\hyperlink{MAGEE_8h_a8a8fc2d4fb4d10b4c68883dd20383333}{match\+\_\+indices}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&original, \mbox{\hyperlink{namespacestd_1_1ext_a6fabd30484e58d8586657bd4f9c8b4da}{std\+::ext\+::\+V\+\_\+opt\+\_\+string}} const \&filtered)
+\begin{DoxyCompactList}\small\item\em Matches indices from the original vector to the filtered vector. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T $>$ }\\\mbox{\hyperlink{namespacestd_1_1ext_a6fabd30484e58d8586657bd4f9c8b4da}{std\+::ext\+::\+V\+\_\+opt\+\_\+string}} \mbox{\hyperlink{MAGEE_8h_a8723137bfdb9af00aa9fb5b60fc020f6}{slice}} (std\+::vector$<$ T $>$ const \&vec, \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} const \&indices)
+\begin{DoxyCompactList}\small\item\em Extracts elements from a vector based on specified indices. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{MAGEE_8h_a85b04524f7f4cb754e5c5134e829e1cc}{any\+\_\+isna}} (\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} vec)
+\begin{DoxyCompactList}\small\item\em Checks if any element in the vector is NA (represented as -\/1). \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} \mbox{\hyperlink{MAGEE_8h_a8d6375cea4387d373e06dfc26fde9ea9}{in\+\_\+op}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec1, \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec2)
+\begin{DoxyCompactList}\small\item\em Checks if elements of vec1 are in vec2. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \mbox{\hyperlink{MAGEE_8h_a7727f4aeba27c13934b28cb95d9f5474}{filtered\+\_\+ids}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec1, \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} const \&vec2)
+\begin{DoxyCompactList}\small\item\em Filters a vector of strings based on a boolean vector. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{MAGEE_8h_a4ae51d7896080eb7ac29fd9cec729687}{check\+\_\+not\+\_\+empty}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&sample\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Checks if the input vector of strings is not empty. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{MAGEE_8h_a7b8f11b4d740e1067d2e457c6301e5fc}{any\+\_\+duplicated}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec)
+\begin{DoxyCompactList}\small\item\em Checks if there are any duplicated elements in the vector. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} \mbox{\hyperlink{MAGEE_8h_a4edaa3bbd0be968070e7ce1c3896a49e}{list\+\_\+duplicates\+\_\+bool}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec)
+\begin{DoxyCompactList}\small\item\em Identifies duplicates in a vector of strings. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{MAGEE_8h_a45ab1f3c1df4ed33719ee998f9649d4b}{filter\+\_\+unique\+\_\+rows}} (\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&mat, \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&id\+\_\+include)
+\begin{DoxyCompactList}\small\item\em Filters out duplicate rows from a matrix. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} \mbox{\hyperlink{MAGEE_8h_ae38ee2535af962e8a0a63648658e205e}{apply\+\_\+on\+\_\+columns}} (\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&mat, const std\+::function$<$ bool(Vector\+Xd const \&)$>$ \&func, int threshold)
+\begin{DoxyCompactList}\small\item\em Applies a function to each column of a matrix and returns a boolean vector. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{MAGEE_8h_ab37fb7e09863cd1b74d5e700127bd09f}{unique\+\_\+less\+\_\+equal}} (\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} const \&vec, int threshold)
+\begin{DoxyCompactList}\small\item\em Checks if the number of unique elements in a vector is less than or equal to a threshold. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a47b8924c7d2ee22ff1b5edfd32cf822c}{std\+::ext\+::\+Map\+\_\+str\+\_\+\+Vint}} \mbox{\hyperlink{MAGEE_8h_a4d98652b910180eefb15439d74e3dedb}{generate\+\_\+strata\+\_\+list}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&vec)
+\begin{DoxyCompactList}\small\item\em Generates a strata list mapping observations to their corresponding strata. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{MAGEE_8h_ac40522dbe9f47afcc76b51ab3c0cc787}{scale}} (\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \&mat, bool \mbox{\hyperlink{GEM_8h_a1aa9cf5f0c87af78e1835b31206f43c7}{center}}=true, bool scale=true)
+\begin{DoxyCompactList}\small\item\em Scales a matrix by centering and/or scaling its columns. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \mbox{\hyperlink{MAGEE_8h_a0a05500cd4d6369d0d49de25072a7387}{cbind}} (\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&A, \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&B)
+\begin{DoxyCompactList}\small\item\em Combines two matrices column-\/wise. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \mbox{\hyperlink{MAGEE_8h_a0adef0e67ca58656a872c364ff93a54c}{match\+\_\+id\+\_\+include}} (\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&id\+\_\+include, \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&sample\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Matches included IDs with sample IDs. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} \mbox{\hyperlink{MAGEE_8h_a6ed04c63f24454adb9483f83932879c9}{remove\+\_\+minus\+\_\+one}} (\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} vec)
+\begin{DoxyCompactList}\small\item\em Removes elements equal to -\/1 from the vector. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \mbox{\hyperlink{MAGEE_8h_a82748d18139ef3469b060870678ca403}{create\+\_\+strata}} (\mbox{\hyperlink{namespacestd_1_1ext_a48566eb97c176990d81f8b7d9d217dce}{std\+::ext\+::\+VV\+\_\+string}} const \&Ecat)
+\begin{DoxyCompactList}\small\item\em Creates strata by concatenating elements in each row of the binary columns of matrix E. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{MAGEE_8h_a7b8f11b4d740e1067d2e457c6301e5fc}\label{MAGEE_8h_a7b8f11b4d740e1067d2e457c6301e5fc} 
+\index{MAGEE.h@{MAGEE.h}!any\_duplicated@{any\_duplicated}}
+\index{any\_duplicated@{any\_duplicated}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{any\_duplicated()}{any\_duplicated()}}
+{\footnotesize\ttfamily bool any\+\_\+duplicated (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{vec }\end{DoxyParamCaption})}
+
+
+
+Checks if there are any duplicated elements in the vector. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if there are duplicates, otherwise false. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a85b04524f7f4cb754e5c5134e829e1cc}\label{MAGEE_8h_a85b04524f7f4cb754e5c5134e829e1cc} 
+\index{MAGEE.h@{MAGEE.h}!any\_isna@{any\_isna}}
+\index{any\_isna@{any\_isna}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{any\_isna()}{any\_isna()}}
+{\footnotesize\ttfamily bool any\+\_\+isna (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}}}]{vec }\end{DoxyParamCaption})}
+
+
+
+Checks if any element in the vector is NA (represented as -\/1). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if any element is -\/1, otherwise false. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_ae38ee2535af962e8a0a63648658e205e}\label{MAGEE_8h_ae38ee2535af962e8a0a63648658e205e} 
+\index{MAGEE.h@{MAGEE.h}!apply\_on\_columns@{apply\_on\_columns}}
+\index{apply\_on\_columns@{apply\_on\_columns}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{apply\_on\_columns()}{apply\_on\_columns()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} apply\+\_\+on\+\_\+columns (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&}]{mat,  }\item[{const std\+::function$<$ bool(Vector\+Xd const \&)$>$ \&}]{func,  }\item[{int}]{threshold }\end{DoxyParamCaption})}
+
+
+
+Applies a function to each column of a matrix and returns a boolean vector. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mat} & The matrix to process. \\
+\hline
+{\em func} & The function to apply to each column. \\
+\hline
+{\em threshold} & The threshold value used in the function. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A boolean vector indicating which columns meet the criteria. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a0a05500cd4d6369d0d49de25072a7387}\label{MAGEE_8h_a0a05500cd4d6369d0d49de25072a7387} 
+\index{MAGEE.h@{MAGEE.h}!cbind@{cbind}}
+\index{cbind@{cbind}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{cbind()}{cbind()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} cbind (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&}]{A,  }\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&}]{B }\end{DoxyParamCaption})}
+
+
+
+Combines two matrices column-\/wise. 
+
+This function concatenates two matrices {\ttfamily A} and {\ttfamily B} horizontally to create a new matrix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em A} & The first matrix. \\
+\hline
+{\em B} & The second matrix. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The combined matrix. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a4ae51d7896080eb7ac29fd9cec729687}\label{MAGEE_8h_a4ae51d7896080eb7ac29fd9cec729687} 
+\index{MAGEE.h@{MAGEE.h}!check\_not\_empty@{check\_not\_empty}}
+\index{check\_not\_empty@{check\_not\_empty}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{check\_not\_empty()}{check\_not\_empty()}}
+{\footnotesize\ttfamily void check\+\_\+not\+\_\+empty (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{sample\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Checks if the input vector of strings is not empty. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sample\+\_\+id} & The vector of sample IDs to check. \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::runtime\+\_\+error} & if the vector is empty. \\
+\hline
+\end{DoxyExceptions}
+\Hypertarget{MAGEE_8h_ae1562a125beea1ca15c8bfa927706e87}\label{MAGEE_8h_ae1562a125beea1ca15c8bfa927706e87} 
+\index{MAGEE.h@{MAGEE.h}!conver\_eigen\_to\_arma@{conver\_eigen\_to\_arma}}
+\index{conver\_eigen\_to\_arma@{conver\_eigen\_to\_arma}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{conver\_eigen\_to\_arma()}{conver\_eigen\_to\_arma()}}
+{\footnotesize\ttfamily void conver\+\_\+eigen\+\_\+to\+\_\+arma (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_ae48f4cfe426f81846d670a050ecb7f38}{Spa\+Mat}} const \&}]{eigen\+Mat,  }\item[{arma\+::sp\+\_\+mat \&}]{arma\+Mat }\end{DoxyParamCaption})}
+
+
+
+Convert Eigen matrix to armadillo. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em eigen\+Mat} & \\
+\hline
+{\em arma\+Mat} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{MAGEE_8h_a82748d18139ef3469b060870678ca403}\label{MAGEE_8h_a82748d18139ef3469b060870678ca403} 
+\index{MAGEE.h@{MAGEE.h}!create\_strata@{create\_strata}}
+\index{create\_strata@{create\_strata}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{create\_strata()}{create\_strata()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} create\+\_\+strata (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a48566eb97c176990d81f8b7d9d217dce}{std\+::ext\+::\+VV\+\_\+string}} const \&}]{Ecat }\end{DoxyParamCaption})}
+
+
+
+Creates strata by concatenating elements in each row of the binary columns of matrix E. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em Ecat} & A vector of vector of strings representing categorical data. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector of concatenated strings representing strata. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a45ab1f3c1df4ed33719ee998f9649d4b}\label{MAGEE_8h_a45ab1f3c1df4ed33719ee998f9649d4b} 
+\index{MAGEE.h@{MAGEE.h}!filter\_unique\_rows@{filter\_unique\_rows}}
+\index{filter\_unique\_rows@{filter\_unique\_rows}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{filter\_unique\_rows()}{filter\_unique\_rows()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} filter\+\_\+unique\+\_\+rows (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} const \&}]{mat,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&}]{id\+\_\+include }\end{DoxyParamCaption})}
+
+
+
+Filters out duplicate rows from a matrix. 
+
+This function removes duplicate rows from the input matrix and returns a matrix with only unique rows, as well as updating the {\ttfamily id\+\_\+include} vector accordingly.
+
+
+\begin{DoxyParams}{Parameters}
+{\em mat} & The input matrix. \\
+\hline
+{\em id\+\_\+include} & The vector of IDs to filter. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A matrix with unique rows. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a7727f4aeba27c13934b28cb95d9f5474}\label{MAGEE_8h_a7727f4aeba27c13934b28cb95d9f5474} 
+\index{MAGEE.h@{MAGEE.h}!filtered\_ids@{filtered\_ids}}
+\index{filtered\_ids@{filtered\_ids}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{filtered\_ids()}{filtered\_ids()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} filtered\+\_\+ids (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{vec1,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} const \&}]{vec2 }\end{DoxyParamCaption})}
+
+
+
+Filters a vector of strings based on a boolean vector. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec1} & The vector to filter. \\
+\hline
+{\em vec2} & The boolean vector indicating which elements to keep. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A filtered vector of strings. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a4d98652b910180eefb15439d74e3dedb}\label{MAGEE_8h_a4d98652b910180eefb15439d74e3dedb} 
+\index{MAGEE.h@{MAGEE.h}!generate\_strata\_list@{generate\_strata\_list}}
+\index{generate\_strata\_list@{generate\_strata\_list}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{generate\_strata\_list()}{generate\_strata\_list()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a47b8924c7d2ee22ff1b5edfd32cf822c}{std\+::ext\+::\+Map\+\_\+str\+\_\+\+Vint}} generate\+\_\+strata\+\_\+list (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{vec }\end{DoxyParamCaption})}
+
+
+
+Generates a strata list mapping observations to their corresponding strata. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector of strata identifiers. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A map from strata identifiers to lists of observation indices. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a8d6375cea4387d373e06dfc26fde9ea9}\label{MAGEE_8h_a8d6375cea4387d373e06dfc26fde9ea9} 
+\index{MAGEE.h@{MAGEE.h}!in\_op@{in\_op}}
+\index{in\_op@{in\_op}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{in\_op()}{in\_op()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} in\+\_\+op (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&}]{vec1,  }\item[{const \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \&}]{vec2 }\end{DoxyParamCaption})}
+
+
+
+Checks if elements of vec1 are in vec2. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec1} & The first vector of strings. \\
+\hline
+{\em vec2} & The second vector of strings. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A boolean vector indicating whether elements of vec1 are found in vec2.
+\end{DoxyReturn}
+Checks if elements of vec1 are in vec2.
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec1} & \\
+\hline
+{\em vec2} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool} 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a4edaa3bbd0be968070e7ce1c3896a49e}\label{MAGEE_8h_a4edaa3bbd0be968070e7ce1c3896a49e} 
+\index{MAGEE.h@{MAGEE.h}!list\_duplicates\_bool@{list\_duplicates\_bool}}
+\index{list\_duplicates\_bool@{list\_duplicates\_bool}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{list\_duplicates\_bool()}{list\_duplicates\_bool()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_ad6668e4aa6b76f81df83f86b06726773}{std\+::ext\+::\+V\+\_\+bool}} list\+\_\+duplicates\+\_\+bool (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{vec }\end{DoxyParamCaption})}
+
+
+
+Identifies duplicates in a vector of strings. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector to check for duplicates. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A boolean vector indicating the presence of duplicates. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a0adef0e67ca58656a872c364ff93a54c}\label{MAGEE_8h_a0adef0e67ca58656a872c364ff93a54c} 
+\index{MAGEE.h@{MAGEE.h}!match\_id\_include@{match\_id\_include}}
+\index{match\_id\_include@{match\_id\_include}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{match\_id\_include()}{match\_id\_include()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} match\+\_\+id\+\_\+include (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{id\+\_\+include,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{sample\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Matches included IDs with sample IDs. 
+
+This function returns the subset of IDs in {\ttfamily id\+\_\+include} if they are present in {\ttfamily sample\+\_\+id}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em id\+\_\+include} & A vector of IDs to include. \\
+\hline
+{\em sample\+\_\+id} & A vector of sample IDs. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector of matched IDs. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a8a8fc2d4fb4d10b4c68883dd20383333}\label{MAGEE_8h_a8a8fc2d4fb4d10b4c68883dd20383333} 
+\index{MAGEE.h@{MAGEE.h}!match\_indices@{match\_indices}}
+\index{match\_indices@{match\_indices}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{match\_indices()}{match\_indices()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} match\+\_\+indices (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} const \&}]{original,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a6fabd30484e58d8586657bd4f9c8b4da}{std\+::ext\+::\+V\+\_\+opt\+\_\+string}} const \&}]{filtered }\end{DoxyParamCaption})}
+
+
+
+Matches indices from the original vector to the filtered vector. 
+
+This function returns a vector of indices that match the elements in the original vector with those in the filtered vector. If an element in the original vector does not have a match, the corresponding index is set to -\/1.
+
+
+\begin{DoxyParams}{Parameters}
+{\em original} & The original vector of strings. \\
+\hline
+{\em filtered} & The filtered vector of optional strings. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector of matched indices or -\/1 for non-\/matches. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_a6ed04c63f24454adb9483f83932879c9}\label{MAGEE_8h_a6ed04c63f24454adb9483f83932879c9} 
+\index{MAGEE.h@{MAGEE.h}!remove\_minus\_one@{remove\_minus\_one}}
+\index{remove\_minus\_one@{remove\_minus\_one}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{remove\_minus\_one()}{remove\_minus\_one()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} remove\+\_\+minus\+\_\+one (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}}}]{vec }\end{DoxyParamCaption})}
+
+
+
+Removes elements equal to -\/1 from the vector. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector to filter. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector with all elements that are not equal to -\/1. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_ac40522dbe9f47afcc76b51ab3c0cc787}\label{MAGEE_8h_ac40522dbe9f47afcc76b51ab3c0cc787} 
+\index{MAGEE.h@{MAGEE.h}!scale@{scale}}
+\index{scale@{scale}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{scale()}{scale()}}
+{\footnotesize\ttfamily void scale (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_af92de41652f979a525aafc1cb529ff99}{Dens\+Mat}} \&}]{mat,  }\item[{bool}]{center = {\ttfamily true},  }\item[{bool}]{scale = {\ttfamily true} }\end{DoxyParamCaption})}
+
+
+
+Scales a matrix by centering and/or scaling its columns. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mat} & The matrix to scale. \\
+\hline
+{\em center} & Whether to center the matrix by subtracting the mean of each column. \\
+\hline
+{\em scale} & Whether to scale the matrix by dividing by the standard deviation of each column. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{MAGEE_8h_a8723137bfdb9af00aa9fb5b60fc020f6}\label{MAGEE_8h_a8723137bfdb9af00aa9fb5b60fc020f6} 
+\index{MAGEE.h@{MAGEE.h}!slice@{slice}}
+\index{slice@{slice}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{slice()}{slice()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+\mbox{\hyperlink{namespacestd_1_1ext_a6fabd30484e58d8586657bd4f9c8b4da}{std\+::ext\+::\+V\+\_\+opt\+\_\+string}} slice (\begin{DoxyParamCaption}\item[{std\+::vector$<$ T $>$ const \&}]{vec,  }\item[{\mbox{\hyperlink{namespacestd_1_1ext_a95da540ec4f030c3727fdb4bb3534f2d}{std\+::ext\+::\+V\+\_\+int}} const \&}]{indices }\end{DoxyParamCaption})}
+
+
+
+Extracts elements from a vector based on specified indices. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & The type of elements in the vector. \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The original vector. \\
+\hline
+{\em indices} & The indices of the elements to extract. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector of optional strings, with nullopt representing NA. 
+\end{DoxyReturn}
+\Hypertarget{MAGEE_8h_ab37fb7e09863cd1b74d5e700127bd09f}\label{MAGEE_8h_ab37fb7e09863cd1b74d5e700127bd09f} 
+\index{MAGEE.h@{MAGEE.h}!unique\_less\_equal@{unique\_less\_equal}}
+\index{unique\_less\_equal@{unique\_less\_equal}!MAGEE.h@{MAGEE.h}}
+\doxysubsubsection{\texorpdfstring{unique\_less\_equal()}{unique\_less\_equal()}}
+{\footnotesize\ttfamily bool unique\+\_\+less\+\_\+equal (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{SparseInverse_8h_a896b462d80bbcb142658457b2192b83e}{Dens\+Vec}} const \&}]{vec,  }\item[{int}]{threshold }\end{DoxyParamCaption})}
+
+
+
+Checks if the number of unique elements in a vector is less than or equal to a threshold. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & The vector to check. \\
+\hline
+{\em threshold} & The threshold value. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the number of unique elements is less than or equal to the threshold, otherwise false. 
+\end{DoxyReturn}

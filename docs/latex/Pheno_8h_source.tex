@@ -1,0 +1,25 @@
+\doxysection{Pheno.\+h}
+\hypertarget{Pheno_8h_source}{}\label{Pheno_8h_source}\index{include/Pheno.h@{include/Pheno.h}}
+\mbox{\hyperlink{Pheno_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{ReadFiles_8h}{ReadFiles.h}}"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classPheno}{Pheno}}}
+\DoxyCodeLine{00007\ \{}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00009\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classDataFrame}{DataFrame}}\ \mbox{\hyperlink{classPheno_a13d3f0204442973cf8448a089b00f40d}{m\_data\_frame}};}
+\DoxyCodeLine{00010\ \ \ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{classPheno_ad41aa874e6c3cc17efb9a5b904ebf78f}{m\_sam\_id}};}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std::ext::V\_string}}\ \mbox{\hyperlink{classPheno_ac9955a06fbba2f3747f41240e16e1dcf}{m\_v\_hdrs}};}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classPheno_a57d5f3c73a40320dfaa3a60ac39997f0}{size}}();}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPheno_a4a853fee157820f3a24de4abb0a62382}{set\_path}}(std::string\_view\ path);}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ std::string\ \mbox{\hyperlink{classPheno_aeaee322981be6b2380f8cfc0830be970}{get\_path}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classPheno_a94e360093933c61f4d4b635abbe83b2e}{read\_file}}(std::string\_view,\ \textcolor{keywordtype}{char}\ delim\ =\ \textcolor{charliteral}{','});\ \ }
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ std::pair<std::string,\ std::string>\ \mbox{\hyperlink{classPheno_a3aed0cc566e0f682fb1d9a1685057c80}{check\_binary}}(std::string\ pheno\_name);}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ std::string\ m\_path;}
+\DoxyCodeLine{00039\ \};}
+
+\end{DoxyCode}

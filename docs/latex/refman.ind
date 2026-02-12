@@ -1,0 +1,1484 @@
+\begin{theindex}
+
+  \item {add\_dquot}
+    \subitem {details}, \hyperpage{23}
+  \item {alpha}
+    \subitem {Fit}, \hyperpage{52}
+    \subitem {GEMFit}, \hyperpage{54}
+  \item {any\_duplicated}
+    \subitem {DataFrame}, \hyperpage{47}
+    \subitem {MAGEE.cpp}, \hyperpage{142}
+    \subitem {MAGEE.h}, \hyperpage{102}
+  \item {any\_isna}
+    \subitem {MAGEE.cpp}, \hyperpage{142}
+    \subitem {MAGEE.h}, \hyperpage{102}
+  \item {apply\_on\_columns}
+    \subitem {MAGEE.cpp}, \hyperpage{143}
+    \subitem {MAGEE.h}, \hyperpage{103}
+  \item {apply\_wb}
+    \subitem {GMMAT.cpp}, \hyperpage{134}
+  \item {apply\_wb\_J}
+    \subitem {MAGEE.cpp}, \hyperpage{143}
+
+  \indexspace
+
+  \item {Bed}, \hyperpage{29}
+    \subitem {bedVariantPos}, \hyperpage{30}
+    \subitem {begin}, \hyperpage{30}
+    \subitem {bimDelim}, \hyperpage{30}
+    \subitem {bimLast}, \hyperpage{30}
+    \subitem {end}, \hyperpage{30}
+    \subitem {excludeCol}, \hyperpage{31}
+    \subitem {famDelim}, \hyperpage{31}
+    \subitem {filterVariants}, \hyperpage{31}
+    \subitem {getBedVariantPos}, \hyperpage{30}
+    \subitem {include\_idx}, \hyperpage{31}
+    \subitem {MAGEE}, \hyperpage{63}
+    \subitem {n\_samples}, \hyperpage{31}
+    \subitem {n\_variants}, \hyperpage{31}
+    \subitem {new\_covdata}, \hyperpage{31}
+    \subitem {new\_phenodata}, \hyperpage{31}
+    \subitem {new\_samSize}, \hyperpage{31}
+    \subitem {numExpSelCol\_new}, \hyperpage{31}
+    \subitem {numIntSelCol\_new}, \hyperpage{32}
+    \subitem {numSelCol\_new}, \hyperpage{32}
+    \subitem {phenoType}, \hyperpage{32}
+    \subitem {processBed}, \hyperpage{30}
+    \subitem {processFam}, \hyperpage{30}
+    \subitem {sampleID}, \hyperpage{32}
+    \subitem {sampleID\_all}, \hyperpage{32}
+    \subitem {threads}, \hyperpage{32}
+  \item {bedFile}
+    \subitem {CommandLine}, \hyperpage{40}
+  \item {bedVariantPos}
+    \subitem {Bed}, \hyperpage{30}
+  \item {begin}
+    \subitem {Bed}, \hyperpage{30}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {Bgen}, \hyperpage{32}
+    \subitem {bgenVariantPos}, \hyperpage{34}
+    \subitem {CompressedSNPBlocks}, \hyperpage{34}
+    \subitem {excludeCol}, \hyperpage{34}
+    \subitem {filterVariants}, \hyperpage{34}
+    \subitem {fin}, \hyperpage{34}
+    \subitem {getPositionOfBgenVariant}, \hyperpage{34}
+    \subitem {include\_idx}, \hyperpage{34}
+    \subitem {includeVariantIndex}, \hyperpage{35}
+    \subitem {keepVariants}, \hyperpage{35}
+    \subitem {Layout}, \hyperpage{35}
+    \subitem {MAGEE}, \hyperpage{63}
+    \subitem {Mbgen}, \hyperpage{35}
+    \subitem {Mbgen\_begin}, \hyperpage{35}
+    \subitem {Mbgen\_end}, \hyperpage{35}
+    \subitem {Nbgen}, \hyperpage{35}
+    \subitem {new\_covdata}, \hyperpage{35}
+    \subitem {new\_phenodata}, \hyperpage{35}
+    \subitem {new\_samSize}, \hyperpage{35}
+    \subitem {numExpSelCol\_new}, \hyperpage{36}
+    \subitem {numIntSelCol\_new}, \hyperpage{36}
+    \subitem {numSelCol\_new}, \hyperpage{36}
+    \subitem {offset}, \hyperpage{36}
+    \subitem {phenoType}, \hyperpage{36}
+    \subitem {processBgenHeaderBlock}, \hyperpage{34}
+    \subitem {processBgenSampleBlock}, \hyperpage{34}
+    \subitem {sampleID}, \hyperpage{36}
+    \subitem {sampleID\_all}, \hyperpage{36}
+    \subitem {SampleIdentifiers}, \hyperpage{36}
+    \subitem {threads}, \hyperpage{36}
+    \subitem {variant\_pos}, \hyperpage{36}
+  \item {Bgen13GetTwoVals}
+    \subitem {ReadBGEN.cpp}, \hyperpage{154}
+    \subitem {ReadBGEN.h}, \hyperpage{115}
+  \item {bgenFile}
+    \subitem {CommandLine}, \hyperpage{40}
+  \item {bgenVariantPos}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {bimDelim}
+    \subitem {Bed}, \hyperpage{30}
+  \item {bimFile}
+    \subitem {CommandLine}, \hyperpage{40}
+  \item {bimLast}
+    \subitem {Bed}, \hyperpage{30}
+  \item {bin\_headers}
+    \subitem {BinE}, \hyperpage{37}
+  \item {BinaryEUtils.cpp}
+    \subitem {cartesian\_map}, \hyperpage{125}
+    \subitem {cartesian\_vec\_sep}, \hyperpage{125}
+  \item {BinaryEUtils.h}
+    \subitem {BinaryEUtils\_H}, \hyperpage{77}
+    \subitem {cartesian\_map}, \hyperpage{77}
+    \subitem {cartesian\_vec\_sep}, \hyperpage{77}
+    \subitem {GetPowerSet}, \hyperpage{77}
+    \subitem {vector\_binstrings}, \hyperpage{78}
+  \item {BinaryEUtils\_H}
+    \subitem {BinaryEUtils.h}, \hyperpage{77}
+  \item {BinE}, \hyperpage{37}
+    \subitem {bin\_headers}, \hyperpage{37}
+    \subitem {checkBinaryCovariates}, \hyperpage{37}
+    \subitem {nBinE}, \hyperpage{37}
+    \subitem {strataLen}, \hyperpage{38}
+    \subitem {stratum\_idx}, \hyperpage{38}
+  \item {binE\_idx}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {build\_Psi}
+    \subitem {GMMAT}, \hyperpage{57}
+
+  \indexspace
+
+  \item {calc\_dmu\_deta}
+    \subitem {Fit}, \hyperpage{51}
+  \item {calc\_sqrtW}
+    \subitem {Fit}, \hyperpage{52}
+  \item {calc\_variance}
+    \subitem {GMMAT.cpp}, \hyperpage{134}
+  \item {cartesian\_map}
+    \subitem {BinaryEUtils.cpp}, \hyperpage{125}
+    \subitem {BinaryEUtils.h}, \hyperpage{77}
+  \item {cartesian\_vec\_sep}
+    \subitem {BinaryEUtils.cpp}, \hyperpage{125}
+    \subitem {BinaryEUtils.h}, \hyperpage{77}
+  \item {cat\_names}
+    \subitem {CommandLine}, \hyperpage{40}
+  \item {cat\_threshold}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {cbind}
+    \subitem {MAGEE.cpp}, \hyperpage{143}
+    \subitem {MAGEE.h}, \hyperpage{103}
+  \item {center}
+    \subitem {CommandLine}, \hyperpage{41}
+    \subitem {GEM.cpp}, \hyperpage{129}
+    \subitem {GEM.h}, \hyperpage{81}
+  \item {CerrRedirector}, \hyperpage{38}
+    \subitem {overflow}, \hyperpage{39}
+    \subitem {sync}, \hyperpage{39}
+  \item {check\_binary}
+    \subitem {Pheno}, \hyperpage{71}
+  \item {check\_convergence}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {check\_not\_empty}
+    \subitem {MAGEE.cpp}, \hyperpage{143}
+    \subitem {MAGEE.h}, \hyperpage{103}
+  \item {checkBinary}
+    \subitem {GEM.cpp}, \hyperpage{129}
+    \subitem {GEM.h}, \hyperpage{81}
+  \item {checkBinaryCovariates}
+    \subitem {BinE}, \hyperpage{37}
+  \item {chi\_square\_CDF}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {cholmodSparseToCsparse}
+    \subitem {SparseInverse.cpp}, \hyperpage{156}
+  \item {combine\_indices}
+    \subitem {SparseInverse.cpp}, \hyperpage{156}
+  \item {CommandLine}, \hyperpage{39}
+    \subitem {bedFile}, \hyperpage{40}
+    \subitem {bgenFile}, \hyperpage{40}
+    \subitem {bimFile}, \hyperpage{40}
+    \subitem {cat\_names}, \hyperpage{40}
+    \subitem {cat\_threshold}, \hyperpage{41}
+    \subitem {center}, \hyperpage{41}
+    \subitem {cov}, \hyperpage{41}
+    \subitem {covHM}, \hyperpage{41}
+    \subitem {delim}, \hyperpage{41}
+    \subitem {delim\_k}, \hyperpage{41}
+    \subitem {doFilters}, \hyperpage{41}
+    \subitem {exp}, \hyperpage{41}
+    \subitem {expHM}, \hyperpage{41}
+    \subitem {famFile}, \hyperpage{41}
+    \subitem {group}, \hyperpage{42}
+    \subitem {icov}, \hyperpage{42}
+    \subitem {includeVariantFile}, \hyperpage{42}
+    \subitem {intHM}, \hyperpage{42}
+    \subitem {kin\_delim}, \hyperpage{42}
+    \subitem {kin\_diag}, \hyperpage{42}
+    \subitem {kin\_file}, \hyperpage{42}
+    \subitem {kin\_flag}, \hyperpage{42}
+    \subitem {MAF}, \hyperpage{42}
+    \subitem {missGenoRate}, \hyperpage{42}
+    \subitem {missing}, \hyperpage{43}
+    \subitem {numExpSelCol}, \hyperpage{43}
+    \subitem {numIntSelCol}, \hyperpage{43}
+    \subitem {numSelCol}, \hyperpage{43}
+    \subitem {outFile}, \hyperpage{43}
+    \subitem {outStyle}, \hyperpage{43}
+    \subitem {pgenFile}, \hyperpage{43}
+    \subitem {pheno\_delim}, \hyperpage{43}
+    \subitem {pheno\_file}, \hyperpage{43}
+    \subitem {phenoName}, \hyperpage{43}
+    \subitem {processCommandLine}, \hyperpage{40}
+    \subitem {psamFile}, \hyperpage{44}
+    \subitem {pvarFile}, \hyperpage{44}
+    \subitem {randomSlope}, \hyperpage{44}
+    \subitem {robust}, \hyperpage{44}
+    \subitem {sampleFile}, \hyperpage{44}
+    \subitem {samplefile}, \hyperpage{44}
+    \subitem {sampleID}, \hyperpage{44}
+    \subitem {scale}, \hyperpage{44}
+    \subitem {stream\_snps}, \hyperpage{44}
+    \subitem {threads}, \hyperpage{44}
+    \subitem {tol}, \hyperpage{45}
+    \subitem {useBedFile}, \hyperpage{45}
+    \subitem {useBgenFile}, \hyperpage{45}
+    \subitem {usePgenFile}, \hyperpage{45}
+    \subitem {useSampleFile}, \hyperpage{45}
+  \item {CompressedSNPBlocks}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {conv\_dm2stdV}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conv\_dv2stdVd}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conv\_stdV2dv}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conv\_stdVs2dV}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conv\_stdvs2stdvi}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conv\_vec\_vecXd}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {conver\_eigen\_to\_arma}
+    \subitem {MAGEE.h}, \hyperpage{104}
+  \item {converged}
+    \subitem {Glmmkin}, \hyperpage{55}
+  \item {convert\_2\_fit}
+    \subitem {GEMFit}, \hyperpage{54}
+  \item {convert\_eigen\_to\_arma}
+    \subitem {MAGEE.cpp}, \hyperpage{144}
+  \item {convertEigenToSuiteSparse}
+    \subitem {SparseInverse.cpp}, \hyperpage{156}
+  \item {copy\_by\_hdrs}
+    \subitem {DataFrame}, \hyperpage{47}
+  \item {CoutRedirector}, \hyperpage{45}
+    \subitem {overflow}, \hyperpage{46}
+    \subitem {sync}, \hyperpage{46}
+  \item {cov}
+    \subitem {CommandLine}, \hyperpage{41}
+    \subitem {Fit}, \hyperpage{52}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {covHM}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {create\_covdata}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {create\_strata}
+    \subitem {MAGEE.cpp}, \hyperpage{144}
+    \subitem {MAGEE.h}, \hyperpage{104}
+  \item {createHeaderMap}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {createSparseIdentity}
+    \subitem {SparseInverse.cpp}, \hyperpage{156}
+  \item {crossprod}
+    \subitem {GMMAT.h}, \hyperpage{88}
+
+  \indexspace
+
+  \item {Data}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {DataFrame}, \hyperpage{46}
+    \subitem {any\_duplicated}, \hyperpage{47}
+    \subitem {copy\_by\_hdrs}, \hyperpage{47}
+    \subitem {get\_header}, \hyperpage{48}
+    \subitem {head}, \hyperpage{48}
+    \subitem {isDataFrameCreated}, \hyperpage{48}
+    \subitem {list\_duplicates}, \hyperpage{48}
+    \subitem {list\_unique}, \hyperpage{48}
+    \subitem {m\_data}, \hyperpage{50}
+    \subitem {m\_geno\_ids}, \hyperpage{50}
+    \subitem {m\_headers}, \hyperpage{50}
+    \subitem {m\_missing\_key}, \hyperpage{50}
+    \subitem {m\_ncols}, \hyperpage{50}
+    \subitem {m\_nrows}, \hyperpage{50}
+    \subitem {match\_genoids}, \hyperpage{49}
+    \subitem {n\_cols}, \hyperpage{49}
+    \subitem {n\_rows}, \hyperpage{49}
+    \subitem {read\_file}, \hyperpage{49}
+    \subitem {remove\_duplicates}, \hyperpage{50}
+    \subitem {size\_wo\_duplicates}, \hyperpage{50}
+  \item {daxpy\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{150}
+  \item {dbl}
+    \subitem {ReadBGEN.cpp}, \hyperpage{154}
+  \item {DBL\_EPSILON}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {declars.h}
+    \subitem {uchar}, \hyperpage{79}
+    \subitem {uint}, \hyperpage{79}
+    \subitem {uint64}, \hyperpage{79}
+    \subitem {ushort}, \hyperpage{79}
+  \item {delim}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {delim\_k}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {DenseMatInt}
+    \subitem {SparseInverse.h}, \hyperpage{121}
+  \item {DensMat}
+    \subitem {SparseInverse.h}, \hyperpage{121}
+  \item {DensVec}
+    \subitem {SparseInverse.h}, \hyperpage{121}
+  \item {DensVecInt}
+    \subitem {SparseInverse.h}, \hyperpage{122}
+  \item {details}, \hyperpage{23}
+    \subitem {add\_dquot}, \hyperpage{23}
+    \subitem {diag}, \hyperpage{23}
+  \item {dgemm\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{150}
+  \item {dgemv\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{150}
+  \item {dgetrf\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{150}
+  \item {dgetri\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{150}
+  \item {diag}
+    \subitem {details}, \hyperpage{23}
+  \item {diag\_sigma\_i}
+    \subitem {Fit}, \hyperpage{52}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {diag\_sigma\_i\_ZPchol}
+    \subitem {Fit}, \hyperpage{52}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {dlacpy\_}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+  \item {dmu\_deta}
+    \subitem {Fit}, \hyperpage{52}
+  \item {doFilters}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {dtau}
+    \subitem {Fit}, \hyperpage{52}
+  \item {dupflag}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+
+  \indexspace
+
+  \item {E}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {EC}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {end}
+    \subitem {Bed}, \hyperpage{30}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {eta}
+    \subitem {Fit}, \hyperpage{52}
+    \subitem {GEMFit}, \hyperpage{54}
+  \item {excludeCol}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{34}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {exp}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {expHM}
+    \subitem {CommandLine}, \hyperpage{41}
+
+  \indexspace
+
+  \item {famDelim}
+    \subitem {Bed}, \hyperpage{31}
+  \item {famFile}
+    \subitem {CommandLine}, \hyperpage{41}
+  \item {filter\_elements}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {filter\_unique\_rows}
+    \subitem {MAGEE.cpp}, \hyperpage{144}
+    \subitem {MAGEE.h}, \hyperpage{104}
+  \item {filtered\_ids}
+    \subitem {MAGEE.cpp}, \hyperpage{144}
+    \subitem {MAGEE.h}, \hyperpage{105}
+  \item {filterVariants}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{34}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {fin}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {find\_indx}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {Fit}, \hyperpage{51}
+    \subitem {alpha}, \hyperpage{52}
+    \subitem {calc\_dmu\_deta}, \hyperpage{51}
+    \subitem {calc\_sqrtW}, \hyperpage{52}
+    \subitem {cov}, \hyperpage{52}
+    \subitem {diag\_sigma\_i}, \hyperpage{52}
+    \subitem {diag\_sigma\_i\_ZPchol}, \hyperpage{52}
+    \subitem {dmu\_deta}, \hyperpage{52}
+    \subitem {dtau}, \hyperpage{52}
+    \subitem {eta}, \hyperpage{52}
+    \subitem {mu}, \hyperpage{53}
+    \subitem {sigma\_i}, \hyperpage{53}
+    \subitem {sigma\_ix}, \hyperpage{53}
+    \subitem {W}, \hyperpage{53}
+  \item {fit}
+    \subitem {Glmmkin}, \hyperpage{55}
+  \item {fitglmm}
+    \subitem {MAGEE}, \hyperpage{63}
+  \item {Fitglmm.cpp}
+    \subitem {chi\_square\_CDF}, \hyperpage{126}
+    \subitem {DBL\_EPSILON}, \hyperpage{126}
+    \subitem {filter\_elements}, \hyperpage{126}
+    \subitem {find\_indx}, \hyperpage{126}
+    \subitem {glmm\_gei}, \hyperpage{127}
+    \subitem {glmm\_gei\_bed13}, \hyperpage{127}
+    \subitem {glmm\_gei\_bgen13}, \hyperpage{127}
+    \subitem {glmm\_gei\_pgen13}, \hyperpage{128}
+    \subitem {llui}, \hyperpage{126}
+    \subitem {uchar}, \hyperpage{126}
+    \subitem {uint}, \hyperpage{126}
+    \subitem {ushort}, \hyperpage{126}
+  \item {FitNull\_f}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {fitNullModel}
+    \subitem {GEM.cpp}, \hyperpage{129}
+    \subitem {GEM.h}, \hyperpage{82}
+  \item {fitNullModel2}
+    \subitem {GEM.cpp}, \hyperpage{130}
+    \subitem {GEM.h}, \hyperpage{83}
+
+  \indexspace
+
+  \item {GEM}, \hyperpage{1}
+  \item {GEM.cpp}
+    \subitem {center}, \hyperpage{129}
+    \subitem {checkBinary}, \hyperpage{129}
+    \subitem {fitNullModel}, \hyperpage{129}
+    \subitem {fitNullModel2}, \hyperpage{130}
+    \subitem {get\_log\_name}, \hyperpage{131}
+    \subitem {main}, \hyperpage{132}
+    \subitem {printCovVarMat}, \hyperpage{132}
+    \subitem {printOutputHeader}, \hyperpage{132}
+  \item {GEM.h}
+    \subitem {center}, \hyperpage{81}
+    \subitem {checkBinary}, \hyperpage{81}
+    \subitem {fitNullModel}, \hyperpage{82}
+    \subitem {fitNullModel2}, \hyperpage{83}
+    \subitem {get\_log\_name}, \hyperpage{84}
+    \subitem {printCovVarMat}, \hyperpage{84}
+    \subitem {printOutputHeader}, \hyperpage{85}
+  \item {gemBED}
+    \subitem {ReadBed.cpp}, \hyperpage{153}
+    \subitem {ReadBed.h}, \hyperpage{113}
+  \item {gemBGEN}
+    \subitem {ReadBGEN.cpp}, \hyperpage{154}
+    \subitem {ReadBGEN.h}, \hyperpage{115}
+  \item {GEMFit}, \hyperpage{53}
+    \subitem {alpha}, \hyperpage{54}
+    \subitem {convert\_2\_fit}, \hyperpage{54}
+    \subitem {eta}, \hyperpage{54}
+    \subitem {mu}, \hyperpage{54}
+    \subitem {resid}, \hyperpage{54}
+    \subitem {sigma2}, \hyperpage{54}
+    \subitem {XinvXTX}, \hyperpage{54}
+  \item {gemPGEN}
+    \subitem {ReadPGEN.cpp}, \hyperpage{156}
+    \subitem {ReadPGEN.h}, \hyperpage{119}
+  \item {generate\_strata\_list}
+    \subitem {MAGEE.cpp}, \hyperpage{145}
+    \subitem {MAGEE.h}, \hyperpage{105}
+  \item {GENOTYPE}
+    \subitem {MAGEE}, \hyperpage{62}
+  \item {get\_header}
+    \subitem {DataFrame}, \hyperpage{48}
+  \item {get\_idx\_mp}
+    \subitem {SparseInverse}, \hyperpage{73}
+  \item {get\_idx\_mp\_unq}
+    \subitem {SparseInverse}, \hyperpage{73}
+  \item {get\_log\_name}
+    \subitem {GEM.cpp}, \hyperpage{131}
+    \subitem {GEM.h}, \hyperpage{84}
+  \item {get\_path}
+    \subitem {Pheno}, \hyperpage{71}
+  \item {get\_spmat}
+    \subitem {SparseInverse}, \hyperpage{73}
+  \item {getBedVariantPos}
+    \subitem {Bed}, \hyperpage{30}
+  \item {getPgenVariantPos}
+    \subitem {Pgen}, \hyperpage{68}
+  \item {getPositionOfBgenVariant}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {GetPowerSet}
+    \subitem {BinaryEUtils.h}, \hyperpage{77}
+  \item {glmm\_gei}
+    \subitem {Fitglmm.cpp}, \hyperpage{127}
+  \item {glmm\_gei\_bed13}
+    \subitem {Fitglmm.cpp}, \hyperpage{127}
+    \subitem {MAGEE.cpp}, \hyperpage{145}
+  \item {glmm\_gei\_bgen13}
+    \subitem {Fitglmm.cpp}, \hyperpage{127}
+    \subitem {MAGEE.cpp}, \hyperpage{145}
+  \item {glmm\_gei\_pgen13}
+    \subitem {Fitglmm.cpp}, \hyperpage{128}
+    \subitem {MAGEE.cpp}, \hyperpage{146}
+  \item {Glmmkin}, \hyperpage{55}
+    \subitem {converged}, \hyperpage{55}
+    \subitem {fit}, \hyperpage{55}
+    \subitem {id\_include}, \hyperpage{55}
+    \subitem {residuals}, \hyperpage{55}
+    \subitem {run\_wb}, \hyperpage{55}
+    \subitem {scaled\_residuals}, \hyperpage{55}
+    \subitem {sigma2}, \hyperpage{56}
+  \item {GMMAT}, \hyperpage{56}
+    \subitem {build\_Psi}, \hyperpage{57}
+    \subitem {m\_covariance\_idx}, \hyperpage{57}
+    \subitem {m\_diag\_sigma\_im\_Z}, \hyperpage{57}
+    \subitem {m\_dup}, \hyperpage{57}
+    \subitem {m\_family\_t}, \hyperpage{57}
+    \subitem {m\_fixrho}, \hyperpage{58}
+    \subitem {m\_fixrho\_idx}, \hyperpage{58}
+    \subitem {m\_fixtau}, \hyperpage{58}
+    \subitem {m\_group\_id}, \hyperpage{58}
+    \subitem {m\_group\_idx}, \hyperpage{58}
+    \subitem {m\_groups}, \hyperpage{58}
+    \subitem {m\_hdrsMap}, \hyperpage{58}
+    \subitem {m\_idxtau}, \hyperpage{58}
+    \subitem {m\_idxtau2}, \hyperpage{58}
+    \subitem {m\_J}, \hyperpage{58}
+    \subitem {m\_kins\_size}, \hyperpage{58}
+    \subitem {m\_link}, \hyperpage{58}
+    \subitem {m\_modeltype}, \hyperpage{58}
+    \subitem {m\_N}, \hyperpage{59}
+    \subitem {m\_n\_sel\_col}, \hyperpage{59}
+    \subitem {m\_Nobs}, \hyperpage{59}
+    \subitem {m\_offset}, \hyperpage{59}
+    \subitem {m\_Psi}, \hyperpage{59}
+    \subitem {m\_rand\_slope}, \hyperpage{59}
+    \subitem {m\_robust}, \hyperpage{59}
+    \subitem {m\_sqrtW}, \hyperpage{59}
+    \subitem {m\_tau}, \hyperpage{59}
+    \subitem {m\_vkins\_sp}, \hyperpage{59}
+    \subitem {m\_X}, \hyperpage{59}
+    \subitem {m\_Y}, \hyperpage{59}
+    \subitem {m\_y}, \hyperpage{59}
+    \subitem {m\_Z}, \hyperpage{60}
+  \item {GMMAT.cpp}
+    \subitem {apply\_wb}, \hyperpage{134}
+    \subitem {calc\_variance}, \hyperpage{134}
+    \subitem {check\_convergence}, \hyperpage{135}
+    \subitem {conv\_dm2stdV}, \hyperpage{135}
+    \subitem {conv\_dv2stdVd}, \hyperpage{135}
+    \subitem {conv\_stdV2dv}, \hyperpage{135}
+    \subitem {conv\_stdVs2dV}, \hyperpage{135}
+    \subitem {conv\_stdvs2stdvi}, \hyperpage{135}
+    \subitem {conv\_vec\_vecXd}, \hyperpage{135}
+    \subitem {create\_covdata}, \hyperpage{135}
+    \subitem {createHeaderMap}, \hyperpage{135}
+    \subitem {hadamard\_sum\_block}, \hyperpage{135}
+    \subitem {intersect}, \hyperpage{136}
+    \subitem {linkinv}, \hyperpage{136}
+    \subitem {logic\_update\_fixed\_condtion}, \hyperpage{136}
+    \subitem {sign}, \hyperpage{136}
+    \subitem {slice\_mat}, \hyperpage{136--139}
+    \subitem {slice\_mat\_cols}, \hyperpage{139}
+    \subitem {slice\_vec}, \hyperpage{140}
+  \item {GMMAT.h}
+    \subitem {crossprod}, \hyperpage{88}
+    \subitem {LONGITUDINAL\_RI}, \hyperpage{88}
+    \subitem {LONGITUDINAL\_RS}, \hyperpage{88}
+    \subitem {match\_indices}, \hyperpage{89}
+    \subitem {MAX\_N\_ITER}, \hyperpage{96}
+    \subitem {ModelType}, \hyperpage{88}
+    \subitem {slice\_mat}, \hyperpage{89--92}
+    \subitem {slice\_mat\_cols}, \hyperpage{92}
+    \subitem {slice\_vec}, \hyperpage{93}
+    \subitem {tcrossprod}, \hyperpage{94}
+    \subitem {unique}, \hyperpage{94}
+    \subitem {unique\_id}, \hyperpage{95}
+    \subitem {which}, \hyperpage{95}
+  \item {group}
+    \subitem {CommandLine}, \hyperpage{42}
+
+  \indexspace
+
+  \item {hadamard\_sum\_block}
+    \subitem {GMMAT.cpp}, \hyperpage{135}
+  \item {head}
+    \subitem {DataFrame}, \hyperpage{48}
+
+  \indexspace
+
+  \item {icov}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {id\_include}
+    \subitem {Glmmkin}, \hyperpage{55}
+  \item {in\_op}
+    \subitem {MAGEE.cpp}, \hyperpage{146}
+    \subitem {MAGEE.h}, \hyperpage{105}
+  \item {in\_op\_indices}
+    \subitem {MAGEE.cpp}, \hyperpage{146}
+  \item {include/BinaryEUtils.h}, \hyperpage{77, 78}
+  \item {include/declars.h}, \hyperpage{78}, \hyperpage{80}
+  \item {include/GEM.h}, \hyperpage{81}, \hyperpage{85}
+  \item {include/GMMAT.h}, \hyperpage{86}, \hyperpage{96}
+  \item {include/Kinship.h}, \hyperpage{100}
+  \item {include/Logger.h}, \hyperpage{100, 101}
+  \item {include/MAGEE.h}, \hyperpage{101}, \hyperpage{108}
+  \item {include/MatrixUtils.h}, \hyperpage{110}, \hyperpage{112}
+  \item {include/Pheno.h}, \hyperpage{112}
+  \item {include/ReadBed.h}, \hyperpage{113, 114}
+  \item {include/ReadBGEN.h}, \hyperpage{114, 115}
+  \item {include/ReadFiles.h}, \hyperpage{116, 117}
+  \item {include/ReadParameters.h}, \hyperpage{118}
+  \item {include/ReadPGEN.h}, \hyperpage{119, 120}
+  \item {include/SparseInverse.h}, \hyperpage{120}, \hyperpage{122}
+  \item {include/TimeUtils.h}, \hyperpage{123, 124}
+  \item {include\_idx}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{34}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {includeVariantFile}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {includeVariantIndex}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {IndexMap}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {IndexMapRev}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {IndexMapUnq}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {init}
+    \subitem {LoggerSetup}, \hyperpage{62}
+  \item {initvec}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+    \subitem {MatrixUtils.h}, \hyperpage{110}
+  \item {intersect}
+    \subitem {GMMAT.cpp}, \hyperpage{136}
+  \item {intHM}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {inv}
+    \subitem {SparseInverse}, \hyperpage{73}
+  \item {inv\_spamat}
+    \subitem {SparseInverse}, \hyperpage{73, 74}
+  \item {inv\_spamat\_chol}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {isDataFrameCreated}
+    \subitem {DataFrame}, \hyperpage{48}
+
+  \indexspace
+
+  \item {J}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {JEPEJ}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {JEPJ}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {JEres}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {JEresblock}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+  \item {JPJ}
+    \subitem {Magee\_Glmmkin}, \hyperpage{66}
+  \item {Jres}
+    \subitem {Magee\_Arma}, \hyperpage{64}
+
+  \indexspace
+
+  \item {keepVariants}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {kin}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {kin\_delim}
+    \subitem {CommandLine}, \hyperpage{42}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {kin\_diag}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {kin\_file}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {kin\_flag}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {Kinship}, \hyperpage{60}
+    \subitem {m\_data\_frame}, \hyperpage{61}
+    \subitem {m\_diag}, \hyperpage{61}
+    \subitem {m\_null\_kin}, \hyperpage{61}
+    \subitem {m\_path}, \hyperpage{61}
+    \subitem {read\_file}, \hyperpage{60}
+    \subitem {set\_path}, \hyperpage{60}
+    \subitem {size}, \hyperpage{61}
+
+  \indexspace
+
+  \item {Layout}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {linkinv}
+    \subitem {GMMAT.cpp}, \hyperpage{136}
+  \item {list\_duplicates}
+    \subitem {DataFrame}, \hyperpage{48}
+  \item {list\_duplicates\_bool}
+    \subitem {MAGEE.cpp}, \hyperpage{146}
+    \subitem {MAGEE.h}, \hyperpage{106}
+  \item {list\_unique}
+    \subitem {DataFrame}, \hyperpage{48}
+  \item {llui}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {LoggerSetup}, \hyperpage{61}
+    \subitem {init}, \hyperpage{62}
+  \item {logic\_update\_fixed\_condtion}
+    \subitem {GMMAT.cpp}, \hyperpage{136}
+  \item {LONGITUDINAL\_RI}
+    \subitem {GMMAT.h}, \hyperpage{88}
+  \item {LONGITUDINAL\_RS}
+    \subitem {GMMAT.h}, \hyperpage{88}
+
+  \indexspace
+
+  \item {m\_covariance\_idx}
+    \subitem {GMMAT}, \hyperpage{57}
+  \item {m\_data}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_data\_frame}
+    \subitem {Kinship}, \hyperpage{61}
+    \subitem {Pheno}, \hyperpage{72}
+  \item {m\_diag}
+    \subitem {Kinship}, \hyperpage{61}
+  \item {m\_diag\_sigma\_im\_Z}
+    \subitem {GMMAT}, \hyperpage{57}
+  \item {m\_dup}
+    \subitem {GMMAT}, \hyperpage{57}
+  \item {m\_family\_t}
+    \subitem {GMMAT}, \hyperpage{57}
+  \item {m\_fixrho}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_fixrho\_idx}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_fixtau}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_geno\_ids}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_group\_id}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_group\_idx}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_groups}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_hdrsMap}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_headers}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_idxtau}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_idxtau2}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_J}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_kins\_size}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_link}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_missing\_key}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_modeltype}
+    \subitem {GMMAT}, \hyperpage{58}
+  \item {m\_N}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_n\_sel\_col}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_ncols}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_Nobs}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_nrows}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {m\_null\_kin}
+    \subitem {Kinship}, \hyperpage{61}
+  \item {m\_offset}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_path}
+    \subitem {Kinship}, \hyperpage{61}
+  \item {m\_Psi}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_rand\_slope}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_ratio\_Nob2N}
+    \subitem {SparseInverse}, \hyperpage{75}
+  \item {m\_robust}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_sam\_id}
+    \subitem {Pheno}, \hyperpage{72}
+  \item {m\_sqrtW}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_tau}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_thr}
+    \subitem {SparseInverse}, \hyperpage{75}
+  \item {m\_v\_hdrs}
+    \subitem {Pheno}, \hyperpage{72}
+  \item {m\_vkins\_sp}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_X}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_Y}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_y}
+    \subitem {GMMAT}, \hyperpage{59}
+  \item {m\_Z}
+    \subitem {GMMAT}, \hyperpage{60}
+  \item {MAF}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {MAGEE}, \hyperpage{62}
+    \subitem {Bed}, \hyperpage{63}
+    \subitem {Bgen}, \hyperpage{63}
+    \subitem {fitglmm}, \hyperpage{63}
+    \subitem {GENOTYPE}, \hyperpage{62}
+    \subitem {MAGEE}, \hyperpage{63}
+    \subitem {Pgen}, \hyperpage{63}
+  \item {MAGEE.cpp}
+    \subitem {any\_duplicated}, \hyperpage{142}
+    \subitem {any\_isna}, \hyperpage{142}
+    \subitem {apply\_on\_columns}, \hyperpage{143}
+    \subitem {apply\_wb\_J}, \hyperpage{143}
+    \subitem {cbind}, \hyperpage{143}
+    \subitem {check\_not\_empty}, \hyperpage{143}
+    \subitem {convert\_eigen\_to\_arma}, \hyperpage{144}
+    \subitem {create\_strata}, \hyperpage{144}
+    \subitem {filter\_unique\_rows}, \hyperpage{144}
+    \subitem {filtered\_ids}, \hyperpage{144}
+    \subitem {generate\_strata\_list}, \hyperpage{145}
+    \subitem {glmm\_gei\_bed13}, \hyperpage{145}
+    \subitem {glmm\_gei\_bgen13}, \hyperpage{145}
+    \subitem {glmm\_gei\_pgen13}, \hyperpage{146}
+    \subitem {in\_op}, \hyperpage{146}
+    \subitem {in\_op\_indices}, \hyperpage{146}
+    \subitem {list\_duplicates\_bool}, \hyperpage{146}
+    \subitem {match\_id\_include}, \hyperpage{147}
+    \subitem {match\_indices}, \hyperpage{147}
+    \subitem {remove\_minus\_one}, \hyperpage{148}
+    \subitem {scale}, \hyperpage{148}
+    \subitem {slice}, \hyperpage{148}
+    \subitem {spa\_mat\_ones}, \hyperpage{149}
+    \subitem {unique\_less\_equal}, \hyperpage{149}
+  \item {MAGEE.h}
+    \subitem {any\_duplicated}, \hyperpage{102}
+    \subitem {any\_isna}, \hyperpage{102}
+    \subitem {apply\_on\_columns}, \hyperpage{103}
+    \subitem {cbind}, \hyperpage{103}
+    \subitem {check\_not\_empty}, \hyperpage{103}
+    \subitem {conver\_eigen\_to\_arma}, \hyperpage{104}
+    \subitem {create\_strata}, \hyperpage{104}
+    \subitem {filter\_unique\_rows}, \hyperpage{104}
+    \subitem {filtered\_ids}, \hyperpage{105}
+    \subitem {generate\_strata\_list}, \hyperpage{105}
+    \subitem {in\_op}, \hyperpage{105}
+    \subitem {list\_duplicates\_bool}, \hyperpage{106}
+    \subitem {match\_id\_include}, \hyperpage{106}
+    \subitem {match\_indices}, \hyperpage{106}
+    \subitem {remove\_minus\_one}, \hyperpage{107}
+    \subitem {scale}, \hyperpage{107}
+    \subitem {slice}, \hyperpage{107}
+    \subitem {unique\_less\_equal}, \hyperpage{108}
+  \item {Magee\_Arma}, \hyperpage{64}
+    \subitem {cov}, \hyperpage{64}
+    \subitem {diag\_sigma\_i}, \hyperpage{64}
+    \subitem {diag\_sigma\_i\_ZPchol}, \hyperpage{64}
+    \subitem {dupflag}, \hyperpage{64}
+    \subitem {EC}, \hyperpage{64}
+    \subitem {JEresblock}, \hyperpage{64}
+    \subitem {Jres}, \hyperpage{64}
+    \subitem {n}, \hyperpage{65}
+    \subitem {n\_obs}, \hyperpage{65}
+    \subitem {Psi}, \hyperpage{65}
+    \subitem {select}, \hyperpage{65}
+    \subitem {sigma\_iJJ}, \hyperpage{65}
+    \subitem {sigma\_ixJ}, \hyperpage{65}
+    \subitem {Xi}, \hyperpage{65}
+  \item {Magee\_Glmmkin}, \hyperpage{65}
+    \subitem {cov}, \hyperpage{66}
+    \subitem {diag\_sigma\_i}, \hyperpage{66}
+    \subitem {diag\_sigma\_i\_ZPchol}, \hyperpage{66}
+    \subitem {dupflag}, \hyperpage{66}
+    \subitem {E}, \hyperpage{66}
+    \subitem {EC}, \hyperpage{66}
+    \subitem {J}, \hyperpage{66}
+    \subitem {JEPEJ}, \hyperpage{66}
+    \subitem {JEPJ}, \hyperpage{66}
+    \subitem {JEres}, \hyperpage{66}
+    \subitem {JPJ}, \hyperpage{66}
+    \subitem {residuals}, \hyperpage{67}
+    \subitem {select}, \hyperpage{67}
+    \subitem {sigma\_i}, \hyperpage{67}
+    \subitem {sigma\_ix}, \hyperpage{67}
+  \item {main}
+    \subitem {GEM.cpp}, \hyperpage{132}
+    \subitem {testinv.cpp}, \hyperpage{157}
+  \item {map\_str\_int}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {Map\_str\_Vint}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {matAdd}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+    \subitem {MatrixUtils.h}, \hyperpage{110}
+  \item {match\_genoids}
+    \subitem {DataFrame}, \hyperpage{49}
+  \item {match\_id\_include}
+    \subitem {MAGEE.cpp}, \hyperpage{147}
+    \subitem {MAGEE.h}, \hyperpage{106}
+  \item {match\_indices}
+    \subitem {GMMAT.h}, \hyperpage{89}
+    \subitem {MAGEE.cpp}, \hyperpage{147}
+    \subitem {MAGEE.h}, \hyperpage{106}
+  \item {matInv}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+    \subitem {MatrixUtils.h}, \hyperpage{110}
+  \item {matmatprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+    \subitem {MatrixUtils.h}, \hyperpage{110}
+  \item {matmatTprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{151}
+    \subitem {MatrixUtils.h}, \hyperpage{110}
+  \item {matNmatNprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {Matrix\_variant}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {MatrixUtils.cpp}
+    \subitem {daxpy\_}, \hyperpage{150}
+    \subitem {dgemm\_}, \hyperpage{150}
+    \subitem {dgemv\_}, \hyperpage{150}
+    \subitem {dgetrf\_}, \hyperpage{150}
+    \subitem {dgetri\_}, \hyperpage{150}
+    \subitem {dlacpy\_}, \hyperpage{151}
+    \subitem {initvec}, \hyperpage{151}
+    \subitem {matAdd}, \hyperpage{151}
+    \subitem {matInv}, \hyperpage{151}
+    \subitem {matmatprod}, \hyperpage{151}
+    \subitem {matmatTprod}, \hyperpage{151}
+    \subitem {matNmatNprod}, \hyperpage{152}
+    \subitem {matTmatprod}, \hyperpage{152}
+    \subitem {matTvecprod}, \hyperpage{152}
+    \subitem {matvecprod}, \hyperpage{152}
+    \subitem {matvecSprod}, \hyperpage{152}
+    \subitem {subMatrix}, \hyperpage{152}
+    \subitem {vecmatprod}, \hyperpage{153}
+  \item {MatrixUtils.h}
+    \subitem {initvec}, \hyperpage{110}
+    \subitem {matAdd}, \hyperpage{110}
+    \subitem {matInv}, \hyperpage{110}
+    \subitem {matmatprod}, \hyperpage{110}
+    \subitem {matmatTprod}, \hyperpage{110}
+    \subitem {matNmatNprod}, \hyperpage{111}
+    \subitem {matTmatprod}, \hyperpage{111}
+    \subitem {matTvecprod}, \hyperpage{111}
+    \subitem {matvecprod}, \hyperpage{111}
+    \subitem {matvecSprod}, \hyperpage{111}
+    \subitem {subMatrix}, \hyperpage{111}
+    \subitem {vecmatprod}, \hyperpage{112}
+  \item {matTmatprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {matTvecprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {matvecprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {matvecSprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {MAX\_N\_ITER}
+    \subitem {GMMAT.h}, \hyperpage{96}
+  \item {Mbgen}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {Mbgen\_begin}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {Mbgen\_end}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {missGenoRate}
+    \subitem {CommandLine}, \hyperpage{42}
+  \item {missing}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {ModelType}
+    \subitem {GMMAT.h}, \hyperpage{88}
+  \item {mu}
+    \subitem {Fit}, \hyperpage{53}
+    \subitem {GEMFit}, \hyperpage{54}
+
+  \indexspace
+
+  \item {n}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {n\_cols}
+    \subitem {DataFrame}, \hyperpage{49}
+  \item {n\_obs}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {n\_rows}
+    \subitem {DataFrame}, \hyperpage{49}
+  \item {n\_samples}
+    \subitem {Bed}, \hyperpage{31}
+  \item {n\_variants}
+    \subitem {Bed}, \hyperpage{31}
+  \item {Nbgen}
+    \subitem {Bgen}, \hyperpage{35}
+  \item {nBinE}
+    \subitem {BinE}, \hyperpage{37}
+  \item {new\_covdata}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{35}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {new\_phenodata}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{35}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {new\_samSize}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{35}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {NumExcludeCol}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {numExpSelCol}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {numExpSelCol\_new}
+    \subitem {Bed}, \hyperpage{31}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {numIntSelCol}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {numIntSelCol\_new}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {Pgen}, \hyperpage{69}
+  \item {numSelCol}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {numSelCol\_new}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {Pgen}, \hyperpage{70}
+
+  \indexspace
+
+  \item {offset}
+    \subitem {Bgen}, \hyperpage{36}
+  \item {operator()}
+    \subitem {pair\_hash}, \hyperpage{67}
+  \item {outFile}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {outStyle}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {overflow}
+    \subitem {CerrRedirector}, \hyperpage{39}
+    \subitem {CoutRedirector}, \hyperpage{46}
+
+  \indexspace
+
+  \item {pair\_hash}, \hyperpage{67}
+    \subitem {operator()}, \hyperpage{67}
+  \item {Pgen}, \hyperpage{67}
+    \subitem {begin}, \hyperpage{69}
+    \subitem {binE\_idx}, \hyperpage{69}
+    \subitem {end}, \hyperpage{69}
+    \subitem {excludeCol}, \hyperpage{69}
+    \subitem {filterVariants}, \hyperpage{69}
+    \subitem {getPgenVariantPos}, \hyperpage{68}
+    \subitem {include\_idx}, \hyperpage{69}
+    \subitem {MAGEE}, \hyperpage{63}
+    \subitem {new\_covdata}, \hyperpage{69}
+    \subitem {new\_phenodata}, \hyperpage{69}
+    \subitem {new\_samSize}, \hyperpage{69}
+    \subitem {NumExcludeCol}, \hyperpage{69}
+    \subitem {numExpSelCol\_new}, \hyperpage{69}
+    \subitem {numIntSelCol\_new}, \hyperpage{69}
+    \subitem {numSelCol\_new}, \hyperpage{70}
+    \subitem {pgenVariantPos}, \hyperpage{70}
+    \subitem {phenoType}, \hyperpage{70}
+    \subitem {processPgenHeader}, \hyperpage{68}
+    \subitem {processPsam}, \hyperpage{68}
+    \subitem {processPvar}, \hyperpage{68}
+    \subitem {pvarIndex}, \hyperpage{70}
+    \subitem {pvarLast}, \hyperpage{70}
+    \subitem {raw\_sample\_ct}, \hyperpage{70}
+    \subitem {raw\_variant\_ct}, \hyperpage{70}
+    \subitem {sampleID}, \hyperpage{70}
+    \subitem {sampleID\_all}, \hyperpage{70}
+    \subitem {threads}, \hyperpage{70}
+  \item {pgenFile}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {pgenVariantPos}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {Pheno}, \hyperpage{70}
+    \subitem {check\_binary}, \hyperpage{71}
+    \subitem {get\_path}, \hyperpage{71}
+    \subitem {m\_data\_frame}, \hyperpage{72}
+    \subitem {m\_sam\_id}, \hyperpage{72}
+    \subitem {m\_v\_hdrs}, \hyperpage{72}
+    \subitem {read\_file}, \hyperpage{71}
+    \subitem {set\_path}, \hyperpage{71}
+    \subitem {size}, \hyperpage{72}
+  \item {pheno}
+    \subitem {SparseInverse}, \hyperpage{75}
+  \item {pheno\_delim}
+    \subitem {CommandLine}, \hyperpage{43}
+    \subitem {SparseInverse}, \hyperpage{75}
+  \item {pheno\_file}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {phenoName}
+    \subitem {CommandLine}, \hyperpage{43}
+  \item {phenoType}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {print\_help}
+    \subitem {ReadParameters.cpp}, \hyperpage{155}
+  \item {printCovVarMat}
+    \subitem {GEM.cpp}, \hyperpage{132}
+    \subitem {GEM.h}, \hyperpage{84}
+  \item {printExecutionTime}
+    \subitem {TimeUtils.cpp}, \hyperpage{157}
+    \subitem {TimeUtils.h}, \hyperpage{124}
+  \item {printExecutionTime1}
+    \subitem {TimeUtils.cpp}, \hyperpage{157}
+    \subitem {TimeUtils.h}, \hyperpage{124}
+  \item {printOutputHeader}
+    \subitem {GEM.cpp}, \hyperpage{132}
+    \subitem {GEM.h}, \hyperpage{85}
+  \item {processBed}
+    \subitem {Bed}, \hyperpage{30}
+  \item {processBgenHeaderBlock}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {processBgenSampleBlock}
+    \subitem {Bgen}, \hyperpage{34}
+  \item {processCommandLine}
+    \subitem {CommandLine}, \hyperpage{40}
+  \item {processFam}
+    \subitem {Bed}, \hyperpage{30}
+  \item {processPgenHeader}
+    \subitem {Pgen}, \hyperpage{68}
+  \item {processPsam}
+    \subitem {Pgen}, \hyperpage{68}
+  \item {processPvar}
+    \subitem {Pgen}, \hyperpage{68}
+  \item {psamFile}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {Psi}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {pvarFile}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {pvarIndex}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {pvarLast}
+    \subitem {Pgen}, \hyperpage{70}
+
+  \indexspace
+
+  \item {randomSlope}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {raw\_sample\_ct}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {raw\_variant\_ct}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {read\_file}
+    \subitem {DataFrame}, \hyperpage{49}
+    \subitem {Kinship}, \hyperpage{60}
+    \subitem {Pheno}, \hyperpage{71}
+  \item {ReadBed.cpp}
+    \subitem {gemBED}, \hyperpage{153}
+  \item {ReadBed.h}
+    \subitem {gemBED}, \hyperpage{113}
+    \subitem {READBED\_H}, \hyperpage{113}
+  \item {READBED\_H}
+    \subitem {ReadBed.h}, \hyperpage{113}
+  \item {ReadBGEN.cpp}
+    \subitem {Bgen13GetTwoVals}, \hyperpage{154}
+    \subitem {dbl}, \hyperpage{154}
+    \subitem {gemBGEN}, \hyperpage{154}
+  \item {ReadBGEN.h}
+    \subitem {Bgen13GetTwoVals}, \hyperpage{115}
+    \subitem {gemBGEN}, \hyperpage{115}
+  \item {README.md}, \hyperpage{124}
+  \item {ReadParameters.cpp}
+    \subitem {print\_help}, \hyperpage{155}
+    \subitem {VERSION}, \hyperpage{155}
+  \item {ReadPGEN.cpp}
+    \subitem {gemPGEN}, \hyperpage{156}
+  \item {ReadPGEN.h}
+    \subitem {gemPGEN}, \hyperpage{119}
+  \item {remove\_duplicates}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {remove\_minus\_one}
+    \subitem {MAGEE.cpp}, \hyperpage{148}
+    \subitem {MAGEE.h}, \hyperpage{107}
+  \item {resid}
+    \subitem {GEMFit}, \hyperpage{54}
+  \item {residuals}
+    \subitem {Glmmkin}, \hyperpage{55}
+    \subitem {Magee\_Glmmkin}, \hyperpage{67}
+  \item {robust}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {run\_wb}
+    \subitem {Glmmkin}, \hyperpage{55}
+
+  \indexspace
+
+  \item {sampleFile}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {samplefile}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {sampleID}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {CommandLine}, \hyperpage{44}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {sampleID\_all}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {SampleIdentifiers}
+    \subitem {Bgen}, \hyperpage{36}
+  \item {scale}
+    \subitem {CommandLine}, \hyperpage{44}
+    \subitem {MAGEE.cpp}, \hyperpage{148}
+    \subitem {MAGEE.h}, \hyperpage{107}
+  \item {scaled\_residuals}
+    \subitem {Glmmkin}, \hyperpage{55}
+  \item {select}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+    \subitem {Magee\_Glmmkin}, \hyperpage{67}
+  \item {set\_idx\_mp}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {set\_idx\_mp\_unq}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {set\_kin\_Nobssize}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {set\_kin\_Nsize}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {set\_path}
+    \subitem {Kinship}, \hyperpage{60}
+    \subitem {Pheno}, \hyperpage{71}
+  \item {set\_spmat}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {sigma2}
+    \subitem {GEMFit}, \hyperpage{54}
+    \subitem {Glmmkin}, \hyperpage{56}
+  \item {sigma\_i}
+    \subitem {Fit}, \hyperpage{53}
+    \subitem {Magee\_Glmmkin}, \hyperpage{67}
+  \item {sigma\_iJJ}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {sigma\_ix}
+    \subitem {Fit}, \hyperpage{53}
+    \subitem {Magee\_Glmmkin}, \hyperpage{67}
+  \item {sigma\_ixJ}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {sign}
+    \subitem {GMMAT.cpp}, \hyperpage{136}
+  \item {size}
+    \subitem {Kinship}, \hyperpage{61}
+    \subitem {Pheno}, \hyperpage{72}
+  \item {size\_wo\_duplicates}
+    \subitem {DataFrame}, \hyperpage{50}
+  \item {slice}
+    \subitem {MAGEE.cpp}, \hyperpage{148}
+    \subitem {MAGEE.h}, \hyperpage{107}
+  \item {slice\_mat}
+    \subitem {GMMAT.cpp}, \hyperpage{136--139}
+    \subitem {GMMAT.h}, \hyperpage{89--92}
+  \item {slice\_mat\_cols}
+    \subitem {GMMAT.cpp}, \hyperpage{139}
+    \subitem {GMMAT.h}, \hyperpage{92}
+  \item {slice\_vec}
+    \subitem {GMMAT.cpp}, \hyperpage{140}
+    \subitem {GMMAT.h}, \hyperpage{93}
+  \item {solve\_chol}
+    \subitem {SparseInverse}, \hyperpage{74}
+  \item {spa\_mat\_ones}
+    \subitem {MAGEE.cpp}, \hyperpage{149}
+  \item {SpaMat}
+    \subitem {SparseInverse.h}, \hyperpage{122}
+  \item {SpaMatRow}
+    \subitem {SparseInverse.h}, \hyperpage{122}
+  \item {SparseInverse}, \hyperpage{72}
+    \subitem {get\_idx\_mp}, \hyperpage{73}
+    \subitem {get\_idx\_mp\_unq}, \hyperpage{73}
+    \subitem {get\_spmat}, \hyperpage{73}
+    \subitem {inv}, \hyperpage{73}
+    \subitem {inv\_spamat}, \hyperpage{73, 74}
+    \subitem {inv\_spamat\_chol}, \hyperpage{74}
+    \subitem {kin}, \hyperpage{74}
+    \subitem {kin\_delim}, \hyperpage{74}
+    \subitem {m\_ratio\_Nob2N}, \hyperpage{75}
+    \subitem {m\_thr}, \hyperpage{75}
+    \subitem {pheno}, \hyperpage{75}
+    \subitem {pheno\_delim}, \hyperpage{75}
+    \subitem {set\_idx\_mp}, \hyperpage{74}
+    \subitem {set\_idx\_mp\_unq}, \hyperpage{74}
+    \subitem {set\_kin\_Nobssize}, \hyperpage{74}
+    \subitem {set\_kin\_Nsize}, \hyperpage{74}
+    \subitem {set\_spmat}, \hyperpage{74}
+    \subitem {solve\_chol}, \hyperpage{74}
+    \subitem {SparseInverse}, \hyperpage{73}
+  \item {SparseInverse.cpp}
+    \subitem {cholmodSparseToCsparse}, \hyperpage{156}
+    \subitem {combine\_indices}, \hyperpage{156}
+    \subitem {convertEigenToSuiteSparse}, \hyperpage{156}
+    \subitem {createSparseIdentity}, \hyperpage{156}
+  \item {SparseInverse.h}
+    \subitem {DenseMatInt}, \hyperpage{121}
+    \subitem {DensMat}, \hyperpage{121}
+    \subitem {DensVec}, \hyperpage{121}
+    \subitem {DensVecInt}, \hyperpage{122}
+    \subitem {SpaMat}, \hyperpage{122}
+    \subitem {SpaMatRow}, \hyperpage{122}
+  \item {src/BinaryEUtils.cpp}, \hyperpage{124}
+  \item {src/Fitglmm.cpp}, \hyperpage{125}
+  \item {src/GEM.cpp}, \hyperpage{128}
+  \item {src/GMMAT.cpp}, \hyperpage{133}
+  \item {src/Kinship.cpp}, \hyperpage{141}
+  \item {src/Logger.cpp}, \hyperpage{141}
+  \item {src/MAGEE.cpp}, \hyperpage{141}
+  \item {src/MatrixUtils.cpp}, \hyperpage{149}
+  \item {src/Pheno.cpp}, \hyperpage{153}
+  \item {src/ReadBed.cpp}, \hyperpage{153}
+  \item {src/ReadBGEN.cpp}, \hyperpage{154}
+  \item {src/ReadFiles.cpp}, \hyperpage{154}
+  \item {src/README.md}, \hyperpage{124}
+  \item {src/ReadParameters.cpp}, \hyperpage{155}
+  \item {src/ReadPGEN.cpp}, \hyperpage{155}
+  \item {src/SparseInverse.cpp}, \hyperpage{156}
+  \item {src/TimeUtils.cpp}, \hyperpage{157}
+  \item {std}, \hyperpage{23}
+  \item {std::ext}, \hyperpage{24}
+    \subitem {Data}, \hyperpage{25}
+    \subitem {FitNull\_f}, \hyperpage{25}
+    \subitem {IndexMap}, \hyperpage{25}
+    \subitem {IndexMapRev}, \hyperpage{25}
+    \subitem {IndexMapUnq}, \hyperpage{25}
+    \subitem {map\_str\_int}, \hyperpage{25}
+    \subitem {Map\_str\_Vint}, \hyperpage{25}
+    \subitem {Matrix\_variant}, \hyperpage{25}
+    \subitem {Triplet\_d}, \hyperpage{25}
+    \subitem {Triplet\_i}, \hyperpage{25}
+    \subitem {tuplePrint}, \hyperpage{27}
+    \subitem {Umap\_str\_int}, \hyperpage{26}
+    \subitem {V\_bool}, \hyperpage{26}
+    \subitem {V\_double}, \hyperpage{26}
+    \subitem {V\_float}, \hyperpage{26}
+    \subitem {V\_int}, \hyperpage{26}
+    \subitem {V\_lluint}, \hyperpage{26}
+    \subitem {V\_opt\_string}, \hyperpage{26}
+    \subitem {V\_size\_t}, \hyperpage{26}
+    \subitem {V\_string}, \hyperpage{26}
+    \subitem {Var\_bool\_int}, \hyperpage{26}
+    \subitem {VecTriple\_i}, \hyperpage{27}
+    \subitem {VecTuples4spmat}, \hyperpage{27}
+    \subitem {VV\_int}, \hyperpage{27}
+    \subitem {VV\_string}, \hyperpage{27}
+  \item {strataLen}
+    \subitem {BinE}, \hyperpage{38}
+  \item {stratum\_idx}
+    \subitem {BinE}, \hyperpage{38}
+  \item {stream\_snps}
+    \subitem {CommandLine}, \hyperpage{44}
+  \item {subMatrix}
+    \subitem {MatrixUtils.cpp}, \hyperpage{152}
+    \subitem {MatrixUtils.h}, \hyperpage{111}
+  \item {sync}
+    \subitem {CerrRedirector}, \hyperpage{39}
+    \subitem {CoutRedirector}, \hyperpage{46}
+
+  \indexspace
+
+  \item {tcrossprod}
+    \subitem {GMMAT.h}, \hyperpage{94}
+  \item {testinv.cpp}, \hyperpage{157}
+    \subitem {main}, \hyperpage{157}
+  \item {threads}
+    \subitem {Bed}, \hyperpage{32}
+    \subitem {Bgen}, \hyperpage{36}
+    \subitem {CommandLine}, \hyperpage{44}
+    \subitem {Pgen}, \hyperpage{70}
+  \item {Time}, \hyperpage{75}
+  \item {TimeUtils.cpp}
+    \subitem {printExecutionTime}, \hyperpage{157}
+    \subitem {printExecutionTime1}, \hyperpage{157}
+  \item {TimeUtils.h}
+    \subitem {printExecutionTime}, \hyperpage{124}
+    \subitem {printExecutionTime1}, \hyperpage{124}
+    \subitem {TIMEUTILS\_H}, \hyperpage{124}
+  \item {TIMEUTILS\_H}
+    \subitem {TimeUtils.h}, \hyperpage{124}
+  \item {tol}
+    \subitem {CommandLine}, \hyperpage{45}
+  \item {Triplet\_d}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {Triplet\_i}
+    \subitem {std::ext}, \hyperpage{25}
+  \item {tuplePrint}
+    \subitem {std::ext}, \hyperpage{27}
+
+  \indexspace
+
+  \item {uchar}
+    \subitem {declars.h}, \hyperpage{79}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {uint}
+    \subitem {declars.h}, \hyperpage{79}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+  \item {uint64}
+    \subitem {declars.h}, \hyperpage{79}
+  \item {Umap\_str\_int}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {unique}
+    \subitem {GMMAT.h}, \hyperpage{94}
+  \item {unique\_id}
+    \subitem {GMMAT.h}, \hyperpage{95}
+  \item {unique\_less\_equal}
+    \subitem {MAGEE.cpp}, \hyperpage{149}
+    \subitem {MAGEE.h}, \hyperpage{108}
+  \item {useBedFile}
+    \subitem {CommandLine}, \hyperpage{45}
+  \item {useBgenFile}
+    \subitem {CommandLine}, \hyperpage{45}
+  \item {usePgenFile}
+    \subitem {CommandLine}, \hyperpage{45}
+  \item {useSampleFile}
+    \subitem {CommandLine}, \hyperpage{45}
+  \item {ushort}
+    \subitem {declars.h}, \hyperpage{79}
+    \subitem {Fitglmm.cpp}, \hyperpage{126}
+
+  \indexspace
+
+  \item {V\_bool}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_double}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_float}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_int}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_lluint}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_opt\_string}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_size\_t}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {V\_string}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {Var\_bool\_int}
+    \subitem {std::ext}, \hyperpage{26}
+  \item {variant\_pos}
+    \subitem {Bgen}, \hyperpage{36}
+  \item {vecmatprod}
+    \subitem {MatrixUtils.cpp}, \hyperpage{153}
+    \subitem {MatrixUtils.h}, \hyperpage{112}
+  \item {vector\_binstrings}
+    \subitem {BinaryEUtils.h}, \hyperpage{78}
+  \item {VecTriple\_i}
+    \subitem {std::ext}, \hyperpage{27}
+  \item {VecTuples4spmat}
+    \subitem {std::ext}, \hyperpage{27}
+  \item {VERSION}
+    \subitem {ReadParameters.cpp}, \hyperpage{155}
+  \item {VV\_int}
+    \subitem {std::ext}, \hyperpage{27}
+  \item {VV\_string}
+    \subitem {std::ext}, \hyperpage{27}
+
+  \indexspace
+
+  \item {W}
+    \subitem {Fit}, \hyperpage{53}
+  \item {which}
+    \subitem {GMMAT.h}, \hyperpage{95}
+
+  \indexspace
+
+  \item {Xi}
+    \subitem {Magee\_Arma}, \hyperpage{65}
+  \item {XinvXTX}
+    \subitem {GEMFit}, \hyperpage{54}
+
+\end{theindex}

@@ -9,7 +9,6 @@ class Pheno
         DataFrame m_data_frame;
         std::string m_sam_id;
         std::ext::V_string m_v_hdrs;
-        // std::string m_phenoMissingKey;
         /**
          * @brief a function to get the size of pheno data
          * 
@@ -23,13 +22,13 @@ class Pheno
          */
         void set_path(std::string_view path);
         /**
-         * @brief Get the path
+         * @brief Get pheno path
          * 
          * @return std::string 
          */
         std::string get_path() const;
         /**
-         * @brief A function to read pheno file with a given delimeter (default ",") and path
+         * @brief Read pheno path
          * 
          * @param delim 
          */

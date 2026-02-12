@@ -1,0 +1,709 @@
+\chapter{GEM}
+\hypertarget{index}{}\label{index}\index{GEM@{GEM}}
+\label{index_md_README}%
+\Hypertarget{index_md_README}%
+ GEM (Gene-\/\+Environment interaction analysis for Millions of samples) is a software program for large-\/scale gene-\/environment interaction testing in samples from unrelated individuals. It enables genome-\/wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-\/covariate interactions, and robust inference. ~\newline
+
+
+~\newline
+ Current version\+: 2.\+2
+
+~\newline
+ Additional documentation\+: ~\newline
+ \href{https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace}{\texttt{ https\+://large-\/scale-\/gxe-\/methods.\+github.\+io/\+GEMShowcase\+Workspace}}
+
+~\newline
+\hypertarget{index_autotoc_md1}{}\doxysection{\texorpdfstring{Contents}{Contents}}\label{index_autotoc_md1}
+
+\begin{DoxyItemize}
+\item Quick Installation
+\item Dependencies
+\item Usage
+\item Contact
+\item License
+\item Recent Updates
+\end{DoxyItemize}
+
+~\newline
+\hypertarget{index_autotoc_md2}{}\doxysection{\texorpdfstring{Quick Installation}{Quick Installation}}\label{index_autotoc_md2}
+Option 1\+: Use the binary executable file for Linux
+\begin{DoxyItemize}
+\item Download the binary file from\+: \href{https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.4/GEM_2.2_Intel}{\texttt{ https\+://github.\+com/large-\/scale-\/gxe-\/methods/\+GEM/releases/download/v2.\+1.\+4/\+GEM\+\_\+2.\+2\+\_\+\+Intel}}
+\item Change the permission\+: chmod +x GEM\+\_\+2.\+2\+\_\+\+Intel
+\end{DoxyItemize}
+
+Option 2\+: Build GEM Library Dependencies ~\newline
+
+\begin{DoxyItemize}
+\item C++17 compiler or later
+\item BLAS/\+LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel one\+API Math Kernal Library to replace BLAS/\+LAPACK for optimal performance.
+\item Boost C++ libraries. GEM links to the following Boost libraries\+: {\ttfamily boost\+\_\+program\+\_\+options, boost\+\_\+thread, boost\+\_\+system, and boost\+\_\+filesystem} ~\newline
+
+\item Suite\+Sparse Library, download and compile it using CMake.
+\end{DoxyItemize}
+
+~\newline
+
+
+To install GEM, run the following lines of code\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{git\ clone\ https://github.com/large-\/scale-\/gxe-\/methods/GEM}
+\DoxyCodeLine{cd\ GEM/}
+\DoxyCodeLine{cmake\ -\/B\ build}
+\DoxyCodeLine{cmake\ -\/-\/build\ build\ }
+
+\end{DoxyCode}
+
+
+~\newline
+\hypertarget{index_autotoc_md3}{}\doxysection{\texorpdfstring{Dependencies}{Dependencies}}\label{index_autotoc_md3}
+C/\+C++ Compiler
+\begin{DoxyItemize}
+\item A compiler with C++17 (or later) support is required.
+\end{DoxyItemize}
+
+LAPACK and BLAS
+\begin{DoxyItemize}
+\item The LAPACK (Linear Algebra PACKage) and BLAS (Basic Linear Algebra Subprograms) libraries are used for matrix operations in GEM.
+\end{DoxyItemize}
+
+Intel processors\+:
+\begin{DoxyItemize}
+\item We recommend linking GEM to the Intel one\+API Math Kernal Library (one\+MKL), instead of classical BLAS/\+LAPACK, for a greater performance boost. This can be done by replacing -\/llapack and -\/lblas in the makefile with -\/lmkl\+\_\+gf\+\_\+lp64 -\/lmkl\+\_\+sequential -\/lmkl\+\_\+core before compiling.
+\begin{DoxyItemize}
+\item It is important to compile with -\/lmkl\+\_\+sequential since GEM already does multi-\/threading across SNPs.
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+AMD processors\+:
+\begin{DoxyItemize}
+\item For AMD processors, Open\+BLAS (-\/lopenblas) may be a better alternative.
+\end{DoxyItemize}
+
+Boost C++ Libraries
+\begin{DoxyItemize}
+\item The Boost C++ libraries are used for command-\/line, file management and multi-\/threading purposes.
+\item The following Boost libraries are required \+:
+\begin{DoxyEnumerate}
+\item libboost\+\_\+system
+\item libboost\+\_\+program\+\_\+options
+\item libboost\+\_\+filesystem
+\item libboost\+\_\+thread
+\end{DoxyEnumerate}
+\end{DoxyItemize}
+
+Eigen Library
+\begin{DoxyItemize}
+\item The Eigen library is used for linear algebra of dense and sparse matrices.
+\end{DoxyItemize}
+
+Suite\+Sparse Library
+\begin{DoxyItemize}
+\item The Suite\+Sparse library is used for linear algebra operations on dense and sparse matrices. It is particularly utilized in in the GLMM model to fit the null model during association test.
+\end{DoxyItemize}
+
+Armadillo Library
+\begin{DoxyItemize}
+\item The Armadillo library is used for linear algebra of dense and sparse matrices. It is particularly utilized in G × E (Gene-\/\+Environment) interaction test.
+\end{DoxyItemize}\hypertarget{index_autotoc_md4}{}\doxysection{\texorpdfstring{Usage}{Usage}}\label{index_autotoc_md4}
+\hypertarget{index_autotoc_md5}{}\doxysubsection{\texorpdfstring{Running GEM}{Running GEM}}\label{index_autotoc_md5}
+
+\begin{DoxyEnumerate}
+\item Command Line Options ~\newline
+
+\end{DoxyEnumerate}
+\begin{DoxyEnumerate}
+\item Input Files
+\end{DoxyEnumerate}
+\begin{DoxyEnumerate}
+\item Output File Format
+\end{DoxyEnumerate}
+\begin{DoxyEnumerate}
+\item Examples
+\end{DoxyEnumerate}
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md6}{}\doxysubsection{\texorpdfstring{Command Line Options}{Command Line Options}}\label{index_autotoc_md6}
+Once GEM is installed, the executable {\ttfamily ./\+GEM\+\_\+2.1.\+4\+\_\+\+Intel} can be used to run the program. ~\newline
+ For a list of options, use {\ttfamily ./\+GEM\+\_\+2.1.\+4\+\_\+\+Intel -\/-\/help}.
+
+
+
+{\bfseries{{\bfseries{List of Options}} }}\begin{adjustwidth}{1em}{0em}
+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{General\ Options:}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/help}
+\DoxyCodeLine{\ \ \ \ Prints\ the\ available\ options\ of\ GEM\ and\ exits.\ \ }
+\DoxyCodeLine{\ \ \ }
+\DoxyCodeLine{-\/-\/version}
+\DoxyCodeLine{\ \ \ \ Prints\ the\ version\ of\ GEM\ and\ exits.}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{Input/Output\ File\ Options:\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/pheno-\/file\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ phenotype\ file.\ \ }
+\DoxyCodeLine{-\/-\/kin-\/file\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ kinship\ file.}
+\DoxyCodeLine{-\/-\/bgen\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ BGEN\ file.\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/sample\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ sample\ file.\ \ }
+\DoxyCodeLine{\ \ \ \ \ Required\ when\ the\ BGEN\ file\ does\ not\ contain\ sample\ identifiers.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/pfile\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ and\ prefix\ to\ the\ .pgen,\ .pvar,\ and\ .psam\ files.\ \ }
+\DoxyCodeLine{\ \ \ \ \ If\ this\ flag\ is\ used,\ then\ -\/-\/pgen/-\/-\/pvar/-\/-\/psam\ don't\ need\ to\ be\ specified.}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/pgen\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ pgen\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/pvar\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ pvar\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/psam\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ psam\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/bfile\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ and\ prefix\ to\ the\ .bed,\ .bim\ and\ .fam\ files.\ \ }
+\DoxyCodeLine{\ \ \ \ \ If\ this\ flag\ is\ used,\ then\ -\/-\/bed/-\/-\/bim/-\/-\/fam\ don't\ need\ to\ be\ specified.}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/bed\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ bed\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/bim\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ bim\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/fam\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ the\ fam\ file.\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/out\ \ }
+\DoxyCodeLine{\ \ \ \ \ Full\ path\ and\ extension\ to\ where\ GEM\ output\ results.\ \ }
+\DoxyCodeLine{\ \ \ \ \ Default:\ gem.out}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/output-\/style\ \ }
+\DoxyCodeLine{\ \ \ \ \ Modifies\ the\ output\ of\ GEM.\ Must\ be\ one\ of\ the\ following:}
+\DoxyCodeLine{\ \ \ \ \ minimum:\ Output\ the\ summary\ statistics\ for\ only\ the\ GxE\ and\ marginal\ G\ terms.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ meta:\ 'minimum'\ output\ plus\ additional\ fields\ for\ the\ main\ G\ and\ any\ GxCovariate\ terms.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ For\ a\ robust\ analysis,\ additional\ columns\ for\ the\ model-\/based\ summary\ statistics\ will\ be\ included.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ full:\ 'meta'\ output\ plus\ additional\ fields\ needed\ for\ re-\/analyses\ of\ a\ subset\ of\ interactions.}
+\DoxyCodeLine{\ \ \ \ \ Default:\ minimum\ \ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{Phenotype\ File\ Options:}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/sampleid-\/name\ \ }
+\DoxyCodeLine{\ \ \ \ \ Column\ name\ in\ the\ phenotype\ file\ that\ contains\ sample\ identifiers.\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/pheno-\/name\ \ }
+\DoxyCodeLine{\ \ \ \ \ Column\ name\ in\ the\ phenotype\ file\ that\ contains\ the\ phenotype\ of\ interest.\ }
+\DoxyCodeLine{\ \ \ \ \ If\ the\ number\ of\ levels\ (unique\ observations)\ is\ 2,\ the\ phenotype\ is\ treated\ as\ binary;\ otherwise\ it\ is\ assumed\ to\ be\ continuous.}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/exposure-\/names\ \ }
+\DoxyCodeLine{\ \ \ \ \ One\ or\ more\ column\ names\ in\ the\ phenotype\ file\ naming\ the\ exposure(s)\ to\ be\ included\ in\ interaction\ tests.\ \ }
+\DoxyCodeLine{\ \ \ \ \ If\ no\ exposures\ are\ included,\ GEM\ will\ only\ perform\ the\ marginal\ test.\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/int-\/covar-\/names\ \ }
+\DoxyCodeLine{\ \ \ \ \ Any\ column\ names\ in\ the\ phenotype\ file\ naming\ the\ covariate(s)\ for\ which\ interactions\ should\ be\ included\ }
+\DoxyCodeLine{\ \ \ \ \ for\ adjustment\ (do\ not\ include\ with\ -\/-\/exposure-\/names).\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/covar-\/names\ \ }
+\DoxyCodeLine{\ \ \ \ \ Any\ column\ names\ in\ the\ phenotype\ file\ naming\ the\ covariates\ for\ which\ only\ main\ effects\ should\ be\ included}
+\DoxyCodeLine{\ \ \ \ \ for\ adjustment\ (do\ not\ include\ with\ -\/-\/exposure-\/names\ or\ -\/-\/int-\/covar-\/names).\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/random-\/slope-\/name\ }
+\DoxyCodeLine{\ \ \ \ \ Column\ name\ in\ the\ phenotype\ file\ that\ contains\ random\ slope.\ }
+\DoxyCodeLine{\ \ \ \ \ }
+\DoxyCodeLine{-\/-\/group-\/name}
+\DoxyCodeLine{\ \ \ \ \ Column\ name\ in\ the\ phenotype\ file\ that\ contains\ the\ group.}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/robust}
+\DoxyCodeLine{\ \ \ \ \ 0\ for\ model-\/based\ standard\ errors\ and\ 1\ for\ robust\ standard\ errors.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 0\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/tol\ }
+\DoxyCodeLine{\ \ \ \ \ Convergence\ tolerance\ for\ logistic\ regression.\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 0.0000001\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/delim\ \ }
+\DoxyCodeLine{\ \ \ \ \ Delimiter\ separating\ values\ in\ the\ phenotype\ file.\ Tab\ delimiter\ should\ be\ represented\ as\ \(\backslash\)t\ and\ space\ delimiter\ as\ \(\backslash\)0.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ ,\ (comma-\/separated)\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/missing-\/value\ \ }
+\DoxyCodeLine{\ \ \ \ \ Indicates\ how\ missing\ values\ in\ the\ phenotype\ file\ are\ stored.\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ NA}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/center\ }
+\DoxyCodeLine{\ \ \ \ \ 0\ for\ no\ centering\ to\ be\ done,\ 1\ to\ center\ ALL\ exposures\ and\ covariates,\ and\ 2\ to\ center\ all\ the\ interaction\ covariates\ only.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ Default:\ 2}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/scale}
+\DoxyCodeLine{\ \ \ \ \ 0\ for\ no\ scaling\ to\ be\ done\ and\ 1\ to\ scale\ ALL\ exposures\ and\ covariates\ by\ the\ standard\ deviation.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 0}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/categorical-\/names}
+\DoxyCodeLine{\ \ \ \ \ Names\ of\ the\ exposure\ or\ interaction\ covariate\ that\ should\ be\ treated\ as\ categorical.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ None}
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/cat-\/threshold}
+\DoxyCodeLine{\ \ \ \ \ A\ cut-\/off\ to\ determine\ which\ exposure\ or\ interaction\ covariate\ not\ specified\ using\ -\/-\/categorical-\/names\ }
+\DoxyCodeLine{\ \ \ \ \ should\ be\ automatically\ treated\ as\ categorical\ based\ on\ the\ number\ of\ levels\ (unique\ observations).}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 2}
+\DoxyCodeLine{\ \ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{Kinship\ File\ Options:}
+\DoxyCodeLine{-\/-\/kin-\/delim}
+\DoxyCodeLine{\ \ \ \ \ Delimiter\ separating\ values\ in\ the\ kinship\ file.\ Tab\ delimiter\ should\ be\ represented\ as\ \(\backslash\)t\ and\ space\ delimiter\ as\ \(\backslash\)0.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ ,\ (comma-\/separated)\ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/kin-\/diag}
+\DoxyCodeLine{\ \ \ \ \ Diagonal\ value\ of\ kinship\ matrix\ that\ not\ accounting\ for\ inbreeding.\ Default:\ 1.0"{}}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{Filtering\ Options:\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/maf}
+\DoxyCodeLine{\ \ \ \ \ Minimum\ threshold\ value\ [0,\ 0.5]\ to\ exclude\ variants\ based\ on\ the\ minor\ allele\ frequency.}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 0.001}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/miss-\/geno-\/cutoff}
+\DoxyCodeLine{\ \ \ \ \ Maximum\ threshold\ value\ [0,\ 1.0]\ to\ filter\ variants\ based\ on\ the\ missing\ genotype\ rate.\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 0.05\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{-\/-\/include-\/snp-\/file\ \ }
+\DoxyCodeLine{\ \ \ \ \ Path\ to\ file\ containing\ a\ subset\ of\ variants\ in\ the\ specified\ genotype\ file\ to\ be\ used\ for\ analysis.\ }
+\DoxyCodeLine{\ \ \ \ \ The\ first\ line\ in\ this\ file\ is\ the\ header\ that\ specifies\ which\ variant\ identifier\ in\ the\ genotype\ file\ \ }
+\DoxyCodeLine{\ \ \ \ \ is\ used\ for\ ID\ matching.\ This\ must\ be\ 'snpid'\ (PLINK\ or\ BGEN)\ or\ 'rsid'\ (BGEN\ only).\ There\ should\ be\ one\ variant\ }
+\DoxyCodeLine{\ \ \ \ \ identifier\ per\ line\ after\ the\ header.}
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{Performance\ Options:\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/threads}
+\DoxyCodeLine{\ \ \ \ \ Set\ number\ of\ compute\ threads.}
+\DoxyCodeLine{\ \ \ \ \ \ \ Default:\ ceiling(detected\ threads\ /\ 2)\ \ }
+\DoxyCodeLine{}
+\DoxyCodeLine{-\/-\/stream-\/snps\ }
+\DoxyCodeLine{\ \ \ \ \ Number\ of\ SNPs\ to\ analyze\ in\ a\ batch.\ Memory\ consumption\ will\ increase\ for\ larger\ values\ of\ stream-\/snps.\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Default:\ 1}
+
+\end{DoxyCode}
+ \end{adjustwidth}
+
+
+~\newline
+\hypertarget{index_autotoc_md7}{}\doxysubsection{\texorpdfstring{Input Files}{Input Files}}\label{index_autotoc_md7}
+
+\begin{DoxyItemize}
+\item \#\#\#\# Phenotype File A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter. All inputs should be coded numerically (e.\+g., males/females as 0/1)
+\end{DoxyItemize}
+
+~\newline
+
+
+
+\begin{DoxyItemize}
+\item \#\#\#\# \doxylink{classKinship}{Kinship} File A file contains nonzero values in a three-\/column format, where the first two columns represent sample identifiers, and the third column indicates the kinship coefficient or genetic relatedness between individuals, or the inbreeding coefficient for the same individual. The scale of the kinship matrix does not matter (e.\+g., you can use two times the kinship matrix, or identity-\/by-\/descent information), as long as the values are on the same scale of the diagonal elements to be added in --kin-\/diag. For genetic relationship matrices computed from genotypes that have different values on the diagonals, we recommend specifying all diagonal values explicitly in the kinship file, along with --kin-\/diag 0.
+\end{DoxyItemize}\hypertarget{index_autotoc_md8}{}\doxyparagraph{\texorpdfstring{Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.\+05 for the fifth individual)\+:}{Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.05 for the fifth individual):}}\label{index_autotoc_md8}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{⎡\ 0.5\ \ \ \ 0\ \ \ \ 0.25\ \ 0.25\ \ \ 0\ \ ⎤}
+\DoxyCodeLine{⎢\ \ 0\ \ \ \ 0.5\ \ \ 0.25\ \ 0.25\ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎢\ 0.25\ \ 0.25\ \ 0.5\ \ \ 0.25\ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎢\ 0.25\ \ 0.25\ \ 0.25\ \ 0.5\ \ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎣\ \ 0\ \ \ \ \ 0\ \ \ \ \ 0\ \ \ \ \ 0\ \ \ 0.55\ ⎦}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md9}{}\doxyparagraph{\texorpdfstring{The Kinship File Corresponding to Example 1 (along with –kin-\/diag 0.\+5)\+:}{The Kinship File Corresponding to Example 1 (along with –kin-diag 0.5):}}\label{index_autotoc_md9}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{|\ ID1\ |\ ID2\ |\ Kinship|}
+\DoxyCodeLine{|-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/-\/-\/-\/|}
+\DoxyCodeLine{|\ \ 1\ \ |\ \ 3\ \ |\ \ 0.25\ \ |}
+\DoxyCodeLine{|\ \ 1\ \ |\ \ 4\ \ |\ \ 0.25\ \ |}
+\DoxyCodeLine{|\ \ 2\ \ |\ \ 3\ \ |\ \ 0.25\ \ |}
+\DoxyCodeLine{|\ \ 2\ \ |\ \ 4\ \ |\ \ 0.25\ \ |}
+\DoxyCodeLine{|\ \ 3\ \ |\ \ 4\ \ |\ \ 0.25\ \ |}
+\DoxyCodeLine{|\ \ 5\ \ |\ \ 5\ \ |\ \ 0.05\ \ |}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md10}{}\doxyparagraph{\texorpdfstring{Example 2 of Kinship Matrix (two times the kinship matrix in Example 1)\+:}{Example 2 of Kinship Matrix (two times the kinship matrix in Example 1):}}\label{index_autotoc_md10}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{⎡\ \ 1\ \ \ \ 0\ \ \ \ 0.5\ \ \ 0.5\ \ \ 0\ \ ⎤}
+\DoxyCodeLine{⎢\ \ 0\ \ \ \ 1\ \ \ \ 0.5\ \ \ 0.5\ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎢\ 0.5\ \ 0.5\ \ \ \ 1\ \ \ \ 0.5\ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎢\ 0.5\ \ 0.5\ \ \ 0.5\ \ \ \ 1\ \ \ \ 0\ \ ⎥}
+\DoxyCodeLine{⎣\ \ 0\ \ \ \ 0\ \ \ \ \ 0\ \ \ \ \ 0\ \ \ 1.1\ ⎦}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md11}{}\doxyparagraph{\texorpdfstring{The Kinship File Corresponding to Example 2 (along with –kin-\/diag 1)\+:}{The Kinship File Corresponding to Example 2 (along with –kin-diag 1):}}\label{index_autotoc_md11}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{|\ ID1\ |\ ID2\ |\ Kinship|}
+\DoxyCodeLine{|-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/|-\/-\/-\/-\/-\/-\/-\/-\/|}
+\DoxyCodeLine{|\ \ 1\ \ |\ \ 3\ \ |\ \ \ 0.5\ \ |}
+\DoxyCodeLine{|\ \ 1\ \ |\ \ 4\ \ |\ \ \ 0.5\ \ |}
+\DoxyCodeLine{|\ \ 2\ \ |\ \ 3\ \ |\ \ \ 0.5\ \ |}
+\DoxyCodeLine{|\ \ 2\ \ |\ \ 4\ \ |\ \ \ 0.5\ \ |}
+\DoxyCodeLine{|\ \ 3\ \ |\ \ 4\ \ |\ \ \ 0.5\ \ |}
+\DoxyCodeLine{|\ \ 5\ \ |\ \ 5\ \ |\ \ \ 0.1\ \ |}
+
+\end{DoxyCode}
+
+
+~\newline
+
+
+
+\begin{DoxyItemize}
+\item \#\#\#\# Genotype Files ~\newline
+
+
+\href{https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html}{\texttt{ {\bfseries{BGEN}}}} ~\newline
+ Variants that are non-\/biallelic should be filtered from the BGEN file. Note that since there are no indication of a REF/\+ALT allele in the BGEN file, the second allele is the effect allele counted in association testing. ~\newline
+
+
+A \href{https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html}{\texttt{ .sample file}} is required as input when the .bgen file does not contain a sample identifier block. ~\newline
+~\newline
+
+
+\href{https://www.cog-genomics.org/plink/1.9/}{\texttt{ {\bfseries{Plink BED}}}} ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#fam}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.fam\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ The .fam file can be space or tab-\/delimited and must contain at least 2 columns where the first column is the family ID (FID) and the second column is the individual ID (IID). GEM will use the IID column for sample identifier matching with the phenotype file. ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#bim}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.bim\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ The .bim file can also be space or tab-\/delimited and should be in the following order\+: the chromosome, variant id, cM (optional), base-\/pair coordinate, ALT allele, and REF allele. ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#bed}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.bed\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ A bed file must be stored in variant-\/major form. The ALT allele specified in the .bim file is the effect allele counted in association testing. ~\newline
+~\newline
+ ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/}{\texttt{ {\bfseries{Plink 2.\+0 PGEN}}}} ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#psam}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.psam\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ The .psam file is a tab-\/delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name \#\+IID (if the first column is not \#\+FID) or IID (if the first column is \#\+FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with \#\+IID or \#\+FID is present, then the columns are assumed to be in .fam file order. ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#pvar}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.pvar\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ The .pvar file is a tab-\/delimited text file containing the variant information. If header lines are present, the last header line should start with \#\+CHROM. If \#\+CHROM is present, then the columns POS, ID, REF, and ALT must also be present. All previous header lines will be ignored. If the .pvar file contain no header lines beginning with \#\+CHROM, it is assumed that the columns are in .bim file order. ~\newline
+
+
+\href{https://www.cog-genomics.org/plink/2.0/formats\#pgen}{\texttt{ \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}.pgen\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}} -\/ The .pgen file should be filtered for non-\/biallelic variants. The ALT allele specified in the .pvar file is the effect allele counted in association testing.
+\end{DoxyItemize}
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md12}{}\doxysubsection{\texorpdfstring{Output File Format}{Output File Format}}\label{index_autotoc_md12}
+GEM will write results to the output file specified with the --out parameter (or \textquotesingle{}gem.\+out\textquotesingle{} if no output file is specified). ~\newline
+ Below are details of the possible column headers in the output file. ~\newline
+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{SNPID\ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ SNP\ identifier\ as\ retrieved\ from\ the\ genotype\ file.}
+\DoxyCodeLine{RSID\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ reference\ SNP\ ID\ number.\ (BGEN\ only)}
+\DoxyCodeLine{CHR\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ chromosome\ of\ the\ SNP.}
+\DoxyCodeLine{POS\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ physical\ position\ of\ the\ SNP.}
+\DoxyCodeLine{Non\_Effect\_Allele\ \ -\/\ The\ allele\ not\ counted\ in\ association\ testing.\ \ }
+\DoxyCodeLine{Effect\_Allele\ \ \ \ \ \ -\/\ The\ allele\ that\ is\ counted\ in\ association\ testing.\ \ }
+\DoxyCodeLine{N\_Samples\ \ \ \ \ \ \ \ \ \ -\/\ The\ number\ of\ samples\ without\ missing\ genotypes.}
+\DoxyCodeLine{AF\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ allele\ frequency\ of\ the\ effect\ allele.}
+\DoxyCodeLine{GV\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ variance\ of\ the\ effected\ allele.}
+\DoxyCodeLine{N\_catE\_*\ \ \ \ \ \ \ \ \ \ \ -\/\ The\ number\ of\ non-\/missing\ samples\ in\ each\ combination\ of\ strata\ for\ all\ of\ the\ categorical\ exposures\ and\ interaction\ covariates.}
+\DoxyCodeLine{AF\_catE\_*\ \ \ \ \ \ \ \ \ \ -\/\ The\ allele\ frequency\ of\ the\ effect\ allele\ for\ each\ combination\ of\ strata\ for\ all\ of\ the\ catgorical\ exposure\ or\ interaction\ covariate.}
+\DoxyCodeLine{GV\_catE\_*\ \ \ \ \ \ \ \ \ \ -\/The\ variance\ of\ the\ effect\ allele\ for\ each\ combination\ of\ strata\ for\ all\ of\ the\ catgorical\ exposure\ or\ interaction\ covariate.}
+\DoxyCodeLine{}
+\DoxyCodeLine{Beta\_Marginal\ \ \ \ \ \ \ \ \ \ \ -\/\ The\ coefficient\ estimate\ for\ the\ marginal\ genetic\ effect\ (i.e.,\ from\ a\ model\ with\ no\ interaction\ terms).}
+\DoxyCodeLine{SE\_Beta\_Marginal\ \ \ \ \ \ \ \ -\/\ The\ model-\/based\ SE\ associated\ with\ the\ marginal\ genetic\ effect\ estimate.}
+\DoxyCodeLine{robust\_SE\_Beta\_Marginal\ -\/\ The\ robust\ SE\ associated\ with\ the\ marginal\ genetic\ effect\ estimate.}
+\DoxyCodeLine{}
+\DoxyCodeLine{Beta\_G\ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ coefficient\ estimate\ for\ the\ genetic\ main\ effect\ (G).}
+\DoxyCodeLine{Beta\_G-\/*\ \ \ \ \ \ \ \ \ \ \ -\/\ The\ coefficient\ estimate\ for\ the\ interaction\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{SE\_Beta\_G\ \ \ \ \ \ \ \ \ \ -\/\ Model-\/based\ SE\ associated\ with\ the\ the\ genetic\ main\ effect\ (G).\ \ }
+\DoxyCodeLine{SE\_Beta\_G-\/*\ \ \ \ \ \ \ \ -\/\ Model-\/based\ SE\ associated\ with\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{robust\_SE\_Beta\_G\ \ \ -\/\ Robust\ SE\ associated\ with\ the\ the\ genetic\ main\ effect\ (G).\ \ }
+\DoxyCodeLine{robust\_SE\_Beta\_G-\/*\ -\/\ Robust\ SE\ associated\ with\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{Cov\_Beta\_G\_G-\/*\ \ \ \ \ \ \ \ \ \ -\/\ Model-\/based\ covariance\ between\ the\ genetic\ main\ effect\ (G)\ and\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{Cov\_Beta\_G-\/*\_G-\/*\ \ \ \ \ \ \ \ -\/\ Model-\/based\ covariance\ between\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{robust\_Cov\_Beta\_G\_G-\/*\ \ \ -\/\ Robust\ covariance\ between\ the\ genetic\ main\ effect\ (G)\ and\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{robust\_Cov\_Beta\_G-\/*\_G-\/*\ -\/\ Robust\ covariance\ between\ any\ GxE\ or\ interaction\ covariate\ terms.}
+\DoxyCodeLine{}
+\DoxyCodeLine{P\_Value\_Marginal\ \ \ \ \ \ \ \ \ \ \ -\/\ Marginal\ genetic\ effect\ p-\/value\ from\ model-\/based\ SE.}
+\DoxyCodeLine{P\_Value\_Interaction\ \ \ \ \ \ \ \ -\/\ Interaction\ effect\ p-\/value\ (K\ degrees\ of\ freedom\ test\ of\ interaction\ effect)\ from\ model-\/based\ SE.\ (K\ is\ number\ of\ major\ exposures)}
+\DoxyCodeLine{P\_Value\_Joint\ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ Joint\ test\ p-\/value\ (K+1\ degrees\ of\ freedom\ test\ of\ genetic\ and\ interaction\ effect)\ from\ model-\/based\ SE.}
+\DoxyCodeLine{robust\_P\_Value\_Marginal\ \ \ \ -\/\ Marginal\ genetic\ effect\ p-\/value\ from\ robust\ SE.}
+\DoxyCodeLine{robust\_P\_Value\_Interaction\ -\/\ Interaction\ effect\ p-\/value\ from\ robust\ SE.}
+\DoxyCodeLine{robust\_P\_Value\_Joint\ \ \ \ \ \ \ -\/\ Joint\ test\ p-\/value\ (K+1\ degrees\ of\ freedom\ test\ of\ genetic\ and\ interaction\ effect)\ from\ robust\ SE.}
+
+\end{DoxyCode}
+
+
+~\newline
+ The --output-\/style flag can be used to specify which columns should be included in the output file\+: ~\newline
+\hypertarget{index_autotoc_md13}{}\doxysubsubsection{\texorpdfstring{minimum\+:}{minimum:}}\label{index_autotoc_md13}
+Includes the variant information, Beta\+\_\+\+Marginal, SE\+\_\+\+Beta\+\_\+\+Marginal, coefficient estimates for only the GxE terms, and depending on the --robust option, SE and covariance for only the GxE terms.\hypertarget{index_autotoc_md14}{}\doxysubsubsection{\texorpdfstring{meta\+:}{meta:}}\label{index_autotoc_md14}
+Includes each of the possible outputs listed above when applicable. For a model-\/based analysis (--robust 0), the columns containing the "{}robust"{} prefix (robust\+\_\+\texorpdfstring{$\ast$}{*}) are excluded in the output file.\hypertarget{index_autotoc_md15}{}\doxysubsubsection{\texorpdfstring{full\+:}{full:}}\label{index_autotoc_md15}
+Includes, in addition to "{}meta"{}, an initial header line with the residual variance estimate necessary for re-\/analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md16}{}\doxysubsection{\texorpdfstring{Examples}{Examples}}\label{index_autotoc_md16}
+~\newline
+
+
+To run GEM using the example data, execute GEM with the following code.
+
+Example for cross-\/sectional data without kinship\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./GEM\ -\/-\/bgen\ example.bgen\ -\/-\/sample\ example.sample\ -\/-\/pheno-\/file\ example.pheno\ -\/-\/sampleid-\/name\ sampleid\ -\/-\/pheno-\/name\ pheno2\ -\/-\/covar-\/names\ cov3\ -\/-\/exposure-\/names\ cov1\ -\/-\/robust\ 1\ -\/-\/center\ 0\ -\/-\/missing-\/value\ NaN\ -\/-\/out\ cross\_sectional\_without\_kinship.out}
+
+\end{DoxyCode}
+ The results should look like the following output file \href{https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_without_kinship.out}{\texttt{ cross\+\_\+sectional\+\_\+without\+\_\+kinship.\+out}}. ~\newline
+
+
+Example for cross-\/sectional data with kinship\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./GEM\ -\/-\/kin-\/file\ example.kinship\ -\/-\/kin-\/diag\ 0.5\ -\/-\/pheno-\/file\ example.pheno\ -\/-\/pheno-\/name\ pheno2\ -\/-\/sampleid-\/name\ sampleid\ -\/-\/exposure-\/names\ cov1\ \ -\/-\/covar-\/names\ cov3\ -\/-\/random-\/slope-\/name\ cov3\ -\/-\/bgen\ example.bgen\ -\/-\/sample\ example.sample\ -\/-\/output-\/style\ meta\ -\/-\/out\ cross\_sectional\_with\_kinship.out}
+
+\end{DoxyCode}
+ The results should look like the following output file \href{https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_with_kinship.out}{\texttt{ cross\+\_\+sectional\+\_\+with\+\_\+kinship.\+out}}. ~\newline
+
+
+Example for longitudinal data without kinship\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./GEM\ -\/-\/pheno-\/file\ example.pheno2\ -\/-\/pheno-\/name\ pheno2\ -\/-\/sampleid-\/name\ sampleid\ -\/-\/exposure-\/names\ cov1\ \ -\/-\/covar-\/names\ cov3\ -\/-\/random-\/slope-\/name\ cov3\ -\/-\/bgen\ example.bgen\ -\/-\/sample\ example.sample\ -\/-\/output-\/style\ meta\ -\/-\/out\ longitudinal\_without\_kinship.out}
+
+\end{DoxyCode}
+ The results should look like the following output file \href{https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_without_kinship.out}{\texttt{ longitudinal\+\_\+without\+\_\+kinship.\+out}}. ~\newline
+
+
+Example for longitudinal data with kinship\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./GEM\ -\/-\/kin-\/file\ example.kinship\ -\/-\/kin-\/diag\ 0.5\ -\/-\/pheno-\/file\ example.pheno2\ -\/-\/pheno-\/name\ pheno2\ -\/-\/sampleid-\/name\ sampleid\ -\/-\/exposure-\/names\ cov1\ \ -\/-\/covar-\/names\ cov3\ -\/-\/random-\/slope-\/name\ cov3\ -\/-\/bgen\ example.bgen\ -\/-\/sample\ example.sample\ -\/-\/output-\/style\ \ meta\ -\/-\/out\ longitudinal\_with\_kinship.out}
+
+\end{DoxyCode}
+ The results should look like the following output file \href{https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_with_kinship.out}{\texttt{ longitudinal\+\_\+with\+\_\+kinship.\+out}}. ~\newline
+
+
+~\newline
+\hypertarget{index_autotoc_md17}{}\doxysection{\texorpdfstring{Recent Updates}{Recent Updates}}\label{index_autotoc_md17}
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2}{\texttt{ Version 2.\+2}} -\/ Feb 10, 2026\+:
+\begin{DoxyItemize}
+\item Added convergence check for logistic regression. The program now reports detailed coefficient estimates when the model fails to converge and exits safely.
+\item Added support for {\ttfamily group} variable in null model fitting to allow heteroscedastic residual variance across sample groups. \texorpdfstring{$\ast$}{*}\+Improved memory handling and internal limits to support larger numbers of observations (larger sample sizes)
+\item Updated headers in the output file \href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.3}{\texttt{ Version 2.\+1.\+3}} -\/ June 14, 2025\+:
+\item Added log file support
+\item Updated headers in the output file
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.2}{\texttt{ Version 2.\+1.\+2}} -\/ May 27, 2025\+:
+\begin{DoxyItemize}
+\item Added output columns GV and GV\+\_\+cat\+E\+\_\+\texorpdfstring{$\ast$}{*}
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.1}{\texttt{ Version 2.\+1.\+1}} -\/ April 18, 2025\+:
+\begin{DoxyItemize}
+\item Logged the SNP ID when a singular matrix is detected
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1}{\texttt{ Version 2.\+1}} -\/ March 10, 2025\+:
+\begin{DoxyItemize}
+\item Added support for GLMM on PGEN and BED files
+\item Added support for GEI test on PGEN and BED files
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.0}{\texttt{ Version 2.\+0}} -\/ February 14, 2025\+:
+\begin{DoxyItemize}
+\item Added generalized linear mixed model (GLMM)
+\item Added gen-\/environment interaction (GEI) test
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.3}{\texttt{ Version 1.\+5.\+3}} -\/ May 20, 2024\+:
+\begin{DoxyItemize}
+\item Included stratified values for binary outcomes
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.2}{\texttt{ Version 1.\+5.\+2}} -\/ August 16, 2023\+:
+\begin{DoxyItemize}
+\item Fixed the output when there is no exposure
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.1}{\texttt{ Version 1.\+5.\+1}} -\/ April 20, 2023\+:
+\begin{DoxyItemize}
+\item Treated empty strings as missing values
+\item Fixed a bug for empty strings at the end of each line
+\item Minor changes to messages printed to stdout
+\item Error out if the sample size is not greater than the number of predictors (intercept, exposures, interaction covariates, and covariates) in the null model fitting
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5}{\texttt{ Version 1.\+5}} -\/ March 9, 2023\+:
+
+
+\begin{DoxyItemize}
+\item Changed the default of the --center flag to 2 to center all the interaction covariates only
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.5}{\texttt{ Version 1.\+4.\+5}} -\/ November 11, 2022\+:
+
+
+\begin{DoxyItemize}
+\item Added collinearity check of the covariates before fitting the null model
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.4}{\texttt{ Version 1.\+4.\+4}} -\/ October 5, 2022\+:
+
+
+\begin{DoxyItemize}
+\item Fixed the bugs of include-\/snp-\/file
+\item Removed the default value of flag "{}-\/-\/center"{}
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.3}{\texttt{ Version 1.\+4.\+3}} -\/ March 23, 2022\+:
+
+
+\begin{DoxyItemize}
+\item Sorted the output headers of categorical variables
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.2}{\texttt{ Version 1.\+4.\+2}} -\/ November 22, 2021\+:
+
+
+\begin{DoxyItemize}
+\item Add math.\+h library to install GEM through Docker desktop
+\item Added a binary executable file
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4.1}{\texttt{ Version 1.\+4.\+1}} -\/ September 14, 2021\+:
+
+
+\begin{DoxyItemize}
+\item Added to read phenotype files created from the Windows system
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.4}{\texttt{ Version 1.\+4}} -\/ July 2, 2021\+:
+
+
+\begin{DoxyItemize}
+\item Remove --pheno-\/type flag. If the number of levels (unique observations) is 2, the phenotype is treated as binary; otherwise it is assumed to be continuous
+\item Check for categorical exposures and interaction covariates
+\item Output number of non-\/missing samples (N) and allele frequency (AF) for effect allele for each combination of strata for all   exposures and interaction covariates
+\item Add two additional flags --categorical-\/names and --cat-\/threshold for user definition of categorical variables
+\item Output the SE instead of variance for the coefficient estimates
+\item Output only the lower triangle of the covariance matrix instead of the full matrix
+\item For robust analysis and "{}meta"{}/"{}full"{} output style, include model-\/based summary statistics in the output file
+\item Column names for the robust summary statistics will include the prefix "{}robust\+\_\+"{}
+\item For "{}full"{} output style, an initial header line with the dispersion is included in the output file
+\item The V matrix no longer included in the output file for "{}full"{} output style
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.3}{\texttt{ Version 1.\+3}} -\/ April 7, 2021\+:
+
+
+\begin{DoxyItemize}
+\item Add a new flag (--output-\/style) to modify which summary statistics should be included in the the output file       Column names now include the exposure and interaction covariate names instead of numbers.
+\item The --exposure-\/names flag is now optional. If no exposures are specified, GEM will run a G-\/only model.       Covariates (not of interest) can still be adjusted for using --covar-\/names flag.
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.2}{\texttt{ Version 1.\+2}} -\/ January 22, 2021\+:
+
+
+\begin{DoxyItemize}
+\item Fix issue to allow for space and tab delimited phenotype files.
+\item Allow for centering and scaling of exposures and covariates.
+\item Update calculations for model-\/based joint test
+\item Update calculations for robust joint test
+\item Output covariance, coefficients and standard errors to the log.
+\item Change Allele1 and Allele2 in outfile file to Non\+\_\+\+Effect\+\_\+\+Allele and Effect\+\_\+\+Allele.
+\item Fix bug when phenotype is binary and there are missing genotypes.
+\item Support PGEN/\+BED files.
+\end{DoxyItemize}
+
+\href{https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.1}{\texttt{ Version 1.\+1}} -\/ July 21, 2020\+:
+
+
+\begin{DoxyItemize}
+\item Allow GEM to subset the BGEN file based on a list of variants to include for analysis. --include-\/snp-\/file
+\item Use matrix operation to adjust for covariates instead of for-\/loop. Use the libdeflate package for faster zlib decompression of BGEN genotype blocks. Compile GEM with -\/O2 (optimizer flag). Prioritize BGEN sample file over the BGEN sample identifier block. Error if phenotype (--pheno-\/name) is also included as an exposoure or covariate
+\item Support BGEN v1.\+1, v1.\+2 and v1.\+3 uncompressed genotype blocks.
+\item Fix major printing bug.
+\item Handle missing genotypes in BGEN files.
+\end{DoxyItemize}
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md18}{}\doxysection{\texorpdfstring{Contact}{Contact}}\label{index_autotoc_md18}
+For comments, suggestions, bug reports and questions, please contact Han Chen (\href{mailto:Han.Chen.2@uth.tmc.edu}{\texttt{ Han.\+Chen.\+2@uth.\+tmc.\+edu}}), Alisa Manning (\href{mailto:AKMANNING@mgh.harvard.edu}{\texttt{ AKMANNING@mgh.\+harvard.\+edu}}), Kenny Westerman (\href{mailto:KEWESTERMAN@mgh.harvard.edu}{\texttt{ KEWESTERMAN@mgh.\+harvard.\+edu}}) or Samaneh Salehi Nasab (\href{mailto:Samaneh.SalehiNasab@uth.tmc.edu}{\texttt{ Samaneh.\+Salehi\+Nasab@uth.\+tmc.\+edu}}). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md19}{}\doxysection{\texorpdfstring{References}{References}}\label{index_autotoc_md19}
+If you use GEM in your analysis, please cite
+\begin{DoxyItemize}
+\item Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-\/\+González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM\+: scalable and flexible gene-\/environment interaction analysis in millions of samples. Bioinformatics 37(20)\+:3514-\/3520. Pub\+Med PMID\+: \href{https://www.ncbi.nlm.nih.gov/pubmed/34695175}{\texttt{ {\bfseries{34695175}}}}. PMCID\+: \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/}{\texttt{ {\bfseries{PMC8545347}}}}. DOI\+: \href{https://doi.org/10.1093/bioinformatics/btab223}{\texttt{ {\bfseries{10.\+1093/bioinformatics/btab223}}}}.
+\end{DoxyItemize}
+
+~\newline
+ ~\newline
+\hypertarget{index_autotoc_md20}{}\doxysection{\texorpdfstring{License}{License}}\label{index_autotoc_md20}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{GEM\ :\ Gene-\/Environment\ interaction\ analysis\ for\ Millions\ of\ samples}
+\DoxyCodeLine{Copyright\ (C)\ 2018-\/2026\ \ Liang\ Hong,\ Han\ Chen,\ Duy\ Pham,\ Cong\ Pan,\ Samaneh\ Salehi\ Nasab}
+\DoxyCodeLine{}
+\DoxyCodeLine{This\ program\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify}
+\DoxyCodeLine{it\ under\ the\ terms\ of\ the\ GNU\ General\ Public\ License\ as\ published\ by}
+\DoxyCodeLine{the\ Free\ Software\ Foundation,\ either\ version\ 3\ of\ the\ License,\ or}
+\DoxyCodeLine{(at\ your\ option)\ any\ later\ version.}
+\DoxyCodeLine{}
+\DoxyCodeLine{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,}
+\DoxyCodeLine{but\ WITHOUT\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of}
+\DoxyCodeLine{MERCHANTABILITY\ or\ FITNESS\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the}
+\DoxyCodeLine{GNU\ General\ Public\ License\ for\ more\ details.}
+\DoxyCodeLine{}
+\DoxyCodeLine{You\ should\ have\ received\ a\ copy\ of\ the\ GNU\ General\ Public\ License}
+\DoxyCodeLine{along\ with\ this\ program.\ \ If\ not,\ see\ <http://www.gnu.org/licenses/>.}
+
+\end{DoxyCode}
+ The GEM package is distributed under GPL (\texorpdfstring{$>$}{>}= 3). It includes source code from open source third-\/party software\+:
+
+
+\begin{DoxyItemize}
+\item libdeflate\+: MIT
+\item Plink\+: LGPLv3+
+\item Zstandard (zstd)\+: BSD\+\_\+3\+\_\+clause \texorpdfstring{$\vert$}{|} GPL-\/2
+
+The binary release of GEM also links to third-\/party libraries\+:
+\item Boost\+: Boost Software License, Version 1.\+0
+\item Eigen\+: Mozilla Public License, Version 2.\+0
+\item Intel one\+API Math Kernel Library (one\+MKL)\+: Intel Simplified Software License (Version October 2022 or later)
+\item Armadillo\+: Apache License 2.\+0
+\item Suite\+Sparse\+:
+\begin{DoxyItemize}
+\item libcholmod\+: GNU Lesser General Public License (LGPL), version 2.\+1 or later
+\item libcxsparse\+: GNU Lesser General Public License (LGPL), version 2.\+1 or later
+\item libspqr\+:GNU General Public License (GPL), version 2 or later
+\item libumfpack\+: GNU General Public License (GPL), version 2 or later
+\item libcamd\+: BSD 3-\/Clause License
+\item libccolamd\+: BSD 3-\/Clause License
+\item libcolamd\+: BSD 3-\/Clause License
+\item libamd\+: BSD 3-\/Clause License
+\item libsuitesparseconfig\+: BSD-\/3-\/clause
+\end{DoxyItemize}
+\item fmt\+: MIT License
+
+Full copies of license agreements for GEM, third-\/party source code, linked libraries can be found \href{https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE}{\texttt{ here}}. 
+\end{DoxyItemize}

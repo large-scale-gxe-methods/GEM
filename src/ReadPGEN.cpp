@@ -608,7 +608,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd)
 
 void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Pgen pgen, CommandLine cmd) 
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
@@ -1339,7 +1339,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
         }
         _subset_size = 0;
 
-        auto end_time = std::chrono::high_resolution_clock::now();
+        auto end_time = std::chrono::steady_clock::now();
         cout << "Thread " << thread_num << " finished in ";
         printExecutionTime1(start_time, end_time);
 }

@@ -2,7 +2,7 @@
 #include "TimeUtils.h"
 
 
-void printExecutionTime(std::chrono::high_resolution_clock::time_point start_time, std::chrono::high_resolution_clock::time_point end_time){
+void printExecutionTime(std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time){
 
     auto execution_time_ms   = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     auto execution_time_sec  = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
@@ -30,7 +30,7 @@ void printExecutionTime(std::chrono::high_resolution_clock::time_point start_tim
 }
 
 
-void printExecutionTime1(std::chrono::high_resolution_clock::time_point start_time, std::chrono::high_resolution_clock::time_point end_time) {
+void printExecutionTime1(std::chrono::steady_clock::time_point start_time, std::chrono::steady_clock::time_point end_time) {
 
     auto execution_time_ms = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     auto execution_time_sec = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();

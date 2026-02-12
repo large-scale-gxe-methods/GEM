@@ -1,5 +1,5 @@
 /*  GEM : Gene-Environment interaction analysis for Millions of samples
- *  Copyright (C) 2018-2025  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
+ *  Copyright (C) 2018-2026  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,11 +26,8 @@
    8/01/18:  sample ID matching
    8/30/18:  initial sample Size is not necessary equal
    8/30/18:  hash table of genoUnMatchID for significant unmatching numbers;
-   12/10/18: aritrary stream_snps implemented, omp parallel with > 20 covariates (HC)
+   12/10/18: arbitrary stream_snps implemented, omp parallel with > 20 covariates (HC)
    2/7/19:   speed up reading genotype data without looking up in genoUnMatchID
-
-   To-Do List:
-   1. OOP
  */
 
 #include "GEM.h"
@@ -41,7 +38,7 @@ int main(int argc, char* argv[]) {
     std::string log_file = get_log_name(argc, argv) + ".log";
     LoggerSetup::init(log_file);
     
-    //Add command to the log file
+    // Write the executed command to the log file
     std::ostringstream oss;
     for (int i = 0; i < argc; ++i) 
     {
@@ -60,7 +57,8 @@ int main(int argc, char* argv[]) {
     int samSize;
     int phenoCol;
     int samIDCol;
-    int randomSlopeeCol;
+    int randomSlopeCol;
+    int groupCol;
     int robust = cmd.robust;
     char delim = cmd.pheno_delim;
     std::string kin_path = cmd.kin_file;
@@ -69,6 +67,7 @@ int main(int argc, char* argv[]) {
     double epsilon = cmd.tol;
     string phenoHeaderName = cmd.phenoName;
     string randomSlopeHeaderName = cmd.randomSlope;
+    string groupHeaderName = cmd.group;
     string samIDHeaderName = cmd.sampleID;
     string phenoMissingKey = cmd.missing;
 
@@ -95,10 +94,10 @@ int main(int argc, char* argv[]) {
     for (int i = numExpSelCol - 1; i >= 0; i--) { covSelHeadersName.insert(covSelHeadersName.begin(), expCovSelHeadersName[i]); }
 
     // Start clock
-    auto wall0 = std::chrono::system_clock::now();
+    auto wall0 = std::chrono::steady_clock::now();
     std::clock_t cpu0 = std::clock();
 
-    //Reading phenotype file headers
+    // Reading phenotype file headers
     std::unordered_map<string, int> colNames;
     long unsigned int  phenoncols;
 
@@ -133,7 +132,8 @@ int main(int argc, char* argv[]) {
         cerr << "\nERROR: Cannot find phenotype column " << phenoHeaderName << " in phenotype file. \n\n";
         exit(1);
     }
-    else {
+    else 
+    {
         phenoCol = colNames[phenoHeaderName];
     }
 
@@ -141,29 +141,47 @@ int main(int argc, char* argv[]) {
         cerr << "\nERROR: Cannot find sample ID column " << samIDHeaderName << " in phenotype file. \n\n";
         exit(1);
     }
-    else {
+    else 
+    {
         samIDCol = colNames[samIDHeaderName];
     }
 
     if(randomSlopeHeaderName.size() > 0)
     {
-        if (colNames.find(randomSlopeHeaderName) == colNames.end()) {
+        if (colNames.find(randomSlopeHeaderName) == colNames.end()) 
+        {
             cerr << "\nERROR: Cannot find random slope column " << randomSlopeHeaderName << " in phenotype file. \n\n";
             exit(1);
         }
-        else {
-            randomSlopeeCol = colNames[randomSlopeHeaderName];
+        else 
+        {
+            randomSlopeCol = colNames[randomSlopeHeaderName];
+        }
+    }
+
+     if(groupHeaderName.size() > 0)
+    {
+        if (colNames.find(groupHeaderName) == colNames.end()) 
+        {
+            cerr << "\nERROR: Cannot find random slope column " << groupHeaderName << " in phenotype file. \n\n";
+            exit(1);
+        }
+        else 
+        {
+            groupCol = colNames[groupHeaderName];
         }
     }
 
     for (int i = 0; i < numExpSelCol; i++) {
-        if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) {
+        if (colNames.find(expCovSelHeadersName[i]) == colNames.end()) 
+        {
             cerr << "\nERROR: Cannot find exposure column " << expCovSelHeadersName[i] << " in phenotype file. \n\n";
             exit(1);
         }
     }
     for (int i = 0; i < numIntSelCol; i++) {
-        if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) {
+        if (colNames.find(intCovSelHeadersName[i]) == colNames.end()) 
+        {
             cerr << "\nERROR: Cannot find interaction covariate column " << intCovSelHeadersName[i] << " in phenotype file. \n\n";
             exit(1);
         }
@@ -173,7 +191,8 @@ int main(int argc, char* argv[]) {
             cerr << "\nERROR: Cannot find covariate column " << covSelHeadersName[i] << " in phenotype file. \n\n";
             exit(1);
         }
-        else {
+        else 
+        {
             colSelVec[i] = colNames[covSelHeadersName[i]];
         }
     }
@@ -190,7 +209,7 @@ int main(int argc, char* argv[]) {
     cout << "Size of the phenotype vector is: " << samSize << " X 1\n";
     cout << "Size of the selected covariate matrix (including first column for intercept values) is: " << samSize << " X " << numSelCol + 1 << '\n';
 
-    // A Hashmap phenodata for IDMatching process.
+    // An unordered_map phenodata for IDMatching process.
     // key is smapleID in phenotype file,
     // value is a vector of pheno data as string for the sampleID
     unordered_map<string, vector<vector<string>>> phenomap;
@@ -251,56 +270,14 @@ int main(int argc, char* argv[]) {
         pgen.processPgenHeader(cmd.pgenFile);
         pgen.processPvar(pgen, cmd.pvarFile);
         pgen.processPsam(pgen, cmd.psamFile, phenomap, phenoMissingKey, numSelCol, samSize);
-
-        if (cmd.kin_flag || is_duplicated)
-        {
-            phenomap.clear();
-            auto start_time_gmmat = std::chrono::high_resolution_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
-            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
-            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
-            {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
-            }
-
-            std::ext::V_string pgen_sample_id; 
-            pgen_sample_id = pgen.sampleID_all;
-            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, pgen_sample_id, phenoMissingKey); 
-
-            GMMAT gmmat;
-            gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
-            cout << "\nEnd of association test\n";
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of association test...\n";
-            auto end_time_gmmat = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_gmmat, end_time_gmmat);
-            cout << "Start gene environment interaction test...\n";
-            cout << std::flush;
-            auto start_time_magee = std::chrono::high_resolution_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
-            magee.fitglmm();
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of GEI test...\n";
-            auto end_time_magee = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_magee, end_time_magee);
-            std::chrono::duration<double> wallduration = std::chrono::system_clock::now() - wall0;
-            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
-            cout << "*********************************************************\n";
-            exit(EXIT_SUCCESS);
-        }
-
+        
         for (int i=0; i<covSelHeadersName.size(); i++)
         {
-                if (std::find(pgen.excludeCol.begin(), pgen.excludeCol.end(), (i+1)) == pgen.excludeCol.end())
-                {
-                    
-                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                   
-                }                    
+            if (std::find(pgen.excludeCol.begin(), pgen.excludeCol.end(), (i+1)) == pgen.excludeCol.end())
+            {
+                
+                covSelHeadersName_new.push_back(covSelHeadersName[i]);                   
+            }                    
         }
 
         for (int i=0; i<expCovSelHeadersName.size(); i++)
@@ -358,6 +335,54 @@ int main(int argc, char* argv[]) {
             cout<<"Warning:"<<endl;
             cout<<"TThere are no environmental variables remaining after the collinearity check, and a marginal model without any gene-environment interactions will be used in the genome-wide analysis."<<endl;
             cout << "*********************************************************\n";
+        }
+
+
+        if (cmd.kin_flag || is_duplicated)
+        {
+            phenomap.clear();
+            auto start_time_gmmat = std::chrono::steady_clock::now();
+            vector <string> phenoHeaders(covSelHeadersName);
+            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
+            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+            }
+
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), groupHeaderName);
+            }
+
+            std::ext::V_string pgen_sample_id; 
+            pgen_sample_id = pgen.sampleID_all;
+            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, pgen_sample_id, phenoMissingKey); 
+
+            GMMAT gmmat;
+            gmmat.m_vkins_sp = {sp};
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            cout << "\nEnd of association test\n";
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of association test...\n";
+            auto end_time_gmmat = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_gmmat, end_time_gmmat);
+            cout << "Start GEI test...\n";
+            cout << std::flush;
+            auto start_time_magee = std::chrono::steady_clock::now();
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName, intCovSelHeadersName,
+                        numSelCol); 
+            magee.fitglmm();
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of GEI test...\n";
+            auto end_time_magee = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_magee, end_time_magee);
+            std::chrono::duration<double> wallduration = std::chrono::steady_clock::now() - wall0;
+            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
+            cout << "*********************************************************\n";
+            exit(EXIT_SUCCESS);
         }
 
         samSize = pgen.new_samSize;        
@@ -437,7 +462,7 @@ int main(int argc, char* argv[]) {
         pgen.new_phenodata.clear();
         pgen.getPgenVariantPos(pgen, cmd);
         cout << "The ALT allele in the .pvar file will be used for association testing.\n";
-        auto start_time = std::chrono::high_resolution_clock::now();
+        auto start_time = std::chrono::steady_clock::now();
         
         if (pgen.threads > 1) 
         {
@@ -454,11 +479,10 @@ int main(int argc, char* argv[]) {
         {
             cout << "Running with single thread...\n";
             gemPGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, pgen, cmd);
-
         }
 
         cmd.threads = pgen.threads;
-        auto end_time = std::chrono::high_resolution_clock::now();
+        auto end_time = std::chrono::steady_clock::now();
         printExecutionTime(start_time, end_time);
     }
     
@@ -468,55 +492,12 @@ int main(int argc, char* argv[]) {
         bed.processBed(cmd.bedFile, cmd.bimFile, cmd.famFile);
         bed.processFam(bed, cmd.famFile, phenomap, phenoMissingKey, numSelCol, samSize);
         
-        if (cmd.kin_flag || is_duplicated)
-        {
-           phenomap.clear();
-            auto start_time_gmmat = std::chrono::high_resolution_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
-            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
-            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
-            {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
-            }
-
-            std::ext::V_string bed_sample_id; 
-            bed_sample_id = bed.sampleID_all;
-            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, bed_sample_id, phenoMissingKey); 
-
-            GMMAT gmmat;
-            gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
-            cout << "\nEnd of association test\n";
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of association test...\n";
-            auto end_time_gmmat = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_gmmat, end_time_gmmat);
-            cout << "Start gene environment interaction test...\n";
-            cout << std::flush;
-            auto start_time_magee = std::chrono::high_resolution_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
-            magee.fitglmm();
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of GEI test...\n";
-            auto end_time_magee = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_magee, end_time_magee);
-            std::chrono::duration<double> wallduration = std::chrono::system_clock::now() - wall0;
-            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
-            cout << "*********************************************************\n";
-            exit(EXIT_SUCCESS);
-        }
-        
         for (int i=0; i<covSelHeadersName.size(); i++)
         {
-                if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end())
-                {
-                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
-                }                    
+            if (std::find(bed.excludeCol.begin(), bed.excludeCol.end(), (i+1)) == bed.excludeCol.end())
+            {
+                covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
+            }                    
         }
 
         for (int i=0; i<expCovSelHeadersName.size(); i++)
@@ -575,6 +556,54 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
         }
 
+        if (cmd.kin_flag || is_duplicated)
+        {
+           phenomap.clear();
+            auto start_time_gmmat = std::chrono::steady_clock::now();
+            vector <string> phenoHeaders(covSelHeadersName);
+            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
+            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+            }
+
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), groupHeaderName);
+            }
+
+            std::ext::V_string bed_sample_id; 
+            bed_sample_id = bed.sampleID_all;
+            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, bed_sample_id, phenoMissingKey); 
+
+            GMMAT gmmat;
+            gmmat.m_vkins_sp = {sp};
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            cout << "\nEnd of association test\n";
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of association test...\n";
+            auto end_time_gmmat = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_gmmat, end_time_gmmat);
+            cout << "Start GEI test...\n";
+            cout << std::flush;
+            auto start_time_magee = std::chrono::steady_clock::now();
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName, intCovSelHeadersName,
+                        numSelCol); 
+            magee.fitglmm();
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of GEI test...\n";
+            auto end_time_magee = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_magee, end_time_magee);
+            std::chrono::duration<double> wallduration = std::chrono::steady_clock::now() - wall0;
+            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
+            cout << "*********************************************************\n";
+            exit(EXIT_SUCCESS);
+        }
+        
         samSize = bed.new_samSize;
         bed.numIntSelCol_new=intCovSelHeadersName_new.size();
         bed.numExpSelCol_new=expCovSelHeadersName_new.size();
@@ -661,7 +690,7 @@ int main(int argc, char* argv[]) {
 
         bed.getBedVariantPos(bed, cmd);
         cout << "The ALT allele in the .bim file will be used for association testing.\n";
-        auto start_time = std::chrono::high_resolution_clock::now();
+        auto start_time = std::chrono::steady_clock::now();
         
         if (bed.threads > 1) {
             cout << "Running multithreading...\n";
@@ -679,7 +708,7 @@ int main(int argc, char* argv[]) {
             gemBED(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, bed, cmd);
         }
         cmd.threads = bed.threads;
-        auto end_time = std::chrono::high_resolution_clock::now();
+        auto end_time = std::chrono::steady_clock::now();
         printExecutionTime(start_time, end_time);
     }
 
@@ -688,56 +717,13 @@ int main(int argc, char* argv[]) {
         Bgen bgen;
         bgen.processBgenHeaderBlock(cmd.bgenFile);
         bgen.processBgenSampleBlock(bgen, cmd.samplefile, cmd.useSampleFile, phenomap, phenoMissingKey, numSelCol, samSize);
-        //Run GMMAT and MAGEE if(cmd.kin_flag) True
-        if (cmd.kin_flag || is_duplicated)
-        {
-            phenomap.clear();
-            auto start_time_gmmat = std::chrono::high_resolution_clock::now();
-            vector <string> phenoHeaders(covSelHeadersName);
-            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
-            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
-            
-            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
-            {
-                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
-            }
-
-            std::ext::V_string bgen_sample_id; 
-            bgen_sample_id = bgen.sampleID_all;
-            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, bgen_sample_id, phenoMissingKey); 
-
-            GMMAT gmmat;
-            gmmat.m_vkins_sp = {sp};
-            auto ret_obj = gmmat.glmmkin_postfit(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, "", "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
-            cout << "\nEnd of association test\n";
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of association test...\n";
-            auto end_time_gmmat = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_gmmat, end_time_gmmat);
-            cout << "Start gene environment interaction test...\n";
-            cout << std::flush;
-            auto start_time_magee = std::chrono::high_resolution_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName, intCovSelHeadersName,
-                        numSelCol); 
-            magee.fitglmm();
-            cout << "****************************************************************************\n";
-            cout << "calculating the duration of GEI test...\n";
-            auto end_time_magee = std::chrono::high_resolution_clock::now();
-            printExecutionTime(start_time_magee, end_time_magee);
-            std::chrono::duration<double> wallduration = std::chrono::system_clock::now() - wall0;
-            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
-            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
-            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
-            cout << "*********************************************************\n";
-            exit(EXIT_SUCCESS);
-        }     
         
         for (int i=0; i<covSelHeadersName.size(); i++)
         {
-                if (std::find(bgen.excludeCol.begin(), bgen.excludeCol.end(), (i+1)) == bgen.excludeCol.end())
-                {
-                    covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
-                }
+            if (std::find(bgen.excludeCol.begin(), bgen.excludeCol.end(), (i+1)) == bgen.excludeCol.end())
+            {
+                covSelHeadersName_new.push_back(covSelHeadersName[i]);                    
+            }
         }
 
         for (int i=0; i<expCovSelHeadersName.size(); i++)
@@ -795,6 +781,55 @@ int main(int argc, char* argv[]) {
             cout << "*********************************************************\n";
         }
 
+        //Run GMMAT and MAGEE if(cmd.kin_flag) True
+        if (cmd.kin_flag || is_duplicated)
+        {
+            phenomap.clear();
+            auto start_time_gmmat = std::chrono::steady_clock::now();
+            vector <string> phenoHeaders(covSelHeadersName);
+            phenoHeaders.insert(phenoHeaders.begin(), phenoHeaderName);
+            phenoHeaders.insert(phenoHeaders.begin(), samIDHeaderName);
+            
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), randomSlopeHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), randomSlopeHeaderName);
+            }
+                      
+            if(std::find(phenoHeaders.begin(), phenoHeaders.end(), groupHeaderName) == phenoHeaders.end())
+            {
+                phenoHeaders.insert(phenoHeaders.end(), groupHeaderName);
+            }
+
+            std::ext::V_string bgen_sample_id; 
+            bgen_sample_id = bgen.sampleID_all;
+            SparseInverse sp(kin_path, pheno_path, delim_k, cmd.kin_diag, delim, samIDHeaderName, phenoHeaders, bgen_sample_id, phenoMissingKey); 
+
+            GMMAT gmmat;
+            gmmat.m_vkins_sp = {sp};
+            auto ret_obj = gmmat.glmmkin_init(fitNullModel2, sp.pheno, covSelHeadersName, phenoHeaderName, samIDHeaderName, randomSlopeHeaderName, groupHeaderName, "REML", "AI", 500, 1e-5, 1e-5, 1e+5, 10);
+            cout << "\nEnd of association test\n";
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of association test...\n";
+            auto end_time_gmmat = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_gmmat, end_time_gmmat);
+            cout << "Start GEI test...\n";
+            cout << std::flush;
+            auto start_time_magee = std::chrono::steady_clock::now();
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName, intCovSelHeadersName,
+                        numSelCol); 
+            magee.fitglmm();
+            cout << "****************************************************************************\n";
+            cout << "Calculating the duration of GEI test...\n";
+            auto end_time_magee = std::chrono::steady_clock::now();
+            printExecutionTime(start_time_magee, end_time_magee);
+            std::chrono::duration<double> wallduration = std::chrono::steady_clock::now() - wall0;
+            double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
+            cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
+            cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
+            cout << "*********************************************************\n";
+            exit(EXIT_SUCCESS);
+        }     
+        
         samSize = bgen.new_samSize;
         bgen.numIntSelCol_new=intCovSelHeadersName_new.size();
         bgen.numExpSelCol_new=expCovSelHeadersName_new.size();
@@ -878,14 +913,14 @@ int main(int argc, char* argv[]) {
 
         bgen.new_phenodata.clear();
 
-        auto start_time = std::chrono::high_resolution_clock::now();
+        auto start_time = std::chrono::steady_clock::now();
         bgen.getPositionOfBgenVariant(bgen, cmd);
-        auto end_time = std::chrono::high_resolution_clock::now();
+        auto end_time = std::chrono::steady_clock::now();
         printExecutionTime(start_time, end_time);
 
         //Preparing for parallelizing of BGEN file
         cout << "The second allele in the BGEN file will be used for association testing.\n";
-        start_time = std::chrono::high_resolution_clock::now();
+        start_time = std::chrono::steady_clock::now();
 
         if (bgen.threads > 1) 
         {
@@ -904,13 +939,13 @@ int main(int argc, char* argv[]) {
             gemBGEN(0, sigma2, &residvec[0], &XinvXTXvec[0], miuvec, binE, bgen, cmd);
         }
         cmd.threads = bgen.threads;
-        end_time = std::chrono::high_resolution_clock::now();
+        end_time = std::chrono::steady_clock::now();
         printExecutionTime(start_time, end_time);
     }
 
     // Write all results from each thread to 1 file
     cout << "Combining results... \n";
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     printOutputHeader(cmd.useBgenFile, numExpSelCol_new, Sq_new+1, covSelHeadersName_new, output, cmd.outStyle, cmd.robust, sigma2, binE);
     std::ofstream results(output, std::ios_base::app);
     
@@ -928,17 +963,16 @@ int main(int argc, char* argv[]) {
     }
 
     results.close();
-    auto end_time = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::steady_clock::now();
     printExecutionTime(start_time, end_time);
     // Finished
-    std::chrono::duration<double> wallduration = (std::chrono::system_clock::now() - wall0);
+    std::chrono::duration<double> wallduration = (std::chrono::steady_clock::now() - wall0);
     double cpuduration = (std::clock() - cpu0) / (double)CLOCKS_PER_SEC;
     cout << "Total Wall Time = " << wallduration.count() << "  Seconds\n";
     cout << "Total CPU Time  = " << cpuduration << "  Seconds\n";
     cout << "*********************************************************\n";
     return 0;
 }
-
 
 // Specify the logger file name
 std::string get_log_name(int argc, char* argv[]) 
@@ -1282,7 +1316,7 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
 
 
     cout << "Precalculations and fitting null model..." << endl;
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     // transpose(X) * X
     double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
     matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
@@ -1296,7 +1330,8 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
     matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
 
     // logistic regression
-    while ((phenoType == 1) && (Check != (numSelCol + 1))) 
+    const int MAX_ITER = 500;
+    while ((phenoType == 1) && (Check != (numSelCol + 1)) && (iter < MAX_ITER))
     {
         iter++;
         // X * beta
@@ -1340,6 +1375,31 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         delete[] XbetaFL;
         delete[] betaT;
     }
+    // check if model does not converge
+    if ((phenoType == 1) && (iter >= MAX_ITER) && (Check != (numSelCol + 1)))
+    {
+        spdlog::error("Error: logistic regression failed to converge after {} iterations.", MAX_ITER);
+        spdlog::error("{:>35}", "Estimate");
+
+        for (int i = 0; i < numSelCol + 1; ++i)
+        {
+            std::string name = (i == 0) ? "Intercept" : covSelHeadersName[i - 1];
+
+            // Print aligned table-style output
+            spdlog::error("{:<20}{:>15.6f}", name, beta[i]);
+        }
+        // free allocated memory
+        delete[] XTransX;
+        delete[] XTransY;
+        delete[] beta;
+
+        XTransX = nullptr;
+        XTransY = nullptr;
+        beta    = nullptr;
+
+        // exit program
+        exit(EXIT_FAILURE);
+    }
 
     // X * beta
     double* Xbeta = new double[samSize];
@@ -1349,7 +1409,8 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
     vector<double> XinvXTXvec(samSize * (numSelCol + 1));
     double* XinvXTX = &XinvXTXvec[0];
 
-    if (phenoType == 1) {
+    if (phenoType == 1) 
+    {
         double* WX = new double[samSize * (numSelCol + 1)];
 
         for (int i = 0; i < samSize; i++) 
@@ -1424,7 +1485,7 @@ void fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int
         delete[] XTransXtXR2tX;
         delete[] XTransXR2;
     }
-    auto end_time = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::steady_clock::now();
     printExecutionTime(start_time, end_time);
 
     delete[] XTransX;
@@ -1453,7 +1514,7 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     int Check = 1; // convergence condition of beta^(i+1) - beta^(i)
     int iter = 1;
     cout << "Precalculations and fitting null model..." << endl;
-    //auto start_time = std::chrono::high_resolution_clock::now();
+    //auto start_time = std::chrono::steady_clock::now();
     // transpose(X) * X
     double* XTransX = new double[(numSelCol + 1) * (numSelCol + 1)];
     matTmatprod(covX, covX, XTransX, samSize, numSelCol + 1, numSelCol + 1);
@@ -1468,7 +1529,8 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     matvecprod(XTransX, XTransY, beta, numSelCol + 1, numSelCol + 1);
 
     // logistic regression
-    while ((phenoType == 1) && (Check != (numSelCol + 1))) 
+    const int MAX_ITER = 500;
+    while ((phenoType == 1) && (Check != (numSelCol + 1)) && (iter < MAX_ITER))
     {
         iter++;
         // X * beta
@@ -1513,7 +1575,31 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
         delete[] XbetaFL;
         delete[] betaT;
     }
+    // model did not converge
+    if ((phenoType == 1) && (iter >= MAX_ITER) && (Check != (numSelCol + 1)))
+    {
+        spdlog::error("Error: logistic regression failed to converge after {} iterations.", MAX_ITER);
+        spdlog::error("{:>35}", "Estimate");
 
+        for (int i = 0; i < numSelCol + 1; ++i)
+        {
+            std::string name = (i == 0) ? "Intercept" : covSelHeadersName[i - 1];
+
+            // Print aligned table-style output
+            spdlog::error("{:<20}{:>15.6f}", name, beta[i]);
+        }
+        // free allocated memory
+        delete[] XTransX;
+        delete[] XTransY;
+        delete[] beta;
+
+        XTransX = nullptr;
+        XTransY = nullptr;
+        beta    = nullptr;
+
+        // exit program
+        exit(EXIT_FAILURE);
+    }
     // X * beta
     double* Xbeta = new double[samSize];
     Xbeta_ret.resize(samSize);
@@ -1556,7 +1642,6 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
         matmatprod(covX, XTransX, XinvXTX, samSize, numSelCol + 1, numSelCol + 1);
     }
 
-
     // residual = Y - X * beta
     double sigma2 = 0;
 
@@ -1602,7 +1687,7 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
         delete[] XTransXtXR2tX;
         delete[] XTransXR2;
     }
-    //auto end_time = std::chrono::high_resolution_clock::now();
+    //auto end_time = std::chrono::steady_clock::now();
     //printExecutionTime(start_time, end_time);
 
     //filling beta_ret (alpha) and Xbeta(eta),  needed for calculations in GMMAT 
@@ -1619,15 +1704,15 @@ void fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon,
     beta = nullptr; 
     delete[] Xbeta;
     Xbeta = nullptr; 
-     if (phenoType == 1)
-     {
-        *miu_ret = miu;
-     }
-     else
-     {
-        *miu_ret = Xbeta_ret;
-     }
-    
+    if (phenoType == 1)
+    {
+    *miu_ret = miu;
+    }
+    else
+    {
+    *miu_ret = Xbeta_ret;
+    }
+
     *sigma2_ret = sigma2;
     *resid_ret = residvec;
     *XinvXTX_ret = XinvXTXvec;

@@ -1,42 +1,54 @@
-cmake_minimum_required(VERSION 3.14) 
-# Set your compiler version
+cmake_minimum_required(VERSION 3.14)
+# Set the compiler
 set(CMAKE_C_COMPILER gcc-13)
 set(CMAKE_CXX_COMPILER g++-13)
-project(GEM)
+project(GEM LANGUAGES C CXX)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include(FetchContent)
+# =========================================================
+# Options
+# =========================================================
+option(BUILD_STATIC "Build static executable" OFF)
+option(USE_MKL "Use Intel MKL instead of BLAS/LAPACK" OFF)
 
-# CMake options=================================================================
+# =========================================================
+# C++ standard
+# =========================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-# Fetch fmt ======================================================
+
+# =========================================================
+# Static vs Dynamic
+# =========================================================
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g")
+if(BUILD_STATIC)
+    message(STATUS "Building STATIC executable")
+    set(BUILD_SHARED_LIBS OFF)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -static")
+else()
+    message(STATUS "Building DYNAMIC executable")
+endif()
+
+# =========================================================
+# fmt
+# =========================================================
+include(FetchContent)
+
 FetchContent_Declare(fmt
- GIT_REPOSITORY https://github.com/fmtlib/fmt.git
- GIT_TAG 11.0.2
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 11.0.2
 )
 FetchContent_MakeAvailable(fmt)
-# Fetch spdlog ===================================================
+# =========================================================
+# spdlog
+# =========================================================
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
   GIT_TAG v1.15.0
 )
 FetchContent_MakeAvailable(spdlog)
 
-# Fetch Armadillo=================================================================
-FetchContent_Declare(
-  armadillo
-  GIT_REPOSITORY https://gitlab.com/conradsnicta/armadillo-code
-  GIT_TAG 14.0.x
-)
-
-FetchContent_GetProperties(armadillo)
-if(NOT armadillo_POPULATED)
-  FetchContent_Populate(armadillo)
-  add_library(armadillo INTERFACE)
-  target_include_directories(armadillo INTERFACE ${armadillo_SOURCE_DIR}/include)
-  # add_subdirectory(${armadillo_SOURCE_DIR} ${armadillo_BINARY_DIR})
-endif()
 # Fetch Eigen=====================================================
 FetchContent_Declare(
     eigen
@@ -49,75 +61,91 @@ if(NOT eigen_POPULATED)
     add_library(eigen INTERFACE)
     target_include_directories(eigen INTERFACE ${eigen_SOURCE_DIR})
 endif()
-#Fetch Boost=================================================================
-# FetchContent_Declare(
-#  Boost
-#  GIT_REPOSITORY https://github.com/boostorg/boost.git
-#  GIT_TAG boost-1.85.0
-#  GIT_SHALLOW TRUE
-# )
-# FetchContent_MakeAvailable(Boost)
-# set(BOOST_INCLUDE_LIBRARIES thread filesystem system program_options asio algorithm iostreams math smart_ptr format)
-# set(BOOST_ENABLE_CMAKE ON)
+message(STATUS "Eigen source dir = ${eigen_SOURCE_DIR}")
+# =========================================================
+# Armadillo
+# =========================================================
+FetchContent_Declare(
+  armadillo
+  GIT_REPOSITORY https://gitlab.com/conradsnicta/armadillo-code
+  GIT_TAG 14.0.x
+)
+FetchContent_GetProperties(armadillo)
+if(NOT armadillo_POPULATED)
+  FetchContent_Populate(armadillo)
+  include_directories(${armadillo_SOURCE_DIR}/include)
+  # add_subdirectory(${armadillo_SOURCE_DIR} ${armadillo_BINARY_DIR})
+endif()
 
-# #include(FetchContent)
-# FetchContent_Declare(
-#   Boost
-#   GIT_REPOSITORY https://github.com/boostorg/boost.git
-#   GIT_TAG boost-1.79.0
-#   GIT_SHALLOW TRUE
-# )
-# FetchContent_MakeAvailable(Boost)
+# =========================================================
+# Boost (required)
+# =========================================================
+if(BUILD_STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
+else()
+    set(Boost_USE_STATIC_LIBS OFF)
+endif()
 
-#find Boost=================================================================
-set(BLA_VENDOR Intel10_64lp)
-find_package(Boost 1.74.0 REQUIRED COMPONENTS program_options thread system filesystem)
-include_directories(${Boost_INCLUDE_DIRS})
-#find BLAS/LAPACK=================================================================
-# find_package(BLAS REQUIRED)
-# find_package(LAPACK REQUIRED)
-#Set MKL=================================================================
-set(MKLROOT "/opt/intel/compilers_and_libraries_2020.2.254/linux/mkl")
-message("MKLROOT: ${MKLROOT}")
-message(STATUS "Setting BLAS vendor to Intel10_64lp.")
-
-# Specify include directories for MKL
-include_directories(${MKLROOT}/include)
-message(STATUS "Setting include directory for MKL to ${MKLROOT}/include.")
-
-# Specify library directories for MKL
-link_directories(${MKLROOT}/lib/intel64)
-message(STATUS "Setting library directory for MKL to ${MKLROOT}/lib/intel64.")
-
-# Define EIGEN_USE_MKL_ALL for Eigen library
-add_definitions(-DEIGEN_USE_MKL_ALL)
-# Define ARMA to use MKL
-add_definitions(-DARMA_USE_LAPACK -DARMA_USE_BLAS -DARMA_DONT_USE_WRAPPER)
-
-message(STATUS "Defining EIGEN_USE_MKL_ALL for Eigen  and Armadillo libraries.")
-
-# Set MKL libraries
-set(MKL_LIBRARIES 
-    mkl_intel_lp64       
-    mkl_sequential    
-    mkl_core            
-    pthread
-    m
-    dl
+find_package(Boost REQUIRED COMPONENTS
+    program_options
+    thread
+    system
+    filesystem
 )
 
+# =========================================================
+# BLAS / LAPACK or MKL
+# =========================================================
+if(USE_MKL)
+    if(DEFINED ENV{MKLROOT})
+        set(MKLROOT $ENV{MKLROOT})
+        message(STATUS "Using exported MKL path: ${MKLROOT}")
+    elseif(EXISTS "/opt/intel/oneapi/mkl/latest")
+    # Set MKL path
+        set(MKLROOT "/opt/intel/compilers_and_libraries_2020.2.254/linux/mkl")
+        message(STATUS "Using default MKL path: ${MKLROOT}")
+    else()
+        message(FATAL_ERROR
+            "MKL requested but MKLROOT not found.\n"
+            "Please set MKLROOT, e.g.:\n"
+            "export MKLROOT=/opt/intel/oneapi/mkl/latest"
+        )
+    endif()
 
-#SuiteSparse=================================================================
-#If SuiteSparse is installed in default directory uncomment below line and comment all the lines related to the SuiteSparse
-#find_package(SuiteSparse REQUIRED)
-# Define SuiteSparse installation directory
-# Include the SuiteSparse headers compiled with suitesparse_7.6.0_no_omp replace your path
+    if(BUILD_STATIC)
+      message(STATUS "Using STATIC MKL")
+
+      set(MKL_LIBS
+          -Wl,--start-group
+          ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a
+          ${MKLROOT}/lib/intel64/libmkl_sequential.a
+          ${MKLROOT}/lib/intel64/libmkl_core.a
+          -Wl,--end-group
+          -Wl,-Bstatic -ldl -lpthread -lm
+      )
+
+    else()
+      message(STATUS "Using SHARED MKL")
+
+      set(MKL_LIBS
+          mkl_intel_lp64
+          mkl_sequential
+          mkl_core
+          pthread m dl
+      )
+    endif()
+else()
+    find_package(BLAS REQUIRED)
+    find_package(LAPACK REQUIRED)
+endif()
+# =========================================================
+# SuiteSparse (required)
+# =========================================================
+# Uncomment the line below and comment out the following lines if SuiteSparse is installed in the system root directory
+# find_package(SuiteSparse REQUIRED)
+# If SuiteSparse is not installed in the system root directory, set the paths manually
 include_directories("/home/ssalehinasab/local/suitesparse_7.6.0_no_omp/include/suitesparse/")
-
-# Link the SuiteSparse libraries
 link_directories("/home/ssalehinasab/local/suitesparse_7.6.0_no_omp/lib64")
-
-# Add the SuiteSparse libraries to the target
 set(SUITESPARSE_LIBRARIES
     libcholmod.a 
     libcxsparse.a
@@ -130,9 +158,11 @@ set(SUITESPARSE_LIBRARIES
     libsuitesparseconfig.a 
 )
 
-#=================================================================
-file(GLOB SRC "src/*.cpp")
-file(GLOB CC_SOURCES "thirdparty/plink-2.0/*.cc")
+# =========================================================
+# Sources
+# =========================================================
+file(GLOB CXX_SOURCES "src/*.cpp")
+
 file(GLOB C_SOURCES 
     "thirdparty/zstd-1.5.5/lib/common/*.c"
     "thirdparty/zstd-1.5.5/lib/compress/*.c"
@@ -141,26 +171,48 @@ file(GLOB C_SOURCES
     "thirdparty/libdeflate-1.18/lib/x86/*.c"
     "thirdparty/libdeflate-1.18/lib/arm/*.c"
 )
-# Concatenate the two lists of source files
-set(SOURCES ${SRC} ${CC_SOURCES} ${C_SOURCES})
-#=================================================================
-# Add the executable with the concatenated source files
-add_executable(GEM ${SOURCES} )
-target_link_libraries(GEM
-  PRIVATE
-    spdlog
-    fmt::fmt
-    # BLAS::BLAS 
-    # LAPACK::LAPACK
+
+file(GLOB CC_SOURCES "thirdparty/plink-2.0/*.cc")
+
+# =========================================================
+# Executable
+# =========================================================
+add_executable(GEM2
+    ${CXX_SOURCES}
+    ${C_SOURCES}
+    ${CC_SOURCES}
+)
+# Armadillo always uses BLAS/LAPACK
+target_compile_definitions(GEM2 PRIVATE
+    ARMA_USE_BLAS
+    ARMA_USE_LAPACK
+    ARMA_DONT_USE_WRAPPER
+)
+
+# Eigen uses MKL only if MKL is enabled
+if(USE_MKL)
+    target_compile_definitions(GEM2 PRIVATE
+        EIGEN_USE_MKL_ALL
+    )
+endif()
+# =========================================================
+# Link libraries
+# =========================================================
+target_link_libraries(GEM2 PRIVATE
+    # Eigen3::Eigen
     eigen
-    armadillo 
+    fmt::fmt
+    spdlog::spdlog
+    Boost::program_options
     Boost::thread
     Boost::system
     Boost::filesystem
-    Boost::program_options
     ${SUITESPARSE_LIBRARIES}
-    ${MKL_LIBRARIES}
 )
 
-# Set compiler optimization flags 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops -ffast-math  -fno-math-errno -DNDEBUG") #-Wall -DMKL_ILP64 -march=native -m64 -fopenmp -mfma
+if(USE_MKL)
+    target_link_libraries(GEM2 PRIVATE ${MKL_LIBS})
+else()
+    target_link_libraries(GEM2 PRIVATE ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+endif()
+

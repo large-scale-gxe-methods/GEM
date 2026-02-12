@@ -1,0 +1,154 @@
+\doxysection{src/\+Matrix\+Utils.cpp File Reference}
+\hypertarget{MatrixUtils_8cpp}{}\label{MatrixUtils_8cpp}\index{src/MatrixUtils.cpp@{src/MatrixUtils.cpp}}
+{\ttfamily \#include $<$cstdio$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_af9ff09bc1eff84fe77dcc0af82988706}{dgemm\+\_\+}} (char \texorpdfstring{$\ast$}{*}TRANSA, char \texorpdfstring{$\ast$}{*}TRANSB, const int \texorpdfstring{$\ast$}{*}M, const int \texorpdfstring{$\ast$}{*}N, const int \texorpdfstring{$\ast$}{*}K, double \texorpdfstring{$\ast$}{*}alpha, double \texorpdfstring{$\ast$}{*}A, const int \texorpdfstring{$\ast$}{*}LDA, double \texorpdfstring{$\ast$}{*}B, const int \texorpdfstring{$\ast$}{*}LDB, double \texorpdfstring{$\ast$}{*}beta, double \texorpdfstring{$\ast$}{*}C, const int \texorpdfstring{$\ast$}{*}LDC)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a699f04aef491cbee4eb067fcb36d00b8}{dgemv\+\_\+}} (char \texorpdfstring{$\ast$}{*}TRANS, const int \texorpdfstring{$\ast$}{*}M, const int \texorpdfstring{$\ast$}{*}N, double \texorpdfstring{$\ast$}{*}alpha, double \texorpdfstring{$\ast$}{*}A, const int \texorpdfstring{$\ast$}{*}LDA, double \texorpdfstring{$\ast$}{*}X, const int \texorpdfstring{$\ast$}{*}INCX, double \texorpdfstring{$\ast$}{*}beta, double \texorpdfstring{$\ast$}{*}C, const int \texorpdfstring{$\ast$}{*}INCY)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a45b81cb7d127c7796f12829bb3abdab4}{dgetrf\+\_\+}} (const int \texorpdfstring{$\ast$}{*}M, const int \texorpdfstring{$\ast$}{*}N, double \texorpdfstring{$\ast$}{*}A, const int \texorpdfstring{$\ast$}{*}LDA, const int \texorpdfstring{$\ast$}{*}IPIV, const int \texorpdfstring{$\ast$}{*}INFO)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a3f9f011ecd2edb7e21669c2b6481567a}{dgetri\+\_\+}} (const int \texorpdfstring{$\ast$}{*}N, double \texorpdfstring{$\ast$}{*}A, const int \texorpdfstring{$\ast$}{*}LDA, const int \texorpdfstring{$\ast$}{*}IPIV, double \texorpdfstring{$\ast$}{*}WORK, const int \texorpdfstring{$\ast$}{*}LWORK, const int \texorpdfstring{$\ast$}{*}INFO)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_ac8eabd49b5f1130e1acd46ce3581290c}{daxpy\+\_\+}} (const int \texorpdfstring{$\ast$}{*}N, double \texorpdfstring{$\ast$}{*}DA, double \texorpdfstring{$\ast$}{*}DX, const int \texorpdfstring{$\ast$}{*}INCX, double \texorpdfstring{$\ast$}{*}DY, const int \texorpdfstring{$\ast$}{*}INCY)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_ad2ace9d229fcef9b967f134877d1a874}{dlacpy\+\_\+}} (char \texorpdfstring{$\ast$}{*}uplo, const int \texorpdfstring{$\ast$}{*}m, const int \texorpdfstring{$\ast$}{*}n, double \texorpdfstring{$\ast$}{*}a, const int \texorpdfstring{$\ast$}{*}lda, double \texorpdfstring{$\ast$}{*}b, const int \texorpdfstring{$\ast$}{*}ldb)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a6d81676f2e6b8eac085a3093418e44f4}{initvec}} (double \texorpdfstring{$\ast$}{*}v, int N)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a1765d9b6e5bc8aeb4fa9d484fa84b608}{mat\+Tmatprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol, int NcolB)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a3bfb24065fb3d3e51b22787356712eb0}{mat\+Nmat\+Nprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol, int NcolB)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a981d51f6c0ab78af7fb48ac02c23821c}{matmatprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol, int NcolB)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a85fd10a0f29bf18fdbc1ac2ba857df3b}{matmat\+Tprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol, int NcolB)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_ad830598b09bd6702bcbd8a07135ebf65}{mat\+Tvecprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a16ae8145a301a07f0c6de1e8bc1615a1}{matvecprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a3f9e470e320f743addd84e29fb087aef}{vecmatprod}} (double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}u, int N)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a5a445bd89d6264b7ec3ca4db0b0a16ba}{mat\+Inv}} (double \texorpdfstring{$\ast$}{*}A, int N)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a567fbcd7c6e606b0eb297417eac78dc2}{mat\+Add}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}B, int N, double alpha)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a310347937ad8f3aa0fed9a87fb4195ff}{sub\+Matrix}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}u, int M, int N, int NrowA, int NrowB, int start)
+\item 
+void \mbox{\hyperlink{MatrixUtils_8cpp_a99052809c8980aee16bfba40cd13826b}{matvec\+Sprod}} (double \texorpdfstring{$\ast$}{*}A, double \texorpdfstring{$\ast$}{*}v, double \texorpdfstring{$\ast$}{*}u, int Nrow, int Ncol, int start)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{MatrixUtils_8cpp_ac8eabd49b5f1130e1acd46ce3581290c}\label{MatrixUtils_8cpp_ac8eabd49b5f1130e1acd46ce3581290c} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!daxpy\_@{daxpy\_}}
+\index{daxpy\_@{daxpy\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{daxpy\_()}{daxpy\_()}}
+{\footnotesize\ttfamily void daxpy\+\_\+ (\begin{DoxyParamCaption}\item[{const int \texorpdfstring{$\ast$}{*}}]{N,  }\item[{double \texorpdfstring{$\ast$}{*}}]{DA,  }\item[{double \texorpdfstring{$\ast$}{*}}]{DX,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INCX,  }\item[{double \texorpdfstring{$\ast$}{*}}]{DY,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INCY }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_af9ff09bc1eff84fe77dcc0af82988706}\label{MatrixUtils_8cpp_af9ff09bc1eff84fe77dcc0af82988706} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!dgemm\_@{dgemm\_}}
+\index{dgemm\_@{dgemm\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{dgemm\_()}{dgemm\_()}}
+{\footnotesize\ttfamily void dgemm\+\_\+ (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{TRANSA,  }\item[{char \texorpdfstring{$\ast$}{*}}]{TRANSB,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{M,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{N,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{K,  }\item[{double \texorpdfstring{$\ast$}{*}}]{alpha,  }\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDA,  }\item[{double \texorpdfstring{$\ast$}{*}}]{B,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDB,  }\item[{double \texorpdfstring{$\ast$}{*}}]{beta,  }\item[{double \texorpdfstring{$\ast$}{*}}]{C,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDC }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a699f04aef491cbee4eb067fcb36d00b8}\label{MatrixUtils_8cpp_a699f04aef491cbee4eb067fcb36d00b8} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!dgemv\_@{dgemv\_}}
+\index{dgemv\_@{dgemv\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{dgemv\_()}{dgemv\_()}}
+{\footnotesize\ttfamily void dgemv\+\_\+ (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{TRANS,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{M,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{N,  }\item[{double \texorpdfstring{$\ast$}{*}}]{alpha,  }\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDA,  }\item[{double \texorpdfstring{$\ast$}{*}}]{X,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INCX,  }\item[{double \texorpdfstring{$\ast$}{*}}]{beta,  }\item[{double \texorpdfstring{$\ast$}{*}}]{C,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INCY }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a45b81cb7d127c7796f12829bb3abdab4}\label{MatrixUtils_8cpp_a45b81cb7d127c7796f12829bb3abdab4} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!dgetrf\_@{dgetrf\_}}
+\index{dgetrf\_@{dgetrf\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{dgetrf\_()}{dgetrf\_()}}
+{\footnotesize\ttfamily void dgetrf\+\_\+ (\begin{DoxyParamCaption}\item[{const int \texorpdfstring{$\ast$}{*}}]{M,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{N,  }\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDA,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{IPIV,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INFO }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a3f9f011ecd2edb7e21669c2b6481567a}\label{MatrixUtils_8cpp_a3f9f011ecd2edb7e21669c2b6481567a} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!dgetri\_@{dgetri\_}}
+\index{dgetri\_@{dgetri\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{dgetri\_()}{dgetri\_()}}
+{\footnotesize\ttfamily void dgetri\+\_\+ (\begin{DoxyParamCaption}\item[{const int \texorpdfstring{$\ast$}{*}}]{N,  }\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LDA,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{IPIV,  }\item[{double \texorpdfstring{$\ast$}{*}}]{WORK,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{LWORK,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{INFO }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_ad2ace9d229fcef9b967f134877d1a874}\label{MatrixUtils_8cpp_ad2ace9d229fcef9b967f134877d1a874} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!dlacpy\_@{dlacpy\_}}
+\index{dlacpy\_@{dlacpy\_}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{dlacpy\_()}{dlacpy\_()}}
+{\footnotesize\ttfamily void dlacpy\+\_\+ (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{uplo,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{m,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{n,  }\item[{double \texorpdfstring{$\ast$}{*}}]{a,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{lda,  }\item[{double \texorpdfstring{$\ast$}{*}}]{b,  }\item[{const int \texorpdfstring{$\ast$}{*}}]{ldb }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a6d81676f2e6b8eac085a3093418e44f4}\label{MatrixUtils_8cpp_a6d81676f2e6b8eac085a3093418e44f4} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!initvec@{initvec}}
+\index{initvec@{initvec}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{initvec()}{initvec()}}
+{\footnotesize\ttfamily void initvec (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{int}]{N }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a567fbcd7c6e606b0eb297417eac78dc2}\label{MatrixUtils_8cpp_a567fbcd7c6e606b0eb297417eac78dc2} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matAdd@{matAdd}}
+\index{matAdd@{matAdd}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matAdd()}{matAdd()}}
+{\footnotesize\ttfamily void mat\+Add (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{B,  }\item[{int}]{N,  }\item[{double}]{alpha }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a5a445bd89d6264b7ec3ca4db0b0a16ba}\label{MatrixUtils_8cpp_a5a445bd89d6264b7ec3ca4db0b0a16ba} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matInv@{matInv}}
+\index{matInv@{matInv}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matInv()}{matInv()}}
+{\footnotesize\ttfamily void mat\+Inv (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{int}]{N }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a981d51f6c0ab78af7fb48ac02c23821c}\label{MatrixUtils_8cpp_a981d51f6c0ab78af7fb48ac02c23821c} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matmatprod@{matmatprod}}
+\index{matmatprod@{matmatprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matmatprod()}{matmatprod()}}
+{\footnotesize\ttfamily void matmatprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol,  }\item[{int}]{NcolB }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a85fd10a0f29bf18fdbc1ac2ba857df3b}\label{MatrixUtils_8cpp_a85fd10a0f29bf18fdbc1ac2ba857df3b} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matmatTprod@{matmatTprod}}
+\index{matmatTprod@{matmatTprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matmatTprod()}{matmatTprod()}}
+{\footnotesize\ttfamily void matmat\+Tprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol,  }\item[{int}]{NcolB }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a3bfb24065fb3d3e51b22787356712eb0}\label{MatrixUtils_8cpp_a3bfb24065fb3d3e51b22787356712eb0} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matNmatNprod@{matNmatNprod}}
+\index{matNmatNprod@{matNmatNprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matNmatNprod()}{matNmatNprod()}}
+{\footnotesize\ttfamily void mat\+Nmat\+Nprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol,  }\item[{int}]{NcolB }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a1765d9b6e5bc8aeb4fa9d484fa84b608}\label{MatrixUtils_8cpp_a1765d9b6e5bc8aeb4fa9d484fa84b608} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matTmatprod@{matTmatprod}}
+\index{matTmatprod@{matTmatprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matTmatprod()}{matTmatprod()}}
+{\footnotesize\ttfamily void mat\+Tmatprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol,  }\item[{int}]{NcolB }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_ad830598b09bd6702bcbd8a07135ebf65}\label{MatrixUtils_8cpp_ad830598b09bd6702bcbd8a07135ebf65} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matTvecprod@{matTvecprod}}
+\index{matTvecprod@{matTvecprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matTvecprod()}{matTvecprod()}}
+{\footnotesize\ttfamily void mat\+Tvecprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a16ae8145a301a07f0c6de1e8bc1615a1}\label{MatrixUtils_8cpp_a16ae8145a301a07f0c6de1e8bc1615a1} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matvecprod@{matvecprod}}
+\index{matvecprod@{matvecprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matvecprod()}{matvecprod()}}
+{\footnotesize\ttfamily void matvecprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a99052809c8980aee16bfba40cd13826b}\label{MatrixUtils_8cpp_a99052809c8980aee16bfba40cd13826b} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!matvecSprod@{matvecSprod}}
+\index{matvecSprod@{matvecSprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{matvecSprod()}{matvecSprod()}}
+{\footnotesize\ttfamily void matvec\+Sprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{Nrow,  }\item[{int}]{Ncol,  }\item[{int}]{start }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a310347937ad8f3aa0fed9a87fb4195ff}\label{MatrixUtils_8cpp_a310347937ad8f3aa0fed9a87fb4195ff} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!subMatrix@{subMatrix}}
+\index{subMatrix@{subMatrix}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{subMatrix()}{subMatrix()}}
+{\footnotesize\ttfamily void sub\+Matrix (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{M,  }\item[{int}]{N,  }\item[{int}]{NrowA,  }\item[{int}]{NrowB,  }\item[{int}]{start }\end{DoxyParamCaption})}
+
+\Hypertarget{MatrixUtils_8cpp_a3f9e470e320f743addd84e29fb087aef}\label{MatrixUtils_8cpp_a3f9e470e320f743addd84e29fb087aef} 
+\index{MatrixUtils.cpp@{MatrixUtils.cpp}!vecmatprod@{vecmatprod}}
+\index{vecmatprod@{vecmatprod}!MatrixUtils.cpp@{MatrixUtils.cpp}}
+\doxysubsubsection{\texorpdfstring{vecmatprod()}{vecmatprod()}}
+{\footnotesize\ttfamily void vecmatprod (\begin{DoxyParamCaption}\item[{double \texorpdfstring{$\ast$}{*}}]{v,  }\item[{double \texorpdfstring{$\ast$}{*}}]{A,  }\item[{double \texorpdfstring{$\ast$}{*}}]{u,  }\item[{int}]{N }\end{DoxyParamCaption})}
+

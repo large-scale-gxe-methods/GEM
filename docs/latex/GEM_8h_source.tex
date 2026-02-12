@@ -1,0 +1,41 @@
+\doxysection{GEM.\+h}
+\hypertarget{GEM_8h_source}{}\label{GEM_8h_source}\index{include/GEM.h@{include/GEM.h}}
+\mbox{\hyperlink{GEM_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{GMMAT_8h}{GMMAT.h}}"{}}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{MAGEE_8h}{MAGEE.h}}"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{declars_8h}{declars.h}}"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{Logger_8h}{Logger.h}}"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00022\ std::string\ \mbox{\hyperlink{GEM_8h_a1b3b3f1770d02f901ad12f51ccb135f0}{get\_log\_name}}(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}*\ argv[]);}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00043\ \textcolor{keywordtype}{int}\ \ \mbox{\hyperlink{GEM_8h_a8d7f0036da93b8141c6c59a62a2e4f1b}{checkBinary}}(unordered\_map<\textcolor{keywordtype}{string},\ vector<vector<string>>>\ phenoMap,\ vector<string>\ sampleID,\ \textcolor{keywordtype}{double}\ epsilon);}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{GEM_8h_a1aa9cf5f0c87af78e1835b31206f43c7}{center}}(\textcolor{keywordtype}{int}\ \mbox{\hyperlink{GEM_8h_a1aa9cf5f0c87af78e1835b31206f43c7}{center}},\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{MAGEE_8h_ac40522dbe9f47afcc76b51ab3c0cc787}{scale}},\ \textcolor{keywordtype}{int}\ samSize,\ \textcolor{keywordtype}{int}\ numSelCol,\ vector<double>\ covdata,\ vector<double>*\ covdata\_ret);}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00080\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{GEM_8h_aafce8f94fb0c5d0cc53348214728500d}{fitNullModel2}}(\textcolor{keywordtype}{int}\ samSize,\ \textcolor{keywordtype}{int}\ numSelCol,\ \textcolor{keywordtype}{int}\ phenoType,\ \textcolor{keywordtype}{double}\ epsilon,\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ robust,\ std::vector<string>\ covSelHeadersName,\ std::vector<double>\ phenodata,\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\ covdata,\ std::vector<double>*\ XinvXTX\_ret,\ vector<double>*\ miu\_ret,\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vector<double>*\ resid\_ret,\ \textcolor{keywordtype}{double}*\ sigma2\_ret,\ std::vector<double>\&\ beta\_ret,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\&\ Xbeta\_ret);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00117\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{GEM_8h_a0aab9e409bb31acf52f8c56ff89c16e5}{fitNullModel}}(\textcolor{keywordtype}{int}\ samSize,\ \textcolor{keywordtype}{int}\ numSelCol,\ \textcolor{keywordtype}{int}\ phenoType,\ \textcolor{keywordtype}{double}\ epsilon,\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ robust,\ std::vector<string>\ covSelHeadersName,\ std::vector<double>\ phenodata,\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<double>\ covdata,\ std::vector<double>*\ XinvXTX\_ret,\ vector<double>*\ miu\_ret,\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vector<double>*\ resid\_ret,\ \textcolor{keywordtype}{double}*\ sigma2\_ret);}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00143\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{GEM_8h_ad636a6ecd90250dc30abbb339147d6b5}{printCovVarMat}}(\textcolor{keywordtype}{int}\ numCovs,\ vector<string>\ covNames,\ \textcolor{keywordtype}{double}*\ covVarMat,\ \textcolor{keywordtype}{double}*\ beta,\ \textcolor{keywordtype}{int}\ phenoType,\ \textcolor{keywordtype}{int}\ samSize);}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00169\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{GEM_8h_a9afa04e18f3df9f294556f04dfaec582}{printOutputHeader}}(\textcolor{keywordtype}{bool}\ useBgen,\ \textcolor{keywordtype}{int}\ numExpSelCol\_new,\ \textcolor{keywordtype}{int}\ Sq1,\ vector<string>\ covNames,\ \textcolor{keywordtype}{string}\ output,\ \textcolor{keywordtype}{string}\ outStyle,\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ robust,\ \textcolor{keywordtype}{double}\ sigma2,\ \mbox{\hyperlink{classBinE}{BinE}}\ binE);}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00173\ }
+
+\end{DoxyCode}

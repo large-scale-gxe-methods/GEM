@@ -1,0 +1,19 @@
+\doxysection{include/\+Logger.h File Reference}
+\hypertarget{Logger_8h}{}\label{Logger_8h}\index{include/Logger.h@{include/Logger.h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$streambuf$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$spdlog/spdlog.\+h$>$}\newline
+{\ttfamily \#include $<$spdlog/sinks/stdout\+\_\+color\+\_\+sinks.\+h$>$}\newline
+{\ttfamily \#include $<$spdlog/sinks/basic\+\_\+file\+\_\+sink.\+h$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classCoutRedirector}{Cout\+Redirector}}
+\begin{DoxyCompactList}\small\item\em Redirects standard output (std\+::cout) into the spdlog logging system. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classCerrRedirector}{Cerr\+Redirector}}
+\begin{DoxyCompactList}\small\item\em Redirects standard error output (std\+::cerr) into the spdlog logging system. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classLoggerSetup}{Logger\+Setup}}
+\begin{DoxyCompactList}\small\item\em Initializes a global spdlog logger and redirects std\+::cout/std\+::cerr. \end{DoxyCompactList}\end{DoxyCompactItemize}

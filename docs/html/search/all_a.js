@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['famdelim_0',['famDelim',['../classBed.html#a1acf57c0ef564a1cc0e45a8ed9c8eb2f',1,'Bed']]],
+  ['famfile_1',['famFile',['../classCommandLine.html#a01f13a03f8f6a4f87faef76d94a3a5bd',1,'CommandLine']]],
+  ['fifth_20individual_20_3a_2',['Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.05 for the fifth individual):',['../index.html#autotoc_md8',1,'']]],
+  ['file_20corresponding_20to_20example_201_20along_20with_20ndash_20kin_20diag_200_205_20_3a_3',['The Kinship File Corresponding to Example 1 (along with &amp;ndash;kin-diag 0.5):',['../index.html#autotoc_md9',1,'']]],
+  ['file_20corresponding_20to_20example_202_20along_20with_20ndash_20kin_20diag_201_20_3a_4',['The Kinship File Corresponding to Example 2 (along with &amp;ndash;kin-diag 1):',['../index.html#autotoc_md11',1,'']]],
+  ['file_20format_5',['Output File Format',['../index.html#autotoc_md12',1,'']]],
+  ['files_6',['Input Files',['../index.html#autotoc_md7',1,'']]],
+  ['filter_5felements_7',['filter_elements',['../Fitglmm_8cpp.html#ab59281b260fe891e67b64357d8d83786',1,'Fitglmm.cpp']]],
+  ['filter_5funique_5frows_8',['filter_unique_rows',['../MAGEE_8h.html#a45ab1f3c1df4ed33719ee998f9649d4b',1,'filter_unique_rows(DensMat const &amp;mat, std::ext::V_string &amp;id_include):&#160;MAGEE.cpp'],['../MAGEE_8cpp.html#a45ab1f3c1df4ed33719ee998f9649d4b',1,'filter_unique_rows(DensMat const &amp;mat, std::ext::V_string &amp;id_include):&#160;MAGEE.cpp']]],
+  ['filtered_5fids_9',['filtered_ids',['../MAGEE_8h.html#a7727f4aeba27c13934b28cb95d9f5474',1,'filtered_ids(std::ext::V_string const &amp;vec1, std::ext::V_bool const &amp;vec2):&#160;MAGEE.cpp'],['../MAGEE_8cpp.html#a7727f4aeba27c13934b28cb95d9f5474',1,'filtered_ids(std::ext::V_string const &amp;vec1, std::ext::V_bool const &amp;vec2):&#160;MAGEE.cpp']]],
+  ['filtervariants_10',['filtervariants',['../classPgen.html#ad4e017d4cc5afa85182e01f2a959fb54',1,'Pgen::filterVariants'],['../classBgen.html#a037a6908eb1712d904dd61cbc85184f7',1,'Bgen::filterVariants'],['../classBed.html#a987cf050f530418a06bf8efedce8cf6e',1,'Bed::filterVariants']]],
+  ['fin_11',['fin',['../classBgen.html#ab2ce0a44188b444a1b8fd94bae07279b',1,'Bgen']]],
+  ['find_5findx_12',['find_indx',['../Fitglmm_8cpp.html#aaeb0db86d01088ed7bc7c6e8a6f5716b',1,'Fitglmm.cpp']]],
+  ['fit_13',['fit',['../structGlmmkin.html#a218890d4d7fdf6d7af08622bff66c532',1,'Glmmkin::fit'],['../structFit.html',1,'Fit']]],
+  ['fitglmm_14',['fitglmm',['../classMAGEE.html#ac70ef0cfee9abba7a50f973aa148ee1e',1,'MAGEE']]],
+  ['fitglmm_2ecpp_15',['Fitglmm.cpp',['../Fitglmm_8cpp.html',1,'']]],
+  ['fitnull_5ff_16',['FitNull_f',['../namespacestd_1_1ext.html#a474f47259347d846d697c283fa8baaab',1,'std::ext']]],
+  ['fitnullmodel_17',['fitnullmodel',['../GEM_8cpp.html#a0aab9e409bb31acf52f8c56ff89c16e5',1,'fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector&lt; string &gt; covSelHeadersName, std::vector&lt; double &gt; phenodata, std::vector&lt; double &gt; covdata, std::vector&lt; double &gt; *XinvXTX_ret, vector&lt; double &gt; *miu_ret, vector&lt; double &gt; *resid_ret, double *sigma2_ret):&#160;GEM.cpp'],['../GEM_8h.html#a0aab9e409bb31acf52f8c56ff89c16e5',1,'fitNullModel(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector&lt; string &gt; covSelHeadersName, std::vector&lt; double &gt; phenodata, std::vector&lt; double &gt; covdata, std::vector&lt; double &gt; *XinvXTX_ret, vector&lt; double &gt; *miu_ret, vector&lt; double &gt; *resid_ret, double *sigma2_ret):&#160;GEM.cpp']]],
+  ['fitnullmodel2_18',['fitnullmodel2',['../GEM_8cpp.html#aafce8f94fb0c5d0cc53348214728500d',1,'fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector&lt; string &gt; covSelHeadersName, std::vector&lt; double &gt; phenodata, std::vector&lt; double &gt; covdata, std::vector&lt; double &gt; *XinvXTX_ret, vector&lt; double &gt; *miu_ret, vector&lt; double &gt; *resid_ret, double *sigma2_ret, std::vector&lt; double &gt; &amp;beta_ret, std::vector&lt; double &gt; &amp;Xbeta_ret):&#160;GEM.cpp'],['../GEM_8h.html#aafce8f94fb0c5d0cc53348214728500d',1,'fitNullModel2(int samSize, int numSelCol, int phenoType, double epsilon, int robust, std::vector&lt; string &gt; covSelHeadersName, std::vector&lt; double &gt; phenodata, std::vector&lt; double &gt; covdata, std::vector&lt; double &gt; *XinvXTX_ret, vector&lt; double &gt; *miu_ret, vector&lt; double &gt; *resid_ret, double *sigma2_ret, std::vector&lt; double &gt; &amp;beta_ret, std::vector&lt; double &gt; &amp;Xbeta_ret):&#160;GEM.cpp']]],
+  ['for_20the_20fifth_20individual_20_3a_19',['Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.05 for the fifth individual):',['../index.html#autotoc_md8',1,'']]],
+  ['format_20',['Output File Format',['../index.html#autotoc_md12',1,'']]],
+  ['full_3a_21',['full:',['../index.html#autotoc_md15',1,'']]]
+];

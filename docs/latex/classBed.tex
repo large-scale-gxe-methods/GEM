@@ -1,0 +1,216 @@
+\doxysection{Bed Class Reference}
+\hypertarget{classBed}{}\label{classBed}\index{Bed@{Bed}}
+
+
+{\ttfamily \#include $<$Read\+Bed.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classBed_aef8fa104452220e4e713fc3d47e50c93}{process\+Bed}} (string bed\+File, string bim\+File, string fam\+File)
+\item 
+void \mbox{\hyperlink{classBed_a9341b7de3c859221e726b560c9cdc612}{process\+Fam}} (\mbox{\hyperlink{classBed}{Bed}} bed, string fam\+File, unordered\+\_\+map$<$ string, vector$<$ vector$<$ string $>$ $>$ $>$ phenomap, string pheno\+Missing\+Key, int num\+Sel\+Col, int sam\+Size)
+\item 
+void \mbox{\hyperlink{classBed_ad9a0fddce7f15b56004de12933f9b662}{get\+Bed\+Variant\+Pos}} (\mbox{\hyperlink{classBed}{Bed}} bed, \mbox{\hyperlink{classCommandLine}{Command\+Line}} cmd)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classBed_a489e8e1fdf5bf1816b4d5628b5f5dad1}{n\+\_\+samples}} = 0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classBed_a3f22b04b33de2d54c653ba134c8c39fe}{n\+\_\+variants}} = 0
+\item 
+char \mbox{\hyperlink{classBed_a1acf57c0ef564a1cc0e45a8ed9c8eb2f}{fam\+Delim}}
+\item 
+char \mbox{\hyperlink{classBed_abfe83ed0482a4b629e1fcabba2fc6224}{bim\+Delim}}
+\item 
+int \mbox{\hyperlink{classBed_a13b7cf5ed777939ba8db813e05b9ad71}{bim\+Last}}
+\item 
+int \mbox{\hyperlink{classBed_a40c976ac8641560a3363aa17fde7e7e2}{new\+\_\+sam\+Size}}
+\item 
+std\+::vector$<$ string $>$ \mbox{\hyperlink{classBed_a9cf4828d3a111ed7f5f098766832a011}{sample\+ID}}
+\item 
+std\+::vector$<$ string $>$ \mbox{\hyperlink{classBed_a199ff1b7597be8f6ddf3811c87a2d046}{sample\+ID\+\_\+all}}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{classBed_a50ade187e0e99f5169fe59d723a8024f}{new\+\_\+covdata}}
+\item 
+std\+::vector$<$ double $>$ \mbox{\hyperlink{classBed_a6e5b89045f40841b8f79959f08ed779c}{new\+\_\+phenodata}}
+\item 
+std\+::vector$<$ long int $>$ \mbox{\hyperlink{classBed_a882700235c7d7cc44de37b5fdec658b9}{include\+\_\+idx}}
+\item 
+int \mbox{\hyperlink{classBed_adeaabd6bf5a729ebad3197ffb371e4d4}{num\+Int\+Sel\+Col\+\_\+new}}
+\item 
+int \mbox{\hyperlink{classBed_a122d2f29121c1dff3bd83eb95d354448}{num\+Exp\+Sel\+Col\+\_\+new}}
+\item 
+int \mbox{\hyperlink{classBed_abaffa81515aab252eba62ffb25caab3b}{num\+Sel\+Col\+\_\+new}}
+\item 
+std\+::vector$<$ int $>$ \mbox{\hyperlink{classBed_a6ce439118054e46a73c2e895d4ed4ab6}{exclude\+Col}}
+\item 
+int \mbox{\hyperlink{classBed_ac863c0ccfbac272fad6d3f82c7c3d4e3}{pheno\+Type}}
+\item 
+vector$<$ uint32\+\_\+t $>$ \mbox{\hyperlink{classBed_add9339760b2c537b4f888dac3b96ec72}{begin}}
+\item 
+vector$<$ uint32\+\_\+t $>$ \mbox{\hyperlink{classBed_a75f12134962d338d340e034954fbbfd2}{end}}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classBed_adb4deaa6c002dcd08c18a803e4d07703}{threads}}
+\item 
+bool \mbox{\hyperlink{classBed_a987cf050f530418a06bf8efedce8cf6e}{filter\+Variants}} = false
+\item 
+std\+::vector$<$ long long unsigned int $>$ \mbox{\hyperlink{classBed_a7d32da35fb1a8ac6e1791c960d60a026}{bed\+Variant\+Pos}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classBed_ad9a0fddce7f15b56004de12933f9b662}\label{classBed_ad9a0fddce7f15b56004de12933f9b662} 
+\index{Bed@{Bed}!getBedVariantPos@{getBedVariantPos}}
+\index{getBedVariantPos@{getBedVariantPos}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{getBedVariantPos()}{getBedVariantPos()}}
+{\footnotesize\ttfamily void Bed\+::get\+Bed\+Variant\+Pos (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classBed}{Bed}}}]{bed,  }\item[{\mbox{\hyperlink{classCommandLine}{Command\+Line}}}]{cmd }\end{DoxyParamCaption})}
+
+\Hypertarget{classBed_aef8fa104452220e4e713fc3d47e50c93}\label{classBed_aef8fa104452220e4e713fc3d47e50c93} 
+\index{Bed@{Bed}!processBed@{processBed}}
+\index{processBed@{processBed}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{processBed()}{processBed()}}
+{\footnotesize\ttfamily void Bed\+::process\+Bed (\begin{DoxyParamCaption}\item[{string}]{bed\+File,  }\item[{string}]{bim\+File,  }\item[{string}]{fam\+File }\end{DoxyParamCaption})}
+
+\Hypertarget{classBed_a9341b7de3c859221e726b560c9cdc612}\label{classBed_a9341b7de3c859221e726b560c9cdc612} 
+\index{Bed@{Bed}!processFam@{processFam}}
+\index{processFam@{processFam}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{processFam()}{processFam()}}
+{\footnotesize\ttfamily void Bed\+::process\+Fam (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classBed}{Bed}}}]{bed,  }\item[{string}]{fam\+File,  }\item[{unordered\+\_\+map$<$ string, vector$<$ vector$<$ string $>$ $>$ $>$}]{phenomap,  }\item[{string}]{pheno\+Missing\+Key,  }\item[{int}]{num\+Sel\+Col,  }\item[{int}]{sam\+Size }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classBed_a7d32da35fb1a8ac6e1791c960d60a026}\label{classBed_a7d32da35fb1a8ac6e1791c960d60a026} 
+\index{Bed@{Bed}!bedVariantPos@{bedVariantPos}}
+\index{bedVariantPos@{bedVariantPos}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{bedVariantPos}{bedVariantPos}}
+{\footnotesize\ttfamily std\+::vector$<$long long unsigned int$>$ Bed\+::bed\+Variant\+Pos}
+
+\Hypertarget{classBed_add9339760b2c537b4f888dac3b96ec72}\label{classBed_add9339760b2c537b4f888dac3b96ec72} 
+\index{Bed@{Bed}!begin@{begin}}
+\index{begin@{begin}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{begin}{begin}}
+{\footnotesize\ttfamily vector$<$uint32\+\_\+t$>$ Bed\+::begin}
+
+\Hypertarget{classBed_abfe83ed0482a4b629e1fcabba2fc6224}\label{classBed_abfe83ed0482a4b629e1fcabba2fc6224} 
+\index{Bed@{Bed}!bimDelim@{bimDelim}}
+\index{bimDelim@{bimDelim}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{bimDelim}{bimDelim}}
+{\footnotesize\ttfamily char Bed\+::bim\+Delim}
+
+\Hypertarget{classBed_a13b7cf5ed777939ba8db813e05b9ad71}\label{classBed_a13b7cf5ed777939ba8db813e05b9ad71} 
+\index{Bed@{Bed}!bimLast@{bimLast}}
+\index{bimLast@{bimLast}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{bimLast}{bimLast}}
+{\footnotesize\ttfamily int Bed\+::bim\+Last}
+
+\Hypertarget{classBed_a75f12134962d338d340e034954fbbfd2}\label{classBed_a75f12134962d338d340e034954fbbfd2} 
+\index{Bed@{Bed}!end@{end}}
+\index{end@{end}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{end}{end}}
+{\footnotesize\ttfamily vector$<$uint32\+\_\+t$>$ Bed\+::end}
+
+\Hypertarget{classBed_a6ce439118054e46a73c2e895d4ed4ab6}\label{classBed_a6ce439118054e46a73c2e895d4ed4ab6} 
+\index{Bed@{Bed}!excludeCol@{excludeCol}}
+\index{excludeCol@{excludeCol}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{excludeCol}{excludeCol}}
+{\footnotesize\ttfamily std\+::vector$<$int$>$ Bed\+::exclude\+Col}
+
+\Hypertarget{classBed_a1acf57c0ef564a1cc0e45a8ed9c8eb2f}\label{classBed_a1acf57c0ef564a1cc0e45a8ed9c8eb2f} 
+\index{Bed@{Bed}!famDelim@{famDelim}}
+\index{famDelim@{famDelim}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{famDelim}{famDelim}}
+{\footnotesize\ttfamily char Bed\+::fam\+Delim}
+
+\Hypertarget{classBed_a987cf050f530418a06bf8efedce8cf6e}\label{classBed_a987cf050f530418a06bf8efedce8cf6e} 
+\index{Bed@{Bed}!filterVariants@{filterVariants}}
+\index{filterVariants@{filterVariants}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{filterVariants}{filterVariants}}
+{\footnotesize\ttfamily bool Bed\+::filter\+Variants = false}
+
+\Hypertarget{classBed_a882700235c7d7cc44de37b5fdec658b9}\label{classBed_a882700235c7d7cc44de37b5fdec658b9} 
+\index{Bed@{Bed}!include\_idx@{include\_idx}}
+\index{include\_idx@{include\_idx}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{include\_idx}{include\_idx}}
+{\footnotesize\ttfamily std\+::vector$<$long int$>$ Bed\+::include\+\_\+idx}
+
+\Hypertarget{classBed_a489e8e1fdf5bf1816b4d5628b5f5dad1}\label{classBed_a489e8e1fdf5bf1816b4d5628b5f5dad1} 
+\index{Bed@{Bed}!n\_samples@{n\_samples}}
+\index{n\_samples@{n\_samples}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{n\_samples}{n\_samples}}
+{\footnotesize\ttfamily uint32\+\_\+t Bed\+::n\+\_\+samples = 0}
+
+\Hypertarget{classBed_a3f22b04b33de2d54c653ba134c8c39fe}\label{classBed_a3f22b04b33de2d54c653ba134c8c39fe} 
+\index{Bed@{Bed}!n\_variants@{n\_variants}}
+\index{n\_variants@{n\_variants}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{n\_variants}{n\_variants}}
+{\footnotesize\ttfamily uint32\+\_\+t Bed\+::n\+\_\+variants = 0}
+
+\Hypertarget{classBed_a50ade187e0e99f5169fe59d723a8024f}\label{classBed_a50ade187e0e99f5169fe59d723a8024f} 
+\index{Bed@{Bed}!new\_covdata@{new\_covdata}}
+\index{new\_covdata@{new\_covdata}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{new\_covdata}{new\_covdata}}
+{\footnotesize\ttfamily std\+::vector$<$double$>$ Bed\+::new\+\_\+covdata}
+
+\Hypertarget{classBed_a6e5b89045f40841b8f79959f08ed779c}\label{classBed_a6e5b89045f40841b8f79959f08ed779c} 
+\index{Bed@{Bed}!new\_phenodata@{new\_phenodata}}
+\index{new\_phenodata@{new\_phenodata}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{new\_phenodata}{new\_phenodata}}
+{\footnotesize\ttfamily std\+::vector$<$double$>$ Bed\+::new\+\_\+phenodata}
+
+\Hypertarget{classBed_a40c976ac8641560a3363aa17fde7e7e2}\label{classBed_a40c976ac8641560a3363aa17fde7e7e2} 
+\index{Bed@{Bed}!new\_samSize@{new\_samSize}}
+\index{new\_samSize@{new\_samSize}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{new\_samSize}{new\_samSize}}
+{\footnotesize\ttfamily int Bed\+::new\+\_\+sam\+Size}
+
+\Hypertarget{classBed_a122d2f29121c1dff3bd83eb95d354448}\label{classBed_a122d2f29121c1dff3bd83eb95d354448} 
+\index{Bed@{Bed}!numExpSelCol\_new@{numExpSelCol\_new}}
+\index{numExpSelCol\_new@{numExpSelCol\_new}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{numExpSelCol\_new}{numExpSelCol\_new}}
+{\footnotesize\ttfamily int Bed\+::num\+Exp\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classBed_adeaabd6bf5a729ebad3197ffb371e4d4}\label{classBed_adeaabd6bf5a729ebad3197ffb371e4d4} 
+\index{Bed@{Bed}!numIntSelCol\_new@{numIntSelCol\_new}}
+\index{numIntSelCol\_new@{numIntSelCol\_new}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{numIntSelCol\_new}{numIntSelCol\_new}}
+{\footnotesize\ttfamily int Bed\+::num\+Int\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classBed_abaffa81515aab252eba62ffb25caab3b}\label{classBed_abaffa81515aab252eba62ffb25caab3b} 
+\index{Bed@{Bed}!numSelCol\_new@{numSelCol\_new}}
+\index{numSelCol\_new@{numSelCol\_new}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{numSelCol\_new}{numSelCol\_new}}
+{\footnotesize\ttfamily int Bed\+::num\+Sel\+Col\+\_\+new}
+
+\Hypertarget{classBed_ac863c0ccfbac272fad6d3f82c7c3d4e3}\label{classBed_ac863c0ccfbac272fad6d3f82c7c3d4e3} 
+\index{Bed@{Bed}!phenoType@{phenoType}}
+\index{phenoType@{phenoType}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{phenoType}{phenoType}}
+{\footnotesize\ttfamily int Bed\+::pheno\+Type}
+
+\Hypertarget{classBed_a9cf4828d3a111ed7f5f098766832a011}\label{classBed_a9cf4828d3a111ed7f5f098766832a011} 
+\index{Bed@{Bed}!sampleID@{sampleID}}
+\index{sampleID@{sampleID}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{sampleID}{sampleID}}
+{\footnotesize\ttfamily std\+::vector$<$string$>$ Bed\+::sample\+ID}
+
+\Hypertarget{classBed_a199ff1b7597be8f6ddf3811c87a2d046}\label{classBed_a199ff1b7597be8f6ddf3811c87a2d046} 
+\index{Bed@{Bed}!sampleID\_all@{sampleID\_all}}
+\index{sampleID\_all@{sampleID\_all}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{sampleID\_all}{sampleID\_all}}
+{\footnotesize\ttfamily std\+::vector$<$string$>$ Bed\+::sample\+ID\+\_\+all}
+
+\Hypertarget{classBed_adb4deaa6c002dcd08c18a803e4d07703}\label{classBed_adb4deaa6c002dcd08c18a803e4d07703} 
+\index{Bed@{Bed}!threads@{threads}}
+\index{threads@{threads}!Bed@{Bed}}
+\doxysubsubsection{\texorpdfstring{threads}{threads}}
+{\footnotesize\ttfamily uint32\+\_\+t Bed\+::threads}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{ReadBed_8h}{Read\+Bed.\+h}}\item 
+src/\mbox{\hyperlink{ReadBed_8cpp}{Read\+Bed.\+cpp}}\end{DoxyCompactItemize}

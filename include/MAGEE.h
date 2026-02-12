@@ -7,28 +7,35 @@
 #include <thread>
 
 /**
- * @brief struct to include magee data
- * 
+ * @brief Structure for storing GEI-related data in Eigen matrices.
+ *
+ * This structure holds intermediate matrices and vectors used in the
+ * GMMAT + MAGEE workflow, including design matrices, covariance
+ * components, residuals, and Woodbury-related terms.
  */
 struct Magee_Glmmkin
 {
-    // Glmmkin &glmmkin;
-	Mat E;
-	Mat EC;
+	DensMat E;
+	DensMat EC;
     SpaMat J;
     std::ext::V_int select;
     bool dupflag = false;
-    //new sigma_ix which is sparse
     SpaMat sigma_i;
-    SpaMat sigma_ix;
+    DensVec diag_sigma_i;           //  Woodbury
+    SpaMat  diag_sigma_i_ZPchol; //  Woodbury
+    SpaMat sigma_ix;           //new sigma_ix which is sparse
     SpaMat cov;
     DensVec residuals;
-    Mat JEres; 
+    DensMat JEres; 
 	SpaMat JPJ;
 	SpaMat JEPJ;
 	SpaMat JEPEJ;
 };
 
+/**
+ * @brief Struct to create an object with armadillo type
+ * 
+ */
 struct Magee_Arma {
     arma::mat EC;
     std::ext::V_int select;
@@ -42,6 +49,8 @@ struct Magee_Arma {
     arma::sp_mat Xi;
     arma::sp_mat sigma_iJJ;
     arma::sp_mat sigma_ixJ;
+    arma::vec diag_sigma_i;
+    arma::sp_mat diag_sigma_i_ZPchol;
 };
 
 /**
@@ -174,19 +183,6 @@ void conver_eigen_to_arma( SpaMat const& eigenMat, arma::sp_mat& armaMat);
 std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_opt_string const& filtered);
 
 /**
- * @brief Matches indices from the original vector to the filtered vector.
- * 
- * Similar to the above `match_indices`, but this version accepts non-optional strings
- * in both the original and filtered vectors. If an element in the original vector does not 
- * have a match, the corresponding index is set to -1.
- * 
- * @param original The original vector of strings.
- * @param filtered The filtered vector of strings.
- * @return A vector of matched indices or -1 for non-matches.
-*/
-std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_string const& filtered);
-
-/**
  * @brief Extracts elements from a vector based on specified indices.
  * 
  * @tparam T The type of elements in the vector.
@@ -214,15 +210,6 @@ bool any_isna(std::ext::V_int vec);
 */
 std::ext::V_bool in_op(std::ext::V_string const& vec1, std::ext::V_string const& vec2);
 
-/**
- * @brief Returns a vector of unique elements from the input vector.
- * 
- * @tparam T The type of elements in the vector.
- * @param vec The input vector.
- * @return A vector of unique elements.
-*/
-template <typename T>
-std::vector<T> unique_id(std::vector<T> const& vec);
 
 /**
  * @brief Filters a vector of strings based on a boolean vector.
@@ -268,7 +255,7 @@ std::ext::V_bool list_duplicates_bool(std::ext::V_string const& vec);
  * @param id_include The vector of IDs to filter.
  * @return A matrix with unique rows.
 */
-Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include);
+DensMat filter_unique_rows(DensMat const& mat, std::ext::V_string& id_include);
 
 /**
  * @brief Applies a function to each column of a matrix and returns a boolean vector.
@@ -278,7 +265,7 @@ Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include);
  * @param threshold The threshold value used in the function.
  * @return A boolean vector indicating which columns meet the criteria.
 */
-std::ext::V_bool apply_on_columns(Mat const& mat, const std::function<bool(VectorXd const&)>& func, int threshold);
+std::ext::V_bool apply_on_columns(DensMat const& mat, const std::function<bool(VectorXd const&)>& func, int threshold);
 
 /**
  * @brief Checks if the number of unique elements in a vector is less than or equal to a threshold.
@@ -304,7 +291,7 @@ std::ext::Map_str_Vint generate_strata_list(std::ext::V_string const& vec);
  * @param center Whether to center the matrix by subtracting the mean of each column.
  * @param scale Whether to scale the matrix by dividing by the standard deviation of each column.
  */
-void scale(Mat& mat, bool center = true, bool scale = true);
+void scale(DensMat& mat, bool center = true, bool scale = true);
 
 /**
  * @brief Combines two matrices column-wise.
@@ -315,12 +302,12 @@ void scale(Mat& mat, bool center = true, bool scale = true);
  * @param B The second matrix.
  * @return The combined matrix.
  */
-Mat cbind(Mat const& A, Mat const& B);
+DensMat cbind(DensMat const& A, DensMat const& B);
 
 /**
  * @brief Matches included IDs with sample IDs.
  * 
- * This function returns the subset of IDs in `id_include` if they presnt in `sample_id`.
+ * This function returns the subset of IDs in `id_include` if they are present in `sample_id`.
  * 
  * @param id_include A vector of IDs to include.
  * @param sample_id A vector of sample IDs.

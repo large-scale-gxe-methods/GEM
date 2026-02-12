@@ -8,6 +8,18 @@
 #include "TimeUtils.h"
 #ifndef READBGEN_H
 #define READBGEN_H
+
+/**
+ * @class Bgen
+ * @brief Reader and processor for BGEN genotype files (v1.1–v1.3).
+ *
+ * This class provides utilities for:
+ * - Reading the BGEN header block (variant/sample metadata)
+ * - Loading sample identifiers (from file or embedded block)
+ * - Matching genotype samples with phenotype/covariate data
+ * - Locating variant byte positions for multithreaded processing
+ *
+ */
 class Bgen {
 
     public:

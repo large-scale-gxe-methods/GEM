@@ -1,0 +1,120 @@
+\doxysection{Pheno Class Reference}
+\hypertarget{classPheno}{}\label{classPheno}\index{Pheno@{Pheno}}
+
+
+{\ttfamily \#include $<$Pheno.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \mbox{\hyperlink{classPheno_a57d5f3c73a40320dfaa3a60ac39997f0}{size}} ()
+\begin{DoxyCompactList}\small\item\em a function to get the size of pheno data \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classPheno_a4a853fee157820f3a24de4abb0a62382}{set\+\_\+path}} (std\+::string\+\_\+view path)
+\begin{DoxyCompactList}\small\item\em Set the path. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classPheno_aeaee322981be6b2380f8cfc0830be970}{get\+\_\+path}} () const
+\begin{DoxyCompactList}\small\item\em Get pheno path. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classPheno_a94e360093933c61f4d4b635abbe83b2e}{read\+\_\+file}} (std\+::string\+\_\+view, char delim=\textquotesingle{},\textquotesingle{})
+\begin{DoxyCompactList}\small\item\em Read pheno path. \end{DoxyCompactList}\item 
+std\+::pair$<$ std\+::string, std\+::string $>$ \mbox{\hyperlink{classPheno_a3aed0cc566e0f682fb1d9a1685057c80}{check\+\_\+binary}} (std\+::string pheno\+\_\+name)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDataFrame}{Data\+Frame}} \mbox{\hyperlink{classPheno_a13d3f0204442973cf8448a089b00f40d}{m\+\_\+data\+\_\+frame}}
+\item 
+std\+::string \mbox{\hyperlink{classPheno_ad41aa874e6c3cc17efb9a5b904ebf78f}{m\+\_\+sam\+\_\+id}}
+\item 
+\mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} \mbox{\hyperlink{classPheno_ac9955a06fbba2f3747f41240e16e1dcf}{m\+\_\+v\+\_\+hdrs}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classPheno_a3aed0cc566e0f682fb1d9a1685057c80}\label{classPheno_a3aed0cc566e0f682fb1d9a1685057c80} 
+\index{Pheno@{Pheno}!check\_binary@{check\_binary}}
+\index{check\_binary@{check\_binary}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{check\_binary()}{check\_binary()}}
+{\footnotesize\ttfamily std\+::pair$<$ std\+::string, std\+::string $>$ Pheno\+::check\+\_\+binary (\begin{DoxyParamCaption}\item[{std\+::string}]{pheno\+\_\+name }\end{DoxyParamCaption})}
+
+\Hypertarget{classPheno_aeaee322981be6b2380f8cfc0830be970}\label{classPheno_aeaee322981be6b2380f8cfc0830be970} 
+\index{Pheno@{Pheno}!get\_path@{get\_path}}
+\index{get\_path@{get\_path}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{get\_path()}{get\_path()}}
+{\footnotesize\ttfamily std\+::string Pheno\+::get\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+
+
+Get pheno path. 
+
+\begin{DoxyReturn}{Returns}
+std\+::string 
+\end{DoxyReturn}
+\Hypertarget{classPheno_a94e360093933c61f4d4b635abbe83b2e}\label{classPheno_a94e360093933c61f4d4b635abbe83b2e} 
+\index{Pheno@{Pheno}!read\_file@{read\_file}}
+\index{read\_file@{read\_file}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}}
+{\footnotesize\ttfamily void Pheno\+::read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string\+\_\+view}]{path,  }\item[{char}]{delim = {\ttfamily \textquotesingle{},\textquotesingle{}} }\end{DoxyParamCaption})}
+
+
+
+Read pheno path. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em delim} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classPheno_a4a853fee157820f3a24de4abb0a62382}\label{classPheno_a4a853fee157820f3a24de4abb0a62382} 
+\index{Pheno@{Pheno}!set\_path@{set\_path}}
+\index{set\_path@{set\_path}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{set\_path()}{set\_path()}}
+{\footnotesize\ttfamily void Pheno\+::set\+\_\+path (\begin{DoxyParamCaption}\item[{std\+::string\+\_\+view}]{path }\end{DoxyParamCaption})}
+
+
+
+Set the path. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classPheno_a57d5f3c73a40320dfaa3a60ac39997f0}\label{classPheno_a57d5f3c73a40320dfaa3a60ac39997f0} 
+\index{Pheno@{Pheno}!size@{size}}
+\index{size@{size}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{size()}{size()}}
+{\footnotesize\ttfamily unsigned int Pheno\+::size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+a function to get the size of pheno data 
+
+\begin{DoxyReturn}{Returns}
+unsigned int 
+\end{DoxyReturn}
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classPheno_a13d3f0204442973cf8448a089b00f40d}\label{classPheno_a13d3f0204442973cf8448a089b00f40d} 
+\index{Pheno@{Pheno}!m\_data\_frame@{m\_data\_frame}}
+\index{m\_data\_frame@{m\_data\_frame}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{m\_data\_frame}{m\_data\_frame}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classDataFrame}{Data\+Frame}} Pheno\+::m\+\_\+data\+\_\+frame}
+
+\Hypertarget{classPheno_ad41aa874e6c3cc17efb9a5b904ebf78f}\label{classPheno_ad41aa874e6c3cc17efb9a5b904ebf78f} 
+\index{Pheno@{Pheno}!m\_sam\_id@{m\_sam\_id}}
+\index{m\_sam\_id@{m\_sam\_id}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{m\_sam\_id}{m\_sam\_id}}
+{\footnotesize\ttfamily std\+::string Pheno\+::m\+\_\+sam\+\_\+id}
+
+\Hypertarget{classPheno_ac9955a06fbba2f3747f41240e16e1dcf}\label{classPheno_ac9955a06fbba2f3747f41240e16e1dcf} 
+\index{Pheno@{Pheno}!m\_v\_hdrs@{m\_v\_hdrs}}
+\index{m\_v\_hdrs@{m\_v\_hdrs}!Pheno@{Pheno}}
+\doxysubsubsection{\texorpdfstring{m\_v\_hdrs}{m\_v\_hdrs}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespacestd_1_1ext_a66df9584926d2f21c9d4db7ba55da61c}{std\+::ext\+::\+V\+\_\+string}} Pheno\+::m\+\_\+v\+\_\+hdrs}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{Pheno_8h}{Pheno.\+h}}\item 
+src/\mbox{\hyperlink{Pheno_8cpp}{Pheno.\+cpp}}\end{DoxyCompactItemize}

@@ -1,0 +1,43 @@
+\doxysection{src/\+Read\+BGEN.cpp File Reference}
+\hypertarget{ReadBGEN_8cpp}{}\label{ReadBGEN_8cpp}\index{src/ReadBGEN.cpp@{src/ReadBGEN.cpp}}
+{\ttfamily \#include "{}declars.\+h"{}}\newline
+{\ttfamily \#include "{}Read\+BGEN.\+h"{}}\newline
+{\ttfamily \#include "{}Read\+Parameters.\+h"{}}\newline
+{\ttfamily \#include "{}../thirdparty/zstd-\/1.\+5.\+5/lib/zstd.\+h"{}}\newline
+{\ttfamily \#include "{}../thirdparty/libdeflate-\/1.\+18/libdeflate.\+h"{}}\newline
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\+::numeric\+\_\+limits$<$ double $>$ \mbox{\hyperlink{ReadBGEN_8cpp_a7012d535e2b78bfd82672aab41393b33}{dbl}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{ReadBGEN_8cpp_a24831e1e4f5534158764cffcb6a5ab7d}{Bgen13\+Get\+Two\+Vals}} (const unsigned char \texorpdfstring{$\ast$}{*}prob\+\_\+start, uint32\+\_\+t bit\+\_\+precision, uintptr\+\_\+t offset, uintptr\+\_\+t \texorpdfstring{$\ast$}{*}first\+\_\+val\+\_\+ptr, uintptr\+\_\+t \texorpdfstring{$\ast$}{*}second\+\_\+val\+\_\+ptr)
+\item 
+void \mbox{\hyperlink{ReadBGEN_8cpp_a9eec947834ac7fb5650e319b5dc07fe7}{gem\+BGEN}} (int thread\+\_\+num, double sigma2, double \texorpdfstring{$\ast$}{*}resid, double \texorpdfstring{$\ast$}{*}Xinv\+XTX, vector$<$ double $>$ miu, \mbox{\hyperlink{classBinE}{BinE}} binE, \mbox{\hyperlink{classBgen}{Bgen}} bgen, \mbox{\hyperlink{classCommandLine}{Command\+Line}} cmd)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\Hypertarget{ReadBGEN_8cpp_a7012d535e2b78bfd82672aab41393b33}\label{ReadBGEN_8cpp_a7012d535e2b78bfd82672aab41393b33} 
+\index{ReadBGEN.cpp@{ReadBGEN.cpp}!dbl@{dbl}}
+\index{dbl@{dbl}!ReadBGEN.cpp@{ReadBGEN.cpp}}
+\doxysubsubsection{\texorpdfstring{dbl}{dbl}}
+{\footnotesize\ttfamily typedef std\+::numeric\+\_\+limits$<$ double $>$ \mbox{\hyperlink{ReadBGEN_8cpp_a7012d535e2b78bfd82672aab41393b33}{dbl}}}
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{ReadBGEN_8cpp_a24831e1e4f5534158764cffcb6a5ab7d}\label{ReadBGEN_8cpp_a24831e1e4f5534158764cffcb6a5ab7d} 
+\index{ReadBGEN.cpp@{ReadBGEN.cpp}!Bgen13GetTwoVals@{Bgen13GetTwoVals}}
+\index{Bgen13GetTwoVals@{Bgen13GetTwoVals}!ReadBGEN.cpp@{ReadBGEN.cpp}}
+\doxysubsubsection{\texorpdfstring{Bgen13GetTwoVals()}{Bgen13GetTwoVals()}}
+{\footnotesize\ttfamily void Bgen13\+Get\+Two\+Vals (\begin{DoxyParamCaption}\item[{const unsigned char \texorpdfstring{$\ast$}{*}}]{prob\+\_\+start,  }\item[{uint32\+\_\+t}]{bit\+\_\+precision,  }\item[{uintptr\+\_\+t}]{offset,  }\item[{uintptr\+\_\+t \texorpdfstring{$\ast$}{*}}]{first\+\_\+val\+\_\+ptr,  }\item[{uintptr\+\_\+t \texorpdfstring{$\ast$}{*}}]{second\+\_\+val\+\_\+ptr }\end{DoxyParamCaption})}
+
+\Hypertarget{ReadBGEN_8cpp_a9eec947834ac7fb5650e319b5dc07fe7}\label{ReadBGEN_8cpp_a9eec947834ac7fb5650e319b5dc07fe7} 
+\index{ReadBGEN.cpp@{ReadBGEN.cpp}!gemBGEN@{gemBGEN}}
+\index{gemBGEN@{gemBGEN}!ReadBGEN.cpp@{ReadBGEN.cpp}}
+\doxysubsubsection{\texorpdfstring{gemBGEN()}{gemBGEN()}}
+{\footnotesize\ttfamily void gem\+BGEN (\begin{DoxyParamCaption}\item[{int}]{thread\+\_\+num,  }\item[{double}]{sigma2,  }\item[{double \texorpdfstring{$\ast$}{*}}]{resid,  }\item[{double \texorpdfstring{$\ast$}{*}}]{Xinv\+XTX,  }\item[{vector$<$ double $>$}]{miu,  }\item[{\mbox{\hyperlink{classBinE}{BinE}}}]{binE,  }\item[{\mbox{\hyperlink{classBgen}{Bgen}}}]{bgen,  }\item[{\mbox{\hyperlink{classCommandLine}{Command\+Line}}}]{cmd }\end{DoxyParamCaption})}
+

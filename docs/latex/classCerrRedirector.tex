@@ -1,0 +1,52 @@
+\doxysection{Cerr\+Redirector Class Reference}
+\hypertarget{classCerrRedirector}{}\label{classCerrRedirector}\index{CerrRedirector@{CerrRedirector}}
+
+
+Redirects standard error output (std\+::cerr) into the spdlog logging system.  
+
+
+
+
+{\ttfamily \#include $<$Logger.\+h$>$}
+
+Inheritance diagram for Cerr\+Redirector\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classCerrRedirector}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classCerrRedirector_ab99327db8c37be18129d8e567ec3b3ce}{overflow}} (int c) override
+\item 
+int \mbox{\hyperlink{classCerrRedirector_ae9292f65781f3330c58efc4970cc1e53}{sync}} () override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Redirects standard error output (std\+::cerr) into the spdlog logging system. 
+
+This class captures all output written to std\+::cerr and forwards it to spdlog using the error-\/level logger.
+
+Characters are buffered until a newline or flush occurs. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classCerrRedirector_ab99327db8c37be18129d8e567ec3b3ce}\label{classCerrRedirector_ab99327db8c37be18129d8e567ec3b3ce} 
+\index{CerrRedirector@{CerrRedirector}!overflow@{overflow}}
+\index{overflow@{overflow}!CerrRedirector@{CerrRedirector}}
+\doxysubsubsection{\texorpdfstring{overflow()}{overflow()}}
+{\footnotesize\ttfamily int Cerr\+Redirector\+::overflow (\begin{DoxyParamCaption}\item[{int}]{c }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
+
+\Hypertarget{classCerrRedirector_ae9292f65781f3330c58efc4970cc1e53}\label{classCerrRedirector_ae9292f65781f3330c58efc4970cc1e53} 
+\index{CerrRedirector@{CerrRedirector}!sync@{sync}}
+\index{sync@{sync}!CerrRedirector@{CerrRedirector}}
+\doxysubsubsection{\texorpdfstring{sync()}{sync()}}
+{\footnotesize\ttfamily int Cerr\+Redirector\+::sync (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{Logger_8h}{Logger.\+h}}\item 
+src/\mbox{\hyperlink{Logger_8cpp}{Logger.\+cpp}}\end{DoxyCompactItemize}

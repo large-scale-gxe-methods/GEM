@@ -4,7 +4,7 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 
 
 <br />
-Current version: 2.1.3
+Current version: 2.2
 
 <br />
 Additional documentation:  
@@ -26,8 +26,8 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.3/GEM_2.1.3_Intel
-* Change the permission: chmod a+x GEM_2.1.3_Intel
+* Download the binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.1.4/GEM_2.2_Intel
+* Change the permission: chmod +x GEM_2.2_Intel
 
 Option 2: Build GEM Library Dependencies  
    * C++17 compiler or later 
@@ -94,8 +94,8 @@ Armadillo Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable `./GEM_2.1.3_Intel` can be used to run the program.  
-For a list of options, use `./GEM_2.1.3_Intel --help`.
+Once GEM is installed, the executable `./GEM_2.1.4_Intel` can be used to run the program.  
+For a list of options, use `./GEM_2.1.4_Intel --help`.
  
 
 <details>
@@ -186,9 +186,12 @@ Phenotype File Options:
      Any column names in the phenotype file naming the covariates for which only main effects should be included
      for adjustment (do not include with --exposure-names or --int-covar-names).  
 
---random-slope  
+--random-slope-name 
      Column name in the phenotype file that contains random slope. 
      
+--group-name
+     Column name in the phenotype file that contains the group.
+
 --robust
      0 for model-based standard errors and 1 for robust standard errors.
         Default: 0  
@@ -427,25 +430,31 @@ The results should look like the following output file [cross_sectional_without_
 
 Example for cross-sectional data with kinship:
 ```
-./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
 ```
 The results should look like the following output file [cross_sectional_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_with_kinship.out).  
 
 Example for longitudinal data without kinship:
 ```
-./GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
+./GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
 ```
 The results should look like the following output file [longitudinal_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_without_kinship.out).  
 
 Example for longitudinal data with kinship:
 ```
-./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope cov3 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
 ```
 The results should look like the following output file [longitudinal_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_with_kinship.out).  
 
 <br />
 
 ## Recent Updates 
+[Version 2.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2) - Feb 10, 2026:
+* Added convergence check for logistic regression. The program now reports detailed coefficient estimates when the model fails to converge and exits safely.
+* Added support for `group` variable in null model fitting to allow heteroscedastic residual variance across sample groups.
+*Improved memory handling and internal limits to support larger numbers of observations (larger sample sizes)
+
+* Updated headers in the output file
 [Version 2.1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.3) - June 14, 2025:
 * Added log file support
 * Updated headers in the output file
@@ -564,7 +573,7 @@ If you use GEM in your analysis, please cite
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2025  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
+ Copyright (C) 2018-2026  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

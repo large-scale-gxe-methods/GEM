@@ -1,0 +1,56 @@
+\doxysection{Cout\+Redirector Class Reference}
+\hypertarget{classCoutRedirector}{}\label{classCoutRedirector}\index{CoutRedirector@{CoutRedirector}}
+
+
+Redirects standard output (std\+::cout) into the spdlog logging system.  
+
+
+
+
+{\ttfamily \#include $<$Logger.\+h$>$}
+
+Inheritance diagram for Cout\+Redirector\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classCoutRedirector}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classCoutRedirector_aefcadde5c5a2053f158adf48abe43204}{overflow}} (int c) override
+\item 
+int \mbox{\hyperlink{classCoutRedirector_ab155b5aef312a0028f8078317f89d4a0}{sync}} () override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Redirects standard output (std\+::cout) into the spdlog logging system. 
+
+This class inherits from std\+::streambuf and overrides the virtual functions \doxylink{classCoutRedirector_aefcadde5c5a2053f158adf48abe43204}{overflow()} and \doxylink{classCoutRedirector_ab155b5aef312a0028f8078317f89d4a0}{sync()} in order to intercept characters written to std\+::cout.
+
+Typical use\+:
+\begin{DoxyItemize}
+\item Installed via std\+::cout.\+rdbuf(\&redirector)
+\item Enables capturing of all std\+::cout output into log files and console sinks. 
+\end{DoxyItemize}
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classCoutRedirector_aefcadde5c5a2053f158adf48abe43204}\label{classCoutRedirector_aefcadde5c5a2053f158adf48abe43204} 
+\index{CoutRedirector@{CoutRedirector}!overflow@{overflow}}
+\index{overflow@{overflow}!CoutRedirector@{CoutRedirector}}
+\doxysubsubsection{\texorpdfstring{overflow()}{overflow()}}
+{\footnotesize\ttfamily int Cout\+Redirector\+::overflow (\begin{DoxyParamCaption}\item[{int}]{c }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
+
+\Hypertarget{classCoutRedirector_ab155b5aef312a0028f8078317f89d4a0}\label{classCoutRedirector_ab155b5aef312a0028f8078317f89d4a0} 
+\index{CoutRedirector@{CoutRedirector}!sync@{sync}}
+\index{sync@{sync}!CoutRedirector@{CoutRedirector}}
+\doxysubsubsection{\texorpdfstring{sync()}{sync()}}
+{\footnotesize\ttfamily int Cout\+Redirector\+::sync (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{Logger_8h}{Logger.\+h}}\item 
+src/\mbox{\hyperlink{Logger_8cpp}{Logger.\+cpp}}\end{DoxyCompactItemize}

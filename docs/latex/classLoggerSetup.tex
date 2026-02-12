@@ -1,0 +1,44 @@
+\doxysection{Logger\+Setup Class Reference}
+\hypertarget{classLoggerSetup}{}\label{classLoggerSetup}\index{LoggerSetup@{LoggerSetup}}
+
+
+Initializes a global spdlog logger and redirects std\+::cout/std\+::cerr.  
+
+
+
+
+{\ttfamily \#include $<$Logger.\+h$>$}
+
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{classLoggerSetup_a946cd0eb957777960601eea394db845a}{init}} (const std\+::string \&filename="{}log.\+txt"{})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Initializes a global spdlog logger and redirects std\+::cout/std\+::cerr. 
+
+This utility class configures spdlog with\+:
+\begin{DoxyItemize}
+\item Console logging (colored output)
+\item File logging (persistent log file)
+\item Custom log formatting
+\item Automatic flushing behavior
+\end{DoxyItemize}
+
+After initialization, all output written to std\+::cout and std\+::cerr is captured and forwarded into spdlog, allowing unified logging of both C++ and library output. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classLoggerSetup_a946cd0eb957777960601eea394db845a}\label{classLoggerSetup_a946cd0eb957777960601eea394db845a} 
+\index{LoggerSetup@{LoggerSetup}!init@{init}}
+\index{init@{init}!LoggerSetup@{LoggerSetup}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily void Logger\+Setup\+::init (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{filename = {\ttfamily "{}log.txt"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{Logger_8h}{Logger.\+h}}\item 
+src/\mbox{\hyperlink{Logger_8cpp}{Logger.\+cpp}}\end{DoxyCompactItemize}

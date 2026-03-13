@@ -179,6 +179,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) 
             {
                 auto& tmp_valvecs = phenomap[strtmp]; 
+                bool ID_added = false;
 
                 for (const auto& tmp_valvec : tmp_valvecs) {
                     // Check for missing phenotype values in the current vector
@@ -191,8 +192,12 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
                         {
                             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
                         }
-                        sampleID.push_back(strtmp);
-                        k++;
+                        if(!ID_added)
+                        {   
+                            sampleID.push_back(strtmp);
+                            k++;
+                            ID_added = true;
+                        }
                     }
                 }
             }
@@ -250,6 +255,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
             if (phenomap.find(strtmp) != phenomap.end()) 
             {
                 auto& tmp_valvecs = phenomap[strtmp]; 
+                bool ID_added = false;
 
                 for (const auto& tmp_valvec : tmp_valvecs) {
                     // Check for missing phenotype values in the current vector
@@ -262,8 +268,13 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
                         {
                             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
                         }
-                        sampleID.push_back(strtmp);
-                        k++;
+                        
+                        if(!ID_added)
+                        {   
+                            sampleID.push_back(strtmp);
+                            k++;
+                            ID_added = true;
+                        }
                     }
                 }
             }
@@ -331,7 +342,7 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
         exit(1);
     }
 
-    //the first column of matcovX is Y
+    // The first column of matcovX is Y
     MatrixXd matcovX (samSize,(numSelCol+1));
     for (int i=0; i<samSize; i++){    
         for (int j=0; j<(numSelCol+1); j++) {
@@ -380,9 +391,10 @@ void Bgen::processBgenSampleBlock(Bgen bgen, char samplefile[300], bool useSampl
         }
         new_covdata = temp;
     } 
-    else {
-            new_covdata.resize(samSize * (numSelCol+1));
-            new_covdata = new_covdata_orig;
+    else 
+    {
+        new_covdata.resize(samSize * (numSelCol+1));
+        new_covdata = new_covdata_orig;
     }
 
 }
@@ -733,8 +745,6 @@ void Bgen::getPositionOfBgenVariant(Bgen bgen, CommandLine cmd) {
 }
 
 
-
-
 void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, uintptr_t offset, uintptr_t* first_val_ptr, uintptr_t* second_val_ptr) {
 
     switch (bit_precision) {
@@ -764,15 +774,13 @@ void Bgen13GetTwoVals(const unsigned char* prob_start, uint32_t bit_precision, u
 
 
 
-
-
 /*************************************************************************************************************************
 This function contains code that has been revised based on BOLT-LMM v2.3 source code
 **************************************************************************************************************************/
 
 void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu,  BinE binE, Bgen bgen, CommandLine cmd) {
 
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
@@ -1662,7 +1670,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     results.close();
     fclose(fin3);
 
-    auto end_time = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::steady_clock::now();
     cout << "Thread " << thread_num << " finished in ";
     printExecutionTime1(start_time, end_time);
 }

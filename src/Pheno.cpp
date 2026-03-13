@@ -6,9 +6,7 @@
 
 void Pheno::read_file(std::string_view path, char delim)
 {
-    m_data_frame.read_file(path, delim);
-    //std::ext::V_string tmp_hdrs = {m_sam_id};
-    m_data_frame = m_data_frame.copy_by_hdrs(m_v_hdrs);
+    m_data_frame.read_file(path, m_v_hdrs, delim);
 }
 
 std::pair<std::string, std::string> Pheno::check_binary(std::string pheno_name )

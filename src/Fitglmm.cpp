@@ -62,7 +62,7 @@ double chi_square_CDF(double x, double df, bool lower_tail, bool log_p)
     // Check if x is NaN or less than or equal to zero
     if (std::isnan(x) || x <= 0.0)
     {
-        // Handle the invalid input as needed:
+        // Handle the invalid input
         return std::numeric_limits<double>::quiet_NaN();
     }
     // Proceed with the chi-square CDF calculation
@@ -137,7 +137,6 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 				arma::sp_mat PG;
 				arma::vec U;
 				arma::mat GPG;
-				
 				U = G.t() * null_obj.Jres;// 1*1 if G be a vec
 				arma::sp_mat Gsigma_ixJ =  Gsp.t() * null_obj.sigma_ixJ;
 				PG = (null_obj.sigma_iJJ.t() * Gsp) - (null_obj.sigma_ixJ * (Gsigma_ixJ * null_obj.cov.t()).t());//P projection matrix
@@ -149,9 +148,10 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 					GPG_i = pinv(GPG);
 				}
 				arma::mat V_i;
-				V_i = diagvec(GPG_i);           
+				V_i = diagvec(GPG_i); 
+				          
 				arma::vec V_MAIN_adj = diagvec(GPG_i);
-				V_MAIN_adj = V_MAIN_adj.rows(0, ng-1);            
+				V_MAIN_adj = V_MAIN_adj.rows(0, ng-1);    
 				arma::vec BETA_MAIN_adj = GPG_i.t() * U;
 				BETA_MAIN_adj= BETA_MAIN_adj.rows(0, ng-1);
 				arma::vec STAT_MAIN_adj(ng);
@@ -176,69 +176,70 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 						PVAL_MAIN[s] = chi_square_CDF(STAT_MAIN[s], 1, 0, 0);
 					}
 				}
-				
-				arma::mat Hv(ei+qi+1, ei+qi+1, arma::fill::zeros);
-				arma::mat Gtblock = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t());
-				// arma::sp_mat Gtblock = kron(arma::speye<arma::sp_mat>(ei+qi+1, ei+qi+1), arma::sp_mat(G).t());
-				arma::mat GblockXi = Gtblock * null_obj.Xi;
-				// arma::sp_mat GblockXi = Gtblock * null_obj.Xi;
-				Hv = Gtblock * null_obj.Psi * Gtblock.t() - (GblockXi * null_obj.cov.t() * GblockXi.t());
-				Hv = Hv % arma::kron(arma::ones(ei+qi+1, ei+qi+1), arma::mat(ng, ng, arma::fill::eye));
-				bool is_non_singular_Hv = inv(IV_V_i1, Hv);
-				if (!is_non_singular_Hv) 
+				// If there is an interaction term
+				if(ei > 0)
 				{
-					IV_V_i1 = arma::pinv(Hv);
-				}
-
-				arma::mat cross_Eres_G;
-				cross_Eres_G = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t()) * null_obj.JEresblock;//G.t() * cross_K1_J;
-				arma::mat IV_U_kron1 = arma::kron(arma::ones<arma::mat>(ei + qi + 1, 1), arma::mat(ng, ng, arma::fill::eye));
-				IV_U1 = IV_U_kron1.each_col() % cross_Eres_G;// V_U_kron1.each_col() % cross_K1_J_G //cross_K_res;
-				BETA_INT1 = (IV_V_i1 * IV_U1);
-				bool is_non_singular_IV_V1 = arma::inv(IV_E_i,IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1)));
-				if (!is_non_singular_IV_V1) 
-				{
-					IV_E_i = arma::pinv(IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1))); 
-				}
-
-				IV_U = IV_E_i* BETA_INT1.rows(ng,ngei1-1);
-				STAT_INT = diagvec(IV_U.t()*BETA_INT1.rows(ng,ngei1-1));
-
-				try 
-				{
-					IV_GE_i = arma::inv(IV_V_i1(arma::span(0,ngei1-1), arma::span(0,ngei1-1))); 
-					STAT_JOINT_tmp=  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
-					STAT_JOINT = diagvec(STAT_JOINT_tmp.t()*BETA_INT1.rows(0,ngei1-1));
-				
-					for (size_t s = 0; s < STAT_INT.size(); s++) 
+					arma::mat Hv(ei+qi+1, ei+qi+1, arma::fill::zeros);
+					arma::mat Gtblock = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t());
+					// arma::sp_mat Gtblock = kron(arma::speye<arma::sp_mat>(ei+qi+1, ei+qi+1), arma::sp_mat(G).t());
+					arma::mat GblockXi = Gtblock * null_obj.Xi;
+					// arma::sp_mat GblockXi = Gtblock * null_obj.Xi;
+					Hv = Gtblock * null_obj.Psi * Gtblock.t() - (GblockXi * null_obj.cov.t() * GblockXi.t());
+					Hv = Hv % arma::kron(arma::ones(ei+qi+1, ei+qi+1), arma::mat(ng, ng, arma::fill::eye));
+					bool is_non_singular_Hv = inv(IV_V_i1, Hv);
+					if (!is_non_singular_Hv) 
 					{
-						// PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
-						if (arma::is_finite(PVAL_MAIN[s])) 
+						IV_V_i1 = arma::pinv(Hv);
+					}
+					arma::mat cross_Eres_G;
+					cross_Eres_G = kron(arma::mat(ei+qi+1, ei+qi+1, arma::fill::eye), G.t()) * null_obj.JEresblock;//G.t() * cross_K1_J;
+					arma::mat IV_U_kron1 = arma::kron(arma::ones<arma::mat>(ei + qi + 1, 1), arma::mat(ng, ng, arma::fill::eye));
+					IV_U1 = IV_U_kron1.each_col() % cross_Eres_G;// V_U_kron1.each_col() % cross_K1_J_G //cross_K_res;
+					BETA_INT1 = (IV_V_i1 * IV_U1);
+					bool is_non_singular_IV_V1 = arma::inv(IV_E_i,IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1)));
+					if (!is_non_singular_IV_V1) 
+					{
+						IV_E_i = arma::pinv(IV_V_i1(arma::span(ng,ngei1-1), arma::span(ng,ngei1-1))); 
+					}
+
+					IV_U = IV_E_i* BETA_INT1.rows(ng,ngei1-1);
+					STAT_INT = diagvec(IV_U.t()*BETA_INT1.rows(ng,ngei1-1));
+
+					try 
+					{
+						IV_GE_i = arma::inv(IV_V_i1(arma::span(0,ngei1-1), arma::span(0,ngei1-1))); 
+						STAT_JOINT_tmp =  IV_GE_i*BETA_INT1.rows(0,ngei1-1);
+						STAT_JOINT = diagvec(STAT_JOINT_tmp.t()*BETA_INT1.rows(0,ngei1-1));
+					
+						for (size_t s = 0; s < STAT_INT.size(); s++) 
 						{
-							PVAL_JOINT[s] = chi_square_CDF(STAT_JOINT[s], 1+ei, 0, 0);
-						}
+							// PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
+							if (arma::is_finite(PVAL_MAIN[s])) 
+							{
+								PVAL_JOINT[s] = chi_square_CDF(STAT_JOINT[s], 1+ei, 0, 0);
+							}
+						} 
 					} 
-				} 
 
-				catch (std::runtime_error const& error) 
-				{
-					std::cout << "Warning: A singular matrix was observed for snpID: "<< snpID << "\n";
-					for (size_t s = 0; s < STAT_INT.size(); s++) 
+					catch (std::runtime_error const& error) 
 					{
-						PVAL_JOINT[s] = DBL_EPSILON;
+						std::cout << "Warning: A singular matrix was observed for snpID: "<< snpID << "\n";
+						for (size_t s = 0; s < STAT_INT.size(); s++) 
+						{
+							PVAL_JOINT[s] = DBL_EPSILON;
+						}
+					}
+
+					for (size_t s = 0; s < STAT_INT.size(); s++)
+					{
+						PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
 					}
 				}
-
-				for (size_t s = 0; s < STAT_INT.size(); s++)
-				{
-					PVAL_INT[s] = chi_square_CDF(STAT_INT[s], ei, 0, 0);
-				}
 			}
-
+			//Write to the file
 			arma::uvec b_idx1 = arma::regspace<arma::uvec>(0, ng, (ei+qi) * ng);
 			int ng_j = 0;
-			//Write in the file
-
+			
 			for (size_t j = 0; j < npbidx; ++j)
 			{
 				if (snp_skip[j] == 1)
@@ -247,136 +248,143 @@ void glmm_gei(std::string snpID, arma::mat &G, arma::uvec &snp_skip, size_t &npb
 				}
 				else
 				{
-					writefile << tmpout[j] <<  BETA_MAIN[ng_j] << "\t" << SE_MAIN[ng_j] << "\t";
-					
-					if (meta_output)
+					if (ei == 0)
 					{
-						// Beta Int the diaganol of BETA_INT1
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int row = b_idx1[b] + ng_j;
-							writefile << BETA_INT1(row, ng_j) << "\t";
-						}
-						// Var (the diaganol of IV_V_i1)
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int col = b_idx1[b] + ng_j;
-							for (int d = 0; d < ei + qi + 1; d++)
-							{
-								if (b == d)
-								{
-									int row = b_idx1[d] + ng_j;
-									writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-								}
-							}
-						}
-
-						// Cov (the lower triangle elements of IV_V_i1)
-						for (int b = 0; b < ei + qi + 1; b++)
-						{
-							int col = b_idx1[b] + ng_j;
-							for (int d = 0; d < ei + qi + 1; d++)
-							{
-								if (d > b)
-								{
-									int row = b_idx1[d] + ng_j;
-									writefile << IV_V_i1(row, col) << "\t";
-								}
-							}
-						}
+						writefile << tmpout[j] <<  BETA_MAIN[ng_j] << "\t" << SE_MAIN[ng_j] << "\t" << PVAL_MAIN[ng_j] << '\n';
 					}
 					else
 					{
-						int ncolE = ei + qi + 1;
-						arma::mat split_mat(ncolE,ncolE);
-
-						for (int i=0; i<ncolE; i++) 
-						{
-							for (int j=0; j<ncolE; j++)
-							split_mat(i,j) = i+1-ncolE+ncolE*(j+1);
-						}
+						writefile << tmpout[j] <<  BETA_MAIN[ng_j] << "\t" << SE_MAIN[ng_j] << "\t";
 						
-						split_mat = split_mat(arma::span(1,ei), arma::span(1,ei));
-
-						if (split_mat.size() == 1)
+						if (meta_output)
 						{
-							for (int b = 0; b < ei + 1; b++)
+							// Beta Int the diagonal of BETA_INT1
+							for (int b = 0; b < ei + qi + 1; b++)
 							{
 								int row = b_idx1[b] + ng_j;
-								// NOT the first ng row
-
-								if (row > ng - 1)
-								{
-
-									writefile << BETA_INT1(row, ng_j) << "\t";
-								}
+								writefile << BETA_INT1(row, ng_j) << "\t";
 							}
-							// Var (the diaganol elements)
-							for (int b = 0; b < ei + 1; b++)
+							// Var (the diaganol of IV_V_i1)
+							for (int b = 0; b < ei + qi + 1; b++)
 							{
 								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
+								for (int d = 0; d < ei + qi + 1; d++)
 								{
 									if (b == d)
 									{
 										int row = b_idx1[d] + ng_j;
-										// NOT the first ng row or first ng col
-										if (row > ng - 1 && col > ng - 1)
-										{
-											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-										}
+										writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
 									}
 								}
 							}
-						}
-
-						else
-						{
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int row = b_idx1[b] + ng_j;
-								// NOT the first ng row
-								if (row > ng - 1)
-								{
-									writefile << BETA_INT1(row, ng_j) << "\t";
-								}
-							}
-
-							for (int b = 0; b < ei + 1; b++)
+	
+							// Cov (the lower triangle elements of IV_V_i1)
+							for (int b = 0; b < ei + qi + 1; b++)
 							{
 								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
-								{
-									if (b == d)
-									{
-										int row = b_idx1[d] + ng_j;
-										// NOT the first ng row or first ng col
-										if (row > ng - 1 && col > ng - 1)
-										{
-											writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
-										}
-									}
-								}
-							}
-
-							for (int b = 0; b < ei + 1; b++)
-							{
-								int col = b_idx1[b] + ng_j;
-								for (int d = 0; d < ei + 1; d++)
+								for (int d = 0; d < ei + qi + 1; d++)
 								{
 									if (d > b)
 									{
 										int row = b_idx1[d] + ng_j;
-										if (row > ng - 1 && col > ng - 1)
+										writefile << IV_V_i1(row, col) << "\t";
+									}
+								}
+							}
+						}
+						else
+						{
+							int ncolE = ei + qi + 1;
+							arma::mat split_mat(ncolE,ncolE);
+	
+							for (int i=0; i<ncolE; i++) 
+							{
+								for (int j=0; j<ncolE; j++)
+								split_mat(i,j) = i+1-ncolE+ncolE*(j+1);
+							}
+							
+							split_mat = split_mat(arma::span(1,ei), arma::span(1,ei));
+	
+							if (split_mat.size() == 1)
+							{
+								for (int b = 0; b < ei + 1; b++)
+								{
+									int row = b_idx1[b] + ng_j;
+									// NOT the first ng row
+	
+									if (row > ng - 1)
+									{
+	
+										writefile << BETA_INT1(row, ng_j) << "\t";
+									}
+								}
+								// Var (the diagonal elements)
+								for (int b = 0; b < ei + 1; b++)
+								{
+									int col = b_idx1[b] + ng_j;
+									for (int d = 0; d < ei + 1; d++)
+									{
+										if (b == d)
 										{
-											writefile << IV_V_i1(row, col) << "\t";
+											int row = b_idx1[d] + ng_j;
+											// NOT the first ng row or first ng col
+											if (row > ng - 1 && col > ng - 1)
+											{
+												writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
+											}
+										}
+									}
+								}
+							}
+	
+							else
+							{
+								for (int b = 0; b < ei + 1; b++)
+								{
+									int row = b_idx1[b] + ng_j;
+									// NOT the first ng row
+									if (row > ng - 1)
+									{
+										writefile << BETA_INT1(row, ng_j) << "\t";
+									}
+								}
+	
+								for (int b = 0; b < ei + 1; b++)
+								{
+									int col = b_idx1[b] + ng_j;
+									for (int d = 0; d < ei + 1; d++)
+									{
+										if (b == d)
+										{
+											int row = b_idx1[d] + ng_j;
+											// NOT the first ng row or first ng col
+											if (row > ng - 1 && col > ng - 1)
+											{
+												writefile << std::sqrt(IV_V_i1(row, col)) << "\t";
+											}
+										}
+									}
+								}
+	
+								for (int b = 0; b < ei + 1; b++)
+								{
+									int col = b_idx1[b] + ng_j;
+									for (int d = 0; d < ei + 1; d++)
+									{
+										if (d > b)
+										{
+											int row = b_idx1[d] + ng_j;
+											if (row > ng - 1 && col > ng - 1)
+											{
+												writefile << IV_V_i1(row, col) << "\t";
+											}
 										}
 									}
 								}
 							}
 						}
+						writefile << PVAL_MAIN[ng_j] << "\t" << PVAL_INT[ng_j] << "\t" << PVAL_JOINT[ng_j] << "\n"; 
 					}
-					writefile << PVAL_MAIN[ng_j] << "\t" << PVAL_INT[ng_j] << "\t" << PVAL_JOINT[ng_j] << "\n"; 
 					ng_j++;
 				}
 			}
@@ -399,7 +407,7 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 					uint begin, uint end, long long unsigned int byte, uint Nbgen,
 					uint compression, bool meta_output)
 {
-	// bool isDupeID = null_obj.dupflag;
+	
     std::ext::V_int select = null_obj.select;
     int strataList_size = strata_list.size();
     bool skip_strata = strata_list.empty();
@@ -414,14 +422,12 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 
 	size_t n = null_obj.n;
 	size_t n_obs = null_obj.n_obs;
-
 	arma::mat G(n, npb);
 	arma::vec g(n);
     arma::uvec gmiss(n);
 	arma::uvec snp_skip = arma::zeros<arma::uvec>(npb);
-	// arma::mat G(n_obs, npb);
 	std::ext::V_string tmpout(npb);
-
+	
 	double gmean, gsqmean, geno, gmax, gmin;
 	size_t ncount, nmiss, npbidx = 0;
 	
@@ -510,7 +516,6 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 			if (libdeflate_zlib_decompress(decompressor, &zBuf12[0], cLen - 4, &shortBuf12[0], destLen, NULL) != LIBDEFLATE_SUCCESS)
 			{
 				std::cerr << "\nERROR: Decompressing " << str_snpID << " block failed with libdeflate.\n\n";
-				//throw std::runtime_error("Decompressing " + std::string(rsID.get()) + " genotype block failed with libdeflate.");
 				std::exit(EXIT_FAILURE);
 			}
 			bufAt = &shortBuf12[0];
@@ -591,11 +596,9 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		const uintptr_t probs_offset = B / 8;
 
 		gmean = 0.0;
-		//double mac = 0.0;
 		gsqmean = 0.0;
 		gmax = -100.0;
 		gmin = 100.0;
-		//double rsq = 0.0;
 		nmiss = 0;
 		ncount = 0;
 
@@ -777,7 +780,6 @@ void glmm_gei_bgen13(Magee_Arma const& null_obj, string const &bgenfile,
 		tmpout[npbidx] = writeout.str();
 		writeout.clear();
 		npbidx++;
-
 		glmm_gei(std::string (snpID.begin(), snpID.end()), G, snp_skip, npbidx, npb, n, ei, qi, null_obj, 
 				writefile, meta_output, tmpout, m, end);
 
@@ -844,7 +846,6 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
         std::exit(EXIT_FAILURE);
     }
 
-
 	while (getline(fIDMat, IDline)) 
 	{
         std::istringstream iss(IDline);
@@ -875,7 +876,8 @@ void glmm_gei_pgen13(Magee_Arma const& null_obj, string const &pgenfile,
             skipIndex++;
         }
     }
-    else {
+    else 
+	{
         while (skipIndex != pgenPos[begin]) 
 		{
             getline(fIDMat, IDline);

@@ -107,6 +107,63 @@ void DataFrame::fill_data(std::ext::V_string const& lines, char delim)
     m_nrows = m_data[m_headers[0]].size();
 }
 
+// Overload fill_data
+void DataFrame::fill_data(std::ext::V_string const& lines,
+                            std::ext::V_string const& keep_headers,
+                            char delim)
+{
+    std::ext::VV_string vv_strs;
+    for(auto const& line : lines)
+    {
+        std::istringstream iss(line);
+        std::string cell;
+        std::ext::V_string v_str_tmp;
+        while(std::getline(iss, cell, delim))
+        {
+            cell.erase(std::remove(cell.begin(), cell.end(), '\"'), cell.end());
+            if (cell.empty())
+                v_str_tmp.emplace_back(m_missing_key);
+            else
+                v_str_tmp.emplace_back(cell);
+        }
+        vv_strs.emplace_back(v_str_tmp);
+    }
+
+    // all headers
+    std::ext::V_string all_headers = vv_strs[0];
+
+    // find indices of headers to keep
+    std::ext::V_int keep_indices;
+    for (int i = 0; i < all_headers.size(); ++i) {
+        if (std::find(keep_headers.begin(), keep_headers.end(), all_headers[i]) != keep_headers.end()) {
+            keep_indices.push_back(i);
+        }
+    }
+
+    m_ncols = keep_indices.size();
+    m_headers.resize(m_ncols);
+
+    // fill data only for kept headers
+    for (int idx = 0; idx < keep_indices.size(); ++idx) {
+        int col = keep_indices[idx];
+        m_headers[idx] = all_headers[col];
+        std::ext::V_string values;
+
+        for (int j = 1; j < vv_strs.size(); ++j) {
+            if (vv_strs[j].size() <= col) {
+                values.emplace_back(m_missing_key);
+            } else {
+                values.emplace_back(vv_strs[j][col]);
+            }
+        }
+        m_data[m_headers[idx]] = values;
+    }
+
+    m_nrows = m_data[m_headers[0]].size();
+}
+
+
+
 void DataFrame::head(int n)
 {
         for(auto const& curr_hdr : m_headers)
@@ -132,6 +189,14 @@ void DataFrame::read_file(std::string_view path, char delim)
 {
     auto v_strs = read_lines(path);
     fill_data(v_strs, delim);
+}
+// overload read_file
+void DataFrame::read_file(std::string_view path,
+                            std::ext::V_string const& keep_headers,
+                             char delim)
+{
+    auto v_strs = read_lines(path);
+    fill_data(v_strs, keep_headers, delim);
 }
 
 std::ext::V_string DataFrame::get_header(std::string const& hdr) const
@@ -331,3 +396,20 @@ std::set<std::string> DataFrame::list_duplicates(std::string const& hdr)
     return unique_dup;
 }
 
+
+std::ext::V_string DataFrame::list_unique(std::string const& hdr)
+{
+    std::unordered_set<std::string> seen; 
+    std::ext::V_string result;
+
+    for(auto const& elm : m_data[hdr])  
+    {
+        if (seen.find(elm) == seen.end()) 
+        {  
+            result.push_back(elm);          
+            seen.insert(elm);               
+        }
+    }
+
+    return result;
+}

@@ -15,10 +15,10 @@ void Kinship::read_file(std::string_view path, char delim)
 {
     m_data_frame.read_file(path, delim);
 
-    if(m_data_frame.m_headers.size() > 3)
+    if(m_data_frame.m_headers.size() != 3)
     {
-        fmt::print("Erro in kinship files, the number of the columns in {} exceeds 3\n",
-        path);
+        spdlog::error("Error in kinship files: the number of columns in '{}' should be 3",
+            path);
         exit(EXIT_FAILURE);
     }
     add_dquot();

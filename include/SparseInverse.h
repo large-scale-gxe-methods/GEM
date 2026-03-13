@@ -1,9 +1,5 @@
 #pragma once
-// #define ARMA_USE_LAPACK
-// #define ARMA_USE_BLAS
-// #define DARMA_DONT_USE_WRAPPER
 #include <armadillo>
-// #define EIGEN_USE_MKL_ALL
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
 #include <Eigen/Core>
@@ -20,6 +16,7 @@ namespace std
 {
     namespace ext
     {
+        using IndexMapUnq = unordered_map<string, int>;
         using IndexMap = unordered_map<string, V_int>;
         using IndexMapRev = unordered_map<int, string>;
         using Triplet_d = Eigen::Triplet<double>;
@@ -45,7 +42,8 @@ namespace std
     }
 }
 
-struct pair_hash {
+struct pair_hash 
+{
     template <class T1, class T2>
     std::size_t operator () (std::pair<T1,T2> const& pair) const 
     {
@@ -56,13 +54,11 @@ struct pair_hash {
 };
 
 using SpaMat = Eigen::SparseMatrix<double, Eigen::ColMajor>;
-// using SpaMat = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
-using Mat = Eigen::MatrixXd;
+using SpaMatRow = Eigen::SparseMatrix<double, Eigen::RowMajor, int>;
 using DensMat = Eigen::MatrixXd;
 using DensVec = Eigen::VectorXd;
 using DensVecInt = Eigen::VectorXi;
 using DenseMatInt = Eigen::MatrixXi;
-
 
 class SparseInverse
 {
@@ -71,27 +67,36 @@ class SparseInverse
         Kinship kin;
         char pheno_delim;
         char kin_delim; 
+        int m_ratio_Nob2N;
+        int m_thr = 2; // threshold to decide on Woodbury
 
         SparseInverse() =  default;
         SparseInverse(std::string kin_add, std::string pheno_add, char kin_delim,
                       double kin_diag, char pheno_delim, std::string &m_sam_id,
                       std::ext::V_string &m_v_hdrs, std::ext::V_string &bgen_sample_id,
                       std::string phenoMissingKey) ;
+        void set_idx_mp_unq(std::ext::V_string const& vec);
         void set_idx_mp(std::ext::V_string v_strs);
-        std::ext::IndexMap get_idx_mp();        
+        std::ext::IndexMap get_idx_mp();
+        std::ext::IndexMapUnq get_idx_mp_unq(); 
+        void set_kin_Nsize(std::ext::VecTuples4spmat& vt4spmat); 
+        void set_kin_Nobssize(std::ext::VecTuples4spmat& vt4spmat);      
         void set_spmat();
         void set_spmat(SpaMat sm);
         SpaMat& get_spmat();
         SpaMat inv_spamat();
-        //define static as we might don't create an object
+        static SpaMat solve_chol(const SpaMat& sm);
+        //define static as we might not need an object
         static SpaMat inv_spamat(SpaMat const& sm);
+        static SpaMat inv_spamat_chol(SpaMat const& sm, bool return_full_inverse=false);
         static DensMat inv(DensMat const &dm);
 
     private:
        std::ext::IndexMap m_idx_mp;
+       std::ext::IndexMapUnq m_idx_mp_unq;
        SpaMat m_spmat;
     //    std::vector<SpaMat> m_vspmat;
        //std::ext::V_string get_pheno_samid();
-       [[nodiscard]] std::ext::VecTuples4spmat create_tuple4spmat();
+        void create_tuple4spmat(std::ext::VecTuples4spmat& vt4spmat);
        [[nodiscard]] bool is_missing(int id1, int id2);
 };

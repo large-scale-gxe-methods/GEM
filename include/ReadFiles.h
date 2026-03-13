@@ -1,16 +1,4 @@
 #pragma once
-
-/**
- * @file ReadFiles.h
- * @author In this file we define a class to read files with different delimiter 
- * @brief 
- * @version 0.1
- * @date 2024-03-01
- * 
- * @copyright Copyright (c) 2024
- * 
- */
-
 #include <optional>
 #include <string>
 #include <string_view>
@@ -22,6 +10,7 @@
 #include <variant>
 #include "fmt/core.h"
 #include "fmt/format.h"
+#include <spdlog/spdlog.h>
 
 
 
@@ -40,13 +29,12 @@ namespace std
         using V_bool = std::vector<bool>;
         using V_lluint = std::vector<long long unsigned int>;
         using map_str_int = std::map<std::string, int>;
+        using Umap_str_int = std::unordered_map<std::string, int>;
         using V_opt_string = std::vector<std::optional<std::string>>;
         using Var_bool_int = std::variant<V_bool, V_int>;
         using Map_str_Vint = std::map<string, V_int>;
     }
 }
-
-#pragma once
 
 /**
  * @brief A class for storing infromation in the tabular files
@@ -67,13 +55,13 @@ class DataFrame
         int n_cols() const;
 
         /**
-         * @brief show the n row of the dataframe
+         * @brief Print the n rows of the dataframe
          * 
          * @param n : number of rows to show (by default 5)
          */
         void head(int n = 5);
         /**
-         * @brief copy a data from one data frame based on a given headers to new one
+         * @brief Make a copy of data from based on a given headers
          * 
          * @param v_hdrs : vector of requested headers to copy
          * @return DataFrame 
@@ -83,18 +71,28 @@ class DataFrame
          * @brief Read input file and store its data
          * 
          * @param path : path to the input file
-         * @param delim : delimeter to separate columns
+         * @param delim : delimiter to separate columns
          */
         void read_file(std::string_view path, char delim = ',');
         /**
-         * @brief Get the whole columns of a given hdr
+         * @brief Read input file and store its data
+         * 
+         * @param path 
+         * @param keep_headers 
+         * @param delim 
+         */
+        void read_file(std::string_view path,
+                        std::ext::V_string const& keep_headers,
+                        char delim = ',');
+        /**
+         * @brief Return columns of a given header
          * 
          * @param hdr : a given header to return its values
          * @return std::ext::V_string 
          */
         std::ext::V_string get_header(std::string const& hdr) const;
         /**
-         * @brief remove duplication based on the values in  given headers
+         * @brief Remove duplicate entries based on the values in the given header fields.
          * 
          * @param v_hdrs 
          */
@@ -104,10 +102,13 @@ class DataFrame
         bool any_duplicated(std::string const& hdr);
         std::set<std::string> list_duplicates(std::string const& hdr);
         void match_genoids(std::string hdr_id, std::ext::V_string const& v_hdrs);
-        
+        std::ext::V_string list_unique(std::string const& hdr);
     private:
         std::ext::V_string read_lines(std::string_view path);
         void fill_data(std::ext::V_string const& v_strs, char delim = ',');
+        void fill_data(std::ext::V_string const& v_strs,
+                        std::ext::V_string const& keep_headers, char delim= ','
+                        );
 };
 
 

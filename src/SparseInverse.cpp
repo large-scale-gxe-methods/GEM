@@ -30,6 +30,17 @@ SparseInverse::SparseInverse(std::string kin_add, std::string pheno_add, char ki
 }
 
 
+void SparseInverse::set_idx_mp_unq(std::ext::V_string const& vec)
+{
+    unsigned int i = 0;
+    for (auto const& s : vec) 
+    {
+        m_idx_mp_unq[s] = i;
+        ++i;
+    }
+}
+
+
 void SparseInverse::set_idx_mp(std::ext::V_string v_strs)
 {
 
@@ -41,12 +52,15 @@ void SparseInverse::set_idx_mp(std::ext::V_string v_strs)
   
 }
 
-
 std::ext::IndexMap SparseInverse::get_idx_mp()
 {
     return m_idx_mp;
 }
 
+std::ext::IndexMapUnq SparseInverse::get_idx_mp_unq()
+{
+    return m_idx_mp_unq;
+}
 
 SpaMat& SparseInverse::get_spmat()
 {
@@ -61,33 +75,47 @@ uint64_t combine_indices(long long a, long long b) {
 }
 
 
-std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
+void SparseInverse::set_kin_Nsize(std::ext::VecTuples4spmat& vt4spmat)
 {
-    std::ext::VecTuples4spmat vt4spmat;
-    auto path = pheno.get_path();
-    pheno.read_file(path, pheno_delim);
-    //Match genofile sample IDs
-    size_t unique_phenoIDs_beforematch = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
-    size_t phenoIDs_beforematch = pheno.m_data_frame.n_rows();
-    pheno.m_data_frame.match_genoids(pheno.m_sam_id, pheno.m_v_hdrs);
-    size_t unique_phenoIDs = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
-    size_t phenoIDs = pheno.m_data_frame.n_rows();
+    set_idx_mp_unq(pheno.m_data_frame.list_unique(pheno.m_sam_id));
+    size_t N = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
+    if(!kin.m_null_kin)
+    {
+        kin.read_file(kin.m_path, kin_delim);
+        // std::unordered_set<uint64_t> added_pairs;
+            
+        for(unsigned int i {0}; i < N ; ++i)
+        {
+            vt4spmat.emplace_back(std::ext::Triplet_d(i, i, kin.m_diag)); 
+        }
+    
+        for(unsigned int i{0}; i < kin.size(); ++i)
+        {
+            auto val0 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[0]][i];//Retutn first ID in kin
+            auto val1 = kin.m_data_frame.m_data[kin.m_data_frame.m_headers[1]][i];//Retutn second ID in kin
+            double kinship_val = std::stod(kin.m_data_frame.m_data[kin.m_data_frame.m_headers[2]][i]);
+    
+            val0.erase(std::remove(val0.begin(), val0.end(), '\"'), val0.end());
+            val1.erase(std::remove(val1.begin(), val1.end(), '\"'), val1.end());
+            // Map indxes to be meaningful in matrix if the sample exist in pheno it return corresponding index
 
-    if (!pheno.m_data_frame.any_duplicated(pheno.m_sam_id))
-    {
-        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
-        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
+            auto it0 = m_idx_mp_unq.find(val0);
+            auto it1 = m_idx_mp_unq.find(val1);
+
+            if (it0 != m_idx_mp_unq.end() && it1 != m_idx_mp_unq.end())
+            {
+                int v0_idx = it0->second;
+                int v1_idx = it1->second;
+                vt4spmat.emplace_back(v0_idx, v1_idx, kinship_val);
+                if (v0_idx != v1_idx) vt4spmat.emplace_back(v1_idx, v0_idx, kinship_val);
+            }    
+        }
     }
-    else
-    {
-        fmt::println("The number of unique IDs in Phenotype file before matching IDs is: {}", unique_phenoIDs_beforematch);
-        fmt::println("The number of unique IDs in Phenotype file after matching IDs is: {}", unique_phenoIDs);
-        fmt::println("****************************************************************************");
-        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
-        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
-    }
-    fmt::println("****************************************************************************");
-    //Map pheno sample ids to int to be used as matrix indices
+}
+
+
+void SparseInverse::set_kin_Nobssize(std::ext::VecTuples4spmat& vt4spmat)
+{
     set_idx_mp(pheno.m_data_frame.m_data[pheno.m_sam_id]);
     if(kin.m_null_kin)
     {
@@ -113,7 +141,7 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
 
         if (pheno.m_data_frame.any_duplicated(pheno.m_sam_id))
         {
-            // std::cout << "Duplicated id detected... \nAssuming longitudinal data with repeated measures...\n";
+            // set diagonal
             auto duplicates = pheno.m_data_frame.list_duplicates(pheno.m_sam_id);
             for( auto dup : duplicates)
             {
@@ -178,7 +206,44 @@ std::ext::VecTuples4spmat SparseInverse::create_tuple4spmat()
             }
         }
     }
-    return vt4spmat;
+}
+
+
+void SparseInverse::create_tuple4spmat(std::ext::VecTuples4spmat& vt4spmat)
+{
+    auto path = pheno.get_path();
+    pheno.read_file(path, pheno_delim);
+    //Match genofile sample IDs
+    size_t unique_phenoIDs_beforematch = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
+    size_t phenoIDs_beforematch = pheno.m_data_frame.n_rows();
+    pheno.m_data_frame.match_genoids(pheno.m_sam_id, pheno.m_v_hdrs);
+    size_t unique_phenoIDs = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
+    size_t phenoIDs = pheno.m_data_frame.n_rows();
+    m_ratio_Nob2N = phenoIDs / unique_phenoIDs;// if > threshold then kin N in N ele kin Nobs in Nobs
+
+    if (!pheno.m_data_frame.any_duplicated(pheno.m_sam_id))
+    {
+        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
+        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
+    }
+    else
+    {
+        fmt::println("The number of unique IDs in Phenotype file before matching IDs is: {}", unique_phenoIDs_beforematch);
+        fmt::println("The number of unique IDs in Phenotype file after matching IDs is: {}", unique_phenoIDs);
+        fmt::println("****************************************************************************");
+        fmt::println("The number of IDs in Phenotype file before matching IDs is: {}", phenoIDs_beforematch);
+        fmt::println("The number of IDs in Phenotype file after matching IDs is: {}", phenoIDs);
+    }
+    fmt::println("****************************************************************************");
+    //Map pheno sample ids to int to be used as matrix indices
+    if(m_ratio_Nob2N >= m_thr)
+    {
+        set_kin_Nsize(vt4spmat);
+    }
+    else
+    {
+        set_kin_Nobssize(vt4spmat);
+    } 
 }
 
 bool SparseInverse::is_missing(int id1, int id2)
@@ -188,10 +253,27 @@ bool SparseInverse::is_missing(int id1, int id2)
 
 void SparseInverse::set_spmat()
 {
-    auto vt = create_tuple4spmat();
-    auto mat_size = pheno.size();
+    std::ext::VecTuples4spmat vt4spmat;
+    create_tuple4spmat(vt4spmat);
+
+    if (vt4spmat.empty()) 
+    {
+        m_spmat.resize(0, 0);        // null
+        m_spmat.data().squeeze();    // release memory
+        return;
+    }
+    size_t mat_size;
+    if(m_ratio_Nob2N >= m_thr)
+    {
+        mat_size = pheno.m_data_frame.size_wo_duplicates(pheno.m_sam_id);
+    }
+    else
+    {
+        mat_size = pheno.size();
+    }
+    
     m_spmat.resize(mat_size, mat_size);
-    m_spmat.setFromTriplets(vt.begin(), vt.end());
+    m_spmat.setFromTriplets(vt4spmat.begin(), vt4spmat.end());
     m_spmat.finalize();
     m_spmat.makeCompressed();
 }
@@ -201,22 +283,40 @@ void SparseInverse::set_spmat(SpaMat sm)
     m_spmat = sm;
 }
 
-SpaMat SparseInverse::inv_spamat()
+SpaMat SparseInverse::inv_spamat(SpaMat const& sm) 
 {
     Eigen::SimplicialLDLT<SpaMat, Eigen::Upper> solver;
-    solver.compute(m_spmat);
+    solver.compute(sm);
     if (solver.info() != Eigen::Success) 
     { 
         std::cerr << "Decomposition failed!" << std::endl; 
         exit(EXIT_FAILURE);
     }
     std::cout << "Solver computed finished" << std::endl;
-    SpaMat I(m_spmat.rows(), m_spmat.rows()); 
+    SpaMat I(sm.rows(), sm.rows()); 
     I.setIdentity();
     return solver.solve(I);
 }
 
-// Function to convert an Eigen SparseMatrix to SuiteSparse cholmod_sparse
+// Inverse of triangular factor
+SpaMat SparseInverse::solve_chol(const SpaMat& M)
+{
+    Eigen::SimplicialLLT<SpaMat> llt;
+    llt.compute(M);
+    if (llt.info() != Eigen::Success)
+        throw std::runtime_error("LLT failed");
+
+    SpaMat U = llt.matrixU();  // Upper factor
+    const auto& Q = llt.permutationP(); 
+    SpaMat I(M.rows(), M.rows()); 
+    I.setIdentity();
+    U.template triangularView<Eigen::Upper>().solveInPlace(I);
+
+    return Q.transpose() * I; 
+}
+
+
+//  Convert an Eigen SparseMatrix to SuiteSparse cholmod_sparse
 cholmod_sparse* convertEigenToSuiteSparse(SpaMat const& sm, cholmod_common *cm) 
 {
     // Retrieve matrix properties
@@ -309,7 +409,8 @@ cs_di* createSparseIdentity(int m)
     }
 
     // Set up the identity matrix in compressed column storage (CCS) format
-    for (int i = 0; i < m; ++i) {
+    for (int i = 0; i < m; ++i) 
+    {
         csMatrix->p[i] = i;      // Column pointers: each column starts at index i
         csMatrix->i[i] = i;      // Row indices: diagonal element at row i
         csMatrix->x[i] = 1.0;    // Value: all diagonal elements are 1
@@ -320,7 +421,7 @@ cs_di* createSparseIdentity(int m)
 }
 
 
-SpaMat SparseInverse::inv_spamat(SpaMat const& sm) 
+SpaMat SparseInverse::inv_spamat_chol(SpaMat const& sm, bool return_full_inverse)
 {
     cholmod_common cm;
     cholmod_start(&cm);
@@ -384,7 +485,8 @@ SpaMat SparseInverse::inv_spamat(SpaMat const& sm)
     // Workspace for cs_di_spsolve
     int* xi = (int*)malloc(2 * n_cols * sizeof(int));
     double* x = (double*)malloc(n_cols * sizeof(double));
-    if (!xi || !x) {
+    if (!xi || !x) 
+    {
         std::cerr << "Memory allocation failed.";
         cs_di_spfree(csFactor);
         cholmod_free_factor(&factor, &cm);
@@ -395,7 +497,7 @@ SpaMat SparseInverse::inv_spamat(SpaMat const& sm)
     }
     cs_di* csb = createSparseIdentity(n_cols);//or nnz
     // Solve the system for each column 
-    auto start1 = std::chrono::high_resolution_clock::now();
+
     for (int col = 0; col < n_cols; ++col) 
     {
         int top = cs_di_spsolve(csFactor, csb, col, xi, x, nullptr, 1); // 0 indicates upper triangular csFactor should be llt or supernudal
@@ -420,7 +522,7 @@ SpaMat SparseInverse::inv_spamat(SpaMat const& sm)
         
     // Populate the Eigen sparse inverse matrix
     eigenInverse.setFromTriplets(tripletList.begin(), tripletList.end());
-    SpaMat eigenInverseFinal = eigenInverse.transpose() * eigenInverse; //To calculate upper and lower
+    // SpaMat eigenInverseFinal = eigenInverse.transpose() * eigenInverse; //To calculate upper and lower
     cs_di_spfree(csb);
     cs_di_spfree(csFactor);
     cholmod_free_factor(&factor, &cm);
@@ -429,7 +531,10 @@ SpaMat SparseInverse::inv_spamat(SpaMat const& sm)
     free(x);
     // Finish CHOLMOD
     cholmod_finish(&cm);
-    return eigenInverseFinal;
+    if (return_full_inverse)
+        return eigenInverse.transpose() * eigenInverse;
+    else
+        return eigenInverse.transpose();
 }
 
 

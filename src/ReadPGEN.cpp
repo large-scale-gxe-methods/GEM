@@ -89,8 +89,6 @@ void Pgen::processPgenHeader(string pgenFile)
     cout << "Number of samples: " << raw_sample_ct << '\n';
 }
 
-
-
 // This functions reads the .psam file
 void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) 
 {
@@ -196,18 +194,7 @@ void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<
          string strtmp = values[iidIndex];
          sampleID_all.push_back(strtmp);//sampleID befor match with PhenoID
          int itmp = k;
-        //  if (phenomap.find(strtmp) != phenomap.end()) {
-        //      auto tmp_valvec = phenomap[strtmp];
-        //      if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-        //          sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-        //          new_covdata_orig[k * (numSelCol+1)] = 1.0;
-        //         for (int c = 0; c < numSelCol; c++) {
-        //             sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
-        //         }
-        //         sampleID.push_back(strtmp);
-        //         k++;
-        //      }
-        //  }
+
         if (phenomap.find(strtmp) != phenomap.end()) 
         {
             auto& tmp_valvecs = phenomap[strtmp]; 
@@ -452,7 +439,7 @@ void Pgen::processPvar(Pgen pgen, string pvarFile)
             exit(1);
         }
     }
-
+    
     fIDMat.close();
 }
 
@@ -608,7 +595,7 @@ void Pgen::getPgenVariantPos(Pgen pgen, CommandLine cmd)
 
 void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Pgen pgen, CommandLine cmd) 
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
@@ -1339,7 +1326,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
         }
         _subset_size = 0;
 
-        auto end_time = std::chrono::high_resolution_clock::now();
+        auto end_time = std::chrono::steady_clock::now();
         cout << "Thread " << thread_num << " finished in ";
         printExecutionTime1(start_time, end_time);
 }

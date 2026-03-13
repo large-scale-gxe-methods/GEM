@@ -57,6 +57,7 @@ public:
 	std::vector<std::string> cov;
 	std::vector<std::string> icov;
 	std::vector<std::string> exp;
+	std::string group;
 	std::unordered_map<std::string, int> covHM;
 	std::unordered_map<std::string, int> intHM;
 	std::unordered_map<std::string, int> expHM;

@@ -21,7 +21,7 @@ void glmm_gei_bed13(Magee_Arma const& null_obj, string const &bedfile,
 					bool filterVariants, char bimDelim, int bimLast,
 					uint32_t n_samples, bool meta_output = false);
 
-void conver_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) 
+void convert_eigen_to_arma(SpaMat const& eigenMat, arma::sp_mat& armaMat) 
 {
     // Determine the number of non-zero elements
     arma::umat locations(2, eigenMat.nonZeros());  // Store row and column indices
@@ -73,33 +73,6 @@ std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_op
     }
     return indices;
 }
-
-//Return id for match indexes or -1 for not match
-std::ext::V_int match_indices(std::ext::V_string const& original, std::ext::V_string const& filtered) {
-    std::ext::map_str_int filtered_map;
-    
-    for (size_t i = 0; i < filtered.size(); ++i) 
-    {
-        filtered_map[filtered[i]] = i;
-    }
-    
-    std::ext::V_int indices;
-    for (const auto& id : original) 
-    {
-        auto it = filtered_map.find(id);
-
-        if (it != filtered_map.end()) 
-        {
-            indices.push_back(it->second);
-        } 
-        else 
-        {
-            indices.push_back(-1); // Use -1 to indicate not found
-        }
-    }
-    return indices;
-}
-
 
 std::ext::V_string match_id_include(std::ext::V_string const& id_include, std::ext::V_string const& sample_id) 
 {
@@ -157,36 +130,21 @@ std::ext::V_string create_strata(std::ext::VV_string const& Ecat) {
     return strata;
 }
 
-
-
-template <typename T>
-std::vector<T> unique_id(const std::vector<T> &vec) 
+/**
+ * @brief Serach vector1 in a unique vector2
+ * 
+ * @param vec1 
+ * @param vec2 
+ * @return std::ext::V_bool 
+ */
+std::ext::V_bool in_op(const std::ext::V_string& vec1,
+                       const std::ext::V_string& vec2)
 {
-    std::unordered_set<T> seen; 
-    std::vector<T> result;
-
-    for (auto const& val : vec) 
-    {
-        if (seen.find(val) == seen.end()) 
-        {  
-            result.push_back(val);          
-            seen.insert(val);               
-        }
-    }
-
-    return result;
-}
-
-std::ext::V_bool in_op(std::ext::V_string const& vec1, std::ext::V_string const& vec2) 
-{
+    std::unordered_set<std::string> look(vec2.begin(), vec2.end());
     std::ext::V_bool result;
     result.reserve(vec1.size());
-    
-    for (const auto& elem : vec1) 
-    {
-        result.push_back(std::find(vec2.begin(), vec2.end(), elem) != vec2.end());
-    }
-    
+    for (const auto& s : vec1)
+        result.push_back(look.find(s) != look.end());
     return result;
 }
 
@@ -282,7 +240,7 @@ std::ext::V_bool list_duplicates_bool(std::ext::V_string const& vec)
 }
 
 
-Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include) 
+DensMat filter_unique_rows(DensMat const& mat, std::ext::V_string& id_include) 
 {
     std::ext::V_bool is_duplicate = list_duplicates_bool(id_include);
     std::ext::V_int non_duplicate_indices;
@@ -295,7 +253,7 @@ Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include)
         }
     }
 
-    Mat filtered(non_duplicate_indices.size(), mat.cols());
+    DensMat filtered(non_duplicate_indices.size(), mat.cols());
 
     for (size_t i = 0; i < non_duplicate_indices.size(); ++i) 
     {
@@ -305,7 +263,7 @@ Mat filter_unique_rows(Mat const& mat, std::ext::V_string& id_include)
 }
 
 
-std::ext::V_bool apply_on_columns(Mat const& mat, const std::function<bool(VectorXd const&, int)>& func, int threshold) 
+std::ext::V_bool apply_on_columns(DensMat const& mat, const std::function<bool(VectorXd const&, int)>& func, int threshold) 
 {
     std::ext::V_bool result(mat.cols(), false);
 
@@ -334,7 +292,7 @@ std::ext::Map_str_Vint generate_strata_list(std::ext::V_string const& vec)
   return strata_list;
 }
 
-void scale(Mat& mat, bool center, bool scale) 
+void scale(DensMat& mat, bool center, bool scale) 
 {    
     if (center) 
     {
@@ -349,9 +307,9 @@ void scale(Mat& mat, bool center, bool scale)
 }
 
 
-Mat cbind(Mat const& A, Mat const& B) 
+DensMat cbind(DensMat const& A, DensMat const& B) 
 {
-    Mat combined(A.rows(), A.cols() + B.cols());
+    DensMat combined(A.rows(), A.cols() + B.cols());
     combined << A, B;
     return combined;
 }
@@ -376,24 +334,146 @@ void spa_mat_ones(arma::sp_mat &arma_mat)
 }
 
 
+SpaMat apply_wb_J(SpaMat const& J, DensVec const& diag_sigma_i, SpaMat const& diag_sigma_i_ZPchol)
+{
+    SpaMat J_scaled = J;                 // copy J
+    for (int k = 0; k < J_scaled.outerSize(); ++k) {
+        for (SpaMat::InnerIterator it(J_scaled, k); it; ++it) {
+            // column scaling (right-multiply by diagonal)
+            it.valueRef() *= diag_sigma_i[it.col()];
+        }
+    }
+    SpaMat term1 = J_scaled * J.transpose();   // (n x n)
+    SpaMat JU = (J * diag_sigma_i_ZPchol);   // (n x r) N in N or N in 2N
+    SpaMat term2 = (JU * JU.transpose());    // (n x n) N in N
+    SpaMat J_sigma_i_Jt = term1 - term2;
+    return J_sigma_i_Jt;
+}
+
+static arma::sp_mat kron_ones_I(int p, arma::uword nObs)
+{
+    arma::umat loc(2, (arma::uword)p * nObs);
+    arma::vec  val((arma::uword)p * nObs, arma::fill::ones);
+
+    arma::uword k = 0;//uword(uint)
+    for (int a = 0; a < p; ++a) 
+    {
+        arma::uword roff = (arma::uword)a * nObs;
+        for (arma::uword i = 0; i < nObs; ++i) 
+        {
+            loc(0, k) = roff + i;
+            loc(1, k) = i;
+            // val(k)=1 already
+            ++k;
+        }
+    }
+    return arma::sp_mat(loc, val, (arma::uword)p * nObs, nObs, true, true);
+}
+
+/**
+ * @brief Create E by sigma_i in Woodbury
+ * 
+ * @param J 
+ * @param E 
+ * @param diag_sigma_i 
+ * @param U 
+ * @return SpaMat 
+ */
+[[nodiscard]] static SpaMat build_Psi_wb_blocks(const SpaMat& J, const DensMat& E,               
+    const DensVec& diag_sigma_i, const SpaMat& U)
+{
+    int n  = J.rows();
+    int nObs = J.cols();
+    int p    = E.cols();
+    int r    = U.cols();
+
+    // ---- Build JU_stack = [ J*diag(e0)*U ; J*diag(e1)*U ; ... ]  (p*n x r)
+    // std::vector<Triplet> ju_trip;
+    std::ext::VecTuples4spmat ju_trip;
+    ju_trip.reserve(p * U.nonZeros()); 
+
+    for (int a = 0; a < p; ++a)
+    {
+        // Ue = diag(e_a) * U  (row-scale U by e_a)
+        SpaMat Ue = U;
+        Ue.makeCompressed();
+        for (int col = 0; col < Ue.outerSize(); ++col) 
+        {
+            for (SpaMat::InnerIterator it(Ue, col); it; ++it) 
+            {
+                it.valueRef() *= E(it.row(), a);
+            }
+        }
+
+        SpaMat JU = (J * Ue).eval();   // (n x r)
+        JU.makeCompressed();
+
+        int row_off = a * n;
+        for (int col = 0; col < JU.outerSize(); ++col) 
+        {
+            for (SpaMat::InnerIterator it(JU, col); it; ++it) 
+            {
+                ju_trip.emplace_back(row_off + it.row(), it.col(), it.value());
+            }
+        }
+    }
+
+    SpaMat JU_stack(p*n, r);
+    JU_stack.setFromTriplets(ju_trip.begin(), ju_trip.end());
+    JU_stack.makeCompressed();
+
+    SpaMat term2 = JU_stack * JU_stack.transpose(); // (p*n x p*n)
+    term2.makeCompressed();
+
+    // ---- Build term1 (diagonal inside each (a,b) block if J is one-hot collapse)
+    // d_ab = J * (diag_sigma_i % e_a % e_b)  => length n
+    std::ext::VecTuples4spmat t1_trip;
+    t1_trip.reserve((size_t)p * (size_t)p * (size_t)n);
+
+    for (int a = 0; a < p; ++a)
+    {
+        for (int b = 0; b < p; ++b)
+        {
+            DensVec w = diag_sigma_i.array()
+                    * E.col(a).array()
+                    * E.col(b).array();          // (nObs)
+
+            DensVec d = J * w;            // (n)
+
+            int roff = a * n;
+            int coff = b * n;
+            for (int i = 0; i < n; ++i) 
+            {
+                if (d[i] != 0.0) t1_trip.emplace_back(roff + i, coff + i, d[i]);
+            }
+        }
+    }
+
+    SpaMat term1(p*n, p*n);
+    term1.setFromTriplets(t1_trip.begin(), t1_trip.end());
+    term1.makeCompressed();
+
+    SpaMat Psi = (term1 - term2).eval();
+    Psi.makeCompressed();
+    return Psi;
+}
+
+
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen bgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bgen)),
             m_active_genotype(GENOTYPE::Bgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Pgen pgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(pgen)),
             m_active_genotype(GENOTYPE::Pgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bed bed,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, 
-            int numSelCol) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bed)),
             m_active_genotype(GENOTYPE::Bed), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov), m_numSelCol(numSelCol){}
+            m_interaction_cov(interaction_cov) {}
 
 
 void MAGEE::clear_m_magee_glmmkin() 
@@ -405,7 +485,9 @@ void MAGEE::clear_m_magee_glmmkin()
     m_magee_glmmkin.sigma_i.resize(0, 0);
     m_magee_glmmkin.sigma_ix.resize(0, 0);
     m_magee_glmmkin.cov.resize(0, 0);
-    m_magee_glmmkin.select.clear();
+    m_magee_glmmkin.select.resize(0);
+    m_magee_glmmkin.diag_sigma_i_ZPchol.resize(0, 0);
+    m_magee_glmmkin.diag_sigma_i.resize(0);
 }
 
 void MAGEE::create_E()
@@ -422,30 +504,30 @@ void MAGEE::create_E()
     }
     catch(std::out_of_range const& e)
     {
-        //std::cerr << "{header} does not exist in headers" << e.what() << '\n';
         fmt::print("The header: \"{}\" does not exist in headers. Error: {}", header, e.what());
         std::exit(EXIT_FAILURE);
     }
-    m_magee_glmmkin.E = slice_mat_cols(m_gmmat->m_X, colIndices);// should we add m_x to glmmkin return object? 
+    m_magee_glmmkin.E = slice_mat_cols(m_gmmat->m_X, colIndices);
 }
 
 
 void MAGEE::fill_sel(std::ext::V_string& sample_id)
 {
     std::ext::V_int missing_id= match_indices(m_glmmkin_fitnull.id_include, sample_id);
-    
+
     if(any_isna(missing_id))
     {
-        std::cout << "Warnning: check your data... Some individuals of pheno file are missing in sample file!\n";
+        std::cout << "Warning: check your data... Some individuals of pheno file are missing in sample file!\n";
        m_glmmkin_fitnull.id_include =  match_id_include(m_glmmkin_fitnull.id_include, sample_id);
-        std::cout << "Missing IDs were removed...\n" << "Remaind IDs are: " << m_glmmkin_fitnull.id_include.size() << "\n";
+        std::cout << "Missing IDs were removed...\n" << "Remained IDs are: " << m_glmmkin_fitnull.id_include.size() << "\n";
     }
-
+    
     std::ext::V_string sample_id_original =  sample_id;
     std::ext::V_bool sample_id_bool = in_op(sample_id, unique_id(m_glmmkin_fitnull.id_include));
+
     sample_id = filtered_ids(sample_id, sample_id_bool); 
     m_magee_glmmkin.select  = match_indices(sample_id_original, sample_id);
-    
+
     try
     {
         check_not_empty(sample_id);
@@ -485,21 +567,21 @@ void MAGEE::fill_J(std::ext::V_int& match_id, std::ext::V_string& sample_id)
     std::ext::V_int indixes_col_unique = unique_id(indixes_col);
     m_magee_glmmkin.J.resize(m_glmmkin_fitnull.id_include.size(), indixes_col_unique.size());
     fill_mat(m_glmmkin_fitnull.id_include.size(), indixes_col_unique.size(), indixes_col, 1);
-    m_magee_glmmkin.J = m_magee_glmmkin.J.transpose();
+    m_magee_glmmkin.J = m_magee_glmmkin.J.transpose(); //N in Nobs
 }
 
 void MAGEE::calculate_bin_header()
 {
     // Remove duplicated rows
-    Mat E_unique = filter_unique_rows(m_magee_glmmkin.E, m_glmmkin_fitnull.id_include);
+    DensMat E_unique = filter_unique_rows(m_magee_glmmkin.E, m_glmmkin_fitnull.id_include);
 
-    //Apply function to check if unique elements in each column are <= 20
+    // Check if unique elements in each column are <= 20
     std::ext::V_bool Ebin = apply_on_columns(E_unique, unique_less_equal, m_cmd.cat_threshold);
 	
     if (std::any_of(Ebin.begin(), Ebin.end(), [](bool b) { return b;}))
     {
-        //  Ecat and further operations if any column has <= 20 unique elements
-        Mat Ecat(E_unique.rows(), std::count(Ebin.begin(), Ebin.end(), true));
+        // Ecat and further operations if any column has <= 20 unique elements
+        DensMat Ecat(E_unique.rows(), std::count(Ebin.begin(), Ebin.end(), true));
         int col_idx = 0;
         for (int col = 0; col < E_unique.cols(); ++col) 
         {
@@ -521,11 +603,11 @@ void MAGEE::calculate_bin_header()
         // Concatinate values of each column 0-1 
         std::ext::V_string strata = create_strata(Ecat_str);
         std::ext::V_string uni_strata = unique_id(strata);
-        // It help to keep the last occurance of each element
+        // Keep the last occurance of each element
         std::reverse(uni_strata.begin(), uni_strata.end());
         std::sort(uni_strata.begin(), uni_strata.end());
 
-        //kepp only headers that binary
+        // kepp only binary headers 
         for (auto inter = 0; inter < m_interaction.size(); ++inter)
         {
             if(Ebin[inter])
@@ -542,7 +624,8 @@ void MAGEE::calculate_bin_header()
 
         // Combine cat_inter with unique strata
         std::ext::V_string tmp1(uni_strata.size());
-        for (size_t i = 0; i < uni_strata.size(); ++i) {
+        for (size_t i = 0; i < uni_strata.size(); ++i) 
+        {
             tmp1[i] = cat_inter + "_" + uni_strata[i];
         }
         // Create bin header by appending "N_" and "AF_" to each unique strata combination
@@ -560,7 +643,7 @@ void MAGEE::calculate_bin_header()
 	{
         // Handle case when no columns have <= 20 unique elements
 		std::cout << "There is no strata\n";
-        m_bin_headers.clear();  // Ensures it is an empty vector
+        m_bin_headers.clear();  
         m_interaction_new.clear();
     }
 }
@@ -570,13 +653,16 @@ void MAGEE::printOutputHeader_magee()
     std::ofstream results(m_cmd.outFile, std::ofstream::binary); 
     bool printFull = false; 
     bool printMeta = false; 
-    int printStart = 1;  //escape first index as we will add G for beta_G
-    int printEnd  = m_interaction.size() + 1;  
-    if (m_cmd.outStyle.compare("meta") == 0) { 
+    int printStart = 1;  // Escape first index as we will add G for beta_G
+    int printEnd  = m_interaction_exp.size() + 1;  
+    if (m_cmd.outStyle.compare("meta") == 0) 
+    { 
         printStart = 0;  
         printEnd   = m_interaction.size() + 1; 
         printMeta  = true; 
-    } else if (m_cmd.outStyle.compare("full") == 0) { 
+    } 
+    else if (m_cmd.outStyle.compare("full") == 0) 
+    { 
         printStart = 0;  
         printEnd   = m_interaction.size() + 1;  
         printFull  = true; 
@@ -601,7 +687,8 @@ void MAGEE::printOutputHeader_magee()
     string seMHeader = "SE_Beta_Marginal"; 
     string seHeader  = "SE_Beta_"; 
     string covHeader = "Cov_Beta_"; 
-    if (m_cmd.robust == 1) { 
+    if (m_cmd.robust == 1) 
+    { 
         seMHeader = "robust_" + seMHeader; 
         seHeader  = "robust_" + seHeader; 
         covHeader = "robust_" + covHeader; 
@@ -614,7 +701,7 @@ void MAGEE::printOutputHeader_magee()
         results << "SE_Beta_Marginal" << "\t"; 
     } 
 
-    if (m_interaction.size() != 0)  
+    if (m_interaction_exp.size() != 0)  
     { 
         for (int i = printStart; i < printEnd; i++) 
         { 
@@ -700,34 +787,33 @@ void MAGEE::printOutputHeader_magee()
 
 void MAGEE::fitglmm()
 {
-    // m_magee_glmmkin.glmmkin = m_glmmkin_fitnull;
     Magee_Arma magee_arma;
-	int qi = m_interaction_cov.size();//onlycovinteraction
-	int ei = m_interaction_exp.size();//only exposure interaction
-    m_interaction = m_interaction_exp;//both cov and exp interactions
+	int qi = m_interaction_cov.size();   // cov interaction
+	int ei = m_interaction_exp.size();   // exposure interaction
+    m_interaction = m_interaction_exp;   // Both cov and exp interactions
 	
     for (int i = 0; i < m_interaction_cov.size(); i++)
 	{ 
 		m_interaction.insert(m_interaction.end(), m_interaction_cov[i]); 
 	}
 	
+    const bool has_E = ei > 0;
 	std::string pheno_missing_key = m_cmd.missing;//NA values
     bool meta_output = (m_cmd.outStyle == "meta") ? true : false;//output style
     double miss_cutoff = m_cmd.missGenoRate;
 	int covar_center = m_cmd.center;
     int nperbatch = m_cmd.stream_snps;
     double minmaf = m_cmd.MAF;
-    create_E();
+      
     std::ext::V_int match_id;  
     std::ext::V_string sample_id; 
 	int samSize =  m_gmmat->m_vkins_sp[0].pheno.m_data_frame.m_nrows;
-
     if(m_active_genotype == GENOTYPE::Bgen)
     {
         sample_id = std::get<Bgen>(m_genotype).sampleID_all;//sampleID; 
         std::get<Bgen>(m_genotype).getPositionOfBgenVariant(std::get<Bgen>(m_genotype), m_cmd);
     }
- 
+    
     if(m_active_genotype == GENOTYPE::Pgen)
     {
         sample_id = std::get<Pgen>(m_genotype).sampleID_all;//sampleID;
@@ -740,9 +826,9 @@ void MAGEE::fitglmm()
         std::get<Bed>(m_genotype).getBedVariantPos(std::get<Bed>(m_genotype), m_cmd);
     }
 
-    //fill select to be passed to glmm_gei_bgen13
+    // Fill select to be passed to glmm_gei_bgen13
     fill_sel(sample_id);
-    //fill J if there are duplicated IDs
+    // Fill J if there are duplicated IDs
     if (any_duplicated(m_glmmkin_fitnull.id_include))
     {
         fill_J(match_id, sample_id);
@@ -755,94 +841,150 @@ void MAGEE::fitglmm()
         match_id = remove_minus_one(match_id_with_minus_one);
     }
 
-    m_magee_glmmkin.E = slice_mat(m_magee_glmmkin.E, match_id);
-    calculate_bin_header();
-
-    if (covar_center == 1)
+    //Create E if there is interaction test
+    if (has_E) 
     {
-        scale(m_magee_glmmkin.E, true, false);
-    }
-    else if (covar_center == 2) {
-        if (!m_interaction_cov.empty()) {
-            Mat left = m_magee_glmmkin.E.leftCols(ei);
-            Mat right = m_magee_glmmkin.E.middleCols(ei, qi);
-            scale(right, true, false);
-            m_magee_glmmkin.E = cbind(left, right);
+        create_E();
+        m_magee_glmmkin.E = slice_mat(m_magee_glmmkin.E, match_id);
+        calculate_bin_header();
+
+        if (covar_center == 1)
+        {
+            scale(m_magee_glmmkin.E, true, false);
         }
+        else if (covar_center == 2) 
+        {
+            if (!m_interaction_cov.empty()) 
+            {
+                DensMat left = m_magee_glmmkin.E.leftCols(ei);
+                DensMat right = m_magee_glmmkin.E.middleCols(ei, qi);
+                scale(right, true, false);
+                m_magee_glmmkin.E = cbind(left, right);
+            }
+        }
+        if(!m_interaction_cov.empty())
+        {
+            m_magee_glmmkin.EC = m_magee_glmmkin.E.middleCols(ei, qi);
+        }
+    }
+    else 
+    {
+        m_magee_glmmkin.E.resize(0, 0);
+        m_magee_glmmkin.EC.resize(0, 0);
     }
     m_magee_glmmkin.residuals = slice_vec(m_glmmkin_fitnull.scaled_residuals, match_id);
     m_glmmkin_fitnull.fit.sigma_ix = slice_mat(m_glmmkin_fitnull.fit.sigma_ix, match_id);
     m_magee_glmmkin.sigma_ix = m_glmmkin_fitnull.fit.sigma_ix.sparseView();
-    m_glmmkin_fitnull.fit.sigma_ix.resize(0, 0);// free the memory
-    m_magee_glmmkin.sigma_i = slice_mat(m_glmmkin_fitnull.fit.sigma_i, match_id, match_id, false);
-    m_glmmkin_fitnull.fit.sigma_i.resize(0, 0);
+    m_glmmkin_fitnull.fit.sigma_ix.resize(0, 0);
     m_magee_glmmkin.cov = m_glmmkin_fitnull.fit.cov.sparseView();
-    m_glmmkin_fitnull.fit.cov.resize(0, 0);// free the memory
-
-	if(!m_interaction_cov.empty())
-	{
-		m_magee_glmmkin.EC = m_magee_glmmkin.E.middleCols(ei, qi);
-	}
-  
+    m_glmmkin_fitnull.fit.cov.resize(0, 0);
+    if(!m_glmmkin_fitnull.run_wb)
     {
+        m_magee_glmmkin.sigma_i = slice_mat(m_glmmkin_fitnull.fit.sigma_i, match_id, match_id, false);
+        m_glmmkin_fitnull.fit.sigma_i.resize(0, 0);
+    }
+    else
+    {
+        m_magee_glmmkin.diag_sigma_i =  slice_vec(m_glmmkin_fitnull.fit.diag_sigma_i, match_id);
+        m_magee_glmmkin.diag_sigma_i_ZPchol = slice_mat(m_glmmkin_fitnull.fit.diag_sigma_i_ZPchol, match_id);
+        m_glmmkin_fitnull.fit.diag_sigma_i.resize(0);
+        m_glmmkin_fitnull.fit.diag_sigma_i_ZPchol.resize(0, 0);
+    }
+
+    {
+        // Use J to compress matrices to N in N
         arma::sp_mat J(m_magee_glmmkin.J.rows(), m_magee_glmmkin.J.cols());
         arma::sp_mat sigma_i;
         arma::sp_mat sigma_ix;
         arma::vec residuals;
-        arma::mat E;
-        conver_eigen_to_arma(m_magee_glmmkin.J, J);
-        conver_eigen_to_arma(m_magee_glmmkin.sigma_i, sigma_i);
-        conver_eigen_to_arma(m_magee_glmmkin.sigma_ix, sigma_ix);
-        conver_eigen_to_arma(m_magee_glmmkin.cov, magee_arma.cov);
-        magee_arma.EC = arma::mat(m_magee_glmmkin.EC.data(), m_magee_glmmkin.EC.rows(), m_magee_glmmkin.EC.cols(), true);
-        E = arma::mat(m_magee_glmmkin.E.data(), m_magee_glmmkin.E.rows(), m_magee_glmmkin.E.cols(), true);
+
+        convert_eigen_to_arma(m_magee_glmmkin.J, J);
+        convert_eigen_to_arma(m_magee_glmmkin.sigma_ix, sigma_ix);
+        convert_eigen_to_arma(m_magee_glmmkin.cov, magee_arma.cov);
         residuals = arma::vec(m_magee_glmmkin.residuals.data(), m_magee_glmmkin.residuals.size(), true);
         magee_arma.dupflag = m_magee_glmmkin.dupflag;
         magee_arma.select = m_magee_glmmkin.select;
-        clear_m_magee_glmmkin();
+        
         size_t n = residuals.size();
         size_t n_obs = residuals.size();
-        size_t block_size = (ei + qi + 1) * n_obs;
-        arma::mat resblock = kron(arma::ones(ei + qi + 1), residuals);
-        arma::sp_mat Eblock(block_size, block_size);
-        Eblock.submat(0, 0, n_obs - 1, n_obs - 1) = arma::speye<arma::sp_mat>(n_obs, n_obs);
-        for (auto block_n = 1; block_n < ei + qi + 1; block_n++) 
-        {
-            // Create a sparse diagonal matrix from column block_n - 1 of E
-            arma::sp_mat block = arma::sp_mat(arma::diagmat(E.col(block_n - 1)));
-            Eblock.submat(block_n * n_obs, block_n * n_obs, 
-                        (block_n + 1) * n_obs - 1, (block_n + 1) * n_obs - 1) = block;
-        }
-
         arma::sp_mat all_ones_sigma_i(ei + qi + 1, ei + qi + 1);
         arma::sp_mat all_ones_sigma_ix(ei + qi + 1, 1);
         spa_mat_ones(all_ones_sigma_i);
         spa_mat_ones(all_ones_sigma_ix);
-        arma::sp_mat sigma_iblock = kron(all_ones_sigma_i, sigma_i);
         arma::sp_mat sigma_ixblock = kron(all_ones_sigma_ix, sigma_ix);
         magee_arma.n_obs = residuals.size();
-        magee_arma.n = residuals.size();
-        if (magee_arma.dupflag)
+        magee_arma.Jres = magee_arma.dupflag ? J * residuals : residuals;
+        arma::sp_mat sigma_iblock;
+        if(!m_glmmkin_fitnull.run_wb)
         {
-            magee_arma.Jres = J * residuals;
-            arma::sp_mat Jblock = kron(arma::speye(ei + qi + 1, ei + qi + 1), J);
-            magee_arma.JEresblock = Jblock * Eblock * resblock;
-            magee_arma.Psi = Jblock * Eblock * sigma_iblock * Eblock * Jblock.t();
-            magee_arma.Xi = Jblock * Eblock * sigma_ixblock;
-            magee_arma.sigma_iJJ = J * sigma_i * J.t(); 
-            magee_arma.sigma_ixJ = J * sigma_ix; 
-            magee_arma.n = J.n_rows;
+            convert_eigen_to_arma(m_magee_glmmkin.sigma_i, sigma_i);
+            sigma_iblock = kron(all_ones_sigma_i, sigma_i);
+            magee_arma.sigma_iJJ = magee_arma.dupflag ? J * sigma_i * J.t() : sigma_i;
+        }
+        else // Woodbury
+        {
+            magee_arma.diag_sigma_i = arma::vec(m_magee_glmmkin.diag_sigma_i.data(), m_magee_glmmkin.diag_sigma_i.size(), true);
+            convert_eigen_to_arma(m_magee_glmmkin.diag_sigma_i_ZPchol, magee_arma.diag_sigma_i_ZPchol);
+            SpaMat J_sigma_i_Jt = apply_wb_J(m_magee_glmmkin.J, m_magee_glmmkin.diag_sigma_i, m_magee_glmmkin.diag_sigma_i_ZPchol); 
+            convert_eigen_to_arma(J_sigma_i_Jt, magee_arma.sigma_iJJ);
+        }
+        magee_arma.sigma_ixJ = magee_arma.dupflag ? J * sigma_ix : sigma_ix;
+        magee_arma.n = magee_arma.dupflag ? J.n_rows : residuals.size();
+        if (has_E) 
+        {
+            magee_arma.EC = arma::mat(m_magee_glmmkin.EC.data(), m_magee_glmmkin.EC.rows(), m_magee_glmmkin.EC.cols(), true);
+            arma::mat E;
+            E = arma::mat(m_magee_glmmkin.E.data(), m_magee_glmmkin.E.rows(), m_magee_glmmkin.E.cols(), true);
+            size_t block_size = (ei + qi + 1) * n_obs;
+            arma::mat resblock = kron(arma::ones(ei + qi + 1), residuals);
+
+            arma::sp_mat Eblock(block_size, block_size);
+            Eblock.submat(0, 0, n_obs - 1, n_obs - 1) = arma::speye<arma::sp_mat>(n_obs, n_obs);
+            // Block 0 (the first one) is identity I_n set above the loop
+            // Blocks 1..K (where K = ei + qi) are diagonal matrices.
+            for (auto block_n = 1; block_n < ei + qi + 1; block_n++) 
+            {
+                // Create a sparse diagonal matrix from column block_n - 1 of E
+                arma::sp_mat block = arma::sp_mat(arma::diagmat(E.col(block_n - 1)));
+                Eblock.submat(block_n * n_obs, block_n * n_obs, 
+                            (block_n + 1) * n_obs - 1, (block_n + 1) * n_obs - 1) = block; //n_obs × n_obs
+            }
+            // ----- build E / Eblock path -----
+            // Jblock/Eblock/resblock, Psi, Xi, etc.
+            if(magee_arma.dupflag)
+            {
+                arma::sp_mat Jblock = kron(arma::speye(ei + qi + 1, ei + qi + 1), J);
+                magee_arma.JEresblock = Jblock * Eblock * resblock;
+                if(!m_glmmkin_fitnull.run_wb)
+                {
+                    magee_arma.Psi = Jblock * Eblock * sigma_iblock * Eblock * Jblock.t();
+                }
+                else
+                {
+                    int p = ei + qi + 1;
+                    DensMat E1(m_magee_glmmkin.E.rows(), m_magee_glmmkin.E.cols() + 1);
+                    E1.col(0).setOnes();                    // intercept
+                    E1.block(0, 1, m_magee_glmmkin.E.rows(), m_magee_glmmkin.E.cols()) = m_magee_glmmkin.E;
+                    SpaMat Psi = build_Psi_wb_blocks(m_magee_glmmkin.J, E1, m_magee_glmmkin.diag_sigma_i, m_magee_glmmkin.diag_sigma_i_ZPchol);
+                    convert_eigen_to_arma(Psi, magee_arma.Psi);
+                }
+                magee_arma.Xi = Jblock * Eblock * sigma_ixblock;
+            }
+            else
+            {
+                magee_arma.JEresblock = Eblock * resblock; // No J for cross-sectional
+                magee_arma.Psi = Eblock * sigma_iblock * Eblock;
+                magee_arma.Xi = Eblock * sigma_ixblock;
+            }
         }
         else
         {
-            //There is no J for crosse-sectional data
-            magee_arma.Jres = residuals;
-            magee_arma.JEresblock = Eblock * resblock;
-            magee_arma.Psi = Eblock * sigma_iblock * Eblock;
-            magee_arma.Xi = Eblock * sigma_ixblock;
-            magee_arma.sigma_iJJ = sigma_i ; 
-            magee_arma.sigma_ixJ = sigma_ix;
+            magee_arma.JEresblock.reset(); // 0-length vec
+            magee_arma.Psi.reset();        // 0x0 sp_mat/mat
+            magee_arma.Xi.reset();  // 0x0 mat/mat
         }
+        
+        clear_m_magee_glmmkin();
     }
 
     if(m_active_genotype == GENOTYPE::Bgen)
@@ -953,7 +1095,7 @@ void MAGEE::fitglmm()
     cout << "Combining results... \n";
 	printOutputHeader_magee();
 	std::cout << std::flush;
-	std::ofstream results(m_cmd.outFile, std::ios::binary | std::ios_base::app);
+	std::ofstream results(m_cmd.outFile, std::ios_base::app);
     for (int i = 0; i < m_cmd.threads; i++) 
 	{
         std::string threadOutputFile;
@@ -975,7 +1117,7 @@ void MAGEE::fitglmm()
         std::ifstream thread_output(threadOutputFile);
         if (thread_output.peek() != std::ifstream::traits_type::eof())
 	    {
-           results<<thread_output.rdbuf();
+           results << thread_output.rdbuf();
         }
         thread_output.close();
         std::remove(threadOutputFile.c_str());

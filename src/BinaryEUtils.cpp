@@ -107,7 +107,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
             map.clear();
         }
     } 
-    // if Phenotype is continuous    
+    // If Phenotype is continuous    
     else
     {
         for (int i = 0; i < Sq_new; i++) 
@@ -121,11 +121,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
                     cnt++;
                 }
             }
-        /*  if (cnt == 1) { 
-                cerr << "\nERROR: All values of " << covNames_new[i] << " column are the same.\n\n"; 
-                exit(1);	
-            }*/
-
+      
             if ((cnt <= cat_threshold) || (std::find(cat_names.begin(), cat_names.end(), covNames_new[i]) != cat_names.end())) 
             {
                 binE_idx.push_back(i + 1);

@@ -3,7 +3,7 @@
 ****************************************************************************/
 
 #include "declars.h"
-#define VERSION "2.1.2"
+#define VERSION "2.2"
 
 void print_help();
 
@@ -14,7 +14,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     cout << "\n*****************************************************************************\n";
     cout << "Welcome to GEM v" << VERSION << "\n";
-    cout << "(C) 2018-2025 Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab \n";
+    cout << "(C) 2018-2026 Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab \n";
     cout << "GNU General Public License v3\n";
     cout << "****************************************************************************\n";
 
@@ -43,7 +43,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("pheno-file", po::value<std::string>(), "")
         ("kin-file", po::value<std::string>(), "")
         ("out", po::value<std::string>()->default_value("gem.out"), "")
-        ("output-style", po::value<std::string>()->default_value("minimum"), "");
+        ("output-style", po::value<std::string>()->default_value("meta"), "");
 
     // Phenotype file
     po::options_description phenofile("Phenotype file options");
@@ -53,7 +53,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         ("covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("int-covar-names", po::value<std::vector<std::string>>()->multitoken(), "")
         ("exposure-names", po::value<std::vector<std::string>>()->multitoken(), "")
-        ("random-slope", po::value<std::string>(), "")
+        ("random-slope-name", po::value<std::string>(), "")
+        ("group-name", po::value<std::string>(), "")
         ("delim", po::value<std::string>()->default_value(","), "")
         ("missing-value", po::value<std::string>()->default_value("NA"), "")
         ("robust", po::value<int>()->default_value(0), "")
@@ -354,8 +355,12 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
     }
 
-    if(out.count("random-slope")){
-        randomSlope = out["random-slope"].as<string>();
+    if(out.count("random-slope-name")){
+        randomSlope = out["random-slope-name"].as<string>();
+    }
+
+    if(out.count("group-name")){
+        group = out["group-name"].as<string>();
     }
 
     if (out.count("delim")) {
@@ -571,9 +576,15 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
         cout << "\n";
     }
+
     if(randomSlope.size() > 0)
     {
         cout << "The Selected Random slope is: " << randomSlope << "\n";
+    }
+
+    if(group.size() > 0)
+    {
+        cout << "The Selected group is: " << group << "\n";
     }
 
     if (center == 2){
@@ -625,7 +636,7 @@ void print_help() {
         << "   --bim \t\t Path to the bim file." << endl
         << "   --fam \t\t Path to the fam file." << endl
         << "   --out \t\t Full path and extension to where GEM output results. \n \t\t\t    Default: gem.out" << endl
-        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t\t  For a robust analysis, additional columns for the model-based summary statistics will be included.  \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: minimum" << endl;       
+        << "   --output-style \t Modifies the output of GEM. Must be one of the following: \n\t\t\t    minimum: Output the summary statistics for only the GxE and marginal G terms. \n \t\t\t    meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms \n \t\t\t\t  For a robust analysis, additional columns for the model-based summary statistics will be included.  \n \t\t\t    full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions \n \t\t\t    Default: meta" << endl;       
     cout << endl << endl;
 
 
@@ -635,7 +646,8 @@ void print_help() {
         << "   --exposure-names \t One or more column names in the phenotype file naming the exposure(s) to be included in interaction tests." << endl
         << "   --int-covar-names \t Any column names in the phenotype file naming the covariate(s) for which interactions should\n \t\t\t   be included for adjustment (mutually exclusive with --exposure-names)." << endl
         << "   --covar-names \t Any column names in the phenotype file naming the covariates for which only main effects should\n \t\t\t   be included for adjustment (mutually exclusive with both --exposure-names and --int-covar-names)." << endl
-        << "   --random-slope \t Column name in the phenotype file that contains the random slope." << endl
+        << "   --random-slope-name \t Column name in the phenotype file that contains the random slope." << endl
+        << "   --group-name \t Column name in the phenotype file that contains the group." << endl
         << "   --robust \t\t 0 for model-based standard errors and 1 for robust standard errors. \n \t\t\t    Default: 0" << endl
         << "   --tol \t\t Convergence tolerance for logistic regression. \n \t\t\t    Default: 0.0000001" << endl
         << "   --delim \t\t Delimiter separating values in the phenotype file.\n \t\t\t Tab delimiter should be represented as \\t and space delimiter as \\0. \n \t\t\t    Default: , (comma-separated)" << endl

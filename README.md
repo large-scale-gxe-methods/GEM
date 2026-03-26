@@ -6,10 +6,6 @@ GEM (Gene-Environment interaction analysis for Millions of samples) is a softwar
 Current version: 2.2
 
 <br />
-Additional documentation:  
-https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
-
-<br />
 
 ## Contents
 - [Quick Installation](#quick-installation)

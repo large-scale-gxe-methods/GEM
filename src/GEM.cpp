@@ -396,7 +396,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName_new, intCovSelHeadersName_new); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(pgen), expCovSelHeadersName_new, intCovSelHeadersName_new, phenoHeaderName); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";
@@ -618,7 +618,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName_new, intCovSelHeadersName_new); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bed), expCovSelHeadersName_new, intCovSelHeadersName_new, phenoHeaderName); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";
@@ -847,7 +847,7 @@ int main(int argc, char* argv[]) {
             cout << "Start GEI test...\n";
             cout << std::flush;
             auto start_time_magee = std::chrono::steady_clock::now();
-            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName_new, intCovSelHeadersName_new); 
+            MAGEE magee(gmmat, ret_obj, cmd, std::move(bgen), expCovSelHeadersName_new, intCovSelHeadersName_new, phenoHeaderName); 
             magee.fitglmm();
             cout << "****************************************************************************\n";
             cout << "Calculating the duration of GEI test...\n";
@@ -1212,7 +1212,7 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
         results << "#dispersion: " << sigma2 << "\n";
     }
 
-    results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t";
+    results << "SNPID" << ((useBgen) ? "\tRSID\t" : "\t") << "CHR" << "\t" << "POS" << "\t" << "Non_Effect_Allele" << "\t" << "Effect_Allele" << "\t" << "N_Samples" << "\t" << "AF" << "\t" << "GV" << "\t";
     int nBinE = binE.nBinE;
     if (nBinE > 0) 
     {
@@ -1222,6 +1222,7 @@ void printOutputHeader(bool useBgen, int numExpSelCol_new, int Sq1, vector<strin
         {
             results << "N_" << bin_headers[i] << "\t";
             results << "AF_" << bin_headers[i] << "\t";
+            results << "GV_" << bin_headers[i] << "\t";
         }
     }
 

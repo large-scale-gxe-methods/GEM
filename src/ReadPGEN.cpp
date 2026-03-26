@@ -89,6 +89,8 @@ void Pgen::processPgenHeader(string pgenFile)
     cout << "Number of samples: " << raw_sample_ct << '\n';
 }
 
+
+
 // This functions reads the .psam file
 void Pgen::processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) 
 {
@@ -623,7 +625,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     bool strata   = (numBinE > 0 ) ? true : false;
     int strataLen = binE.strataLen;
     vector<int> stratum_idx = binE.stratum_idx;
-    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_var(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
 
     int pvarLast = pgen.pvarLast;
     vector<int> pvarIndex = pgen.pvarIndex;
@@ -635,7 +637,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
-    vector <double> AF(stream_snps);
+    vector <double> AF(stream_snps), var(stream_snps), gsq(stream_snps);
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
     double* covX = &pgen.new_covdata[0];   
@@ -776,8 +778,8 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int variant_index = 0;
     int keepIndex = 0;
     vector<double> buf(file_sample_ct);
-    while (snploop <= end) {
-
+    while (snploop <= end) 
+    {
         int stream_i = 0;
         while (stream_i < stream_snps) {
 
@@ -829,7 +831,8 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             int nMissing = 0;
             vector <uint>   missingIndex;
 
-            for (uint32_t n = 0; n < file_sample_ct; n++) {
+            for (uint32_t n = 0; n < file_sample_ct; n++) 
+            {
                 if (buf[n] == -9.0) {
                     if (include_idx[idx_k] == n) {
                         nMissing++;
@@ -842,6 +845,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                 if (include_idx[idx_k] == n) {
                     int tmp2 = idx_k + tmp1;
                     AF[stream_i] += buf[n];
+                    gsq[stream_i] += buf[n] * buf[n];
 
                     if (phenoType == 1) {
                         ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * buf[n];
@@ -853,6 +857,7 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                     if (strata) {
                         binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                         binE_AF[strata_i + stratum_idx[idx_k]]+=buf[n];
+                        binE_var[strata_i + stratum_idx[idx_k]]+= (buf[n] * buf[n]);
                     }
                     idx_k++;
                 }
@@ -860,26 +865,36 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
             double gmean = AF[stream_i] / double(samSize - nMissing);
             double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
+            double gsqmean = gsq[stream_i] / double(samSize - nMissing);
+            double cur_var = double(gsqmean - gmean * gmean) * double(samSize - nMissing) / double(samSize - nMissing - 1);
             double percMissing = nMissing / (samSize * 1.0);
-            if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
+            if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) 
+            {
                 AF[stream_i] = 0.0;
+                var[stream_i] = 0.0;
                 if (strata) {
                     for (int i = 0; i < strataLen; i++) {
                         binE_N[strata_i + i] = 0.0;
                         binE_AF[strata_i + i] = 0.0;
+                        binE_var[strata_i + i] = 0.0;
                     }
                 }
                 variant_index++;
                 keepIndex++;
                 continue;
             }
-            else {
+            else 
+            {
                 AF[stream_i] = cur_AF;
+                var[stream_i] = cur_var;
             }
 
             if (strata) { 
                 for (int i = 0; i < strataLen; i++) {
+                    double gmeansq_strata = (binE_AF[strata_i + i] / binE_N[strata_i + i]) * (binE_AF[strata_i + i] / binE_N[strata_i + i]);
                     binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
+                    double gsqmean_strata = (binE_var[strata_i + i] / binE_N[strata_i + i]);
+                    binE_var[strata_i + i] = (gsqmean_strata - gmeansq_strata) * double(binE_N[strata_i + i]) / double(binE_N[strata_i + i] - 1);
                 }
             }
 
@@ -1195,11 +1210,11 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
 
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << var[i] << "\t";
 
             int strata_ii = i * strataLen;
             for (int k = 0; k < strataLen; k++) {
-                oss << binE_N[strata_ii + k] << "\t" << binE_AF[strata_ii + k] << "\t";
+                oss << binE_N[strata_ii + k] << "\t" << binE_AF[strata_ii + k] << "\t" << binE_var[strata_ii + k] << "\t";
             }
             
             oss << betaM[i] << "\t" << sqrt(VarbetaM[i]) << "\t";
@@ -1258,11 +1273,14 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             }
             
             AF[i] = 0.0;
+            var[i] = 0.0;
+            gsq[i] = 0.0;
         }
 
         if (strata) {       
             std::fill(binE_N.begin(), binE_N.end(), 0.0);
             std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+            std::fill(binE_var.begin(), binE_var.end(), 0.0);
         }
         delete[] ZGStR;
         delete[] ZGStZGS;
@@ -1299,36 +1317,36 @@ void gemPGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             oss.str(std::string());
             oss.clear();
         }
-        }
+    }
 
-        if (variant_index % 10000 != 0) {
-            results << oss.str();
-            oss.str(std::string());
-            oss.clear();
-        }
+    if (variant_index % 10000 != 0) {
+        results << oss.str();
+        oss.str(std::string());
+        oss.clear();
+    }
 
-        // Close files
-        results.close();
-        fIDMat.close();
+    // Close files
+    results.close();
+    fIDMat.close();
 
 
 
-        if (_info_ptr.vrtypes) {
-            plink2::aligned_free(_info_ptr.vrtypes);
-        }
-        plink2::PglErr reterr2 = plink2::kPglRetSuccess;
-        plink2::CleanupPgfi(&_info_ptr, &reterr2);
-        
-        reterr2 = plink2::kPglRetSuccess;
-        plink2::CleanupPgr(&_state_ptr, &reterr2);
-        if (PgrGetFreadBuf(&_state_ptr)) {
-            plink2::aligned_free(PgrGetFreadBuf(&_state_ptr));
-        }
-        _subset_size = 0;
+    if (_info_ptr.vrtypes) {
+        plink2::aligned_free(_info_ptr.vrtypes);
+    }
+    plink2::PglErr reterr2 = plink2::kPglRetSuccess;
+    plink2::CleanupPgfi(&_info_ptr, &reterr2);
+    
+    reterr2 = plink2::kPglRetSuccess;
+    plink2::CleanupPgr(&_state_ptr, &reterr2);
+    if (PgrGetFreadBuf(&_state_ptr)) {
+        plink2::aligned_free(PgrGetFreadBuf(&_state_ptr));
+    }
+    _subset_size = 0;
 
-        auto end_time = std::chrono::steady_clock::now();
-        cout << "Thread " << thread_num << " finished in ";
-        printExecutionTime1(start_time, end_time);
+    auto end_time = std::chrono::steady_clock::now();
+    cout << "Thread " << thread_num << " finished in ";
+    printExecutionTime1(start_time, end_time);
 }
     
 

@@ -154,6 +154,7 @@ class GMMAT
         std::ext::V_int m_idxtau2;
         ModelType m_modeltype;
         SpaMat m_diag_sigma_im_Z;
+
         /**
          * @brief Construct the covariance matrix for the random effects.
          *
@@ -162,7 +163,6 @@ class GMMAT
          * ---
          * **1. Random Intercept (RI) model**
          *
-         * where:
          * - \f$\Phi_i\f$ are sparse kinship matrices
          * - \f$\theta_i\f$ are variance component parameters stored in `m_tau`
          * - \f$I\f$ is the identity matrix
@@ -190,6 +190,7 @@ class GMMAT
          */
 
         void build_Psi(int const ng, bool calc_diag_kin = false);
+
         /**
          * @brief Construct the random-effects design matrix.
          *
@@ -216,7 +217,7 @@ class GMMAT
          *
          * The resulting matrix has dimension:
          *
-         * \f$N_{obs} \times 2N\f'
+         * \f$N_{obs} \times 2N\f$
          * ---
          * ## Implementation Notes
          *

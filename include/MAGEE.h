@@ -63,11 +63,11 @@ class MAGEE
         enum class GENOTYPE {Bgen, Pgen, Bed};
         MAGEE() = default;
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bgen bgen,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name); 
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Pgen pgen,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name); 
         MAGEE(GMMAT &gmmat, Glmmkin &glmmkin,  CommandLine &cmd, Bed bed,
-                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov); 
+                std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name); 
         /**
          * @brief Run GEI based on glmm 
          * 
@@ -85,6 +85,7 @@ class MAGEE
         std::ext::V_string m_interaction_exp;
 		std::ext::V_string m_interaction_new;
         std::ext::V_string m_interaction_cov;
+        std::string m_pheno_name;
         // int m_numSelCol;
         std::ext::Map_str_Vint m_strata_list;
 		std::ext::V_string m_bin_headers;
@@ -242,17 +243,6 @@ bool any_duplicated(std::ext::V_string const& vec);
 */
 std::ext::V_bool list_duplicates_bool(std::ext::V_string const& vec);
 
-/**
- * @brief Filters out duplicate rows from a matrix.
- * 
- * This function removes duplicate rows from the input matrix and returns a matrix 
- * with only unique rows, as well as updating the `id_include` vector accordingly.
- * 
- * @param mat The input matrix.
- * @param id_include The vector of IDs to filter.
- * @return A matrix with unique rows.
-*/
-DensMat filter_unique_rows(DensMat const& mat, std::ext::V_string& id_include);
 
 /**
  * @brief Applies a function to each column of a matrix and returns a boolean vector.
@@ -327,3 +317,17 @@ std::ext::V_int remove_minus_one(std::ext::V_int vec);
  * @return A vector of concatenated strings representing strata.
 */
 std::ext::V_string create_strata(std::ext::VV_string const& Ecat);
+
+/**
+ * @brief Returns the indices of the first unique occurrences in `id_include`.
+ *
+ * This function scans the input vector from left to right and keeps track of
+ * which string IDs have already been seen. For each new ID, it stores the
+ * index of its first appearance. Repeated IDs are ignored.
+ *
+ *
+ * @param id_include A vector of string IDs that may contain duplicates.
+ * @return std::vector<int> A vector containing the indices of the first
+ * occurrence of each unique ID, in the same order they first appear.
+ */
+std::vector<int> unique_index(const std::ext::V_string& id_include);

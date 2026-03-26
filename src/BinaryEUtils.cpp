@@ -49,7 +49,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
 {
     std::unordered_map<string, vector<string>> phenomap;
     for (const auto& entry : phenoMap) {
-        phenomap[entry.first] = entry.second[0]; // Take the first (and only) vector as theer is no duplicated data
+        phenomap[entry.first] = entry.second[0]; // Take the first (and only) vector as there is no duplicated data
     }
     string bin_names;
     stratum_idx.resize(samSize);

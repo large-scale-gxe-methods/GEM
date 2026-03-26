@@ -842,7 +842,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int strataLen = binE.strataLen;
     bool strata   = (numBinE > 0 ) ? true : false;
     vector<int> stratum_idx = binE.stratum_idx;
-    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_var(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
    
     int ZGS_col  = Sq1 * stream_snps;
 
@@ -850,7 +850,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
-    vector <double> AF(stream_snps);
+    vector <double> AF(stream_snps), var(stream_snps), gsq(stream_snps);
     //vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
@@ -888,7 +888,8 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
     int variant_index = 0;
     int keepIndex = 0;
     int ret;
-    while (snploop <= end) {
+    while (snploop <= end) 
+    {
 
         int stream_i = 0;
         while (stream_i < stream_snps) {
@@ -994,6 +995,8 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                             double dosage = (2 * p00 + p10) / pTot;
                             int tmp2 = idx_k + tmp1;
                             AF[stream_i] += dosage;
+                            gsq[stream_i] += dosage * dosage;
+
                             if (phenoType == 1) {
                                 ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
                             }
@@ -1004,6 +1007,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                             if (strata) {
                                 binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                                 binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
+                                binE_var[strata_i + stratum_idx[idx_k]]+= (dosage * dosage);
                             }
                         }
 
@@ -1134,6 +1138,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
                             int tmp2 = idx_k + tmp1;
                             AF[stream_i] += dosage;
+                            gsq[stream_i] += dosage * dosage;
 
                             if (phenoType == 1) {
                                 ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
@@ -1145,6 +1150,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                             if (strata) {
                                 binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                                 binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
+                                binE_var[strata_i + stratum_idx[idx_k]]+= (dosage * dosage);
                             }
                             idx_k++;
                         }
@@ -1181,6 +1187,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
 
                             int tmp2 = idx_k + tmp1;
                             AF[stream_i] += dosage;
+                            gsq[stream_i] += dosage * dosage;
 
                             if (phenoType == 1) {
                                 ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * dosage;
@@ -1192,6 +1199,7 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                             if (strata) {
                                 binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                                 binE_AF[strata_i + stratum_idx[idx_k]]+=dosage;
+                                binE_var[strata_i + stratum_idx[idx_k]]+= (dosage * dosage);
                             }
 
                             idx_k++;
@@ -1201,14 +1209,18 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             } // end of layout 2
     
             double gmean  = AF[stream_i] / double(samSize - nMissing);
+            double gsqmean = gsq[stream_i] / double(samSize - nMissing);
+            double cur_var = double(gsqmean - gmean * gmean) * double(samSize - nMissing) / double(samSize - nMissing - 1);
             double cur_AF = AF[stream_i] / 2.0 / double(samSize - nMissing);
             double percMissing = nMissing / (samSize * 1.0);
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0.0;
+                var[stream_i] = 0.0;
                 if (strata) {
                     for (int i = 0; i < strataLen; i++) {
                         binE_N[strata_i + i] = 0.0;
                         binE_AF[strata_i + i] = 0.0;
+                        binE_var[strata_i + i] = 0.0;
                     }
                 }
                 variant_index++;
@@ -1218,11 +1230,15 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             }
             else {
                 AF[stream_i] = cur_AF;
+                var[stream_i] = cur_var;
             }
 
            if (strata) { 
                 for (int i = 0; i < strataLen; i++) {
+                    double gmeansq_strata = (binE_AF[strata_i + i] / binE_N[strata_i + i]) * (binE_AF[strata_i + i] / binE_N[strata_i + i]);
                     binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
+                    double gsqmean_strata = (binE_var[strata_i + i] / binE_N[strata_i + i]);
+                    binE_var[strata_i + i] = (gsqmean_strata - gmeansq_strata) * double(binE_N[strata_i + i]) / double(binE_N[strata_i + i] - 1);
                 }
             }
 
@@ -1535,20 +1551,19 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
                     double statM = betaM[i] * betaM[i] / mbVarbetaM[i];
                     mbPvalM[i] = (isnan(statM) || statM <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_M, statM));                                            
                 }               
-
-
                 
             }
 
         } // end of if robust == 1
 
 
-        for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+        for (int i = 0; i < stream_snps; i++) 
+        {
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << var[i] << "\t";
 
             int tmp_strata = i * strataLen;
             for (int k = 0; k < strataLen; k++) {
-                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t" << binE_var[tmp_strata + k] << "\t";
             }
             
             oss << betaM[i] << "\t" << sqrt(VarbetaM[i]) << "\t";
@@ -1607,11 +1622,14 @@ void gemBGEN(int thread_num, double sigma2, double* resid, double* XinvXTX, vect
             }
             
             AF[i] = 0.0;
+            var[i] = 0.0;
+            gsq[i] = 0.0;
         }
 
         if (strata) {       
             std::fill(binE_N.begin(), binE_N.end(), 0.0);
             std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+            std::fill(binE_var.begin(), binE_var.end(), 0.0);
         }
         delete[] ZGStR;
         delete[] ZGStZGS;

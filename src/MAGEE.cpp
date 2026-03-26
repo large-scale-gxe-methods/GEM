@@ -130,13 +130,7 @@ std::ext::V_string create_strata(std::ext::VV_string const& Ecat) {
     return strata;
 }
 
-/**
- * @brief Serach vector1 in a unique vector2
- * 
- * @param vec1 
- * @param vec2 
- * @return std::ext::V_bool 
- */
+
 std::ext::V_bool in_op(const std::ext::V_string& vec1,
                        const std::ext::V_string& vec2)
 {
@@ -239,27 +233,27 @@ std::ext::V_bool list_duplicates_bool(std::ext::V_string const& vec)
     return result;
 }
 
-
-DensMat filter_unique_rows(DensMat const& mat, std::ext::V_string& id_include) 
+/**
+ * @brief 
+ * 
+ * @param id_include 
+ * @return std::vector<int> 
+ */
+std::vector<int> unique_index(const std::ext::V_string& id_include)
 {
-    std::ext::V_bool is_duplicate = list_duplicates_bool(id_include);
-    std::ext::V_int non_duplicate_indices;
+    std::unordered_set<std::string> seen;
+    std::vector<int> indices;
+    indices.reserve(id_include.size());
 
-    for (size_t i = 0; i < is_duplicate.size(); ++i) 
+    for (size_t i = 0; i < id_include.size(); ++i)
     {
-        if (!is_duplicate[i]) 
+        if (!seen.count(id_include[i]))
         {
-            non_duplicate_indices.push_back(i);
+            seen.insert(id_include[i]);
+            indices.push_back(i);   // keep first occurrence
         }
     }
-
-    DensMat filtered(non_duplicate_indices.size(), mat.cols());
-
-    for (size_t i = 0; i < non_duplicate_indices.size(); ++i) 
-    {
-        filtered.row(i) = mat.row(non_duplicate_indices[i]);
-    }
-    return filtered;
+    return indices;
 }
 
 
@@ -460,20 +454,20 @@ static arma::sp_mat kron_ones_I(int p, arma::uword nObs)
 
 
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bgen bgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bgen)),
             m_active_genotype(GENOTYPE::Bgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov) {}
+            m_interaction_cov(interaction_cov), m_pheno_name(pheno_name) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Pgen pgen,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(pgen)),
             m_active_genotype(GENOTYPE::Pgen), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov) {}
+            m_interaction_cov(interaction_cov), m_pheno_name(pheno_name) {}
 MAGEE::MAGEE(GMMAT &gmmat, Glmmkin &glmmkin, CommandLine &cmd, Bed bed,
-            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov) 
+            std::ext::V_string interaction_exp, std::ext::V_string interaction_cov, std::string pheno_name) 
             : m_gmmat(&gmmat), m_glmmkin_fitnull(glmmkin), m_cmd(cmd), m_genotype(std::move(bed)),
             m_active_genotype(GENOTYPE::Bed), m_interaction_exp(interaction_exp), 
-            m_interaction_cov(interaction_cov) {}
+            m_interaction_cov(interaction_cov), m_pheno_name(pheno_name) {}
 
 
 void MAGEE::clear_m_magee_glmmkin() 
@@ -572,22 +566,56 @@ void MAGEE::fill_J(std::ext::V_int& match_id, std::ext::V_string& sample_id)
 
 void MAGEE::calculate_bin_header()
 {
-    // Remove duplicated rows
-    DensMat E_unique = filter_unique_rows(m_magee_glmmkin.E, m_glmmkin_fitnull.id_include);
+    // Step 1: get unique row indices
+    auto indices = unique_index(m_glmmkin_fitnull.id_include);
 
-    // Check if unique elements in each column are <= 20
-    std::ext::V_bool Ebin = apply_on_columns(E_unique, unique_less_equal, m_cmd.cat_threshold);
-	
+    // Step 2: filter E and y together
+    DensMat E_unique(indices.size(), m_magee_glmmkin.E.cols());
+    for (size_t i = 0; i < indices.size(); ++i)
+    {
+        E_unique.row(i) = m_magee_glmmkin.E.row(indices[i]);
+    }
+
+    // Only if binary outcome
+    DensMat E_work;
+    DensVec y_unique;
+    if (m_gmmat->m_family_t == "binomial")
+    {
+        y_unique.resize(indices.size());
+
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+            y_unique[i] = m_gmmat->m_y[indices[i]];
+        }
+        // Create augmented matrix: first column = m_y
+        E_work.resize(E_unique.rows(), E_unique.cols() + 1);
+
+        // First column = y
+        E_work.col(0) = y_unique;
+
+        // Remaining columns = E
+        E_work.rightCols(E_unique.cols()) = E_unique;
+        m_interaction_new.emplace_back(m_pheno_name);
+    }
+    else
+    {
+        // No change
+        E_work = E_unique;
+    }
+  
+    // Check if unique elements in each column are <= cat_threshold
+    std::ext::V_bool Ebin = apply_on_columns(E_work, unique_less_equal, m_cmd.cat_threshold);
+
     if (std::any_of(Ebin.begin(), Ebin.end(), [](bool b) { return b;}))
     {
         // Ecat and further operations if any column has <= 20 unique elements
-        DensMat Ecat(E_unique.rows(), std::count(Ebin.begin(), Ebin.end(), true));
+        DensMat Ecat(E_work.rows(), std::count(Ebin.begin(), Ebin.end(), true));
         int col_idx = 0;
-        for (int col = 0; col < E_unique.cols(); ++col) 
+        for (int col = 0; col < E_work.cols(); ++col) 
         {
             if (Ebin[col]) 
             {
-                Ecat.col(col_idx++) = E_unique.col(col);
+                Ecat.col(col_idx++) = E_work.col(col);
             }
         }
         // Create strata by concatenating values in each row of Ecat
@@ -603,7 +631,7 @@ void MAGEE::calculate_bin_header()
         // Concatinate values of each column 0-1 
         std::ext::V_string strata = create_strata(Ecat_str);
         std::ext::V_string uni_strata = unique_id(strata);
-        // Keep the last occurance of each element
+
         std::reverse(uni_strata.begin(), uni_strata.end());
         std::sort(uni_strata.begin(), uni_strata.end());
 

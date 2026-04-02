@@ -3,7 +3,7 @@
 GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in cross-sectional and longitudinal data, from unrelated and related individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, and control for genotype-covariate interactions.  
 
 <br />
-Current version: 2.2
+Current version: 2.2.1
 
 <br />
 
@@ -20,14 +20,14 @@ Current version: 2.2
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the MKL binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2/GEM_2.2_MKL
+* Download the MKL binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_MKL
 
-* Download the OpenBLAS binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2/GEM_2.2_OpenBLAS
+* Download the OpenBLAS binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_OpenBLAS
 
 After downloading, make the file executable:
 
 ```bash
-chmod +x GEM_2.2_*
+chmod +x GEM_2.2.1_*
 ```
 
 Option 2: Build GEM Library Dependencies  
@@ -94,8 +94,8 @@ Armadillo Library
 
 ### Command Line Options
 
-Once GEM is installed, the executable `./GEM_2.2` can be used to run the program.  
-For a list of options, use `./GEM_2.2 --help`.
+Once GEM is installed, the executable `./GEM_2.2.1` can be used to run the program.  
+For a list of options, use `./GEM_2.2.1 --help`.
  
 
 <details>
@@ -447,6 +447,9 @@ The results should look like the following output file [longitudinal_with_kinshi
 <br />
 
 ## Recent Updates 
+[Version 2.2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2.1) - April 2, 2026:
+* Fix the wrong header name of N, AF and GV.
+
 [Version 2.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2) - March 4, 2026:
 * Added convergence check for logistic regression. The program now reports detailed coefficient estimates when the model fails to converge and exits safely after 500 iterations.
 * Added support for `group` variable in null model fitting to allow heteroscedastic residual variance across sample groups.

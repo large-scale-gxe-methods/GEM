@@ -3,7 +3,7 @@
 ****************************************************************************/
 
 #include "declars.h"
-#define VERSION "2.2"
+#define VERSION "2.2.1"
 
 void print_help();
 

@@ -636,9 +636,11 @@ void MAGEE::calculate_bin_header()
         std::sort(uni_strata.begin(), uni_strata.end());
 
         // kepp only binary headers 
-        for (auto inter = 0; inter < m_interaction.size(); ++inter)
+        int offset = (m_gmmat->m_family_t == "binomial") ? 1 : 0;
+
+        for (int inter = 0; inter < m_interaction.size(); ++inter)
         {
-            if(Ebin[inter])
+            if (Ebin[inter + offset])
             {
                 m_interaction_new.emplace_back(m_interaction[inter]);
             }

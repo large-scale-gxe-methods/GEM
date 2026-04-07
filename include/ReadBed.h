@@ -20,6 +20,7 @@ public:
     int bimLast; 
     int new_samSize;
     std::vector<string>   sampleID;
+    std::vector<string>   sampleID_all;
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
@@ -37,7 +38,7 @@ public:
 
 
     void processBed(string bedFile, string bimFile, string famFile);
-    void processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
+    void processFam(Bed bed, string famFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
     void getBedVariantPos(Bed bed, CommandLine cmd);
 };
 

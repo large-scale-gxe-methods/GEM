@@ -1,14 +1,9 @@
 # GEM  
 
-GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in samples from unrelated individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, control for genotype-covariate interactions, and robust inference.  
-
-
-<br />
-Current version: 1.5.3 
+GEM (Gene-Environment interaction analysis for Millions of samples) is a software program for large-scale gene-environment interaction testing in cross-sectional and longitudinal data, from unrelated and related individuals. It enables genome-wide association studies in up to millions of samples while allowing for multiple exposures, and control for genotype-covariate interactions.  
 
 <br />
-Additional documentation:  
-https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
+Current version: 2.2.1
 
 <br />
 
@@ -22,18 +17,24 @@ https://large-scale-gxe-methods.github.io/GEMShowcaseWorkspace
 
 <br />
 
-
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the binary file from: [v1.5.3 Release](https://github.com/large-scale-gxe-methods/GEM/releases/download/v1.5.3/GEM_1.5.3_Intel)
-* Change the permission: chmod a+x GEM_1.5.3
+* Download the MKL binary file (for Intel CPUs) from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_MKL
+
+* Download the OpenBLAS binary file (for non-Intel CPUs) from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_OpenBLAS
+
+After downloading, make the file executable:
+
+```bash
+chmod +x GEM_2.2.1_*
+```
 
 Option 2: Build GEM Library Dependencies  
-   * C++11 compiler or later 
+   * C++17 compiler or later 
    * BLAS/LAPACK. For Intel processors, we recommend that GEM be compiled with an optimized math routine library such as the Intel oneAPI Math Kernal Library to replace BLAS/LAPACK for optimal performance.
    * Boost C++ libraries. GEM links to the following Boost libraries:  ```boost_program_options, boost_thread, boost_system, and boost_filesystem```  
-   * Eigen Library. GEM links to the header files of Eigen. 
+   * SuiteSparse Library, download and compile it using CMake. 
 
 <br />
 
@@ -41,17 +42,16 @@ To install GEM, run the following lines of code:
  ```
  git clone https://github.com/large-scale-gxe-methods/GEM
  cd GEM/
- cd src/  
- make  
+ cmake -B build
+ cmake --build build 
  ```
 
 <br />
-<br />
-<br />
+
 
 ## Dependencies
 C/C++ Compiler
- * A compiler with C++11 (or later) support is required.
+ * A compiler with C++17 (or later) support is required.
  
 LAPACK and BLAS
  * The LAPACK (Linear Algebra PACKage) and BLAS (Basic Linear Algebra Subprograms) libraries are used for matrix operations in GEM.
@@ -73,31 +73,39 @@ Boost C++ Libraries
 
 Eigen Library
 * The Eigen library is used for linear algebra of dense and sparse matrices.
-* Download the source code from https://eigen.tuxfamily.org/index.php?title=Main_Page and add the directory of Eigen header files in the include path when compiling.
- 
+
+SuiteSparse Library
+* The SuiteSparse library is used for linear algebra operations on dense and sparse matrices. It is particularly utilized in in the GLMM model to fit the null model during association test.
+
+Armadillo Library
+* The Armadillo library is used for linear algebra of dense and sparse matrices. It is particularly utilized in G × E (Gene-Environment) interaction test.
+
 
 ## Usage
 
-### Running GEM
+**Running GEM**
 
 1. [Command Line Options](#command-line-options)  
-1. [Input Files](#input-files)
-1. [Output File Format](#output-file-format)
-1. [Examples](#examples)
+2. [Input Files](#input-files)
+3. [Output File Format](#output-file-format)
+4. [Examples](#examples)
 
 <br /> 
-<br />
 
 ### Command Line Options
 
-Once GEM is installed, the executable ```./GEM``` can be used to run the program.  
-For a list of options, use ```./GEM --help```.  
+Once GEM is installed, the executable `./GEM_2.2.1` can be used to run the program.  
+For a list of options, use `./GEM_2.2.1 --help`.
+ 
 
 <details>
      <summary> <b>List of Options</b> </summary>
 
 ```
-General Options:
+**General Options**
+
+--help
+  Prints the available options of GEM and exits.
 
 --help
     Prints the available options of GEM and exits.  
@@ -111,7 +119,8 @@ Input/Output File Options:
 
 --pheno-file  
      Path to the phenotype file.  
-
+--kin-file  
+     Path to the kinship file.
 --bgen  
      Path to the BGEN file.  
 
@@ -151,11 +160,10 @@ Input/Output File Options:
   
 --output-style  
      Modifies the output of GEM. Must be one of the following:
-	minimum: Output the summary statistics for only the GxE and marginal G terms.
-        meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms.
-               For a robust analysis, additional columns for the model-based summary statistics will be included.
-        full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions.
-	Default: minimum   
+     minimum: Output the summary statistics for only the GxE and marginal G terms.
+     meta: 'minimum' output plus additional fields for the main G and any GxCovariate terms. For a robust analysis, additional columns for the model-based summary statistics will be included.
+     full: 'meta' output plus additional fields needed for re-analyses of a subset of interactions.
+          Default: meta   
 
 
 
@@ -173,12 +181,16 @@ Phenotype File Options:
      If no exposures are included, GEM will only perform the marginal test.  
 
 --int-covar-names  
-     Any column names in the phenotype file naming the covariate(s) for which interactions should be included 
-     for adjustment (do not include with --exposure-names).  
+     Any column names in the phenotype file naming the covariate(s) for which interactions should be included for adjustment (do not include with --exposure-names).  
 
 --covar-names  
-     Any column names in the phenotype file naming the covariates for which only main effects should be included
-     for adjustment (do not include with --exposure-names or --int-covar-names).  
+     Any column names in the phenotype file naming the covariates for which only main effects should be included for adjustment (do not include with --exposure-names or --int-covar-names).  
+
+--random-slope-name 
+     Column name in the phenotype file that contains random slope. 
+     
+--group-name
+     Column name in the phenotype file that contains the group.
 
 --robust
      0 for model-based standard errors and 1 for robust standard errors.
@@ -198,7 +210,7 @@ Phenotype File Options:
   
 --center 
      0 for no centering to be done, 1 to center ALL exposures and covariates, and 2 to center all the interaction covariates only.
-     	Default: 2
+          Default: 2
 
 --scale
      0 for no scaling to be done and 1 to scale ALL exposures and covariates by the standard deviation.
@@ -211,18 +223,29 @@ Phenotype File Options:
 --cat-threshold
      A cut-off to determine which exposure or interaction covariate not specified using --categorical-names 
      should be automatically treated as categorical based on the number of levels (unique observations).
-        Default: 20
+        Default: 2
    
+
+
+Kinship File Options:
+--kin-delim
+     Delimiter separating values in the kinship file. Tab delimiter should be represented as \t and space delimiter as \0.
+        Default: , (comma-separated) 
+
+--kin-diag
+     Diagonal value of kinship matrix that not accounting for inbreeding. 
+          Default: 1.0 (for 2x the kinship matrix).
+
 
 
 Filtering Options:  
 
 --maf
-     Minimum threshold value [0, 0.5] to exclude variants based on the minor allele frequency.
+     Variants with a minor allele frequency less than this threshold value (range: [0, 0.5]) will be excluded.
         Default: 0.001
   
 --miss-geno-cutoff
-     Maximum threshold value [0, 1.0] to filter variants based on the missing genotype rate.  
+     Variants with a missing genotype rate greater than this threshold value (range: [0, 1.0]) will be excluded.  
         Default: 0.05  
   
 --include-snp-file  
@@ -237,7 +260,7 @@ Performance Options:
 
 --threads
      Set number of compute threads.
-    	  Default: ceiling(detected threads / 2)  
+       Default: ceiling(detected threads / 2)  
 
 --stream-snps 
      Number of SNPs to analyze in a batch. Memory consumption will increase for larger values of stream-snps.  
@@ -250,40 +273,91 @@ Performance Options:
 
 ### Input Files
 
-* #### Phenotype File
-    A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter.
-    All inputs should be coded numerically (e.g., males/females as 0/1)
+#### Phenotype File
+A file which should contain a sample identifier column and columns for the phenotypes, exposures, and covariates. The ordering of the columns does not matter.
+All inputs should be coded numerically (e.g., males/females as 0/1)
 
 <br />
 
-* #### Genotype Files  
+#### Kinship File
+A file contains nonzero values in a three-column format, where the first two columns represent sample identifiers, and the third column indicates the kinship coefficient or genetic relatedness between individuals, or the inbreeding coefficient for the same individual. The scale of the kinship matrix does not matter (e.g., you can use two times the kinship matrix, or identity-by-descent information), as long as the values are on the same scale of the diagonal elements to be added in --kin-diag. For genetic relationship matrices computed from genotypes that have different values on the diagonals, we recommend specifying all diagonal values explicitly in the kinship file, along with --kin-diag 0.
 
-  [**BGEN**](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html)  
+##### Example 1 of Kinship Matrix (with an inbreeding coefficient of 0.05 for the fifth individual):
+```
+
+⎡ 0.5    0    0.25  0.25   0  ⎤
+⎢  0    0.5   0.25  0.25   0  ⎥
+⎢ 0.25  0.25  0.5   0.25   0  ⎥
+⎢ 0.25  0.25  0.25  0.5    0  ⎥
+⎣  0     0     0     0   0.55 ⎦
+
+```
+
+##### The Kinship File Corresponding to Example 1 (along with --kin-diag 0.5):
+```
+
+| ID1 | ID2 | Kinship|
+|-----|-----|--------|
+|  1  |  3  |  0.25  |
+|  1  |  4  |  0.25  |
+|  2  |  3  |  0.25  |
+|  2  |  4  |  0.25  |
+|  3  |  4  |  0.25  |
+|  5  |  5  |  0.05  |
+
+```
+
+##### Example 2 of Kinship Matrix (two times the kinship matrix in Example 1):
+```
+⎡  1    0    0.5   0.5   0  ⎤
+⎢  0    1    0.5   0.5   0  ⎥
+⎢ 0.5  0.5    1    0.5   0  ⎥
+⎢ 0.5  0.5   0.5    1    0  ⎥
+⎣  0    0     0     0   1.1 ⎦
+
+```
+
+##### The Kinship File Corresponding to Example 2 (along with --kin-diag 1):
+```
+| ID1 | ID2 | Kinship|
+|-----|-----|--------|
+|  1  |  3  |   0.5  |
+|  1  |  4  |   0.5  |
+|  2  |  3  |   0.5  |
+|  2  |  4  |   0.5  |
+|  3  |  4  |   0.5  |
+|  5  |  5  |   0.1  |
+
+```
+
+<br />
+
+#### Genotype Files  
+
+[**BGEN**](https://www.well.ox.ac.uk/~gav/bgen_format/spec/latest.html) 
+
 Variants that are non-biallelic should be filtered from the BGEN file. Note that since there are no indication of a REF/ALT allele in the BGEN file, the second allele is the effect allele counted in association testing.   
 
-  A [.sample file](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html) is required as input when the .bgen file does not contain a sample identifier block. <br /><br /> 
+A [.sample file](https://www.well.ox.ac.uk/~gav/qctool_v2/documentation/sample_file_formats.html) is required as input when the .bgen file does not contain a sample identifier block. <br /><br /> 
      
-  [**Plink BED**](https://www.cog-genomics.org/plink/1.9/)  
+[**Plink BED**](https://www.cog-genomics.org/plink/1.9/)  
 
-  [**.fam**](https://www.cog-genomics.org/plink/2.0/formats#fam) - The .fam file can be space or tab-delimited and must contain at least 2 columns where the first column is the family ID (FID) and the second column is the individual ID (IID). 
+[**.fam**](https://www.cog-genomics.org/plink/2.0/formats#fam) - The .fam file can be space or tab-delimited and must contain at least 2 columns where the first column is the family ID (FID) and the second column is the individual ID (IID). 
 GEM will use the IID column for sample identifier matching with the phenotype file.  
 
-  [**.bim**](https://www.cog-genomics.org/plink/2.0/formats#bim) - The .bim file can also be space or tab-delimited and should be in the following order: the chromosome, variant id, cM (optional), base-pair coordinate, ALT allele, and REF allele.  
+[**.bim**](https://www.cog-genomics.org/plink/2.0/formats#bim) - The .bim file can also be space or tab-delimited and should be in the following order: the chromosome, variant id, cM (optional), base-pair coordinate, ALT allele, and REF allele.  
 
-  [**.bed**](https://www.cog-genomics.org/plink/2.0/formats#bed) - A bed file must be stored in variant-major form. The ALT allele specified in the .bim file is the effect allele counted in association testing. <br /><br />  
+[**.bed**](https://www.cog-genomics.org/plink/2.0/formats#bed) - A bed file must be stored in variant-major form. The ALT allele specified in the .bim file is the effect allele counted in association testing. <br /><br />  
 
-  [**Plink 2.0 PGEN**](https://www.cog-genomics.org/plink/2.0/)  
+[**Plink 2.0 PGEN**](https://www.cog-genomics.org/plink/2.0/)  
   
-  [**.psam**](https://www.cog-genomics.org/plink/2.0/formats#psam) - The .psam file is a tab-delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name #IID (if the first column is not #FID) or IID (if the first column is #FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with #IID or #FID is present, then the columns are assumed to be in .fam file order.  
+[**.psam**](https://www.cog-genomics.org/plink/2.0/formats#psam) - The .psam file is a tab-delimited text file containing the sample information. If header lines are present, the last header line should contain a column with the name #IID (if the first column is not #FID) or IID (if the first column is #FID) that holds the individual ID for sample identifier matching with the phenotype file. All previous header lines will be ignored. If no header line beginning with #IID or #FID is present, then the columns are assumed to be in .fam file order.  
 
-  [**.pvar**](https://www.cog-genomics.org/plink/2.0/formats#pvar) - The .pvar file is a tab-delimited text file containing the variant information. If header lines are present, the last header line should start with #CHROM. If #CHROM is present, then the columns POS, ID, REF, and ALT must also be present. All previous header lines will be ignored. If the .pvar file contain no header lines beginning with #CHROM, it is assumed that the columns are in .bim file order.  
+[**.pvar**](https://www.cog-genomics.org/plink/2.0/formats#pvar) - The .pvar file is a tab-delimited text file containing the variant information. If header lines are present, the last header line should start with #CHROM. If #CHROM is present, then the columns POS, ID, REF, and ALT must also be present. All previous header lines will be ignored. If the .pvar file contain no header lines beginning with #CHROM, it is assumed that the columns are in .bim file order.  
 
-  [**.pgen**](https://www.cog-genomics.org/plink/2.0/formats#pgen) - The .pgen file should be filtered for non-biallelic variants. The ALT allele specified in the .pvar file is the effect allele counted in association testing.
-     
-
-    
+[**.pgen**](https://www.cog-genomics.org/plink/2.0/formats#pgen) - The .pgen file should be filtered for non-biallelic variants. The ALT allele specified in the .pvar file is the effect allele counted in association testing.     
 <br /> 
-<br />
+
 
 ### Output File Format  
 
@@ -299,14 +373,16 @@ Non_Effect_Allele  - The allele not counted in association testing.
 Effect_Allele      - The allele that is counted in association testing.  
 N_Samples          - The number of samples without missing genotypes.
 AF                 - The allele frequency of the effect allele.
+GV                 - The variance of the effected allele.
 N_catE_*           - The number of non-missing samples in each combination of strata for all of the categorical exposures and interaction covariates.
 AF_catE_*          - The allele frequency of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
+GV_catE_*          - The variance of the effect allele for each combination of strata for all of the catgorical exposure or interaction covariate.
 
 Beta_Marginal           - The coefficient estimate for the marginal genetic effect (i.e., from a model with no interaction terms).
 SE_Beta_Marginal        - The model-based SE associated with the marginal genetic effect estimate.
 robust_SE_Beta_Marginal - The robust SE associated with the marginal genetic effect estimate.
 
-Beta_G             - The coefficient estimate for the genetic main effect (G).
+Beta_G             - The coefficient estimate for the genetic main effect (G) (i.e., from a model with interaction terms).
 Beta_G-*           - The coefficient estimate for the interaction or interaction covariate terms.
 SE_Beta_G          - Model-based SE associated with the the genetic main effect (G).  
 SE_Beta_G-*        - Model-based SE associated with any GxE or interaction covariate terms.
@@ -338,20 +414,65 @@ Includes each of the possible outputs listed above when applicable. For a model-
 Includes, in addition to "meta", an initial header line with the residual variance estimate necessary for re-analysis of a subset of interactions using only summary statistics (for example, switching an exposure and interaction covariate).
 
 <br />
-<br />
 
 ### Examples  
 <br />
 
 To run GEM using the example data, execute GEM with the following code.
-```unix
-./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --robust 1 --center 0 --missing-value NaN --out my_example.out
+
+Example for cross-sectional data without kinship:
 ```
-The results should look like the following output file [my_example.out](https://github.com/large-scale-gxe-methods/GEM/blob/master/example/my_example.out).  
+./GEM --bgen example.bgen --sample example.sample --pheno-file example.pheno --sampleid-name sampleid --pheno-name pheno2 --covar-names cov3 --exposure-names cov1 --out cross_sectional_without_kinship.out
+```
+The results should look like the following output file [cross_sectional_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_without_kinship.out).  
+
+Example for cross-sectional data with kinship:
+```
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style meta --out cross_sectional_with_kinship.out
+```
+The results should look like the following output file [cross_sectional_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/cross_sectional_with_kinship.out).  
+
+Example for longitudinal data without kinship:
+```
+./GEM --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style meta --out longitudinal_without_kinship.out
+```
+The results should look like the following output file [longitudinal_without_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_without_kinship.out).  
+
+Example for longitudinal data with kinship:
+```
+./GEM --kin-file example.kinship --kin-diag 0.5 --pheno-file example.pheno2 --pheno-name pheno2 --sampleid-name sampleid --exposure-names cov1  --covar-names cov3 --random-slope-name cov3 --bgen example.bgen --sample example.sample --output-style  meta --out longitudinal_with_kinship.out
+```
+The results should look like the following output file [longitudinal_with_kinship.out](https://github.com/large-scale-gxe-methods/GEM/blob/dev/example/longitudinal_with_kinship.out).  
 
 <br />
 
 ## Recent Updates 
+[Version 2.2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2.1) - April 2, 2026:
+* Fix the wrong header name of N, AF and GV.
+
+[Version 2.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.2) - March 4, 2026:
+* Added convergence check for logistic regression. The program now reports detailed coefficient estimates when the model fails to converge and exits safely after 500 iterations.
+* Added support for `group` variable in null model fitting to allow heteroscedastic residual variance across sample groups.
+* Improved memory handling and internal limits to support larger numbers of observations (larger sample sizes)
+
+[Version 2.1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.3) - June 14, 2025:
+* Added log file support
+* Updated headers in the output file
+
+[Version 2.1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.2) - May 27, 2025:
+* Added output columns GV and GV_catE_*
+
+[Version 2.1.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1.1) - April 18, 2025:
+* Logged the SNP ID when a singular matrix is detected
+
+[Version 2.1](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.1) - March 10, 2025:
+* Added support for GLMM on PGEN and BED files
+* Added support for GEI test on PGEN and BED files
+
+[Version 2.0](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v2.0) - February 14, 2025:
+* Added generalized linear mixed model (GLMM)
+* Added gen-environment interaction (GEI) test
+
 [Version 1.5.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.5.3) - May 20, 2024:
 * Included stratified values for binary outcomes
 
@@ -407,10 +528,8 @@ The results should look like the following output file [my_example.out](https://
 
 [Version 1.3](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.3) - April 7, 2021:
 
-* Add a new flag (--output-style) to modify which summary statistics should be included in the the output file
-         Column names now include the exposure and interaction covariate names instead of numbers.
-* The --exposure-names flag is now optional. If no exposures are specified, GEM will run a G-only model.
-         Covariates (not of interest) can still be adjusted for using --covar-names flag.
+* Add a new flag (--output-style) to modify which summary statistics should be included in the the output file. Column names now include the exposure and interaction covariate names instead of numbers.
+* The --exposure-names flag is now optional. If no exposures are specified, GEM will run a G-only model. Covariates (not of interest) can still be adjusted for using --covar-names flag.
 
 [Version 1.2](https://github.com/large-scale-gxe-methods/GEM/releases/tag/v1.2) - January 22, 2021:
 
@@ -432,27 +551,23 @@ The results should look like the following output file [my_example.out](https://
 * Handle missing genotypes in BGEN files.
 
 <br />
-<br />
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (hanchenphd@gmail.com), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenny Westerman (KEWESTERMAN@mgh.harvard.edu) or Samaneh Salehi Nasab (Samaneh.SalehiNasab@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
-<br />
 <br />
 
 ## References
 If you use GEM in your analysis, please cite
 * Westerman KE, Pham DT, Hong L, Chen Y, Sevilla-González M, Sung YJ, Sun YV, Morrison AC, Chen H, Manning AK. (2021) GEM: scalable and flexible gene-environment interaction analysis in millions of samples. Bioinformatics 37(20):3514-3520. PubMed PMID: [**34695175**](https://www.ncbi.nlm.nih.gov/pubmed/34695175). PMCID: [**PMC8545347**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8545347/). DOI: [**10.1093/bioinformatics/btab223**](https://doi.org/10.1093/bioinformatics/btab223). 
  
-
-<br />
 <br />
 
 ## License 
 
  ```
  GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2024  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
+ Copyright (C) 2018-2026  Liang Hong, Han Chen, Duy Pham, Cong Pan, Samaneh Salehi Nasab
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -478,5 +593,17 @@ If you use GEM in your analysis, please cite
 * Boost: Boost Software License, Version 1.0
 * Eigen: Mozilla Public License, Version 2.0
 * Intel oneAPI Math Kernel Library (oneMKL): Intel Simplified Software License (Version October 2022 or later)
+* Armadillo: Apache License 2.0
+* SuiteSparse:
+     * libcholmod: GNU Lesser General Public License (LGPL), version 2.1 or later
+     * libcxsparse: GNU Lesser General Public License (LGPL), version 2.1 or later
+     * libspqr:GNU General Public License (GPL), version 2 or later
+     * libumfpack: GNU General Public License (GPL), version 2 or later
+     * libcamd: BSD 3-Clause License
+     * libccolamd: BSD 3-Clause License
+     * libcolamd: BSD 3-Clause License
+     * libamd: BSD 3-Clause License
+     * libsuitesparseconfig: BSD-3-clause
+* fmt: MIT License
 
- Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/master/LICENSE">here</a>.
+ Full copies of license agreements for GEM, third-party source code, linked libraries can be found <a href="https://github.com/large-scale-gxe-methods/GEM/blob/dev/LICENSE">here</a>.

@@ -61,14 +61,16 @@ void matNmatNprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB
   delete [] tmp;
 }
 
-void matmatprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB){
+void matmatprod(double* A, double* v, double* u, int Nrow, int Ncol, int NcolB)
+{
   double alpha= 1.0, beta= 0.0;
   char tr= 'T';
   int m= Nrow, n= NcolB, k=Ncol, lda= Ncol, incx= NcolB, incy= Nrow;
   double* tmp= new double[Nrow*NcolB];
   initvec(tmp, Nrow*NcolB);
   dgemm_(&tr,&tr,&m,&n,&k,&alpha,A,&lda,v,&incx,&beta,tmp,&incy);
-  for(int i= 0; i<Nrow*NcolB; ++i){
+  for(int i= 0; i<Nrow*NcolB; ++i)
+  {
     u[i]= tmp[i];
   }
   delete [] tmp;

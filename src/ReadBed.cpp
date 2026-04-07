@@ -2,8 +2,6 @@
 #include "ReadBed.h"
 
 
-
-
 void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
     cout << "General information of BED file. \n";
@@ -125,7 +123,7 @@ void Bed::processBed(string bedFile, string bimFile, string famFile) {
 
 
 
-void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
+void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize) {
 
 
     unordered_set<int> genoUnMatchID;
@@ -152,22 +150,34 @@ void Bed::processFam(Bed bed, string famFile, unordered_map<string, vector<strin
             values.push_back(value);
         }
         string strtmp = values[1];
+        sampleID_all.push_back(strtmp);//IDS befor matching
         int itmp = k;
-        if (phenomap.find(strtmp) != phenomap.end()) {
-            auto tmp_valvec = phenomap[strtmp];
-            if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() && find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) {
-                sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
-                new_covdata_orig[k * (numSelCol+1)] = 1.0;
-                for (int c = 0; c < numSelCol; c++) {
-                    sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
-                }
 
-                sampleID.push_back(strtmp);
-                k++;
+        if (phenomap.find(strtmp) != phenomap.end()) 
+        {
+            auto& tmp_valvecs = phenomap[strtmp]; 
+
+            for (const auto& tmp_valvec : tmp_valvecs) {
+                // Check for missing phenotype values in the current vector
+                if (find(tmp_valvec.begin(), tmp_valvec.end(), phenoMissingKey) == tmp_valvec.end() &&
+                    find(tmp_valvec.begin(), tmp_valvec.end(), "") == tmp_valvec.end()) 
+                {     
+                    sscanf(tmp_valvec[0].c_str(), "%lf", &new_phenodata[k]);
+                    new_covdata_orig[k * (numSelCol + 1)] = 1.0;
+                    for (int c = 0; c < numSelCol; c++) 
+                    {
+                        sscanf(tmp_valvec[c + 1].c_str(), "%lf", &new_covdata_orig[k * (numSelCol + 1) + c + 1]);
+                    }
+                    sampleID.push_back(strtmp);
+                    k++;
+                }
             }
         }
 
-        if (itmp == k) genoUnMatchID.insert(m);
+        if (itmp == k) 
+        {
+            genoUnMatchID.insert(m);
+        }
     }
     fIDMat.close();
 
@@ -278,7 +288,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
     std::set<std::string> includeVariant;
     threads = cmd.threads;
 
-
     if (cmd.doFilters) {
 
         filterVariants = true;
@@ -295,7 +304,6 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
             getline(fInclude, IDline);
             std::transform(IDline.begin(), IDline.end(), IDline.begin(), ::tolower);
             IDline.erase(std::remove(IDline.begin(), IDline.end(), '\r'), IDline.end());
-
             if (IDline == "snpid") {
                 cout << "An include snp file was detected... \nIncluding SNPs for analysis based on their snpid... \n";
             }
@@ -354,6 +362,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
                 value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
                 values.push_back(value);
             }
+
             if (includeVariant.find(values[1]) != includeVariant.end()) {
                 bedVariantPos.push_back(pvalIndex);
                 k++;
@@ -391,7 +400,7 @@ void Bed::getBedVariantPos(Bed bed, CommandLine cmd) {
 
 void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vector<double> miu, BinE binE, Bed bed, CommandLine cmd) {
 
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
     std::string output = cmd.outFile + "_bin_" + std::to_string(thread_num) + ".tmp";
     std::ofstream results(output, std::ofstream::binary);
     std::ostringstream oss;
@@ -422,13 +431,13 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     bool strata   = (numBinE > 0 ) ? true : false;
     int strataLen = binE.strataLen;
     vector<int> stratum_idx = binE.stratum_idx;
-    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
+    vector<double> binE_AF(stream_snps * strataLen, 0.0), binE_var(stream_snps * strataLen, 0.0), binE_N(stream_snps * strataLen, 0.0);
 
     int ZGS_col = Sq1 * stream_snps;
     vector <double> ZGSvec(samSize   * (Sq1) * stream_snps);
     vector <double> ZGSR2vec(samSize * (Sq1) * stream_snps);
     vector <double> WZGSvec(samSize  * (Sq1) * stream_snps);
-    vector <double> AF(stream_snps);
+    vector <double> AF(stream_snps), var(stream_snps), gsq(stream_snps);
     //vector<uint> missingIndex;
     vector <string> geno_snpid(stream_snps);
     double* WZGS = &WZGSvec[0];
@@ -574,6 +583,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                     ncount++;
                     int tmp2 = idx_k + tmp1;
                     AF[stream_i] += geno;
+                    gsq[stream_i] += geno * geno;
 
                     if (phenoType == 1) {
                         ZGSvec[tmp2] = miu[idx_k] * (1 - miu[idx_k]) * geno;
@@ -585,6 +595,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
                     if (strata) {
                         binE_N[strata_i + stratum_idx[idx_k]]+=1.0;
                         binE_AF[strata_i + stratum_idx[idx_k]]+=geno;
+                        binE_var[strata_i + stratum_idx[idx_k]]+=geno * geno;
                     }
 
                     idx_k++;
@@ -594,13 +605,17 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
            
             double gmean = AF[stream_i] / double(samSize - nMissing);
             double cur_AF = AF[stream_i] / double(samSize - nMissing) / 2.0;
+            double gsqmean = gsq[stream_i] / double(samSize - nMissing);
+            double cur_var = double(gsqmean - gmean * gmean) * double(samSize - nMissing) / double(samSize - nMissing - 1);
             double percMissing = nMissing / (samSize * 1.0);
             if ((cur_AF < MAF || cur_AF > maxMAF) || (percMissing > missGenoCutoff)) {
                 AF[stream_i] = 0;
+                var[stream_i] = 0;
                 if (strata) {
                     for (int i = 0; i < strataLen; i++) {
                         binE_N[strata_i + i] = 0.0;
                         binE_AF[strata_i + i] = 0.0;
+                        binE_var[strata_i + i] = 0.0;
                     }
                 }
                 
@@ -613,11 +628,15 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
              
             else {
                 AF[stream_i] = cur_AF;
+                var[stream_i] = cur_var;
             }
 
             if (strata) { 
                 for (int i = 0; i < strataLen; i++) {
+                    double gmeansq_strata = (binE_AF[strata_i + i] / binE_N[strata_i + i]) * (binE_AF[strata_i + i] / binE_N[strata_i + i]);
                     binE_AF[strata_i + i] = binE_AF[strata_i + i] / binE_N[strata_i + i] / 2.0;
+                    double gsqmean_strata = (binE_var[strata_i + i] / binE_N[strata_i + i]);
+                    binE_var[strata_i + i] = (gsqmean_strata - gmeansq_strata) * double(binE_N[strata_i + i]) / double(binE_N[strata_i + i] - 1);
                 }
             }
 
@@ -939,11 +958,11 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
 
         
         for (int i = 0; i < stream_snps; i++) {
-            oss << geno_snpid[i] << "\t" << AF[i] << "\t";
+            oss << geno_snpid[i] << "\t" << AF[i] << "\t" << var[i] << "\t";
 
             int tmp_strata = i * strataLen;
             for (int k = 0; k < strataLen; k++) {
-                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t";
+                oss << binE_N[tmp_strata + k] << "\t" << binE_AF[tmp_strata + k] << "\t" << binE_var[tmp_strata + k] << "\t";
             }
             
             oss << betaM[i] << "\t" << sqrt(VarbetaM[i]) << "\t";
@@ -1002,11 +1021,14 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
             }
                         
             AF[i] = 0.0;
+            var[i] = 0.0;
+            gsq[i] = 0.0;
         }
 
         if (strata) {       
             std::fill(binE_N.begin(), binE_N.end(), 0.0);
             std::fill(binE_AF.begin(), binE_AF.end(), 0.0);
+            std::fill(binE_var.begin(), binE_var.end(), 0.0);
         }
         delete[] ZGStR;
         delete[] ZGStZGS;
@@ -1056,7 +1078,7 @@ void gemBED(int thread_num, double sigma2, double* resid, double* XinvXTX, vecto
     fIDMat.close();
 
 
-    auto end_time = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::steady_clock::now();
     cout << "Thread " << thread_num << " finished in ";
     printExecutionTime1(start_time, end_time);
 }

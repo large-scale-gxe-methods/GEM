@@ -17,6 +17,7 @@ public:
 
     int new_samSize;
     std::vector<string>   sampleID;
+    std::vector<string>   sampleID_all;
     std::vector<double>   new_covdata;
     std::vector<double>   new_phenodata;
     std::vector<long int> include_idx;
@@ -40,7 +41,7 @@ public:
     
     void processPgenHeader(string pgenFile);
     void processPvar(Pgen pgen, string pvarFile);
-    void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<string>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
+    void processPsam(Pgen pgen, string psamFile, unordered_map<string, vector<vector<string>>> phenomap, string phenoMissingKey, int numSelCol, int samSize);
     void getPgenVariantPos(Pgen pgen, CommandLine cmd);
 };
 

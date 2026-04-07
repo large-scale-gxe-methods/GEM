@@ -25,10 +25,18 @@ public:
 	bool useBedFile = false;
 
 	// Phenotype file
-	std::string phenoFile;
+	std::string pheno_file;
 	std::string delim;
 	std::string missing;
 	char pheno_delim;
+
+	// kinship file
+	std::string kin_file;
+	std::string delim_k;
+	bool kin_flag = false;
+	double kin_diag;
+//	std::string missing;
+	char kin_delim;
 
 	// Categorical exposures
 	int cat_threshold;
@@ -40,6 +48,7 @@ public:
 
 	// Inputs
 	std::string phenoName;
+	std::string randomSlope;
 	std::string sampleID;
 
 	int numSelCol    = 0;
@@ -48,9 +57,10 @@ public:
 	std::vector<std::string> cov;
 	std::vector<std::string> icov;
 	std::vector<std::string> exp;
-	std::unordered_map<string, int> covHM;
-	std::unordered_map<string, int> intHM;
-	std::unordered_map<string, int> expHM;
+	std::string group;
+	std::unordered_map<std::string, int> covHM;
+	std::unordered_map<std::string, int> intHM;
+	std::unordered_map<std::string, int> expHM;
 
 	// Filtering options
 	double MAF;

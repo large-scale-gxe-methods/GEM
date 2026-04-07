@@ -1,7 +1,7 @@
 #include "declars.h"
 #include "BinaryEUtils.h"
 
-std::unordered_map<std::string, unsigned int> cartesian_map( vector<vector<string> >& v ) 
+std::unordered_map<std::string, unsigned int> cartesian_map( vector<vector<string> >& v) 
 {
   auto product = []( long long a, vector<string>& b ) { return a*b.size(); };
   const long long N = accumulate( v.begin(), v.end(), 1LL, product );
@@ -45,8 +45,12 @@ std::vector<std::string> cartesian_vec_sep( vector<vector<string> >& v)
   return vec;
 }
 
-void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<string>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, int phenoType, string phenoHeaderName, std::vector<string> covNames, std::vector<string> covNames_new, int Sq_new) 
+void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<string, vector<vector<string>>> phenoMap, vector<string> sampleID, vector<long int> include_idx, int samSize, int phenoType, string phenoHeaderName, std::vector<string> covNames, std::vector<string> covNames_new, int Sq_new) 
 {
+    std::unordered_map<string, vector<string>> phenomap;
+    for (const auto& entry : phenoMap) {
+        phenomap[entry.first] = entry.second[0]; // Take the first (and only) vector as there is no duplicated data
+    }
     string bin_names;
     stratum_idx.resize(samSize);
     std::vector<int> binE_idx;
@@ -59,7 +63,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
     std::vector<std::string> cat_names = cmd.cat_names;
    // vector <string> tmp;
     for (size_t i = 0; i < samSize; i++) {
-        auto tmp = phenoMap[sampleID[i]];
+        auto tmp = phenomap[sampleID[i]];
         phenoMap_new[sampleID[i]].push_back(tmp[0]);
         for (int j = 0; j < covNames.size(); j++) {
             if (std::find(covNames_new.begin(), covNames_new.end(), covNames[j]) != covNames_new.end())
@@ -103,7 +107,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
             map.clear();
         }
     } 
-    // if Phenotype is continuous    
+    // If Phenotype is continuous    
     else
     {
         for (int i = 0; i < Sq_new; i++) 
@@ -117,11 +121,7 @@ void BinE::checkBinaryCovariates(BinE binE, CommandLine cmd, unordered_map<strin
                     cnt++;
                 }
             }
-        /*  if (cnt == 1) { 
-                cerr << "\nERROR: All values of " << covNames_new[i] << " column are the same.\n\n"; 
-                exit(1);	
-            }*/
-
+      
             if ((cnt <= cat_threshold) || (std::find(cat_names.begin(), cat_names.end(), covNames_new[i]) != cat_names.end())) 
             {
                 binE_idx.push_back(i + 1);

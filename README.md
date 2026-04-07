@@ -20,9 +20,9 @@ Current version: 2.2.1
 ## Quick Installation 
 
 Option 1: Use the binary executable file for Linux
-* Download the MKL binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_MKL
+* Download the MKL binary file (for Intel CPUs) from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_MKL
 
-* Download the OpenBLAS binary file from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_OpenBLAS
+* Download the OpenBLAS binary file (for non-Intel CPUs) from: https://github.com/large-scale-gxe-methods/GEM/releases/download/v2.2.1/GEM_2.2.1_OpenBLAS
 
 After downloading, make the file executable:
 
